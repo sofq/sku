@@ -1,26 +1,62 @@
-"""Shared Azure ingest helpers: region normalization, unit-of-measure parsing."""
+"""Shared Azure ingest helpers: region normalization, unit-of-measure parsing.
+
+m3b.2 extends the m3b.1 per-hour-only API with two new UoM families:
+- storage meters use `"1 GB/Month"` or `"1/Month"` and divide out Month.
+- request / execution meters use `"1000000"` / `"10K"` and divide to per-request.
+The helpers live here (not in each shard's ingest module) so the canonical-unit
+strings (`hrs` / `gb-mo` / `month` / `requests`) are defined exactly once.
+"""
 
 from __future__ import annotations
 
 from .aws_common import load_region_normalizer  # re-export — same shared YAML loader
 
-__all__ = ["load_region_normalizer", "parse_unit_of_measure"]
+__all__ = [
+    "load_region_normalizer",
+    "parse_unit_of_measure",
+    "parse_storage_uom",
+    "parse_request_uom",
+]
 
-# m3b.1 only ingests per-hour meters. SQL Database price meters publish
-# `unitOfMeasure = "1 Hour"` for vCore SKUs and `"100 Hours"` for some
-# Hyperscale / DTU edge cases; we divide retailPrice by the divisor before
-# emitting so prices.amount is consistently per-hour. Anything else fails
-# the build so we never silently mis-price a non-time meter.
 _HOUR_DIVISORS: dict[str, tuple[float, str]] = {
     "1 Hour": (1.0, "hrs"),
-    "1 Hours": (1.0, "hrs"),  # Azure has both spellings in the wild
+    "1 Hours": (1.0, "hrs"),
     "100 Hours": (100.0, "hrs"),
+}
+
+_STORAGE_DIVISORS: dict[str, tuple[float, str]] = {
+    "1 GB/Month": (1.0, "gb-mo"),
+    "1 GB/Hour": (1.0, "gb-hr"),  # rarely used by disks but keep for future
+    "1/Month": (1.0, "month"),
+}
+
+_REQUEST_DIVISORS: dict[str, tuple[float, str]] = {
+    "1000000": (1_000_000.0, "requests"),
+    "10K": (10_000.0, "requests"),
+    "1K": (1_000.0, "requests"),
+    "1": (1.0, "requests"),
 }
 
 
 def parse_unit_of_measure(uom: str) -> tuple[float, str]:
-    """Return (divisor, canonical_unit) for a per-hour meter; raise ValueError otherwise."""
+    """Per-hour meter parser (m3b.1 surface; kept for backwards-compat)."""
     try:
         return _HOUR_DIVISORS[uom]
     except KeyError as exc:
         raise ValueError(f"unsupported unitOfMeasure: {uom}") from exc
+
+
+def parse_storage_uom(uom: str) -> tuple[float, str]:
+    """Storage / per-month meter parser."""
+    try:
+        return _STORAGE_DIVISORS[uom]
+    except KeyError as exc:
+        raise ValueError(f"unsupported storage unitOfMeasure: {uom}") from exc
+
+
+def parse_request_uom(uom: str) -> tuple[float, str]:
+    """Request / per-execution meter parser."""
+    try:
+        return _REQUEST_DIVISORS[uom]
+    except KeyError as exc:
+        raise ValueError(f"unsupported request unitOfMeasure: {uom}") from exc
