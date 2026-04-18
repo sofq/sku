@@ -1913,7 +1913,7 @@ git commit -m "feat(cmd): sku configure — flagged + interactive profile editor
 
 Cobra has built-in completions via `c.GenBashCompletion(w)` etc. Wrap in a `sku completion {bash,zsh,fish,powershell}` subcommand.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```go
 func TestCompletion_Bash_ContainsBashCompletionSentinel(t *testing.T) {
@@ -1926,7 +1926,7 @@ func TestCompletion_Bash_ContainsBashCompletionSentinel(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 ```go
 func newCompletionCmd() *cobra.Command {
@@ -1955,7 +1955,7 @@ func newCompletionCmd() *cobra.Command {
 
 Register in `root.go`.
 
-- [ ] **Step 3: Run test + commit**
+- [x] **Step 3: Run test + commit**
 
 Run: `go test ./cmd/sku/ -run TestCompletion -v` → PASS.
 Commit: `feat(cmd): sku completion {bash,zsh,fish,powershell}`
