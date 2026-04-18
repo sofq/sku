@@ -7,6 +7,7 @@ dependencies = [
   "requests>=2.32",
   "pyyaml>=6.0",
   "zstandard>=0.22",
+  "duckdb>=0.10,<2",
 ]
 
 [project.optional-dependencies]
@@ -14,6 +15,9 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.5",
 ]
+
+[tool.setuptools]
+packages = ["ingest", "normalize", "package"]
 
 [tool.ruff]
 line-length = 100
