@@ -40,11 +40,14 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone. Next plan (m3a.3: aws-dynamodb /
-aws-cloudfront / updater-extract) to be authored under
-`docs/superpowers/plans/`.
+**M3a.3 — AWS DynamoDB + CloudFront shards + `internal/updater` extraction.**
+See `docs/superpowers/plans/2026-04-18-m3a.3-dynamodb-cloudfront-updater.md`.
+Two production-shaped shards ingested via DuckDB; `sku aws dynamodb {price,list}`
+and `sku aws cloudfront {price,list}` return valid §4 envelopes. The inline
+`sku update` logic moves into `internal/updater` (one-shot baseline only;
+delta-chain / manifest walking / ETag deferred to m3a.4).
 
-### Quick path (agent, repeatable, M3a.2 surface)
+### Quick path (agent, repeatable, M3a.3 surface)
 
 ```bash
 make openrouter-shard aws-shards                        # build all local shards
@@ -74,6 +77,11 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku aws lambda list  --architecture x86_64
 ./bin/sku aws ebs    price --volume-type gp3        --region us-east-1
 ./bin/sku aws ebs    list  --volume-type gp3
+
+./bin/sku aws dynamodb   price --table-class standard --region us-east-1 --preset agent
+./bin/sku aws dynamodb   list  --table-class standard
+./bin/sku aws cloudfront price --region eu-west-1 --preset agent
+./bin/sku aws cloudfront list
 ```
 
 ## Global flags (all subcommands)
