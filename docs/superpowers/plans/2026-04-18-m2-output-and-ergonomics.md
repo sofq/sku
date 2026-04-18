@@ -915,7 +915,7 @@ Comma-separated dot-path projection applied **after** preset, **before** jq. Sem
 **Files:**
 - Create: `internal/output/fields.go`, `internal/output/fields_test.go`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```go
 package output_test
@@ -960,13 +960,13 @@ func TestApplyFields_EmptyExpr_ReturnsInput(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 Parse comma-separated list, split each on `.`, walk the doc copying into a fresh `map[string]any`. For numeric segments treat parent as `[]any`. Keep the first (M2) implementation simple: only support `map[string]any` and `[]any` with numeric index segments.
 
 Key detail: when multiple paths share a prefix (e.g. `price.0.amount,price.0.dimension`), they merge into the same parent. Write with a recursive set-at-path helper that promotes an empty slot to a map (or `[]any`) based on next segment's kind.
 
-- [ ] **Step 3: Run test + commit**
+- [x] **Step 3: Run test + commit**
 
 Run: `go test ./internal/output/ -run TestApplyFields -v` → PASS
 Commit: `feat(output): --fields dot-path projection`

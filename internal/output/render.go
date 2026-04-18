@@ -233,13 +233,6 @@ func toMap(env Envelope) (map[string]any, error) {
 	return m, nil
 }
 
-// ApplyFields projects doc down to the requested dot-paths. Stubbed in Task 4;
-// a real implementation lands in Task 6.
-func ApplyFields(doc map[string]any, expr string) map[string]any {
-	_ = expr
-	return doc
-}
-
 // ApplyJQ runs a gojq expression against doc. Stubbed in Task 4; a real
 // implementation lands in Task 7.
 func ApplyJQ(doc any, expr string) (any, error) {
