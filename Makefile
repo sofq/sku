@@ -37,7 +37,9 @@ generate: ## Run go generate across the module (placeholder; used from M4)
 
 .PHONY: openrouter-shard
 openrouter-shard: ## Build OpenRouter shard from fixtures into dist/pipeline/openrouter.db
-	$(MAKE) -C pipeline shard SHARD=openrouter FIXTURE=testdata/openrouter
+	SKU_FIXED_OBSERVED_AT=1745020800 \
+	  $(MAKE) -C pipeline shard SHARD=openrouter FIXTURE=testdata/openrouter \
+	  INGEST_EXTRA='--skip-non-usd --generated-at 2026-04-18T00:00:00Z'
 
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests

@@ -10,6 +10,7 @@ PYRUN    := $(VENV)/bin/python
 
 SHARD    ?=
 FIXTURE  ?=
+INGEST_EXTRA ?=
 OUT_DIR  := ../dist/pipeline
 
 .PHONY: help
@@ -28,7 +29,7 @@ setup: $(VENV)/bin/activate ## Create venv and install deps
 ingest: setup ## Run ingest for SHARD=<name>; optional FIXTURE=<path>
 	@test -n "$(SHARD)" || (echo "SHARD=<name> required" && exit 2)
 	mkdir -p $(OUT_DIR)
-	$(PYRUN) -m ingest.$(SHARD) --out $(OUT_DIR)/$(SHARD).rows.jsonl $(if $(FIXTURE),--fixture $(FIXTURE),)
+	$(PYRUN) -m ingest.$(SHARD) --out $(OUT_DIR)/$(SHARD).rows.jsonl $(if $(FIXTURE),--fixture $(FIXTURE),) $(INGEST_EXTRA)
 
 .PHONY: package
 package: setup ## Build SQLite shard from rows for SHARD=<name>

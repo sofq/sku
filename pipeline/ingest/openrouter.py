@@ -141,11 +141,21 @@ def _build_row(
     return row
 
 
-def ingest(client: LiveClient | FixtureClient, *, generated_at: str) -> list[dict[str, Any]]:
+def ingest(
+    client: LiveClient | FixtureClient,
+    *,
+    generated_at: str,
+    skip_non_usd: bool = False,
+) -> list[dict[str, Any]]:
     """Normalize everything OpenRouter exposes into row dicts.
 
-    Errors out on the first non-USD endpoint; callers decide whether to retry
-    with a filtered model list or fail the release (spec §5 guard).
+    By default, errors out on the first non-USD endpoint (spec §5 guard — the
+    invariant release CI depends on). With skip_non_usd=True, non-USD endpoints
+    are written to stderr and skipped instead; aggregated rows for a model
+    whose own top-level pricing is non-USD are likewise skipped. This mode is
+    used by the `make openrouter-shard` developer target against fixtures that
+    include a non-USD case for the guard test — real release ingests never set
+    it.
     """
     enums = load_enums()  # side-effect: validates the YAML is parseable
     _ = enums  # suppress unused in M1; real enum validation lands as rows are built
@@ -163,9 +173,31 @@ def ingest(client: LiveClient | FixtureClient, *, generated_at: str) -> list[dic
             # (deprecated or region-restricted). Skip — the aggregated row
             # would be a lie without backing endpoints.
             continue
+        model_rows: list[dict[str, Any]] = []
+        model_skipped = False
         for ep in endpoints:
-            rows.append(_build_row(model=model, endpoint=ep, aggregated=False))
-        rows.append(_build_row(model=model, endpoint=None, aggregated=True))
+            try:
+                model_rows.append(_build_row(model=model, endpoint=ep, aggregated=False))
+            except NonUSDError as e:
+                if not skip_non_usd:
+                    raise
+                sys.stderr.write(f"ingest.openrouter: skip {e}\n")
+                model_skipped = True
+        # Only emit the aggregated row if the model's top-level pricing is USD.
+        try:
+            agg = _build_row(model=model, endpoint=None, aggregated=True)
+        except NonUSDError as e:
+            if not skip_non_usd:
+                raise
+            sys.stderr.write(f"ingest.openrouter: skip aggregated {e}\n")
+            model_skipped = True
+            agg = None
+        rows.extend(model_rows)
+        if agg is not None:
+            rows.append(agg)
+        if model_skipped and not model_rows:
+            # All endpoints for this model were non-USD — nothing to publish.
+            continue
     return rows
 
 
@@ -188,6 +220,11 @@ def main() -> int:
     ap.add_argument("--out", type=Path, help="write NDJSON rows here (stdout if omitted)")
     ap.add_argument("--fixture", type=Path, help="use FixtureClient rooted at this directory")
     ap.add_argument("--generated-at", default="", help="ISO-8601 UTC; default now")
+    ap.add_argument(
+        "--skip-non-usd",
+        action="store_true",
+        help="log and skip non-USD endpoints instead of failing (dev/fixture use only)",
+    )
     args = ap.parse_args()
 
     generated_at = args.generated_at or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -197,7 +234,7 @@ def main() -> int:
         client = LiveClient()
 
     try:
-        rows = ingest(client, generated_at=generated_at)
+        rows = ingest(client, generated_at=generated_at, skip_non_usd=args.skip_non_usd)
     except NonUSDError as e:
         sys.stderr.write(f"ingest.openrouter: {e}\n")
         return 4
