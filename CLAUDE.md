@@ -40,11 +40,9 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-**M3a.2 — AWS S3 + Lambda + EBS shards (on-demand).** See
-`docs/superpowers/plans/2026-04-18-m3a.2-s3-lambda-ebs.md`. Three
-production-shaped shards ingested via DuckDB; `sku aws s3 {price,list}`,
-`sku aws lambda {price,list}`, `sku aws ebs {price,list}` return valid §4
-envelopes with multi-dimensional `price[]` arrays where applicable.
+v1.0 shipped — no open milestone. Next plan (m3a.3: aws-dynamodb /
+aws-cloudfront / updater-extract) to be authored under
+`docs/superpowers/plans/`.
 
 ### Quick path (agent, repeatable, M3a.2 surface)
 
