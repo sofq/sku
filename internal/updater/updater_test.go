@@ -153,6 +153,7 @@ func TestDefaultSources_Contains(t *testing.T) {
 		"openrouter", "aws-ec2", "aws-rds", "aws-s3", "aws-lambda", "aws-ebs",
 		"aws-dynamodb", "aws-cloudfront",
 		"azure-vm", "azure-sql",
+		"azure-blob", "azure-functions", "azure-disks",
 	} {
 		if _, ok := updater.DefaultSources[shard]; !ok {
 			t.Errorf("DefaultSources missing shard %q", shard)

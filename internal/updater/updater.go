@@ -37,8 +37,11 @@ var DefaultSources = map[string]string{
 	"aws-ebs":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ebs",
 	"aws-dynamodb":   "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-dynamodb",
 	"aws-cloudfront": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-cloudfront",
-	"azure-vm":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-vm",
-	"azure-sql":      "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-sql",
+	"azure-vm":        "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-vm",
+	"azure-sql":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-sql",
+	"azure-blob":      "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-blob",
+	"azure-functions": "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-functions",
+	"azure-disks":     "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-disks",
 }
 
 // ShardNames returns the keys of DefaultSources. Used by the Cobra
