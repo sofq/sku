@@ -24,6 +24,8 @@ class NonUSDError(RuntimeError):
     """Raised when an upstream endpoint declares a non-USD currency."""
 
 
+
+
 def _kind_for_modality(modality: str | None, input_modalities: list[str] | None) -> str:
     """Map OpenRouter modality hints to the sku kind taxonomy."""
     mods = {m.lower() for m in (input_modalities or [])}
@@ -198,7 +200,53 @@ def ingest(
         if model_skipped and not model_rows:
             # All endpoints for this model were non-USD — nothing to publish.
             continue
-    return rows
+    return _dedupe_rows(rows)
+
+
+def _uptime(row: dict[str, Any]) -> float:
+    h = row.get("health") or {}
+    v = h.get("uptime_30d")
+    return float(v) if v is not None else -1.0
+
+
+def _dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse rows sharing a sku_id.
+
+    OpenRouter occasionally lists multiple endpoints for the same
+    (model, serving_provider, quantization) tuple — Bedrock/Vertex
+    regional splits, for one. When prices match (the common case), we
+    keep the endpoint with the highest ``uptime_30d`` and log. When
+    prices diverge and upstream exposes no disambiguator we can put on
+    the sku_id, we drop all rows in that group rather than silently
+    publish a coin-flip price; the model's synthetic aggregated row
+    still ships from the top-level pricing.
+    """
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    order: list[str] = []
+    for r in rows:
+        sid = r["sku_id"]
+        if sid not in grouped:
+            grouped[sid] = []
+            order.append(sid)
+        grouped[sid].append(r)
+
+    out: list[dict[str, Any]] = []
+    for sid in order:
+        group = grouped[sid]
+        if len(group) == 1:
+            out.append(group[0])
+            continue
+        prices = group[0]["prices"]
+        if all(r["prices"] == prices for r in group):
+            sys.stderr.write(
+                f"ingest.openrouter: merged {len(group)} rows for duplicate sku_id {sid}\n"
+            )
+            out.append(max(group, key=_uptime))
+            continue
+        sys.stderr.write(
+            f"ingest.openrouter: dropped duplicate sku_id with divergent prices: {sid}\n"
+        )
+    return out
 
 
 def _write_rows(rows: Iterable[dict[str, Any]], out: Path | None) -> None:
