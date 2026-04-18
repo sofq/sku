@@ -40,12 +40,12 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone.
+[M3b.1 — Azure VM + SQL Shards (on-demand) Implementation Plan](docs/superpowers/plans/2026-04-18-m3b.1-azure-vm-sql.md)
 
-### Quick path (agent, repeatable, M3a.3 surface)
+### Quick path (agent, repeatable, M3b.1 surface)
 
 ```bash
-make openrouter-shard aws-shards                        # build all local shards
+make openrouter-shard aws-shards azure-shards           # build all local shards
 export SKU_DATA_DIR=$(pwd)/dist/pipeline
 
 ./bin/sku llm price --model anthropic/claude-opus-4.6 --preset agent
@@ -77,6 +77,12 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku aws dynamodb   list  --table-class standard
 ./bin/sku aws cloudfront price --region eu-west-1 --preset agent
 ./bin/sku aws cloudfront list
+
+./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region eastus --os linux --preset agent
+./bin/sku azure vm  list  --arm-sku-name Standard_D2_v3
+./bin/sku azure sql price --sku-name GP_Gen5_2 --region eastus \
+  --deployment-option single-az --preset agent
+./bin/sku azure sql list  --sku-name GP_Gen5_2
 ```
 
 ## Global flags (all subcommands)
