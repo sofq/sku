@@ -30,6 +30,7 @@ tenancy:
   - postgres
   - mysql
   - mariadb
+  - azure-sql      # Azure SQL "engine" slot — single value, distinguishes from db.relational AWS rows
 
 os:
   - ""
@@ -39,6 +40,8 @@ os:
   # RDS deployment options — same repurpose as tenancy above.
   - single-az
   - multi-az
+  - managed-instance
+  - elastic-pool
 
 support_tier:
   - ""
