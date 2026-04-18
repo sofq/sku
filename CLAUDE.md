@@ -40,7 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-[M3b.1 — Azure VM + SQL Shards (on-demand) Implementation Plan](docs/superpowers/plans/2026-04-18-m3b.1-azure-vm-sql.md)
+v1.0 shipped — no open milestone.
 
 ### Quick path (agent, repeatable, M3b.1 surface)
 
