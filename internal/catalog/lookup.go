@@ -245,6 +245,65 @@ func (c *Catalog) LookupDBRelational(ctx context.Context, f DBRelationalFilter) 
 		f.InstanceType, f.Region, f.Terms)
 }
 
+// StorageObjectFilter captures the flags `sku aws s3 price/list` exposes.
+// StorageClass is the user-facing name for resource_name on storage.object
+// rows (e.g. "standard", "standard-ia"). Terms never carry tenancy/os for
+// this kind — the client must zero-value those slots.
+type StorageObjectFilter struct {
+	Provider     string
+	Service      string
+	StorageClass string
+	Region       string
+	Terms        Terms
+}
+
+// ServerlessFunctionFilter captures the flags `sku aws lambda price/list` exposes.
+// resource_name is the architecture string ("x86_64" / "arm64").
+type ServerlessFunctionFilter struct {
+	Provider     string
+	Service      string
+	Architecture string
+	Region       string
+	Terms        Terms
+}
+
+// StorageBlockFilter captures the flags `sku aws ebs price/list` exposes.
+// resource_name is the volume-type slug ("gp3", "io2", ...).
+type StorageBlockFilter struct {
+	Provider   string
+	Service    string
+	VolumeType string
+	Region     string
+	Terms      Terms
+}
+
+// LookupStorageObject runs the storage.object point lookup / list query.
+func (c *Catalog) LookupStorageObject(ctx context.Context, f StorageObjectFilter) ([]Row, error) {
+	if f.StorageClass == "" {
+		return nil, fmt.Errorf("catalog: LookupStorageObject requires StorageClass")
+	}
+	return c.lookupResource(ctx, "storage.object", f.Provider, f.Service,
+		f.StorageClass, f.Region, f.Terms)
+}
+
+// LookupServerlessFunction runs the compute.function point lookup / list query.
+func (c *Catalog) LookupServerlessFunction(ctx context.Context, f ServerlessFunctionFilter) ([]Row, error) {
+	if f.Architecture == "" {
+		return nil, fmt.Errorf("catalog: LookupServerlessFunction requires Architecture")
+	}
+	return c.lookupResource(ctx, "compute.function", f.Provider, f.Service,
+		f.Architecture, f.Region, f.Terms)
+}
+
+// LookupStorageBlock runs the storage.block point lookup / list query.
+func (c *Catalog) LookupStorageBlock(ctx context.Context, f StorageBlockFilter) ([]Row, error) {
+	if f.VolumeType == "" {
+		return nil, fmt.Errorf("catalog: LookupStorageBlock requires VolumeType")
+	}
+	return c.lookupResource(ctx, "storage.block", f.Provider, f.Service,
+		f.VolumeType, f.Region, f.Terms)
+}
+
 // lookupResource is the shared scan path for cloud kinds. Region is
 // optional (empty region returns every region's row for the given
 // resource_name). terms_hash is computed client-side from f.Terms before

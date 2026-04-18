@@ -34,6 +34,14 @@ func openSeededAWS(t *testing.T) *catalog.Catalog {
 	return cat
 }
 
+func openSeededAWSM3a2(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_aws_m3a2.sql", "aws-s3.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
 func TestOpen_ReadsMetadata(t *testing.T) {
 	path := seedShard(t)
 	cat, err := catalog.Open(path)
@@ -154,4 +162,49 @@ func TestLookupDBRelational_PointLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
 	require.Equal(t, 0.300, rows[0].Prices[0].Amount)
+}
+
+func TestLookupStorageObject_PointLookup(t *testing.T) {
+	cat := openSeededAWSM3a2(t)
+
+	rows, err := cat.LookupStorageObject(context.Background(), catalog.StorageObjectFilter{
+		Provider: "aws", Service: "s3",
+		StorageClass: "standard", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Len(t, rows[0].Prices, 3)
+}
+
+func TestLookupServerlessFunction_PointLookup(t *testing.T) {
+	cat := openSeededAWSM3a2(t)
+
+	rows, err := cat.LookupServerlessFunction(context.Background(), catalog.ServerlessFunctionFilter{
+		Provider: "aws", Service: "lambda",
+		Architecture: "arm64", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	var dur float64
+	for _, p := range rows[0].Prices {
+		if p.Dimension == "duration" {
+			dur = p.Amount
+		}
+	}
+	require.Equal(t, 0.0000133334, dur)
+}
+
+func TestLookupStorageBlock_PointLookup(t *testing.T) {
+	cat := openSeededAWSM3a2(t)
+
+	rows, err := cat.LookupStorageBlock(context.Background(), catalog.StorageBlockFilter{
+		Provider: "aws", Service: "ebs",
+		VolumeType: "gp3", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, 0.08, rows[0].Prices[0].Amount)
 }
