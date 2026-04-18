@@ -15,7 +15,7 @@ func TestInfo_DefaultValuesAreDev(t *testing.T) {
 }
 
 func TestInfo_JSONShape(t *testing.T) {
-	info := Info{Version: "1.2.3", Commit: "abc123", Date: "2026-04-18T00:00:00Z", GoVersion: "go1.25.0", Os: "linux", Arch: "amd64"}
+	info := Info{Version: "1.2.3", Commit: "abc123", Date: "2026-04-18T00:00:00Z", GoVersion: "go1.25.0", OS: "linux", Arch: "amd64"}
 	raw, err := json.Marshal(info)
 	require.NoError(t, err)
 

@@ -17,7 +17,7 @@ type Info struct {
 	Commit    string `json:"commit"`
 	Date      string `json:"date"`
 	GoVersion string `json:"go_version"`
-	Os        string `json:"os"`
+	OS        string `json:"os"`
 	Arch      string `json:"arch"`
 }
 
@@ -28,7 +28,7 @@ func Get() Info {
 		Commit:    commit,
 		Date:      date,
 		GoVersion: runtime.Version(),
-		Os:        runtime.GOOS,
+		OS:        runtime.GOOS,
 		Arch:      runtime.GOARCH,
 	}
 }
