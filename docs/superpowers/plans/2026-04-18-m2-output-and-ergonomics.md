@@ -1098,7 +1098,7 @@ git commit -m "feat(output): json/yaml/toml encoders + pretty"
 
 Human-facing output (the text-format branches of `sku schema` and `sku configure`) honors `--no-color` / `NO_COLOR` / `SKU_NO_COLOR` and also auto-disables when stdout is not a TTY. Data output is always no-color — agents do not want ANSI.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```go
 package output_test
@@ -1127,7 +1127,7 @@ func TestShouldColorize_NoColorFlag_ReturnsFalse(t *testing.T) {
 Note: we can't force a test buffer to claim TTY; TTY test is covered by
 `ShouldColorize(os.Stdout, ...)` at runtime in dev loops.
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 ```go
 package output
@@ -1153,7 +1153,7 @@ func ShouldColorize(w io.Writer, opts Options) bool {
 }
 ```
 
-- [ ] **Step 3: Run test + commit**
+- [x] **Step 3: Run test + commit**
 
 Run: `go test ./internal/output/ -run TestShouldColorize -v` → PASS
 Commit: `feat(output): --no-color/NO_COLOR TTY-aware gate`
