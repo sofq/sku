@@ -1,0 +1,44 @@
+# Every enum the shard-build validator enforces (§5 Enum validation).
+# M1 ships the minimum set needed by OpenRouter; later milestones append.
+version: 1
+
+kind:
+  # LLM kinds (seeded now because OpenRouter uses them)
+  - llm.text
+  - llm.multimodal
+  - llm.embedding
+  - llm.image
+  - llm.audio
+  # Cloud kinds appended in M3a+
+  # - compute.vm
+  # - storage.object
+  # - db.relational
+  # ...
+
+commitment:
+  - on_demand
+  # - spot
+  # - reserved_1y
+  # - reserved_3y
+  # - savings_plan_1y
+  # - savings_plan_3y
+  # - cud_1y
+  # - cud_3y
+
+tenancy:
+  - ""            # non-applicable (LLMs, storage, etc.)
+  # - shared
+  # - dedicated
+  # - host
+
+os:
+  - ""            # non-applicable
+  # - linux
+  # - windows
+  # - rhel
+
+support_tier:
+  - ""
+
+payment_option:
+  - ""
