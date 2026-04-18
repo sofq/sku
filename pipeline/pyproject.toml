@@ -8,6 +8,7 @@ dependencies = [
   "pyyaml>=6.0",
   "zstandard>=0.22",
   "duckdb>=0.10,<2",
+  "numpy>=1.26",
 ]
 
 [project.optional-dependencies]
