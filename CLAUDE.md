@@ -40,12 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-**M3b.2 — Azure Blob + Functions + Disks shards.** Plan at
-`docs/superpowers/plans/2026-04-18-m3b.2-azure-blob-functions-disks.md`. Adds
-three new shards (`azure-blob`, `azure-functions`, `azure-disks`) + six new
-Cobra leaves under the existing `azure` parent + three `internal/updater`
-`DefaultSources` entries. Validation-harness extension to Azure remains
-deferred to m3b.3.
+v1.0 shipped — no open milestone.
 
 ### Quick path (agent, repeatable, M3b.2 surface)
 
