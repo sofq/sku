@@ -40,9 +40,9 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M2 — Output polish & CLI ergonomics. See `docs/superpowers/plans/2026-04-18-m2-output-and-ergonomics.md`.
+v1.0 shipped — no open milestone. Next plan to be authored under `docs/superpowers/plans/`.
 
-### Quick path (agent, repeatable)
+### Quick path (agent, repeatable, M2 surface)
 
 ```bash
 make openrouter-shard                                   # build local shard from fixtures
