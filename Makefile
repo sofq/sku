@@ -55,8 +55,29 @@ aws-rds-shard: ## Build aws-rds shard from fixtures
 	@mv dist/pipeline/aws_rds.db dist/pipeline/aws-rds.db
 	@mv dist/pipeline/aws_rds.rows.jsonl dist/pipeline/aws-rds.rows.jsonl
 
+.PHONY: aws-s3-shard
+aws-s3-shard: ## Build aws-s3 shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_s3 FIXTURE=testdata/aws_s3 \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_s3.db dist/pipeline/aws-s3.db
+	@mv dist/pipeline/aws_s3.rows.jsonl dist/pipeline/aws-s3.rows.jsonl
+
+.PHONY: aws-lambda-shard
+aws-lambda-shard: ## Build aws-lambda shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_lambda FIXTURE=testdata/aws_lambda \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_lambda.db dist/pipeline/aws-lambda.db
+	@mv dist/pipeline/aws_lambda.rows.jsonl dist/pipeline/aws-lambda.rows.jsonl
+
+.PHONY: aws-ebs-shard
+aws-ebs-shard: ## Build aws-ebs shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_ebs FIXTURE=testdata/aws_ebs \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_ebs.db dist/pipeline/aws-ebs.db
+	@mv dist/pipeline/aws_ebs.rows.jsonl dist/pipeline/aws-ebs.rows.jsonl
+
 .PHONY: aws-shards
-aws-shards: aws-ec2-shard aws-rds-shard ## Build both aws shards
+aws-shards: aws-ec2-shard aws-rds-shard aws-s3-shard aws-lambda-shard aws-ebs-shard ## Build all aws shards (m3a.1+m3a.2)
 
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
