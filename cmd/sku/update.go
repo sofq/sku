@@ -24,6 +24,9 @@ var shardSources = map[string]string{
 	"openrouter": "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter",
 	"aws-ec2":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ec2",
 	"aws-rds":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-rds",
+	"aws-s3":     "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-s3",
+	"aws-lambda": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-lambda",
+	"aws-ebs":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ebs",
 }
 
 // resolveUpdateBaseURL returns the asset base URL for shard. Precedence:
@@ -56,7 +59,7 @@ func shardNames() []string {
 func newUpdateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update <shard>",
-		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds)",
+		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds | aws-s3 | aws-lambda | aws-ebs)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := globalSettings(cmd)
