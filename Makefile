@@ -107,8 +107,29 @@ azure-sql-shard: ## Build azure-sql shard from fixtures
 	@mv dist/pipeline/azure_sql.db dist/pipeline/azure-sql.db
 	@mv dist/pipeline/azure_sql.rows.jsonl dist/pipeline/azure-sql.rows.jsonl
 
+.PHONY: azure-blob-shard
+azure-blob-shard: ## Build azure-blob shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_blob FIXTURE=testdata/azure_blob \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_blob.db dist/pipeline/azure-blob.db
+	@mv dist/pipeline/azure_blob.rows.jsonl dist/pipeline/azure-blob.rows.jsonl
+
+.PHONY: azure-functions-shard
+azure-functions-shard: ## Build azure-functions shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_functions FIXTURE=testdata/azure_functions \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_functions.db dist/pipeline/azure-functions.db
+	@mv dist/pipeline/azure_functions.rows.jsonl dist/pipeline/azure-functions.rows.jsonl
+
+.PHONY: azure-disks-shard
+azure-disks-shard: ## Build azure-disks shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_disks FIXTURE=testdata/azure_disks \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_disks.db dist/pipeline/azure-disks.db
+	@mv dist/pipeline/azure_disks.rows.jsonl dist/pipeline/azure-disks.rows.jsonl
+
 .PHONY: azure-shards
-azure-shards: azure-vm-shard azure-sql-shard ## Build azure shards (m3b.1)
+azure-shards: azure-vm-shard azure-sql-shard azure-blob-shard azure-functions-shard azure-disks-shard ## Build azure shards (m3b.1+m3b.2)
 
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
@@ -132,6 +153,9 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/aws-cloudfront.db || (echo "run 'make aws-cloudfront-shard' first" && exit 2)
 	@test -f dist/pipeline/azure-vm.db       || (echo "run 'make azure-vm-shard' first"      && exit 2)
 	@test -f dist/pipeline/azure-sql.db      || (echo "run 'make azure-sql-shard' first"     && exit 2)
+	@test -f dist/pipeline/azure-blob.db      || (echo "run 'make azure-blob-shard' first"      && exit 2)
+	@test -f dist/pipeline/azure-functions.db || (echo "run 'make azure-functions-shard' first" && exit 2)
+	@test -f dist/pipeline/azure-disks.db     || (echo "run 'make azure-disks-shard' first"     && exit 2)
 	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
 	  SKU_TEST_SHARD_DIR=$(CURDIR)/dist/pipeline \
 	  $(GO) test -tags=integration -race -count=1 ./...
