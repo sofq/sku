@@ -38,7 +38,11 @@ checksum:
   name_template: "checksums.txt"
 
 snapshot:
-  version_template: "{{ incpatch .Version }}-snapshot"
+  version_template: "0.0.0-snapshot-{{ .ShortCommit }}"
+
+git:
+  ignore_tags:
+    - "data-bootstrap-*"
 
 changelog:
   disable: true
