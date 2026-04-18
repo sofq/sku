@@ -93,6 +93,23 @@ aws-cloudfront-shard: ## Build aws-cloudfront shard from fixtures
 .PHONY: aws-shards
 aws-shards: aws-ec2-shard aws-rds-shard aws-s3-shard aws-lambda-shard aws-ebs-shard aws-dynamodb-shard aws-cloudfront-shard ## Build all aws shards (m3a.1+m3a.2+m3a.3)
 
+.PHONY: azure-vm-shard
+azure-vm-shard: ## Build azure-vm shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_vm FIXTURE=testdata/azure_vm \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_vm.db dist/pipeline/azure-vm.db
+	@mv dist/pipeline/azure_vm.rows.jsonl dist/pipeline/azure-vm.rows.jsonl
+
+.PHONY: azure-sql-shard
+azure-sql-shard: ## Build azure-sql shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_sql FIXTURE=testdata/azure_sql \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_sql.db dist/pipeline/azure-sql.db
+	@mv dist/pipeline/azure_sql.rows.jsonl dist/pipeline/azure-sql.rows.jsonl
+
+.PHONY: azure-shards
+azure-shards: azure-vm-shard azure-sql-shard ## Build azure shards (m3b.1)
+
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
 	$(MAKE) -C pipeline test
