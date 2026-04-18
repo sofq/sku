@@ -88,16 +88,24 @@ func buildSearchQuery(f SearchFilter) (string, []any) {
 		where = append(where, "ra.memory_gb >= ?")
 		args = append(args, f.MinMemoryGB)
 	}
+	if f.MaxPrice > 0 {
+		where = append(where, "mp.min_price IS NOT NULL AND mp.min_price <= ?")
+		args = append(args, f.MaxPrice)
+	}
 
 	const base = `
 SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,
        s.region_normalized, s.terms_hash,
        t.commitment, t.tenancy, t.os, t.support_tier, t.upfront, t.payment_option,
        ra.vcpu, ra.memory_gb, ra.storage_gb, ra.gpu_count, ra.gpu_model,
-       ra.architecture, ra.extra
+       ra.architecture, ra.extra,
+       COALESCE(mp.min_price, 0) AS min_price
 FROM skus s
 JOIN terms t ON t.sku_id = s.sku_id
 LEFT JOIN resource_attrs ra ON ra.sku_id = s.sku_id
+LEFT JOIN (
+  SELECT sku_id, MIN(amount) AS min_price FROM prices GROUP BY sku_id
+) mp ON mp.sku_id = s.sku_id
 WHERE `
 	query := base + strings.Join(where, " AND ") +
 		"\nORDER BY s.resource_name, s.sku_id" //nolint:gosec // G202: no user input in SQL concatenation
@@ -111,15 +119,18 @@ func scanSearchRow(rs *sql.Rows) (Row, error) {
 	var mem, storage sql.NullFloat64
 	var gpuCount sql.NullInt64
 	var gpuModel, arch, extraJSON sql.NullString
+	var minPrice sql.NullFloat64
 	if err := rs.Scan(
 		&r.SKUID, &r.Provider, &r.Service, &r.Kind, &r.ResourceName, &r.Region,
 		&r.RegionGroup, &r.TermsHash,
 		&r.Terms.Commitment, &r.Terms.Tenancy, &r.Terms.OS,
 		&supportTier, &upfront, &paymentOption,
 		&vcpu, &mem, &storage, &gpuCount, &gpuModel, &arch, &extraJSON,
+		&minPrice,
 	); err != nil {
 		return r, err
 	}
+	_ = minPrice // M4.1 only uses min_price as a WHERE/ORDER-BY column, not on Row.
 	r.Terms.SupportTier = supportTier.String
 	r.Terms.Upfront = upfront.String
 	r.Terms.PaymentOption = paymentOption.String

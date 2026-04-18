@@ -127,3 +127,24 @@ func TestSearch_MinVCPU_ExcludesRowsWithoutResourceAttrs(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, rows)
 }
+
+func TestSearch_MaxPrice(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", MaxPrice: 0.1,
+	})
+	require.NoError(t, err)
+	// Rows with MIN(price.amount) <= 0.10:
+	//   ec2-t3m-use1 (0.0416), ec2-c5l-use1 (0.085), ec2-m5l-use1 (0.096)
+	// = 3 rows.
+	require.Len(t, rows, 3)
+}
+
+func TestSearch_MaxPrice_Zero_IsDisabled(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", MaxPrice: 0,
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 8, "zero disables the filter; all rows come back")
+}
