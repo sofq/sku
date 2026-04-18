@@ -38,7 +38,7 @@ func BenchmarkPointLookup_Warm(b *testing.B) {
 		var buf bytes.Buffer
 		for _, r := range rows {
 			env := output.Render(r, output.PresetAgent)
-			if err := output.Encode(&buf, env, false); err != nil {
+			if err := output.EncodeEnvelope(&buf, env, false); err != nil {
 				b.Fatal(err)
 			}
 		}

@@ -86,7 +86,7 @@ func newLLMPriceCmd() *cobra.Command {
 			w := cmd.OutOrStdout()
 			for _, r := range rows {
 				env := output.Render(r, output.PresetAgent)
-				if encErr := output.Encode(w, env, pretty); encErr != nil {
+				if encErr := output.EncodeEnvelope(w, env, pretty); encErr != nil {
 					wrappedErr := errors.Join(errors.New("output encode failed"), encErr)
 					skuerrors.Write(cmd.ErrOrStderr(), wrappedErr)
 					return wrappedErr

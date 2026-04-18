@@ -646,7 +646,7 @@ func (o Options) WithDefaults() Options // fills zero values
 func Pipeline(r catalog.Row, opts Options) ([]byte, error)
 ```
 
-- [ ] **Step 1: Write failing tests in `pipeline_test.go`**
+- [x] **Step 1: Write failing tests in `pipeline_test.go`**
 
 ```go
 package output_test
@@ -695,7 +695,7 @@ func TestPipeline_Pretty_IndentsJSON(t *testing.T) {
 Run: `go test ./internal/output/... -run TestPipeline`
 Expected: FAIL (undefined Pipeline).
 
-- [ ] **Step 2: Implement `options.go` + `Pipeline`**
+- [x] **Step 2: Implement `options.go` + `Pipeline`**
 
 ```go
 // internal/output/options.go
@@ -759,12 +759,12 @@ var ErrDropped = errors.New("output: row dropped by preset filter")
 
 Scaffold stubs `Project`, `ApplyFields`, `ApplyJQ`, `Encode`, `toMap` that return their input unchanged (or empty for Fields/JQ) — they get real bodies in Tasks 5–8.
 
-- [ ] **Step 3: Run tests**
+- [x] **Step 3: Run tests**
 
 Run: `go test ./internal/output/... -v`
 Expected: existing `render_test.go` still PASS; `pipeline_test.go` for agent + full + pretty PASS (price drops handled when Task 5 lands — skip with `t.Skip("TBD task 5")` as a temporary `&& t.Skip()`... actually **do not skip**; implement the minimal `Project` price branch inline here so the test passes).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add internal/output/

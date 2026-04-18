@@ -50,7 +50,7 @@ func TestRender_FullPresetProducesSpecShape(t *testing.T) {
 	env := output.Render(sampleRow(), output.PresetFull)
 
 	var buf bytes.Buffer
-	require.NoError(t, output.Encode(&buf, env, false))
+	require.NoError(t, output.EncodeEnvelope(&buf, env, false))
 
 	var got map[string]any
 	require.NoError(t, json.Unmarshal(buf.Bytes(), &got))
@@ -97,7 +97,7 @@ func TestRender_AgentPresetTrimsFields(t *testing.T) {
 	env := output.Render(sampleRow(), output.PresetAgent)
 
 	var buf bytes.Buffer
-	require.NoError(t, output.Encode(&buf, env, false))
+	require.NoError(t, output.EncodeEnvelope(&buf, env, false))
 
 	var got map[string]any
 	require.NoError(t, json.Unmarshal(buf.Bytes(), &got))
@@ -127,8 +127,8 @@ func TestEncode_CompactAndPretty(t *testing.T) {
 	env := output.Render(sampleRow(), output.PresetAgent)
 
 	var compact, pretty bytes.Buffer
-	require.NoError(t, output.Encode(&compact, env, false))
-	require.NoError(t, output.Encode(&pretty, env, true))
+	require.NoError(t, output.EncodeEnvelope(&compact, env, false))
+	require.NoError(t, output.EncodeEnvelope(&pretty, env, true))
 
 	require.NotContains(t, compact.String(), "\n  ", "compact has no indentation")
 	require.Contains(t, pretty.String(), "\n  ", "pretty is indented")
@@ -147,7 +147,7 @@ func TestRender_AggregatedMarkedInAttributes(t *testing.T) {
 
 	env := output.Render(r, output.PresetFull)
 	var buf bytes.Buffer
-	require.NoError(t, output.Encode(&buf, env, false))
+	require.NoError(t, output.EncodeEnvelope(&buf, env, false))
 
 	var got map[string]any
 	require.NoError(t, json.Unmarshal(buf.Bytes(), &got))
