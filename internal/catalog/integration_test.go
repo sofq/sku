@@ -5,6 +5,7 @@ package catalog_test
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -33,4 +34,40 @@ func TestIntegration_RealBuiltShard(t *testing.T) {
 	for _, r := range rows {
 		require.NotEmpty(t, r.Prices, "row %s has no prices", r.SKUID)
 	}
+}
+
+func TestIntegration_EC2PointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-ec2.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "aws", Service: "ec2",
+		InstanceType: "m5.large", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+}
+
+func TestIntegration_RDSPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-rds.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider: "aws", Service: "rds",
+		InstanceType: "db.m5.large", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "postgres", OS: "single-az"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
 }

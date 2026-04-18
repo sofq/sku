@@ -69,9 +69,12 @@ bench: ## Run Go benchmarks against the built OpenRouter shard
 	  $(GO) test -run=^$$ -bench=. -benchmem -count=5 ./bench/...
 
 .PHONY: test-integration
-test-integration: ## Run Go integration tests (requires built shard)
+test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/openrouter.db || (echo "run 'make openrouter-shard' first" && exit 2)
+	@test -f dist/pipeline/aws-ec2.db    || (echo "run 'make aws-ec2-shard' first"   && exit 2)
+	@test -f dist/pipeline/aws-rds.db    || (echo "run 'make aws-rds-shard' first"   && exit 2)
 	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
+	  SKU_TEST_SHARD_DIR=$(CURDIR)/dist/pipeline \
 	  $(GO) test -tags=integration -race -count=1 ./...
 
 .PHONY: release-dry
