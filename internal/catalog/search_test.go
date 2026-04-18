@@ -35,3 +35,23 @@ func TestSearch_RequiresProviderAndService(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Service")
 }
+
+func TestSearch_BaseQueryReturnsAllRows(t *testing.T) {
+	cat := openSeededSearch(t)
+
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2",
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 8)
+
+	// Default sort is resource_name + sku_id; the first row is the alphabetically
+	// lowest resource_name in the fixture (c5.large).
+	require.Equal(t, "c5.large", rows[0].ResourceName)
+	// Every row carries currency from metadata and catalog_version.
+	for _, r := range rows {
+		require.Equal(t, "USD", r.Currency)
+		require.Equal(t, "2026.04.18", r.CatalogVersion)
+		require.NotEmpty(t, r.Prices, "row %s has no prices", r.SKUID)
+	}
+}
