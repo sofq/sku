@@ -42,6 +42,14 @@ func openSeededAWSM3a2(t *testing.T) *catalog.Catalog {
 	return cat
 }
 
+func openSeededAWSM3a3(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_aws_m3a3.sql", "aws-dynamodb.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
 func TestOpen_ReadsMetadata(t *testing.T) {
 	path := seedShard(t)
 	cat, err := catalog.Open(path)
@@ -207,4 +215,48 @@ func TestLookupStorageBlock_PointLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
 	require.Equal(t, 0.08, rows[0].Prices[0].Amount)
+}
+
+func TestLookupNoSQLDB_SeededStandardUSE1(t *testing.T) {
+	cat := openSeededAWSM3a3(t)
+
+	rows, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
+		Provider: "aws", Service: "dynamodb",
+		TableClass: "standard", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	dims := map[string]float64{}
+	for _, p := range rows[0].Prices {
+		dims[p.Dimension] = p.Amount
+	}
+	require.Equal(t, 0.25, dims["storage"])
+	require.Equal(t, 0.000000125, dims["read_request_units"])
+	require.Equal(t, 0.000000625, dims["write_request_units"])
+}
+
+func TestLookupCDN_SeededEUWest(t *testing.T) {
+	cat := openSeededAWSM3a3(t)
+
+	rows, err := cat.LookupCDN(context.Background(), catalog.CDNFilter{
+		Provider: "aws", Service: "cloudfront",
+		ResourceName: "standard", Region: "eu-west-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Len(t, rows[0].Prices, 1)
+	require.Equal(t, "data_transfer_out", rows[0].Prices[0].Dimension)
+	require.Equal(t, 0.085, rows[0].Prices[0].Amount)
+}
+
+func TestLookupNoSQLDB_MissingTableClassErrors(t *testing.T) {
+	cat := openSeededAWSM3a3(t)
+	_, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
+		Provider: "aws", Service: "dynamodb",
+		Region: "us-east-1",
+		Terms:  catalog.Terms{Commitment: "on_demand"},
+	})
+	require.Error(t, err)
 }

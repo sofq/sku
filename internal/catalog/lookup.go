@@ -304,6 +304,45 @@ func (c *Catalog) LookupStorageBlock(ctx context.Context, f StorageBlockFilter) 
 		f.VolumeType, f.Region, f.Terms)
 }
 
+// NoSQLDBFilter captures the flags `sku aws dynamodb price/list` exposes.
+// resource_name holds the table class slug ("standard" / "standard-ia").
+type NoSQLDBFilter struct {
+	Provider   string
+	Service    string
+	TableClass string
+	Region     string
+	Terms      Terms
+}
+
+// CDNFilter captures the flags `sku aws cloudfront price/list` exposes.
+// resource_name is the CloudFront offering slug ("standard"); region carries
+// the canonical edge region (see pipeline/ingest/aws_cloudfront.LOCATION_MAP).
+type CDNFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupNoSQLDB runs the db.nosql point lookup / list query.
+func (c *Catalog) LookupNoSQLDB(ctx context.Context, f NoSQLDBFilter) ([]Row, error) {
+	if f.TableClass == "" {
+		return nil, fmt.Errorf("catalog: LookupNoSQLDB requires TableClass")
+	}
+	return c.lookupResource(ctx, "db.nosql", f.Provider, f.Service,
+		f.TableClass, f.Region, f.Terms)
+}
+
+// LookupCDN runs the network.cdn point lookup / list query.
+func (c *Catalog) LookupCDN(ctx context.Context, f CDNFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupCDN requires ResourceName")
+	}
+	return c.lookupResource(ctx, "network.cdn", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
 // lookupResource is the shared scan path for cloud kinds. Region is
 // optional (empty region returns every region's row for the given
 // resource_name). terms_hash is computed client-side from f.Terms before
