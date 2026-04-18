@@ -1,0 +1,272 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AmazonEC2",
+  "version": "20260415000000",
+  "products": {
+    "SKU-EBS-GP3-USE1": {
+      "sku": "SKU-EBS-GP3-USE1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "us-east-1",
+        "volumeApiName": "gp3",
+        "volumeType": "General Purpose",
+        "usagetype": "USE1-EBS:VolumeUsage.gp3"
+      }
+    },
+    "SKU-EBS-GP3-EUW1": {
+      "sku": "SKU-EBS-GP3-EUW1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "eu-west-1",
+        "volumeApiName": "gp3",
+        "volumeType": "General Purpose",
+        "usagetype": "EUW1-EBS:VolumeUsage.gp3"
+      }
+    },
+    "SKU-EBS-GP2-USE1": {
+      "sku": "SKU-EBS-GP2-USE1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "us-east-1",
+        "volumeApiName": "gp2",
+        "volumeType": "General Purpose",
+        "usagetype": "USE1-EBS:VolumeUsage.gp2"
+      }
+    },
+    "SKU-EBS-GP2-EUW1": {
+      "sku": "SKU-EBS-GP2-EUW1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "eu-west-1",
+        "volumeApiName": "gp2",
+        "volumeType": "General Purpose",
+        "usagetype": "EUW1-EBS:VolumeUsage.gp2"
+      }
+    },
+    "SKU-EBS-IO2-USE1": {
+      "sku": "SKU-EBS-IO2-USE1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "us-east-1",
+        "volumeApiName": "io2",
+        "volumeType": "Provisioned IOPS",
+        "usagetype": "USE1-EBS:VolumeUsage.io2"
+      }
+    },
+    "SKU-EBS-IO2-EUW1": {
+      "sku": "SKU-EBS-IO2-EUW1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "eu-west-1",
+        "volumeApiName": "io2",
+        "volumeType": "Provisioned IOPS",
+        "usagetype": "EUW1-EBS:VolumeUsage.io2"
+      }
+    },
+    "SKU-EBS-ST1-USE1": {
+      "sku": "SKU-EBS-ST1-USE1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "us-east-1",
+        "volumeApiName": "st1",
+        "volumeType": "Throughput Optimized HDD",
+        "usagetype": "USE1-EBS:VolumeUsage.st1"
+      }
+    },
+    "SKU-EBS-ST1-EUW1": {
+      "sku": "SKU-EBS-ST1-EUW1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "eu-west-1",
+        "volumeApiName": "st1",
+        "volumeType": "Throughput Optimized HDD",
+        "usagetype": "EUW1-EBS:VolumeUsage.st1"
+      }
+    },
+    "SKU-EBS-SC1-USE1": {
+      "sku": "SKU-EBS-SC1-USE1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "us-east-1",
+        "volumeApiName": "sc1",
+        "volumeType": "Cold HDD",
+        "usagetype": "USE1-EBS:VolumeUsage.sc1"
+      }
+    },
+    "SKU-EBS-SC1-EUW1": {
+      "sku": "SKU-EBS-SC1-EUW1",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonEC2",
+        "regionCode": "eu-west-1",
+        "volumeApiName": "sc1",
+        "volumeType": "Cold HDD",
+        "usagetype": "EUW1-EBS:VolumeUsage.sc1"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SKU-EBS-GP3-USE1": {
+        "SKU-EBS-GP3-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-GP3-USE1",
+          "priceDimensions": {
+            "SKU-EBS-GP3-USE1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0800000000"
+              },
+              "description": "$0.0800 per GB-month of gp3 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-GP3-EUW1": {
+        "SKU-EBS-GP3-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-GP3-EUW1",
+          "priceDimensions": {
+            "SKU-EBS-GP3-EUW1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0880000000"
+              },
+              "description": "$0.0880 per GB-month of gp3 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-GP2-USE1": {
+        "SKU-EBS-GP2-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-GP2-USE1",
+          "priceDimensions": {
+            "SKU-EBS-GP2-USE1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.1000000000"
+              },
+              "description": "$0.1000 per GB-month of gp2 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-GP2-EUW1": {
+        "SKU-EBS-GP2-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-GP2-EUW1",
+          "priceDimensions": {
+            "SKU-EBS-GP2-EUW1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.1100000000"
+              },
+              "description": "$0.1100 per GB-month of gp2 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-IO2-USE1": {
+        "SKU-EBS-IO2-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-IO2-USE1",
+          "priceDimensions": {
+            "SKU-EBS-IO2-USE1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.1250000000"
+              },
+              "description": "$0.1250 per GB-month of io2 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-IO2-EUW1": {
+        "SKU-EBS-IO2-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-IO2-EUW1",
+          "priceDimensions": {
+            "SKU-EBS-IO2-EUW1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.1375000000"
+              },
+              "description": "$0.1375 per GB-month of io2 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-ST1-USE1": {
+        "SKU-EBS-ST1-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-ST1-USE1",
+          "priceDimensions": {
+            "SKU-EBS-ST1-USE1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0450000000"
+              },
+              "description": "$0.0450 per GB-month of st1 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-ST1-EUW1": {
+        "SKU-EBS-ST1-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-ST1-EUW1",
+          "priceDimensions": {
+            "SKU-EBS-ST1-EUW1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0495000000"
+              },
+              "description": "$0.0495 per GB-month of st1 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-SC1-USE1": {
+        "SKU-EBS-SC1-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-SC1-USE1",
+          "priceDimensions": {
+            "SKU-EBS-SC1-USE1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0150000000"
+              },
+              "description": "$0.0150 per GB-month of sc1 storage"
+            }
+          }
+        }
+      },
+      "SKU-EBS-SC1-EUW1": {
+        "SKU-EBS-SC1-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-EBS-SC1-EUW1",
+          "priceDimensions": {
+            "SKU-EBS-SC1-EUW1.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0165000000"
+              },
+              "description": "$0.0165 per GB-month of sc1 storage"
+            }
+          }
+        }
+      }
+    }
+  }
+}
