@@ -2018,11 +2018,11 @@ git commit -m "feat(cmd): version/update use global output options"
 
 Update the **Current milestone** section to point at M2's plan; add quick-path examples for the new flags.
 
-- [ ] **Step 1: Edit `CLAUDE.md`**
+- [x] **Step 1: Edit `CLAUDE.md`**
 
 Replace the M1 quick-path block with an M2 quick-path block demonstrating `--preset`, `--jq`, `--fields`, `--yaml`, `--dry-run`, and `sku schema --errors`. Bump "Current milestone" to M2. Add one-liner "TOML quirks: sku wraps top-level arrays as `{rows: [...]}` before emitting TOML." per Task 8.
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add CLAUDE.md
