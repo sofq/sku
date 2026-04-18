@@ -154,6 +154,7 @@ func TestDefaultSources_Contains(t *testing.T) {
 		"aws-dynamodb", "aws-cloudfront",
 		"azure-vm", "azure-sql",
 		"azure-blob", "azure-functions", "azure-disks",
+		"gcp-gce", "gcp-cloud-sql",
 	} {
 		if _, ok := updater.DefaultSources[shard]; !ok {
 			t.Errorf("DefaultSources missing shard %q", shard)
