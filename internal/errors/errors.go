@@ -15,6 +15,7 @@ import (
 // mapped to a process exit code via ExitCode.
 type Code string
 
+// Exit-code constants — one per spec §4 taxonomy entry.
 const (
 	CodeOK          Code = ""              // exit 0
 	CodeGeneric     Code = "generic_error" // exit 1
