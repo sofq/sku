@@ -233,13 +233,6 @@ func toMap(env Envelope) (map[string]any, error) {
 	return m, nil
 }
 
-// ApplyJQ runs a gojq expression against doc. Stubbed in Task 4; a real
-// implementation lands in Task 7.
-func ApplyJQ(doc any, expr string) (any, error) {
-	_ = expr
-	return doc, nil
-}
-
 // Encode serializes doc to the requested format. Task 4 only implements json;
 // yaml/toml arrive in Task 8.
 func Encode(doc any, format string, pretty bool) ([]byte, error) {

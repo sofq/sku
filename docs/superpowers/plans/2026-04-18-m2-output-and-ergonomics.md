@@ -980,7 +980,7 @@ After preset + fields, run user's jq expression. Parse once (gojq returns a `*Qu
 **Files:**
 - Create: `internal/output/jq.go`, `internal/output/jq_test.go`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```go
 package output_test
@@ -1013,11 +1013,11 @@ func TestApplyJQ_SyntaxError(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement**
+- [x] **Step 2: Implement**
 
 Import `github.com/itchyny/gojq`. Signature `func ApplyJQ(doc any, expr string) (any, error)`. Compile the expression, Run over doc, collect iter outputs; return a single value if exactly one, or a `[]any` if multiple.
 
-- [ ] **Step 3: Run test + commit**
+- [x] **Step 3: Run test + commit**
 
 Run: `go test ./internal/output/ -run TestApplyJQ -v` → PASS
 Commit: `feat(output): --jq via gojq`
