@@ -1524,7 +1524,7 @@ git commit -m "feat(catalog): stale-catalog warning + stale-error exit 8"
 
 Spec §4 table binds each error code to a fixed `details` shape. Codify it so both producers and the `sku schema --errors` doc agree.
 
-- [ ] **Step 1: Write failing test `details_test.go`**
+- [x] **Step 1: Write failing test `details_test.go`**
 
 ```go
 package errors_test
@@ -1561,7 +1561,7 @@ func TestValidationDetailsShape_CoversReasons(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement `catalog.go` + `details.go`**
+- [x] **Step 2: Implement `catalog.go` + `details.go`**
 
 ```go
 // internal/errors/catalog.go
@@ -1610,7 +1610,7 @@ func ValidationReasons() []string {
 }
 ```
 
-- [ ] **Step 3: Run test + commit**
+- [x] **Step 3: Run test + commit**
 
 Run: `go test ./internal/errors/ -v` → PASS.
 Commit: `feat(errors): per-code details schema + ErrorCatalog()`
