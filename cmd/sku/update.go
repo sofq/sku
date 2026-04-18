@@ -17,7 +17,7 @@ import (
 	skuerrors "github.com/sofq/sku/internal/errors"
 )
 
-const defaultUpdateBaseURL = "https://github.com/sofq/sku-data/releases/latest/download"
+const defaultUpdateBaseURL = "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter"
 
 func newUpdateCmd() *cobra.Command {
 	return &cobra.Command{
