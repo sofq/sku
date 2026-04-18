@@ -71,3 +71,58 @@ func TestIntegration_RDSPointLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
 }
+
+func TestIntegration_S3PointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-s3.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupStorageObject(context.Background(), catalog.StorageObjectFilter{
+		Provider: "aws", Service: "s3",
+		StorageClass: "standard", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Len(t, rows[0].Prices, 3)
+}
+
+func TestIntegration_LambdaPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-lambda.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupServerlessFunction(context.Background(), catalog.ServerlessFunctionFilter{
+		Provider: "aws", Service: "lambda",
+		Architecture: "arm64", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+}
+
+func TestIntegration_EBSPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-ebs.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupStorageBlock(context.Background(), catalog.StorageBlockFilter{
+		Provider: "aws", Service: "ebs",
+		VolumeType: "gp3", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+}
