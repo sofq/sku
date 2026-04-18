@@ -13,6 +13,8 @@ kind:
   - storage.object
   - compute.function
   - storage.block
+  - db.nosql
+  - network.cdn
 
 commitment:
   - on_demand

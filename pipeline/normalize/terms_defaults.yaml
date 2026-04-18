@@ -74,3 +74,17 @@ defaults:
     support_tier: ""
     upfront: ""
     payment_option: ""
+  db.nosql:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  network.cdn:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
