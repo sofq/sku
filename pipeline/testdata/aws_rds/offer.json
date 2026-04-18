@@ -1,0 +1,492 @@
+{
+  "formatVersion": "v1.0",
+  "offerCode": "AmazonRDS",
+  "products": {
+    "SKU-DBM5LARGE-EUWEST1-MY-MAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-EUWEST1-MY-MAZ"
+    },
+    "SKU-DBM5LARGE-EUWEST1-MY-SAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-EUWEST1-MY-SAZ"
+    },
+    "SKU-DBM5LARGE-EUWEST1-PO-MAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-EUWEST1-PO-MAZ"
+    },
+    "SKU-DBM5LARGE-EUWEST1-PO-SAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-EUWEST1-PO-SAZ"
+    },
+    "SKU-DBM5LARGE-USEAST1-MY-MAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-USEAST1-MY-MAZ"
+    },
+    "SKU-DBM5LARGE-USEAST1-MY-SAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-USEAST1-MY-SAZ"
+    },
+    "SKU-DBM5LARGE-USEAST1-PO-MAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-USEAST1-PO-MAZ"
+    },
+    "SKU-DBM5LARGE-USEAST1-PO-SAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "No license required",
+        "memory": "8 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBM5LARGE-USEAST1-PO-SAZ"
+    },
+    "SKU-DBT3MEDIUM-EUWEST1-MY-MAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-EUWEST1-MY-MAZ"
+    },
+    "SKU-DBT3MEDIUM-EUWEST1-MY-SAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-EUWEST1-MY-SAZ"
+    },
+    "SKU-DBT3MEDIUM-EUWEST1-PO-MAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-EUWEST1-PO-MAZ"
+    },
+    "SKU-DBT3MEDIUM-EUWEST1-PO-SAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-EUWEST1-PO-SAZ"
+    },
+    "SKU-DBT3MEDIUM-USEAST1-MY-MAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-USEAST1-MY-MAZ"
+    },
+    "SKU-DBT3MEDIUM-USEAST1-MY-SAZ": {
+      "attributes": {
+        "databaseEngine": "MySQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-USEAST1-MY-SAZ"
+    },
+    "SKU-DBT3MEDIUM-USEAST1-PO-MAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Multi-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-USEAST1-PO-MAZ"
+    },
+    "SKU-DBT3MEDIUM-USEAST1-PO-SAZ": {
+      "attributes": {
+        "databaseEngine": "PostgreSQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.t3.medium",
+        "licenseModel": "No license required",
+        "memory": "4 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "SKU-DBT3MEDIUM-USEAST1-PO-SAZ"
+    }
+  },
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "terms": {
+    "OnDemand": {
+      "SKU-DBM5LARGE-EUWEST1-MY-MAZ": {
+        "SKU-DBM5LARGE-EUWEST1-MY-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-EUWEST1-MY-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.285 per RDS MySQL db.m5.large Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2850000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-EUWEST1-MY-MAZ"
+        }
+      },
+      "SKU-DBM5LARGE-EUWEST1-MY-SAZ": {
+        "SKU-DBM5LARGE-EUWEST1-MY-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-EUWEST1-MY-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.1425 per RDS MySQL db.m5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1425000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-EUWEST1-MY-SAZ"
+        }
+      },
+      "SKU-DBM5LARGE-EUWEST1-PO-MAZ": {
+        "SKU-DBM5LARGE-EUWEST1-PO-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-EUWEST1-PO-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.3 per RDS PostgreSQL db.m5.large Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.3000000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-EUWEST1-PO-MAZ"
+        }
+      },
+      "SKU-DBM5LARGE-EUWEST1-PO-SAZ": {
+        "SKU-DBM5LARGE-EUWEST1-PO-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-EUWEST1-PO-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.15 per RDS PostgreSQL db.m5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1500000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-EUWEST1-PO-SAZ"
+        }
+      },
+      "SKU-DBM5LARGE-USEAST1-MY-MAZ": {
+        "SKU-DBM5LARGE-USEAST1-MY-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-USEAST1-MY-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.285 per RDS MySQL db.m5.large Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2850000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-USEAST1-MY-MAZ"
+        }
+      },
+      "SKU-DBM5LARGE-USEAST1-MY-SAZ": {
+        "SKU-DBM5LARGE-USEAST1-MY-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-USEAST1-MY-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.1425 per RDS MySQL db.m5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1425000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-USEAST1-MY-SAZ"
+        }
+      },
+      "SKU-DBM5LARGE-USEAST1-PO-MAZ": {
+        "SKU-DBM5LARGE-USEAST1-PO-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-USEAST1-PO-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.3 per RDS PostgreSQL db.m5.large Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.3000000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-USEAST1-PO-MAZ"
+        }
+      },
+      "SKU-DBM5LARGE-USEAST1-PO-SAZ": {
+        "SKU-DBM5LARGE-USEAST1-PO-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBM5LARGE-USEAST1-PO-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.15 per RDS PostgreSQL db.m5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1500000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBM5LARGE-USEAST1-PO-SAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-EUWEST1-MY-MAZ": {
+        "SKU-DBT3MEDIUM-EUWEST1-MY-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-EUWEST1-MY-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.1425 per RDS MySQL db.t3.medium Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1425000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-EUWEST1-MY-MAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-EUWEST1-MY-SAZ": {
+        "SKU-DBT3MEDIUM-EUWEST1-MY-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-EUWEST1-MY-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.07125 per RDS MySQL db.t3.medium Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0712500000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-EUWEST1-MY-SAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-EUWEST1-PO-MAZ": {
+        "SKU-DBT3MEDIUM-EUWEST1-PO-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-EUWEST1-PO-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.15 per RDS PostgreSQL db.t3.medium Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1500000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-EUWEST1-PO-MAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-EUWEST1-PO-SAZ": {
+        "SKU-DBT3MEDIUM-EUWEST1-PO-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-EUWEST1-PO-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.075 per RDS PostgreSQL db.t3.medium Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0750000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-EUWEST1-PO-SAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-USEAST1-MY-MAZ": {
+        "SKU-DBT3MEDIUM-USEAST1-MY-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-USEAST1-MY-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.1425 per RDS MySQL db.t3.medium Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1425000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-USEAST1-MY-MAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-USEAST1-MY-SAZ": {
+        "SKU-DBT3MEDIUM-USEAST1-MY-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-USEAST1-MY-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.07125 per RDS MySQL db.t3.medium Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0712500000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-USEAST1-MY-SAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-USEAST1-PO-MAZ": {
+        "SKU-DBT3MEDIUM-USEAST1-PO-MAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-USEAST1-PO-MAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.15 per RDS PostgreSQL db.t3.medium Multi-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1500000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-USEAST1-PO-MAZ"
+        }
+      },
+      "SKU-DBT3MEDIUM-USEAST1-PO-SAZ": {
+        "SKU-DBT3MEDIUM-USEAST1-PO-SAZ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-DBT3MEDIUM-USEAST1-PO-SAZ.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.075 per RDS PostgreSQL db.t3.medium Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0750000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-DBT3MEDIUM-USEAST1-PO-SAZ"
+        }
+      }
+    }
+  },
+  "version": "20260415000000"
+}
