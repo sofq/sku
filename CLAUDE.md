@@ -40,12 +40,12 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone.
+m3b.3 in progress — GCP Compute Engine + Cloud SQL shards.
 
-### Quick path (agent, repeatable, M3b.2 surface)
+### Quick path (agent, repeatable, M3b.3 surface)
 
 ```bash
-make openrouter-shard aws-shards azure-shards           # build all local shards
+make openrouter-shard aws-shards azure-shards gcp-shards  # build all local shards
 export SKU_DATA_DIR=$(pwd)/dist/pipeline
 
 ./bin/sku llm price --model anthropic/claude-opus-4.6 --preset agent
@@ -90,6 +90,12 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku azure functions list  --architecture x86_64
 ./bin/sku azure disks     price --disk-type premium-ssd --region eastus     --preset agent
 ./bin/sku azure disks     list  --disk-type standard-ssd
+
+./bin/sku gcp gce       price --machine-type n1-standard-2  --region us-east1 --preset agent
+./bin/sku gcp gce       list  --machine-type n1-standard-2
+./bin/sku gcp cloud-sql price --tier db-custom-2-7680 --region us-east1 \
+                              --engine postgres --deployment-option zonal --preset agent
+./bin/sku gcp cloud-sql list  --tier db-custom-2-7680  --engine postgres
 ```
 
 ## Global flags (all subcommands)
