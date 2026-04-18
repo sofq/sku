@@ -136,6 +136,39 @@ func BenchmarkAzureVMPointLookup_Warm(b *testing.B) {
 	}
 }
 
+// BenchmarkGCPGCEPointLookup_Warm measures an in-process GCP GCE point lookup
+// with the catalog already open. Mirrors BenchmarkAzureVMPointLookup_Warm.
+func BenchmarkGCPGCEPointLookup_Warm(b *testing.B) {
+	path := os.Getenv("SKU_BENCH_GCP_GCE_SHARD")
+	if path == "" {
+		b.Skip("SKU_BENCH_GCP_GCE_SHARD not set")
+	}
+	cat, err := catalog.Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.Cleanup(func() { _ = cat.Close() })
+
+	// Warm the page cache.
+	_, _ = cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "gcp", Service: "gce",
+		InstanceType: "n1-standard-2", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+			Provider: "gcp", Service: "gce",
+			InstanceType: "n1-standard-2", Region: "us-east1",
+			Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 // BenchmarkPointLookup_Cold measures the whole process-startup path: exec of
 // the real binary + shard open + lookup + render + exit. This is the number
 // that matches §5 "<60 ms cold".
