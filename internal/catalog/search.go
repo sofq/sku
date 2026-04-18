@@ -68,6 +68,18 @@ func buildSearchQuery(f SearchFilter) (string, []any) {
 	args = append(args, f.Provider)
 	where = append(where, "s.service = ?")
 	args = append(args, f.Service)
+	if f.Kind != "" {
+		where = append(where, "s.kind = ?")
+		args = append(args, f.Kind)
+	}
+	if f.ResourceName != "" {
+		where = append(where, "s.resource_name = ?")
+		args = append(args, f.ResourceName)
+	}
+	if f.Region != "" {
+		where = append(where, "s.region = ?")
+		args = append(args, f.Region)
+	}
 
 	const base = `
 SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,

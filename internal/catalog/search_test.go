@@ -55,3 +55,35 @@ func TestSearch_BaseQueryReturnsAllRows(t *testing.T) {
 		require.NotEmpty(t, r.Prices, "row %s has no prices", r.SKUID)
 	}
 }
+
+func TestSearch_KindFilter(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Kind: "db.relational",
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "db.m5.large", rows[0].ResourceName)
+}
+
+func TestSearch_RegionFilter(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Region: "us-west-2",
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 2)
+	for _, r := range rows {
+		require.Equal(t, "us-west-2", r.Region)
+	}
+}
+
+func TestSearch_ResourceNameFilter(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", ResourceName: "m5.large",
+	})
+	require.NoError(t, err)
+	// m5.large exists in both us-east-1 and us-west-2 => 2 rows.
+	require.Len(t, rows, 2)
+}
