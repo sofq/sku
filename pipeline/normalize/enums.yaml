@@ -10,6 +10,9 @@ kind:
   - llm.audio
   - compute.vm
   - db.relational
+  - storage.object
+  - compute.function
+  - storage.block
 
 commitment:
   - on_demand
