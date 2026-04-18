@@ -42,7 +42,7 @@ func shardNames() []string { return updater.ShardNames() }
 func newUpdateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update <shard>",
-		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds | aws-s3 | aws-lambda | aws-ebs | aws-dynamodb | aws-cloudfront)",
+		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds | aws-s3 | aws-lambda | aws-ebs | aws-dynamodb | aws-cloudfront | azure-vm | azure-sql)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := globalSettings(cmd)
