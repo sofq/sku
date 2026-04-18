@@ -40,7 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-m3b.3 in progress — GCP Compute Engine + Cloud SQL shards.
+v1.0 shipped — no open milestone.
 
 ### Quick path (agent, repeatable, M3b.3 surface)
 
