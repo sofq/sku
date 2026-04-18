@@ -40,12 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-**M3a.3 — AWS DynamoDB + CloudFront shards + `internal/updater` extraction.**
-See `docs/superpowers/plans/2026-04-18-m3a.3-dynamodb-cloudfront-updater.md`.
-Two production-shaped shards ingested via DuckDB; `sku aws dynamodb {price,list}`
-and `sku aws cloudfront {price,list}` return valid §4 envelopes. The inline
-`sku update` logic moves into `internal/updater` (one-shot baseline only;
-delta-chain / manifest walking / ETag deferred to m3a.4).
+v1.0 shipped — no open milestone.
 
 ### Quick path (agent, repeatable, M3a.3 surface)
 
