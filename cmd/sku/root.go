@@ -45,6 +45,7 @@ func newRootCmd() *cobra.Command {
 	root.AddCommand(newLLMCmd())
 	root.AddCommand(newAWSCmd())
 	root.AddCommand(newAzureCmd())
+	root.AddCommand(newGCPCmd())
 	root.AddCommand(newUpdateCmd())
 	root.AddCommand(newSchemaCmd())
 	root.AddCommand(newConfigureCmd())
