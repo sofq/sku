@@ -160,6 +160,14 @@ func TestLLMPrice_FieldsProjection(t *testing.T) {
 	require.NotContains(t, out, `"service"`)
 }
 
+func TestLLMPrice_DryRun_DoesNotTouchShard(t *testing.T) {
+	t.Setenv("SKU_DATA_DIR", t.TempDir())
+	out, _, code := runLLMPrice(t, "--model", "anthropic/claude-opus-4.6", "--dry-run")
+	require.Zero(t, code)
+	require.Contains(t, out, `"dry_run":true`)
+	require.Contains(t, out, `"command":"llm price"`)
+}
+
 func TestLLMPrice_PresetPrice(t *testing.T) {
 	seedTestDataDir(t)
 	out, _, _ := runLLMPrice(t,

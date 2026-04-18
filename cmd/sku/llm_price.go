@@ -33,6 +33,18 @@ func newLLMPriceCmd() *cobra.Command {
 				return err
 			}
 
+			if s.DryRun {
+				return output.EmitDryRun(cmd.OutOrStdout(), output.DryRunPlan{
+					Command: "llm price",
+					ResolvedArgs: map[string]any{
+						"model":            model,
+						"serving_provider": servingProvider,
+					},
+					Shards: []string{"openrouter"},
+					Preset: s.Preset,
+				})
+			}
+
 			shardPath := catalog.ShardPath("openrouter")
 			if _, statErr := os.Stat(shardPath); statErr != nil {
 				err := &skuerrors.E{
@@ -59,6 +71,11 @@ func newLLMPriceCmd() *cobra.Command {
 				return skuErr
 			}
 			defer func() { _ = cat.Close() }()
+
+			if s.Verbose {
+				output.Log(cmd.ErrOrStderr(), "catalog.open",
+					map[string]any{"shard": "openrouter", "path": shardPath})
+			}
 
 			rows, err := cat.LookupLLM(context.Background(), catalog.LLMFilter{
 				Model:             model,

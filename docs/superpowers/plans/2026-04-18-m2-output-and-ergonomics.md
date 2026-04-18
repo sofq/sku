@@ -1288,7 +1288,7 @@ git commit -m "feat(cmd): llm price consumes global renderer options"
 
 `--dry-run`: emit the spec §4 "Dry-run output" JSON shape and exit 0 without touching the data path. `--verbose`: emit a stderr JSON line per major step (`{"ts":"...","event":"catalog.open","shard":"openrouter","path":"..."}`).
 
-- [ ] **Step 1: Test `dryrun_test.go`**
+- [x] **Step 1: Test `dryrun_test.go`**
 
 ```go
 package output_test
@@ -1322,7 +1322,7 @@ func TestEmitDryRun_StableSchema(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement `EmitDryRun`**
+- [x] **Step 2: Implement `EmitDryRun`**
 
 ```go
 package output
@@ -1378,7 +1378,7 @@ func Log(w io.Writer, event string, fields map[string]any) {
 }
 ```
 
-- [ ] **Step 3: Wire into `llm price`**
+- [x] **Step 3: Wire into `llm price`**
 
 Early return when `s.DryRun == true`:
 
@@ -1396,7 +1396,7 @@ if s.Verbose {
 }
 ```
 
-- [ ] **Step 4: Test command-level dry-run**
+- [x] **Step 4: Test command-level dry-run**
 
 Add to `llm_price_test.go`:
 
@@ -1412,7 +1412,7 @@ func TestLLMPrice_DryRun_DoesNotTouchShard(t *testing.T) {
 
 Run: `go test ./... -count=1` → PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/output/ cmd/sku/
