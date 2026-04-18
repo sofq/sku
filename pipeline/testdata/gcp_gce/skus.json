@@ -1,0 +1,167 @@
+{
+  "skus": [
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-N1S2-USE1-LX",
+      "skuId": "SKU-N1S2-USE1-LX",
+      "description": "N1 Predefined Instance n1-standard-2 running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N1Standard2Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 94999000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-N1S2-EUW1-LX",
+      "skuId": "SKU-N1S2-EUW1-LX",
+      "description": "N1 Predefined Instance n1-standard-2 running in EMEA",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N1Standard2Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 104499000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-N1S4-USE1-LX",
+      "skuId": "SKU-N1S4-USE1-LX",
+      "description": "N1 Predefined Instance n1-standard-4 running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N1Standard4Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 189998000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-N1S4-EUW1-LX",
+      "skuId": "SKU-N1S4-EUW1-LX",
+      "description": "N1 Predefined Instance n1-standard-4 running in EMEA",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N1Standard4Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 208998000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-E2S2-USE1-LX",
+      "skuId": "SKU-E2S2-USE1-LX",
+      "description": "E2 Predefined Instance e2-standard-2 running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "E2Standard2Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 67006000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-E2S2-EUW1-LX",
+      "skuId": "SKU-E2S2-EUW1-LX",
+      "description": "E2 Predefined Instance e2-standard-2 running in EMEA",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "E2Standard2Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 73707000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-WIN-LIC-USE1",
+      "skuId": "SKU-WIN-LIC-USE1",
+      "description": "Licensing Fee for Windows Server running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "License",
+        "resourceGroup": "WindowsServer",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 40000000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-N1S2-USE1-CUD1Y",
+      "skuId": "SKU-N1S2-USE1-CUD1Y",
+      "description": "Commitment v1: N1 Predefined 1 year in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N1Standard2Linux",
+        "usageType": "Commit1Yr"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 60000000}}]
+        }
+      }]
+    },
+    {
+      "name": "services/6F81-5844-456A/skus/SKU-N1S2-EUW1-EUR",
+      "skuId": "SKU-N1S2-EUW1-EUR",
+      "description": "N1 Predefined Instance n1-standard-2 running in EMEA (EUR)",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N1Standard2Linux",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "EUR", "units": "0", "nanos": 90000000}}]
+        }
+      }]
+    }
+  ],
+  "nextPageToken": ""
+}
