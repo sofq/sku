@@ -40,9 +40,14 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone.
+**M3b.2 — Azure Blob + Functions + Disks shards.** Plan at
+`docs/superpowers/plans/2026-04-18-m3b.2-azure-blob-functions-disks.md`. Adds
+three new shards (`azure-blob`, `azure-functions`, `azure-disks`) + six new
+Cobra leaves under the existing `azure` parent + three `internal/updater`
+`DefaultSources` entries. Validation-harness extension to Azure remains
+deferred to m3b.3.
 
-### Quick path (agent, repeatable, M3b.1 surface)
+### Quick path (agent, repeatable, M3b.2 surface)
 
 ```bash
 make openrouter-shard aws-shards azure-shards           # build all local shards
@@ -83,6 +88,13 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku azure sql price --sku-name GP_Gen5_2 --region eastus \
   --deployment-option single-az --preset agent
 ./bin/sku azure sql list  --sku-name GP_Gen5_2
+
+./bin/sku azure blob      price --tier hot            --region eastus       --preset agent
+./bin/sku azure blob      list  --tier hot
+./bin/sku azure functions price --architecture x86_64 --region eastus       --preset agent
+./bin/sku azure functions list  --architecture x86_64
+./bin/sku azure disks     price --disk-type premium-ssd --region eastus     --preset agent
+./bin/sku azure disks     list  --disk-type standard-ssd
 ```
 
 ## Global flags (all subcommands)
