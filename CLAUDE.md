@@ -40,12 +40,15 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone. Next plan to be authored under `docs/superpowers/plans/`.
+**M3a.1 — AWS EC2 + RDS shards (on-demand).** See
+`docs/superpowers/plans/2026-04-18-m3a.1-ec2-rds.md`. Two production-shaped
+shards ingested via DuckDB; `sku aws ec2 {price,list}` and
+`sku aws rds {price,list}` return valid §4 envelopes.
 
-### Quick path (agent, repeatable, M2 surface)
+### Quick path (agent, repeatable, M3a.1 surface)
 
 ```bash
-make openrouter-shard                                   # build local shard from fixtures
+make openrouter-shard aws-shards                        # build all local shards
 export SKU_DATA_DIR=$(pwd)/dist/pipeline
 
 ./bin/sku llm price --model anthropic/claude-opus-4.6 --preset agent
@@ -59,6 +62,12 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku llm price --model anthropic/claude-opus-4.6 --dry-run
 ./bin/sku schema --errors                               # error-code catalog
 ./bin/sku schema --list-serving-providers
+
+./bin/sku aws ec2 price --instance-type m5.large --region us-east-1 --preset agent
+./bin/sku aws ec2 list  --instance-type m5.large
+./bin/sku aws rds price --instance-type db.m5.large --region us-east-1 \
+  --engine postgres --deployment-option single-az
+./bin/sku aws rds list  --instance-type db.m5.large --engine postgres
 ```
 
 ## Global flags (all subcommands)
