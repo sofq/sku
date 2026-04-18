@@ -87,3 +87,43 @@ func TestSearch_ResourceNameFilter(t *testing.T) {
 	// m5.large exists in both us-east-1 and us-west-2 => 2 rows.
 	require.Len(t, rows, 2)
 }
+
+func TestSearch_MinVCPU(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", MinVCPU: 4,
+	})
+	require.NoError(t, err)
+	// m5.xlarge x2 (use1+usw2) + m5.24xlarge = 3 rows.
+	require.Len(t, rows, 3)
+	for _, r := range rows {
+		require.NotNil(t, r.ResourceAttrs.VCPU)
+		require.GreaterOrEqual(t, *r.ResourceAttrs.VCPU, int64(4))
+	}
+}
+
+func TestSearch_MinMemory(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", MinMemoryGB: 16,
+	})
+	require.NoError(t, err)
+	// memory_gb >= 16 matches m5.xlarge x2 + m5.24xlarge = 3 rows.
+	require.Len(t, rows, 3)
+	for _, r := range rows {
+		require.NotNil(t, r.ResourceAttrs.MemoryGB)
+		require.GreaterOrEqual(t, *r.ResourceAttrs.MemoryGB, 16.0)
+	}
+}
+
+func TestSearch_MinVCPU_ExcludesRowsWithoutResourceAttrs(t *testing.T) {
+	cat := openSeededSearch(t)
+	// db.relational row has resource_attrs.vcpu=2 so MinVCPU=1 includes it,
+	// but MinVCPU=99 must filter it out (it must not sneak through the
+	// LEFT JOIN as NULL).
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Kind: "db.relational", MinVCPU: 99,
+	})
+	require.NoError(t, err)
+	require.Empty(t, rows)
+}

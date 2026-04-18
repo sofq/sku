@@ -80,6 +80,14 @@ func buildSearchQuery(f SearchFilter) (string, []any) {
 		where = append(where, "s.region = ?")
 		args = append(args, f.Region)
 	}
+	if f.MinVCPU > 0 {
+		where = append(where, "ra.vcpu >= ?")
+		args = append(args, f.MinVCPU)
+	}
+	if f.MinMemoryGB > 0 {
+		where = append(where, "ra.memory_gb >= ?")
+		args = append(args, f.MinMemoryGB)
+	}
 
 	const base = `
 SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,
