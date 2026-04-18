@@ -312,3 +312,58 @@ func TestLookupDBRelational_AzureSQLManagedInstance(t *testing.T) {
 	require.Len(t, rows, 1)
 	require.Equal(t, 1.058, rows[0].Prices[0].Amount)
 }
+
+func openSeededGCP(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_gcp.sql", "gcp-gce.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupVM_GCPPointLookup(t *testing.T) {
+	cat := openSeededGCP(t)
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "gcp", Service: "gce",
+		InstanceType: "n1-standard-2", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "n1-standard-2", rows[0].ResourceName)
+	require.Equal(t, "us-east", rows[0].RegionGroup)
+	require.InDelta(t, 0.095, rows[0].Prices[0].Amount, 1e-9)
+}
+
+func TestLookupDBRelational_GCPCloudSQLZonal(t *testing.T) {
+	cat := openSeededGCP(t)
+	rows, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider: "gcp", Service: "cloud-sql",
+		InstanceType: "db-custom-2-7680", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "cloud-sql-postgres", OS: "zonal"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.InDelta(t, 0.115, rows[0].Prices[0].Amount, 1e-9)
+}
+
+func TestLookupDBRelational_GCPCloudSQLRegionalDifferentTermsHash(t *testing.T) {
+	cat := openSeededGCP(t)
+	zonal, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider: "gcp", Service: "cloud-sql",
+		InstanceType: "db-custom-2-7680", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "cloud-sql-postgres", OS: "zonal"},
+	})
+	require.NoError(t, err)
+	regional, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider: "gcp", Service: "cloud-sql",
+		InstanceType: "db-custom-2-7680", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "cloud-sql-postgres", OS: "regional"},
+	})
+	require.NoError(t, err)
+	require.Len(t, zonal, 1)
+	require.Len(t, regional, 1)
+	require.NotEqual(t, zonal[0].TermsHash, regional[0].TermsHash,
+		"zonal and regional must hash to different terms rows")
+	require.Greater(t, regional[0].Prices[0].Amount, zonal[0].Prices[0].Amount)
+}
