@@ -260,3 +260,55 @@ func TestLookupNoSQLDB_MissingTableClassErrors(t *testing.T) {
 	})
 	require.Error(t, err)
 }
+
+func openSeededAzure(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_azure.sql", "azure-vm.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupVM_AzurePointLookup(t *testing.T) {
+	cat := openSeededAzure(t)
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider:     "azure",
+		Service:      "vm",
+		InstanceType: "Standard_D2_v3",
+		Region:       "eastus",
+		Terms:        catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "Standard_D2_v3", rows[0].ResourceName)
+	require.Equal(t, "eastus", rows[0].Region)
+	require.Equal(t, 0.096, rows[0].Prices[0].Amount)
+}
+
+func TestLookupVM_AzureWindowsDifferentTermsHash(t *testing.T) {
+	cat := openSeededAzure(t)
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider:     "azure",
+		Service:      "vm",
+		InstanceType: "Standard_D2_v3",
+		Region:       "eastus",
+		Terms:        catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "windows"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, 0.144, rows[0].Prices[0].Amount)
+}
+
+func TestLookupDBRelational_AzureSQLManagedInstance(t *testing.T) {
+	cat := openSeededAzure(t)
+	rows, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider:     "azure",
+		Service:      "sql",
+		InstanceType: "BC_Gen5_2",
+		Region:       "eastus",
+		Terms:        catalog.Terms{Commitment: "on_demand", Tenancy: "azure-sql", OS: "managed-instance"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, 1.058, rows[0].Prices[0].Amount)
+}
