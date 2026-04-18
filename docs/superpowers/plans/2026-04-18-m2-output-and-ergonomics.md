@@ -780,7 +780,7 @@ git commit -m "feat(output): Options + Pipeline choke point"
 
 **Spec §4 Presets table** — fields kept per preset, kind-specific rules for `compare`.
 
-- [ ] **Step 1: Write test `presets_test.go`**
+- [x] **Step 1: Write test `presets_test.go`**
 
 ```go
 package output_test
@@ -829,7 +829,7 @@ func TestProject_Compare_LLMText_IncludesKindFields(t *testing.T) {
 Run: `go test ./internal/output/... -run TestProject`
 Expected: FAIL.
 
-- [ ] **Step 2: Implement `presets.go`**
+- [x] **Step 2: Implement `presets.go`**
 
 ```go
 package output
@@ -892,14 +892,14 @@ func projectCompare(env Envelope, kind string) Envelope {
 
 Also move `trimForAgent` from `render.go` into `presets.go` for cohesion; the old entry point `Render` calls `Project(buildFull(r), p, r.Kind)` now.
 
-- [ ] **Step 3: Update `buildFullSample` helper** in `render_test.go` so it's reused across files.
+- [x] **Step 3: Update `buildFullSample` helper** in `render_test.go` so it's reused across files.
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `go test ./internal/output/... -v`
 Expected: all PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/output/
