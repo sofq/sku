@@ -41,6 +41,23 @@ openrouter-shard: ## Build OpenRouter shard from fixtures into dist/pipeline/ope
 	  $(MAKE) -C pipeline shard SHARD=openrouter FIXTURE=testdata/openrouter \
 	  INGEST_EXTRA='--skip-non-usd --generated-at 2026-04-18T00:00:00Z'
 
+.PHONY: aws-ec2-shard
+aws-ec2-shard: ## Build aws-ec2 shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_ec2 FIXTURE=testdata/aws_ec2 \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_ec2.db dist/pipeline/aws-ec2.db
+	@mv dist/pipeline/aws_ec2.rows.jsonl dist/pipeline/aws-ec2.rows.jsonl
+
+.PHONY: aws-rds-shard
+aws-rds-shard: ## Build aws-rds shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_rds FIXTURE=testdata/aws_rds \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_rds.db dist/pipeline/aws-rds.db
+	@mv dist/pipeline/aws_rds.rows.jsonl dist/pipeline/aws-rds.rows.jsonl
+
+.PHONY: aws-shards
+aws-shards: aws-ec2-shard aws-rds-shard ## Build both aws shards
+
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
 	$(MAKE) -C pipeline test
