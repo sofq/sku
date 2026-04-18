@@ -39,3 +39,17 @@ defaults:
     support_tier: ""
     upfront: ""
     payment_option: ""
+  compute.vm:
+    commitment: on_demand
+    tenancy: shared
+    os: linux
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  db.relational:
+    commitment: on_demand
+    tenancy: mysql          # engine slot, default engine
+    os: single-az           # deployment-option slot
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
