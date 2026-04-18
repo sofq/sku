@@ -40,7 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-m4.1 shipped. Next: `m4.2` — cross-provider `sku compare` + multi-shard fan-out.
+v1.0 shipped — no open milestone.
 
 ### Quick path (agent, repeatable, M3b.3 surface)
 
