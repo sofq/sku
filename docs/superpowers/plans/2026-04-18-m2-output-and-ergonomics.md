@@ -53,7 +53,7 @@
 **Files:**
 - Modify: `go.mod`, `go.sum`
 
-- [ ] **Step 1: Branch off main and confirm baseline green**
+- [x] **Step 1: Branch off main and confirm baseline green**
 
 ```bash
 git checkout main && git pull --ff-only
@@ -63,7 +63,7 @@ make test && make lint && make build
 
 Expected: all green. If not, stop and fix M1 breakage before proceeding.
 
-- [ ] **Step 2: Add direct deps**
+- [x] **Step 2: Add direct deps**
 
 ```bash
 go get github.com/itchyny/gojq@v0.12.17
@@ -75,7 +75,7 @@ go mod tidy
 
 Expected: `go.mod` `require` block now lists all four. `go.sum` updated. `make build` still green.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add go.mod go.sum
