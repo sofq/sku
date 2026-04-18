@@ -137,7 +137,7 @@ func TestUpdate_AllShards(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	for _, shard := range []string{"openrouter", "aws-ec2", "aws-rds", "aws-s3", "aws-lambda", "aws-ebs"} {
+	for _, shard := range []string{"openrouter", "aws-ec2", "aws-rds", "aws-s3", "aws-lambda", "aws-ebs", "aws-dynamodb", "aws-cloudfront"} {
 		t.Run(shard, func(t *testing.T) {
 			dataDir := t.TempDir()
 			t.Setenv("SKU_DATA_DIR", dataDir)
@@ -158,7 +158,7 @@ func TestUpdate_UnsupportedShard(t *testing.T) {
 	dataDir := t.TempDir()
 	t.Setenv("SKU_DATA_DIR", dataDir)
 
-	_, stderr, err := runUpdate(t, "aws-dynamodb")
+	_, stderr, err := runUpdate(t, "aws-glacier")
 	require.Error(t, err)
 	require.Contains(t, stderr, "unsupported_shard")
 }

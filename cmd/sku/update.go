@@ -21,12 +21,14 @@ import (
 // shardSources maps a shard name to the release tag's asset base URL.
 // Grow this map in lockstep with the spec §3 shard inventory.
 var shardSources = map[string]string{
-	"openrouter": "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter",
-	"aws-ec2":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ec2",
-	"aws-rds":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-rds",
-	"aws-s3":     "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-s3",
-	"aws-lambda": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-lambda",
-	"aws-ebs":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ebs",
+	"openrouter":     "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter",
+	"aws-ec2":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ec2",
+	"aws-rds":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-rds",
+	"aws-s3":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-s3",
+	"aws-lambda":     "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-lambda",
+	"aws-ebs":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ebs",
+	"aws-dynamodb":   "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-dynamodb",
+	"aws-cloudfront": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-cloudfront",
 }
 
 // resolveUpdateBaseURL returns the asset base URL for shard. Precedence:
@@ -59,7 +61,7 @@ func shardNames() []string {
 func newUpdateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update <shard>",
-		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds | aws-s3 | aws-lambda | aws-ebs)",
+		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds | aws-s3 | aws-lambda | aws-ebs | aws-dynamodb | aws-cloudfront)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := globalSettings(cmd)
