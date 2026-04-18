@@ -15,15 +15,15 @@ import (
 
 func newLLMPriceCmd() *cobra.Command {
 	var (
-		model             string
-		servingProvider   string
-		includeAggregated bool
-		pretty            bool
+		model           string
+		servingProvider string
 	)
 	c := &cobra.Command{
 		Use:   "price",
 		Short: "Price one or more serving-provider options for an LLM",
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			s := globalSettings(cmd)
+
 			if model == "" {
 				err := skuerrors.Validation(
 					"flag_invalid", "model", "",
@@ -63,7 +63,7 @@ func newLLMPriceCmd() *cobra.Command {
 			rows, err := cat.LookupLLM(context.Background(), catalog.LLMFilter{
 				Model:             model,
 				ServingProvider:   servingProvider,
-				IncludeAggregated: includeAggregated,
+				IncludeAggregated: s.IncludeAggregated,
 			})
 			if err != nil {
 				wrappedErr := fmt.Errorf("llm price: %w", err)
@@ -83,13 +83,30 @@ func newLLMPriceCmd() *cobra.Command {
 				return notFoundErr
 			}
 
+			opts := output.Options{
+				Preset:            output.Preset(s.Preset),
+				Format:            s.Format,
+				Pretty:            s.Pretty,
+				Fields:            s.Fields,
+				JQ:                s.JQ,
+				IncludeRaw:        s.IncludeRaw,
+				IncludeAggregated: s.IncludeAggregated,
+				NoColor:           s.NoColor,
+			}
+
 			w := cmd.OutOrStdout()
 			for _, r := range rows {
-				env := output.Render(r, output.PresetAgent)
-				if encErr := output.EncodeEnvelope(w, env, pretty); encErr != nil {
-					wrappedErr := errors.Join(errors.New("output encode failed"), encErr)
-					skuerrors.Write(cmd.ErrOrStderr(), wrappedErr)
-					return wrappedErr
+				b, err := output.Pipeline(r, opts)
+				if errors.Is(err, output.ErrDropped) {
+					continue
+				}
+				if err != nil {
+					wrapped := fmt.Errorf("render: %w", err)
+					skuerrors.Write(cmd.ErrOrStderr(), wrapped)
+					return wrapped
+				}
+				if _, wErr := w.Write(b); wErr != nil {
+					return wErr
 				}
 			}
 			return nil
@@ -97,7 +114,5 @@ func newLLMPriceCmd() *cobra.Command {
 	}
 	c.Flags().StringVar(&model, "model", "", "Model ID, e.g. anthropic/claude-opus-4.6")
 	c.Flags().StringVar(&servingProvider, "serving-provider", "", "Filter to a single serving provider (e.g. aws-bedrock)")
-	c.Flags().BoolVar(&includeAggregated, "include-aggregated", false, "Include OpenRouter's synthetic aggregated row")
-	c.Flags().BoolVar(&pretty, "pretty", false, "Pretty-print JSON")
 	return c
 }

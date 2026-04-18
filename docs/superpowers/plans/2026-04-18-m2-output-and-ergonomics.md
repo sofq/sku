@@ -1167,7 +1167,7 @@ Commit: `feat(output): --no-color/NO_COLOR TTY-aware gate`
 
 Remove the local `--include-aggregated` flag and the local `--pretty` flag from `llm price`; they are now global. Retain local `--model` / `--serving-provider`. Route through `globalSettings(cmd)` → `output.Options`.
 
-- [ ] **Step 1: Update `llm_price.go`**
+- [x] **Step 1: Update `llm_price.go`**
 
 ```go
 func newLLMPriceCmd() *cobra.Command {
@@ -1222,7 +1222,7 @@ func newLLMPriceCmd() *cobra.Command {
 
 **Also:** stop pre-filtering `IncludeAggregated` in `catalog.LookupLLM`'s WHERE clause when the caller plans to filter at the renderer. The M1 behavior still holds: `LookupLLM` takes `IncludeAggregated` on its filter and keeps filtering at SQL for perf; `output.Pipeline` also drops when `opts.IncludeAggregated == false && row.Aggregated`. Belt-and-suspenders; the SQL filter stays the primary path.
 
-- [ ] **Step 2: Update `llm_price_test.go`**
+- [x] **Step 2: Update `llm_price_test.go`**
 
 Drop the direct `--include-aggregated` flag from the test args where it was local; pass it as the same flag name (now registered on root — same invocation works). Add:
 
@@ -1266,12 +1266,12 @@ func TestLLMPrice_PresetPrice(t *testing.T) {
 }
 ```
 
-- [ ] **Step 3: Run tests**
+- [x] **Step 3: Run tests**
 
 Run: `go test ./... -count=1`
 Expected: PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add cmd/sku/ internal/output/
