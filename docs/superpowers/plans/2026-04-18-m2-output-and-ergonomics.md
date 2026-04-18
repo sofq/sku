@@ -107,7 +107,7 @@ type Profile struct {
 }
 ```
 
-- [ ] **Step 1: Write fixture**
+- [x] **Step 1: Write fixture**
 
 Write `internal/config/testdata/profiles.yaml`:
 
@@ -130,7 +130,7 @@ profiles:
     auto_fetch: false
 ```
 
-- [ ] **Step 2: Write failing test `internal/config/config_test.go`**
+- [x] **Step 2: Write failing test `internal/config/config_test.go`**
 
 ```go
 package config_test
@@ -176,7 +176,7 @@ func TestConfigDir_HonorsEnvOverride(t *testing.T) {
 Run: `go test ./internal/config/... -run TestLoad`
 Expected: FAIL with `undefined: config.Load`.
 
-- [ ] **Step 3: Implement `internal/config/config.go`**
+- [x] **Step 3: Implement `internal/config/config.go`**
 
 ```go
 // Package config parses ~/.config/sku/config.yaml (or platform equivalent)
@@ -251,12 +251,12 @@ func Load(path string) (File, error) {
 }
 ```
 
-- [ ] **Step 4: Run test**
+- [x] **Step 4: Run test**
 
 Run: `go test ./internal/config/... -run TestLoad -v`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/config/ 
