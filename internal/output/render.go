@@ -9,7 +9,6 @@ package output
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 
 	"github.com/sofq/sku/internal/catalog"
@@ -231,29 +230,6 @@ func toMap(env Envelope) (map[string]any, error) {
 		return nil, err
 	}
 	return m, nil
-}
-
-// Encode serializes doc to the requested format. Task 4 only implements json;
-// yaml/toml arrive in Task 8.
-func Encode(doc any, format string, pretty bool) ([]byte, error) {
-	switch format {
-	case "", "json":
-		var (
-			b   []byte
-			err error
-		)
-		if pretty {
-			b, err = json.MarshalIndent(doc, "", "  ")
-		} else {
-			b, err = json.Marshal(doc)
-		}
-		if err != nil {
-			return nil, err
-		}
-		return append(b, '\n'), nil
-	default:
-		return nil, fmt.Errorf("output: unsupported format %q", format)
-	}
 }
 
 // EncodeEnvelope writes the envelope as JSON to w. When pretty is false the

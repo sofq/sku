@@ -1035,7 +1035,7 @@ Commit: `feat(output): --jq via gojq`
 - YAML: `yaml.v3` encoder; yaml is always "pretty" — `pretty` is a no-op flag.
 - TOML: `go-toml/v2`'s `Marshal`. TOML can't represent top-level arrays — if the doc is `[]any`, wrap as `{"rows": ...}` and note this in CLAUDE.md under "TOML quirks".
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```go
 package output_test
@@ -1078,11 +1078,11 @@ func TestEncode_UnknownFormat(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement + run test**
+- [x] **Step 2: Implement + run test**
 
 Implement `Encode`. Run: `go test ./internal/output/ -run TestEncode -v` → PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add internal/output/
