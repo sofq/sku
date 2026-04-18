@@ -12,5 +12,7 @@ func newRootCmd() *cobra.Command {
 		SilenceErrors: true,
 	}
 	root.AddCommand(newVersionCmd())
+	root.AddCommand(newLLMCmd())
+	root.AddCommand(newUpdateCmd())
 	return root
 }

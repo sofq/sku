@@ -15,6 +15,10 @@ Agent quick-start for the `sku` repo.
 | Lint | `make lint` |
 | Release dry-run | `make release-dry` |
 | Regenerate code/docs | `make generate` (no-op until M4) |
+| Build local OpenRouter shard | `make openrouter-shard` |
+| Run Go integration tests | `make test-integration` |
+| Run benchmarks | `make bench` |
+| Run Python pipeline tests | `make pipeline-test` |
 
 ## Repo map
 
@@ -35,4 +39,14 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M0 — foundations. See `docs/superpowers/plans/2026-04-18-m0-foundations.md`.
+M1 — OpenRouter shard + catalog reader + `sku llm price`. See `docs/superpowers/plans/2026-04-18-m1-openrouter-shard-and-llm-price.md`.
+
+### Quick path (agent, repeatable)
+
+```bash
+make openrouter-shard                                   # build local shard from fixtures
+SKU_DATA_DIR=$(pwd)/dist/pipeline ./bin/sku llm price \
+  --model anthropic/claude-opus-4.6                     # two JSON lines out
+SKU_DATA_DIR=$(pwd)/dist/pipeline ./bin/sku llm price \
+  --model anthropic/claude-opus-4.6 --pretty            # indented
+```

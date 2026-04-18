@@ -1,0 +1,76 @@
+{
+  "data": [
+    {
+      "id": "anthropic/claude-opus-4.6",
+      "name": "Anthropic: Claude Opus 4.6",
+      "context_length": 200000,
+      "architecture": {
+        "modality": "text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Claude"
+      },
+      "pricing": {
+        "prompt": "0.000015",
+        "completion": "0.000075",
+        "image": "0",
+        "request": "0",
+        "currency": "USD"
+      },
+      "top_provider": {
+        "context_length": 200000,
+        "max_completion_tokens": 64000,
+        "is_moderated": false
+      },
+      "supported_parameters": ["tools", "tool_choice", "temperature", "top_p"]
+    },
+    {
+      "id": "openai/gpt-5",
+      "name": "OpenAI: GPT-5",
+      "context_length": 400000,
+      "architecture": {
+        "modality": "text+image->text",
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+        "tokenizer": "GPT"
+      },
+      "pricing": {
+        "prompt": "0.000005",
+        "completion": "0.000020",
+        "image": "0.00003",
+        "request": "0",
+        "currency": "USD"
+      },
+      "top_provider": {
+        "context_length": 400000,
+        "max_completion_tokens": 32000,
+        "is_moderated": true
+      },
+      "supported_parameters": ["tools", "tool_choice", "temperature", "top_p", "response_format"]
+    },
+    {
+      "id": "non-usd-model/some-provider",
+      "name": "Non-USD Partner Model",
+      "context_length": 32768,
+      "architecture": {
+        "modality": "text",
+        "input_modalities": ["text"],
+        "output_modalities": ["text"],
+        "tokenizer": "Other"
+      },
+      "pricing": {
+        "prompt": "0.0001",
+        "completion": "0.0003",
+        "image": "0",
+        "request": "0",
+        "currency": "EUR"
+      },
+      "top_provider": {
+        "context_length": 32768,
+        "max_completion_tokens": 4096,
+        "is_moderated": false
+      },
+      "supported_parameters": ["temperature"]
+    }
+  ]
+}

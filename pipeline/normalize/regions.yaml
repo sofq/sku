@@ -1,0 +1,6 @@
+# Canonical region-group map. M1 seed: only the global bucket used by
+# OpenRouter (regionless/global SKUs use `region=''`, `region_normalized=''`).
+# Real region groups land in M3a when cloud shards arrive.
+# Format per spec §5 Region normalization.
+version: 1
+groups: {}

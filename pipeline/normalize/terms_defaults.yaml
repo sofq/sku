@@ -1,0 +1,41 @@
+# Per-kind defaults substituted before terms_hash is computed, so a user
+# omitting flags hits the same row the ingester wrote (spec §5
+# Unspecified-flag resolution).
+version: 1
+
+defaults:
+  llm.text:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  llm.multimodal:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  llm.embedding:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  llm.image:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  llm.audio:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""

@@ -1,0 +1,47 @@
+{
+  "data": {
+    "id": "anthropic/claude-opus-4.6",
+    "name": "Anthropic: Claude Opus 4.6",
+    "architecture": {
+      "modality": "text",
+      "input_modalities": ["text"],
+      "output_modalities": ["text"]
+    },
+    "endpoints": [
+      {
+        "provider_name": "anthropic",
+        "tag": "anthropic",
+        "context_length": 200000,
+        "max_completion_tokens": 64000,
+        "quantization": null,
+        "pricing": {
+          "prompt": "0.000015",
+          "completion": "0.000075",
+          "image": "0",
+          "request": "0",
+          "currency": "USD"
+        },
+        "uptime_last_30m": 0.998,
+        "latency": {"p50_ms": 420, "p95_ms": 1100},
+        "throughput_tokens_per_second": 62.5
+      },
+      {
+        "provider_name": "aws-bedrock",
+        "tag": "aws-bedrock",
+        "context_length": 200000,
+        "max_completion_tokens": 64000,
+        "quantization": null,
+        "pricing": {
+          "prompt": "0.000015",
+          "completion": "0.000075",
+          "image": "0",
+          "request": "0",
+          "currency": "USD"
+        },
+        "uptime_last_30m": 0.995,
+        "latency": {"p50_ms": 450, "p95_ms": 1300},
+        "throughput_tokens_per_second": 55.0
+      }
+    ]
+  }
+}
