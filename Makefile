@@ -35,6 +35,26 @@ clean: ## Remove build artifacts
 generate: ## Run go generate across the module (placeholder; used from M4)
 	$(GO) generate $(PKG)
 
+.PHONY: openrouter-shard
+openrouter-shard: ## Build OpenRouter shard from fixtures into dist/pipeline/openrouter.db
+	$(MAKE) -C pipeline shard SHARD=openrouter FIXTURE=testdata/openrouter
+
+.PHONY: pipeline-test
+pipeline-test: ## Run Python pipeline tests
+	$(MAKE) -C pipeline test
+
+.PHONY: bench
+bench: ## Run Go benchmarks against the built OpenRouter shard
+	@test -f dist/pipeline/openrouter.db || (echo "run 'make openrouter-shard' first" && exit 2)
+	SKU_BENCH_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
+	  $(GO) test -run=^$$ -bench=. -benchmem -count=5 ./bench/...
+
+.PHONY: test-integration
+test-integration: ## Run Go integration tests (requires built shard)
+	@test -f dist/pipeline/openrouter.db || (echo "run 'make openrouter-shard' first" && exit 2)
+	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
+	  $(GO) test -tags=integration -race -count=1 ./...
+
 .PHONY: release-dry
 release-dry: ## Snapshot build via goreleaser; no publish
 	goreleaser release --snapshot --clean
