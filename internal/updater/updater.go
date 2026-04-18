@@ -29,14 +29,14 @@ var ErrSHAMismatch = errors.New("updater: sha256 mismatch")
 // DefaultSources maps shard name → release-asset base URL. Grown in
 // lockstep with the spec §3 inventory.
 var DefaultSources = map[string]string{
-	"openrouter":     "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter",
-	"aws-ec2":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ec2",
-	"aws-rds":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-rds",
-	"aws-s3":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-s3",
-	"aws-lambda":     "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-lambda",
-	"aws-ebs":        "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ebs",
-	"aws-dynamodb":   "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-dynamodb",
-	"aws-cloudfront": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-cloudfront",
+	"openrouter":      "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter",
+	"aws-ec2":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ec2",
+	"aws-rds":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-rds",
+	"aws-s3":          "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-s3",
+	"aws-lambda":      "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-lambda",
+	"aws-ebs":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ebs",
+	"aws-dynamodb":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-dynamodb",
+	"aws-cloudfront":  "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-cloudfront",
 	"azure-vm":        "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-vm",
 	"azure-sql":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-sql",
 	"azure-blob":      "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-blob",
