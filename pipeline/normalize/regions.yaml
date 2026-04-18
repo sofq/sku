@@ -1,13 +1,18 @@
-# Canonical region-group map. M3a.1 seeds AWS-only entries for the five
-# production regions we ingest in this plan. Azure/GCP entries land in M3b.
+# Canonical region-group map. M3a.1 seeded AWS-only entries; m3b.1 adds Azure
+# rows for the same five production regions. GCP entries land in m3b.3.
 version: 1
 groups:
   us-east:
-    - {provider: aws, region: us-east-1}
-    - {provider: aws, region: us-east-2}
+    - {provider: aws,   region: us-east-1}
+    - {provider: aws,   region: us-east-2}
+    - {provider: azure, region: eastus}
+    - {provider: azure, region: eastus2}
   us-west:
-    - {provider: aws, region: us-west-2}
+    - {provider: aws,   region: us-west-2}
+    - {provider: azure, region: westus2}
   eu-west:
-    - {provider: aws, region: eu-west-1}
+    - {provider: aws,   region: eu-west-1}
+    - {provider: azure, region: westeurope}
   asia-ne:
-    - {provider: aws, region: ap-northeast-1}
+    - {provider: aws,   region: ap-northeast-1}
+    - {provider: azure, region: japaneast}
