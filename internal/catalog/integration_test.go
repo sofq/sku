@@ -126,3 +126,41 @@ func TestIntegration_EBSPointLookup(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
 }
+
+func TestIntegration_DynamoDBPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-dynamodb.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
+		Provider: "aws", Service: "dynamodb",
+		TableClass: "standard", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Len(t, rows[0].Prices, 3)
+}
+
+func TestIntegration_CloudFrontPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "aws-cloudfront.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupCDN(context.Background(), catalog.CDNFilter{
+		Provider: "aws", Service: "cloudfront",
+		ResourceName: "standard", Region: "eu-west-1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "data_transfer_out", rows[0].Prices[0].Dimension)
+}
