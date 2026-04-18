@@ -13,12 +13,25 @@ import (
 
 func seedShard(t *testing.T) string {
 	t.Helper()
+	return seedShardFromFile(t, "seed.sql", "openrouter.db")
+}
+
+func seedShardFromFile(t *testing.T, name, dbName string) string {
+	t.Helper()
 	dir := t.TempDir()
-	dst := filepath.Join(dir, "openrouter.db")
-	seed, err := os.ReadFile(filepath.Join("testdata", "seed.sql"))
+	dst := filepath.Join(dir, dbName)
+	seed, err := os.ReadFile(filepath.Join("testdata", name))
 	require.NoError(t, err)
 	require.NoError(t, catalog.BuildFromSQL(dst, string(seed)))
 	return dst
+}
+
+func openSeededAWS(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_aws.sql", "aws-ec2.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
 }
 
 func TestOpen_ReadsMetadata(t *testing.T) {
@@ -101,4 +114,44 @@ func TestLookupLLM_NotFoundReturnsEmpty(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.Empty(t, rows, "no match is not an error at the catalog layer")
+}
+
+func TestLookupVM_PointLookup(t *testing.T) {
+	cat := openSeededAWS(t)
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider:     "aws",
+		Service:      "ec2",
+		InstanceType: "m5.large",
+		Region:       "us-east-1",
+		Terms:        catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "m5.large", rows[0].ResourceName)
+	require.Equal(t, "us-east-1", rows[0].Region)
+	require.Len(t, rows[0].Prices, 1)
+	require.Equal(t, 0.096, rows[0].Prices[0].Amount)
+}
+
+func TestLookupVM_ListByInstance(t *testing.T) {
+	cat := openSeededAWS(t)
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "aws", Service: "ec2", InstanceType: "m5.large",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 2, "both seed regions should come back when region is unset")
+}
+
+func TestLookupDBRelational_PointLookup(t *testing.T) {
+	cat := openSeededAWS(t)
+	rows, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider: "aws", Service: "rds",
+		InstanceType: "db.m5.large",
+		Region:       "us-east-1",
+		Terms:        catalog.Terms{Commitment: "on_demand", Tenancy: "postgres", OS: "multi-az"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, 0.300, rows[0].Prices[0].Amount)
 }
