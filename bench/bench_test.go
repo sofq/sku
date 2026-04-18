@@ -66,7 +66,7 @@ func BenchmarkPointLookup_Cold(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		cmd := exec.Command(bin, "llm", "price", "--model", "anthropic/claude-opus-4.6")
+		cmd := exec.Command(bin, "llm", "price", "--model", "anthropic/claude-opus-4.6") //nolint:gosec // G204: bin is a validated absolute path checked with os.Stat above
 		cmd.Env = append(os.Environ(), "SKU_DATA_DIR="+dataDir)
 		if err := cmd.Run(); err != nil {
 			b.Fatal(err)
