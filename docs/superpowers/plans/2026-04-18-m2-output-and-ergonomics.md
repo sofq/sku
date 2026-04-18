@@ -1634,7 +1634,7 @@ Subcommands and flags per spec §4:
 
 All branches must be JSON-parseable under `--format json` (or implicit on non-TTY). Text branch uses `tabwriter`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```go
 package sku
@@ -1690,7 +1690,7 @@ func TestSchema_ListServingProviders_ReadsShard(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement `schema.go`**
+- [x] **Step 2: Implement `schema.go`**
 
 ```go
 package sku
@@ -1783,13 +1783,13 @@ func (c *Catalog) ServingProviders() ([]string, error) {
 
 Ensure the pipeline's ingest step populates `metadata.serving_providers`. Check `pipeline/ingest/openrouter.py` — if not already present from M1, add a follow-up pipeline TODO in a comment. (M1 may have already shipped this; verify by running `sqlite3 dist/pipeline/openrouter.db "SELECT key,value FROM metadata;"`.)
 
-- [ ] **Step 3: Add to root, run tests**
+- [x] **Step 3: Add to root, run tests**
 
 Register in `root.go`: `root.AddCommand(newSchemaCmd())`.
 
 Run: `go test ./cmd/sku/ -run TestSchema -v` → PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add cmd/sku/ internal/catalog/

@@ -3,8 +3,11 @@ package catalog
 
 import (
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "modernc.org/sqlite" // registers the "sqlite" driver
 )
@@ -98,6 +101,40 @@ func (c *Catalog) CatalogVersion() string { return c.catalogVersion }
 
 // Currency returns the shard's invariant currency.
 func (c *Catalog) Currency() string { return c.currency }
+
+// ServingProviders reads metadata.serving_providers from the shard and returns
+// the list. Accepts both JSON-array (the pipeline's canonical format) and
+// comma-separated encodings; returns an empty slice when the row is absent or
+// empty. Errors only surface on malformed JSON or a database failure.
+func (c *Catalog) ServingProviders() ([]string, error) {
+	var v string
+	err := c.db.QueryRow("SELECT value FROM metadata WHERE key = 'serving_providers'").Scan(&v)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return nil, nil
+	}
+	if strings.HasPrefix(v, "[") {
+		var out []string
+		if err := json.Unmarshal([]byte(v), &out); err != nil {
+			return nil, fmt.Errorf("catalog: parse serving_providers: %w", err)
+		}
+		return out, nil
+	}
+	parts := strings.Split(v, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if s := strings.TrimSpace(p); s != "" {
+			out = append(out, s)
+		}
+	}
+	return out, nil
+}
 
 // BuildFromSQL creates a fresh SQLite file at path, executes the provided SQL
 // (schema + seed), and closes the handle. Used only by tests.
