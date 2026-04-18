@@ -4,8 +4,12 @@
 // work without a `/cmd/sku` path suffix. All logic lives in cmd/sku.
 package main
 
-import "github.com/sofq/sku/cmd/sku"
+import (
+	"os"
+
+	"github.com/sofq/sku/cmd/sku"
+)
 
 func main() {
-	sku.Execute()
+	os.Exit(sku.Execute())
 }
