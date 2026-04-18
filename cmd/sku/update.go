@@ -15,6 +15,7 @@ import (
 
 	"github.com/sofq/sku/internal/catalog"
 	skuerrors "github.com/sofq/sku/internal/errors"
+	"github.com/sofq/sku/internal/output"
 )
 
 const defaultUpdateBaseURL = "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter"
@@ -25,6 +26,7 @@ func newUpdateCmd() *cobra.Command {
 		Short: "Download and install a pricing shard (e.g. openrouter)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			s := globalSettings(cmd)
 			shard := args[0]
 			if shard != "openrouter" {
 				err := skuerrors.Validation(
@@ -55,10 +57,22 @@ func newUpdateCmd() *cobra.Command {
 			zstPartPath := catalog.ShardPath(shard) + ".zst.part"
 			defer func() { _ = os.Remove(zstPartPath) }()
 
+			if s.Verbose {
+				output.Log(cmd.ErrOrStderr(), "update.fetch", map[string]any{
+					"shard": shard,
+					"url":   zstURL,
+				})
+			}
 			zstData, err := httpGet(zstURL)
 			if err != nil {
 				skuerrors.Write(cmd.ErrOrStderr(), err)
 				return err
+			}
+			if s.Verbose {
+				output.Log(cmd.ErrOrStderr(), "update.fetched", map[string]any{
+					"shard": shard,
+					"bytes": len(zstData),
+				})
 			}
 			if writeErr := os.WriteFile(zstPartPath, zstData, 0o600); writeErr != nil { //nolint:gosec // zstPartPath is derived from catalog.ShardPath
 				e := &skuerrors.E{Code: skuerrors.CodeServer, Message: writeErr.Error()}
@@ -67,6 +81,11 @@ func newUpdateCmd() *cobra.Command {
 			}
 
 			// Fetch sha256 and verify.
+			if s.Verbose {
+				output.Log(cmd.ErrOrStderr(), "update.sha_fetch", map[string]any{
+					"url": shaURL,
+				})
+			}
 			shaData, err := httpGet(shaURL)
 			if err != nil {
 				skuerrors.Write(cmd.ErrOrStderr(), err)
@@ -87,6 +106,12 @@ func newUpdateCmd() *cobra.Command {
 
 			// Decompress to a .part file then atomically rename.
 			dbPartPath := catalog.ShardPath(shard) + ".part"
+			if s.Verbose {
+				output.Log(cmd.ErrOrStderr(), "update.decompress", map[string]any{
+					"shard": shard,
+					"dest":  dbPartPath,
+				})
+			}
 			if err := decompressZstd(zstData, dbPartPath); err != nil {
 				skuerrors.Write(cmd.ErrOrStderr(), err)
 				return err

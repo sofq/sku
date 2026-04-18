@@ -3,6 +3,7 @@ package sku
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -34,4 +35,19 @@ func TestVersionCmd_CompactByDefault(t *testing.T) {
 
 	require.NotContains(t, out.String(), "  ", "default output must be compact")
 	require.Equal(t, byte('\n'), out.Bytes()[out.Len()-1])
+}
+
+func TestVersionCmd_YAMLOutput(t *testing.T) {
+	var out bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&out)
+	cmd.SetArgs([]string{"--yaml", "version"})
+	require.NoError(t, cmd.Execute())
+
+	s := out.String()
+	require.Contains(t, s, "version:")
+	require.Contains(t, s, "go_version:")
+	// YAML output must not be JSON.
+	require.False(t, strings.HasPrefix(strings.TrimSpace(s), "{"),
+		"yaml output should not start with {, got %q", s)
 }

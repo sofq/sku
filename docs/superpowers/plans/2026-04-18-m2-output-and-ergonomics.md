@@ -1969,7 +1969,7 @@ Commit: `feat(cmd): sku completion {bash,zsh,fish,powershell}`
 
 `sku version` should honor `--pretty` / `--yaml` / `--toml` / `--jq` / `--fields` too so agents can pipe it the same way as `sku llm price`. `sku update` is output-lite (stderr lines only) and only needs `--verbose` wiring.
 
-- [ ] **Step 1: Update `version.go`**
+- [x] **Step 1: Update `version.go`**
 
 ```go
 func newVersionCmd() *cobra.Command {
@@ -1993,16 +1993,16 @@ func newVersionCmd() *cobra.Command {
 
 Update `version_test.go` to add a `--yaml` case.
 
-- [ ] **Step 2: Update `update.go`**
+- [x] **Step 2: Update `update.go`**
 
 When `s.Verbose` is true, emit `output.Log(cmd.ErrOrStderr(), "update.fetch", ...)` around the HTTP GETs and decompress step. No other output-format wiring needed.
 
-- [ ] **Step 3: Run all tests**
+- [x] **Step 3: Run all tests**
 
 Run: `make test`
 Expected: all PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add cmd/sku/
