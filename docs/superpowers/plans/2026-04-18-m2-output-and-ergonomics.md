@@ -315,7 +315,7 @@ type FlagBag struct {
 
 Defaults: preset=agent, format=json, stale_warning_days=14, stale_error_days=0.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Write `internal/config/resolve_test.go`:
 
@@ -376,7 +376,7 @@ func TestResolve_NoColorStandardEnv(t *testing.T) {
 Run: `go test ./internal/config/... -run TestResolve`
 Expected: FAIL.
 
-- [ ] **Step 2: Implement `internal/config/resolve.go`**
+- [x] **Step 2: Implement `internal/config/resolve.go`**
 
 The function signature: `func Resolve(fb FlagBag, file File, env map[string]string) (Settings, error)`. Profile default is `"default"`. `env` is an injected `{SKU_PROFILE,SKU_PRESET,SKU_FORMAT,SKU_AUTO_FETCH,SKU_STALE_OK,SKU_NO_COLOR,NO_COLOR,SKU_STALE_ERROR_DAYS,SKU_PRETTY}` map so tests don't mutate process env. The caller (cmd/sku/root.go) builds this map from `os.Environ()`.
 
@@ -387,12 +387,12 @@ Key implementation notes:
 - `StaleWarningDays` and `StaleErrorDays` are `*int` in Profile (to distinguish unset from 0). The resolver's defaults are 14 and 0 respectively.
 - `Settings.Profile` records which profile was actually used (or `""` when none existed).
 
-- [ ] **Step 3: Run test**
+- [x] **Step 3: Run test**
 
 Run: `go test ./internal/config/... -v`
 Expected: all PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add internal/config/
