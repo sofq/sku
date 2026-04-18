@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/klauspost/compress/zstd"
@@ -116,6 +117,50 @@ func TestUpdate_SHA256Mismatch(t *testing.T) {
 
 	// The error envelope should carry code "conflict" (exit 6).
 	require.Contains(t, stderr, `"conflict"`)
+}
+
+// TestUpdate_AllShards runs update against each shard the CLI knows about,
+// served from a single httptest that answers every shard's URLs.
+func TestUpdate_AllShards(t *testing.T) {
+	zstData, hexSum := buildTestZst(t)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, ".db.zst.sha256"):
+			_, _ = w.Write([]byte(hexSum + "  " + filepath.Base(r.URL.Path) + "\n")) //nolint:gosec // G705: test server, content is controlled
+		case strings.HasSuffix(r.URL.Path, ".db.zst"):
+			w.Header().Set("Content-Type", "application/octet-stream")
+			_, _ = w.Write(zstData)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	for _, shard := range []string{"openrouter", "aws-ec2", "aws-rds"} {
+		t.Run(shard, func(t *testing.T) {
+			dataDir := t.TempDir()
+			t.Setenv("SKU_DATA_DIR", dataDir)
+			t.Setenv("SKU_UPDATE_BASE_URL", srv.URL)
+
+			_, stderr, err := runUpdate(t, shard)
+			require.NoError(t, err)
+			require.Contains(t, stderr, "installed "+shard)
+
+			fi, statErr := os.Stat(filepath.Join(dataDir, shard+".db"))
+			require.NoError(t, statErr)
+			require.Greater(t, fi.Size(), int64(0))
+		})
+	}
+}
+
+func TestUpdate_UnsupportedShard(t *testing.T) {
+	dataDir := t.TempDir()
+	t.Setenv("SKU_DATA_DIR", dataDir)
+
+	_, stderr, err := runUpdate(t, "aws-s3")
+	require.Error(t, err)
+	require.Contains(t, stderr, "unsupported_shard")
 }
 
 // TestUpdate_HTTPError returns CodeServer when the server replies 502.

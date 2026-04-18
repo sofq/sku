@@ -20,7 +20,7 @@ func seedShardFromFile(t *testing.T, name, dbName string) string {
 	t.Helper()
 	dir := t.TempDir()
 	dst := filepath.Join(dir, dbName)
-	seed, err := os.ReadFile(filepath.Join("testdata", name))
+	seed, err := os.ReadFile(filepath.Join("testdata", name)) //nolint:gosec // G304: test helper with literal basename
 	require.NoError(t, err)
 	require.NoError(t, catalog.BuildFromSQL(dst, string(seed)))
 	return dst

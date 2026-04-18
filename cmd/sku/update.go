@@ -18,30 +18,58 @@ import (
 	"github.com/sofq/sku/internal/output"
 )
 
-const defaultUpdateBaseURL = "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter"
+// shardSources maps a shard name to the release tag's asset base URL.
+// Grow this map in lockstep with the spec §3 shard inventory.
+var shardSources = map[string]string{
+	"openrouter": "https://github.com/sofq/sku/releases/download/data-bootstrap-openrouter",
+	"aws-ec2":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-ec2",
+	"aws-rds":    "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-rds",
+}
+
+// resolveUpdateBaseURL returns the asset base URL for shard. Precedence:
+//  1. SKU_UPDATE_BASE_URL (applied to every shard — test hook)
+//  2. SKU_UPDATE_BASE_URL_<SHARD> (per-shard override, hyphens -> underscores)
+//  3. shardSources[shard] default
+func resolveUpdateBaseURL(shard string) (string, bool) {
+	if v := os.Getenv("SKU_UPDATE_BASE_URL"); v != "" {
+		return strings.TrimRight(v, "/"), true
+	}
+	upperShard := strings.ToUpper(strings.ReplaceAll(shard, "-", "_"))
+	if v := os.Getenv("SKU_UPDATE_BASE_URL_" + upperShard); v != "" {
+		return strings.TrimRight(v, "/"), true
+	}
+	base, ok := shardSources[shard]
+	if !ok {
+		return "", false
+	}
+	return strings.TrimRight(base, "/"), true
+}
+
+func shardNames() []string {
+	out := make([]string, 0, len(shardSources))
+	for name := range shardSources {
+		out = append(out, name)
+	}
+	return out
+}
 
 func newUpdateCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "update <shard>",
-		Short: "Download and install a pricing shard (e.g. openrouter)",
+		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := globalSettings(cmd)
 			shard := args[0]
-			if shard != "openrouter" {
+			baseURL, ok := resolveUpdateBaseURL(shard)
+			if !ok {
 				err := skuerrors.Validation(
 					"unsupported_shard", "shard", shard,
-					"only 'openrouter' is supported in this release",
+					"supported shards: "+strings.Join(shardNames(), ", "),
 				)
 				skuerrors.Write(cmd.ErrOrStderr(), err)
 				return err
 			}
-
-			baseURL := os.Getenv("SKU_UPDATE_BASE_URL")
-			if baseURL == "" {
-				baseURL = defaultUpdateBaseURL
-			}
-			baseURL = strings.TrimRight(baseURL, "/")
 
 			dataDir := catalog.DataDir()
 			if err := os.MkdirAll(dataDir, 0o750); err != nil { //nolint:gosec // standard cache dir
