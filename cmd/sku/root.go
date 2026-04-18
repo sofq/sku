@@ -48,6 +48,7 @@ func newRootCmd() *cobra.Command {
 	root.AddCommand(newGCPCmd())
 	root.AddCommand(newUpdateCmd())
 	root.AddCommand(newSchemaCmd())
+	root.AddCommand(newSearchCmd())
 	root.AddCommand(newConfigureCmd())
 	root.AddCommand(newCompletionCmd())
 	return root
