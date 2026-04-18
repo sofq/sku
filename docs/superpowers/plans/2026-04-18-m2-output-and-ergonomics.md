@@ -1805,7 +1805,7 @@ git commit -m "feat(cmd): sku schema + serving-providers metadata reader"
 
 Writes `$SKU_CONFIG_DIR/config.yaml` merging the new profile into any existing file. Flagged mode: `sku configure --profile default --preset agent --stale-warning-days 14 --auto-fetch=false`. Interactive mode (default, TTY only): prompt-per-field via `bufio.Scanner` with the current / default value offered in brackets.
 
-- [ ] **Step 1: Write failing test `configure_test.go`**
+- [x] **Step 1: Write failing test `configure_test.go`**
 
 ```go
 package sku
@@ -1848,7 +1848,7 @@ func TestConfigure_FlaggedMode_WritesProfile(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Implement `internal/config/configure.go`**
+- [x] **Step 2: Implement `internal/config/configure.go`**
 
 ```go
 package config
@@ -1883,21 +1883,21 @@ func SaveProfile(path, name string, p Profile) error {
 }
 ```
 
-- [ ] **Step 3: Implement `cmd/sku/configure.go`**
+- [x] **Step 3: Implement `cmd/sku/configure.go`**
 
 Cobra command with flags: `--preset`, `--stale-warning-days`, `--stale-error-days`, `--auto-fetch`, `--include-raw`, `--default-regions`, `--channel`. The global `--profile` selects which profile to edit (default `"default"`). When any of the per-field flags is `Changed()`, run in flagged mode and skip prompts. Otherwise run an interactive flow that reads line-by-line from stdin.
 
 Keep interactive mode thin — it's one `for _, field := range fields` loop that prompts, reads, and sets the matching `Profile` field. If stdin isn't a TTY, fall back to flagged-only mode and warn on stderr.
 
-- [ ] **Step 4: Register in root**
+- [x] **Step 4: Register in root**
 
 `root.AddCommand(newConfigureCmd())` in `root.go`.
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `go test ./cmd/sku/ -run TestConfigure -v` → PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add cmd/sku/ internal/config/

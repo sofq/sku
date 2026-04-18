@@ -45,5 +45,6 @@ func newRootCmd() *cobra.Command {
 	root.AddCommand(newLLMCmd())
 	root.AddCommand(newUpdateCmd())
 	root.AddCommand(newSchemaCmd())
+	root.AddCommand(newConfigureCmd())
 	return root
 }
