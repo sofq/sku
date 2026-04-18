@@ -148,3 +148,47 @@ func TestSearch_MaxPrice_Zero_IsDisabled(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, rows, 8, "zero disables the filter; all rows come back")
 }
+
+func TestSearch_SortPrice(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Sort: "price", Limit: 3,
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 3)
+	// cheapest 3 rows by min(price.amount): t3.medium (0.0416),
+	// c5.large (0.085), m5.large us-east-1 (0.096).
+	require.Equal(t, "t3.medium", rows[0].ResourceName)
+	require.Equal(t, "c5.large", rows[1].ResourceName)
+	require.Equal(t, "m5.large", rows[2].ResourceName)
+}
+
+func TestSearch_SortVCPU(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Sort: "vcpu", Limit: 2,
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 2)
+	// smallest vcpu=2 rows come first; tie-break by sku_id.
+	require.EqualValues(t, int64(2), *rows[0].ResourceAttrs.VCPU)
+	require.EqualValues(t, int64(2), *rows[1].ResourceAttrs.VCPU)
+}
+
+func TestSearch_SortUnknown_IsValidationError(t *testing.T) {
+	cat := openSeededSearch(t)
+	_, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Sort: "hostname",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "hostname")
+}
+
+func TestSearch_Limit(t *testing.T) {
+	cat := openSeededSearch(t)
+	rows, err := cat.Search(context.Background(), catalog.SearchFilter{
+		Provider: "aws", Service: "ec2", Limit: 2,
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 2)
+}

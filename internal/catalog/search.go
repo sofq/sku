@@ -35,7 +35,10 @@ func (c *Catalog) Search(ctx context.Context, f SearchFilter) ([]Row, error) {
 	if f.Service == "" {
 		return nil, fmt.Errorf("catalog: Search requires Service")
 	}
-	query, args := buildSearchQuery(f)
+	query, args, err := buildSearchQuery(f)
+	if err != nil {
+		return nil, err
+	}
 	rs, err := c.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("catalog: Search: %w", err)
@@ -58,10 +61,22 @@ func (c *Catalog) Search(ctx context.Context, f SearchFilter) ([]Row, error) {
 	return out, rs.Err()
 }
 
+// sortColumns whitelists ORDER BY expressions. Keys are the user-visible
+// --sort values; values are the SQL fragment that gets concatenated into
+// the query. This map is the only path user input influences ORDER BY;
+// every other mention of ORDER BY is a compile-time literal.
+var sortColumns = map[string]string{
+	"":              "s.resource_name, s.sku_id",
+	"resource_name": "s.resource_name, s.sku_id",
+	"price":         "COALESCE(mp.min_price, 1e308) ASC, s.sku_id",
+	"vcpu":          "ra.vcpu ASC, s.sku_id",
+	"memory":        "ra.memory_gb ASC, s.sku_id",
+}
+
 // buildSearchQuery composes the SELECT + WHERE + ORDER BY + LIMIT clauses
 // from f. Only compile-time literals (never user input) are ever
 // concatenated into the SQL text; every user-supplied value is bound as a ?.
-func buildSearchQuery(f SearchFilter) (string, []any) {
+func buildSearchQuery(f SearchFilter) (string, []any, error) {
 	var where []string
 	var args []any
 	where = append(where, "s.provider = ?")
@@ -107,9 +122,17 @@ LEFT JOIN (
   SELECT sku_id, MIN(amount) AS min_price FROM prices GROUP BY sku_id
 ) mp ON mp.sku_id = s.sku_id
 WHERE `
+	sortFrag, ok := sortColumns[f.Sort]
+	if !ok {
+		return "", nil, fmt.Errorf("catalog: Search: unsupported --sort %q; allowed: resource_name|price|vcpu|memory", f.Sort)
+	}
 	query := base + strings.Join(where, " AND ") +
-		"\nORDER BY s.resource_name, s.sku_id" //nolint:gosec // G202: no user input in SQL concatenation
-	return query, args
+		"\nORDER BY " + sortFrag //nolint:gosec // G202: sortFrag is an allow-list lookup, never user input
+	if f.Limit > 0 {
+		query += "\nLIMIT ?"
+		args = append(args, f.Limit)
+	}
+	return query, args, nil
 }
 
 func scanSearchRow(rs *sql.Rows) (Row, error) {
