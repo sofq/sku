@@ -2037,7 +2037,7 @@ Confirm every spec §9 M2 exit-criterion item is green, end-to-end.
 
 **Files:** none (verification only).
 
-- [ ] **Step 1: Full test + lint + build**
+- [x] **Step 1: Full test + lint + build**
 
 ```bash
 make test && make lint && make build
@@ -2045,7 +2045,7 @@ make test && make lint && make build
 
 Expected: green.
 
-- [ ] **Step 2: Manually walk spec §9 M2 criteria**
+- [x] **Step 2: Manually walk spec §9 M2 criteria**
 
 ```bash
 ./bin/sku schema --list          # {"shards":["openrouter"]}
@@ -2061,7 +2061,7 @@ Expected: green.
 
 Expected: every command exits 0 and the output is the documented shape.
 
-- [ ] **Step 2b: Preset token-size spot check (M2 exit criterion)**
+- [x] **Step 2b: Preset token-size spot check (M2 exit criterion)**
 
 ```bash
 ./bin/sku llm price --model anthropic/claude-opus-4.6 --serving-provider aws-bedrock --preset agent | wc -c
@@ -2070,7 +2070,7 @@ Expected: every command exits 0 and the output is the documented shape.
 
 Expected: `agent` ≈ 200 bytes ±50, `price` ≈ 50 bytes ±20 per spec §4 Presets table. If far off, adjust `Project` trims.
 
-- [ ] **Step 3: Benchmark sanity**
+- [x] **Step 3: Benchmark sanity**
 
 ```bash
 make openrouter-shard && make bench
@@ -2078,7 +2078,7 @@ make openrouter-shard && make bench
 
 Expected: no regression > 15% vs the M1 baseline recorded in `bench/BASELINE.md`. If the extra preset trim / JSON encoder pass costs meaningful time, record it and compare to the <5 ms p99 warm target in spec §5. Perf tuning, if needed, is a follow-up — not an M2 blocker unless the target breaks.
 
-- [ ] **Step 4: Push branch and open PR**
+- [x] **Step 4: Push branch and open PR**
 
 ```bash
 git push -u origin m2-output-and-ergonomics
@@ -2093,7 +2093,7 @@ EOF
 )"
 ```
 
-- [ ] **Step 5: Mark plan complete** — no code change, just a record for the executor that M2 is done.
+- [x] **Step 5: Mark plan complete** — no code change, just a record for the executor that M2 is done.
 
 ---
 
