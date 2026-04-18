@@ -102,6 +102,40 @@ func BenchmarkEC2PointLookup_Cold(b *testing.B) {
 	}
 }
 
+// BenchmarkAzureVMPointLookup_Warm measures an in-process Azure VM point
+// lookup with the catalog already open. Mirrors BenchmarkEC2PointLookup_Warm.
+func BenchmarkAzureVMPointLookup_Warm(b *testing.B) {
+	path := os.Getenv("SKU_BENCH_AZURE_VM_SHARD")
+	if path == "" {
+		b.Skip("SKU_BENCH_AZURE_VM_SHARD not set")
+	}
+	cat, err := catalog.Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.Cleanup(func() { _ = cat.Close() })
+
+	// Warm one query so the page cache is populated; benchmark is the
+	// next loop. Mirrors the EC2 pattern.
+	_, _ = cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "azure", Service: "vm",
+		InstanceType: "Standard_D2_v3", Region: "eastus",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+			Provider: "azure", Service: "vm",
+			InstanceType: "Standard_D2_v3", Region: "eastus",
+			Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 // BenchmarkPointLookup_Cold measures the whole process-startup path: exec of
 // the real binary + shard open + lookup + render + exit. This is the number
 // that matches §5 "<60 ms cold".
