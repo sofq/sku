@@ -1,0 +1,15 @@
+# Binaries
+/bin/
+/dist/
+
+# Go
+*.test
+*.out
+coverage.*
+/vendor/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
