@@ -40,10 +40,8 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-**M3a.1 — AWS EC2 + RDS shards (on-demand).** See
-`docs/superpowers/plans/2026-04-18-m3a.1-ec2-rds.md`. Two production-shaped
-shards ingested via DuckDB; `sku aws ec2 {price,list}` and
-`sku aws rds {price,list}` return valid §4 envelopes.
+v1.0 shipped — no open milestone. Next plan (m3a.2: aws-s3 / aws-lambda /
+aws-ebs) to be authored under `docs/superpowers/plans/`.
 
 ### Quick path (agent, repeatable, M3a.1 surface)
 
