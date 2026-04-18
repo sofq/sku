@@ -23,6 +23,7 @@ type Catalog struct {
 	schemaVersion  string
 	catalogVersion string
 	currency       string
+	generatedAt    string
 	shardPath      string
 }
 
@@ -66,6 +67,8 @@ func (c *Catalog) loadMetadata() error {
 			c.catalogVersion = v
 		case "currency":
 			c.currency = v
+		case "generated_at":
+			c.generatedAt = v
 		}
 	}
 	if err := rows.Err(); err != nil {

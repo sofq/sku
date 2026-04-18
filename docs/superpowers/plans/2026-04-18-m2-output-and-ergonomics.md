@@ -1429,7 +1429,7 @@ git commit -m "feat(output): --dry-run + --verbose primitives"
 
 `Catalog.Age(now time.Time)` returns integer days since `metadata.generated_at`. The caller checks against `stale_warning_days` and `stale_error_days` per spec §3 Reliability / §4 Config. On warning, write one line to stderr (`warning: catalog is 17 days old (warn threshold 14); run sku update`). On error, exit 8 unless `--stale-ok` / `SKU_STALE_OK=1`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```go
 package catalog_test
@@ -1457,11 +1457,11 @@ func TestAge_ReturnsDaysSinceGeneratedAt(t *testing.T) {
 
 `buildTestShardWithGeneratedAt` is a helper that writes minimal shard DDL with the requested `generated_at` value. Put it in `catalog_test.go` and share across tests.
 
-- [ ] **Step 2: Implement `age.go`**
+- [x] **Step 2: Implement `age.go`**
 
 Load `metadata.generated_at` during `loadMetadata` (extend the switch). Parse as RFC3339. `Age(now)` returns `int(now.Sub(generatedAt).Hours() / 24)`.
 
-- [ ] **Step 3: Wire into `llm price`**
+- [x] **Step 3: Wire into `llm price`**
 
 After opening the catalog:
 
@@ -1487,7 +1487,7 @@ if age >= s.StaleWarningDays && !s.StaleOK {
 }
 ```
 
-- [ ] **Step 4: Test end-to-end staleness behavior**
+- [x] **Step 4: Test end-to-end staleness behavior**
 
 ```go
 func TestLLMPrice_StaleCatalog_WarnsButSucceeds(t *testing.T) {
@@ -1508,7 +1508,7 @@ func TestLLMPrice_StaleCatalog_WarnsButSucceeds(t *testing.T) {
 
 If forcing old generated_at in fixtures is heavy, add a dedicated fixture DDL variant (`testdata/stale_seed.sql`) with a generated_at well in the past, load it via `SKU_DATA_DIR` swap, and test the warn + error paths independently.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/catalog/ cmd/sku/

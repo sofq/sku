@@ -160,6 +160,17 @@ func TestLLMPrice_FieldsProjection(t *testing.T) {
 	require.NotContains(t, out, `"service"`)
 }
 
+func TestLLMPrice_StaleCatalog_StaleOKSuppresses(t *testing.T) {
+	seedTestDataDir(t)
+	_, stderr, code := runLLMPrice(t,
+		"--model", "anthropic/claude-opus-4.6",
+		"--serving-provider", "aws-bedrock",
+		"--stale-ok",
+	)
+	require.Zero(t, code)
+	require.NotContains(t, stderr, "warning: catalog")
+}
+
 func TestLLMPrice_DryRun_DoesNotTouchShard(t *testing.T) {
 	t.Setenv("SKU_DATA_DIR", t.TempDir())
 	out, _, code := runLLMPrice(t, "--model", "anthropic/claude-opus-4.6", "--dry-run")

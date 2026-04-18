@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -75,6 +76,27 @@ func newLLMPriceCmd() *cobra.Command {
 			if s.Verbose {
 				output.Log(cmd.ErrOrStderr(), "catalog.open",
 					map[string]any{"shard": "openrouter", "path": shardPath})
+			}
+
+			age := cat.Age(time.Now().UTC())
+			if s.StaleErrorDays > 0 && age >= s.StaleErrorDays && !s.StaleOK {
+				staleErr := &skuerrors.E{
+					Code:       skuerrors.CodeStaleData,
+					Message:    fmt.Sprintf("catalog %d days old exceeds threshold %d", age, s.StaleErrorDays),
+					Suggestion: "Run: sku update openrouter",
+					Details: map[string]any{
+						"shard":          "openrouter",
+						"age_days":       age,
+						"threshold_days": s.StaleErrorDays,
+					},
+				}
+				skuerrors.Write(cmd.ErrOrStderr(), staleErr)
+				return staleErr
+			}
+			if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
+					"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
+					age, s.StaleWarningDays)
 			}
 
 			rows, err := cat.LookupLLM(context.Background(), catalog.LLMFilter{
