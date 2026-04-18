@@ -131,6 +131,23 @@ azure-disks-shard: ## Build azure-disks shard from fixtures
 .PHONY: azure-shards
 azure-shards: azure-vm-shard azure-sql-shard azure-blob-shard azure-functions-shard azure-disks-shard ## Build azure shards (m3b.1+m3b.2)
 
+.PHONY: gcp-gce-shard
+gcp-gce-shard: ## Build gcp-gce shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=gcp_gce FIXTURE=testdata/gcp_gce \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/gcp_gce.db dist/pipeline/gcp-gce.db
+	@mv dist/pipeline/gcp_gce.rows.jsonl dist/pipeline/gcp-gce.rows.jsonl
+
+.PHONY: gcp-cloud-sql-shard
+gcp-cloud-sql-shard: ## Build gcp-cloud-sql shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=gcp_cloud_sql FIXTURE=testdata/gcp_cloud_sql \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/gcp_cloud_sql.db dist/pipeline/gcp-cloud-sql.db
+	@mv dist/pipeline/gcp_cloud_sql.rows.jsonl dist/pipeline/gcp-cloud-sql.rows.jsonl
+
+.PHONY: gcp-shards
+gcp-shards: gcp-gce-shard gcp-cloud-sql-shard ## Build gcp shards (m3b.3)
+
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
 	$(MAKE) -C pipeline test
@@ -156,6 +173,8 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/azure-blob.db      || (echo "run 'make azure-blob-shard' first"      && exit 2)
 	@test -f dist/pipeline/azure-functions.db || (echo "run 'make azure-functions-shard' first" && exit 2)
 	@test -f dist/pipeline/azure-disks.db     || (echo "run 'make azure-disks-shard' first"     && exit 2)
+	@test -f dist/pipeline/gcp-gce.db         || (echo "run 'make gcp-gce-shard' first"         && exit 2)
+	@test -f dist/pipeline/gcp-cloud-sql.db   || (echo "run 'make gcp-cloud-sql-shard' first"   && exit 2)
 	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
 	  SKU_TEST_SHARD_DIR=$(CURDIR)/dist/pipeline \
 	  $(GO) test -tags=integration -race -count=1 ./...
