@@ -1,5 +1,6 @@
 # Every enum the shard-build validator enforces (§5 Enum validation).
-# M1 shipped LLM kinds; M3a.1 adds compute.vm + db.relational.
+# M1 shipped LLM kinds; M3a.1 adds compute.vm + db.relational;
+# m3b.3 adds GCP Cloud SQL engine + deployment slots.
 version: 1
 
 kind:
@@ -24,13 +25,13 @@ tenancy:
   - shared
   - dedicated
   # RDS engines — we repurpose the tenancy slot for db.relational rows
-  # so engine participates in terms_hash. Justified by spec §5 terms_hash
-  # semantics (the six-tuple exists to disambiguate pricing variants;
-  # engine is exactly that for RDS).
+  # so engine participates in terms_hash.
   - postgres
   - mysql
   - mariadb
-  - azure-sql      # Azure SQL "engine" slot — single value, distinguishes from db.relational AWS rows
+  - azure-sql
+  - cloud-sql-postgres
+  - cloud-sql-mysql
 
 os:
   - ""
@@ -42,6 +43,8 @@ os:
   - multi-az
   - managed-instance
   - elastic-pool
+  - zonal
+  - regional
 
 support_tier:
   - ""
