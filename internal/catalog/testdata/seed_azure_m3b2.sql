@@ -68,8 +68,8 @@ INSERT INTO metadata VALUES
 
 -- azure-blob: hot + archive LRS in eastus.
 INSERT INTO skus VALUES
-  ('azure-blob-hot-eastus',     'azure','blob','storage.object','hot',    'eastus','us-east','hBLOB1'),
-  ('azure-blob-archive-eastus', 'azure','blob','storage.object','archive','eastus','us-east','hBLOB1');
+  ('azure-blob-hot-eastus',     'azure','blob','storage.object','hot',    'eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3'),
+  ('azure-blob-archive-eastus', 'azure','blob','storage.object','archive','eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3');
 INSERT INTO resource_attrs(sku_id, durability_nines, availability_tier, extra) VALUES
   ('azure-blob-hot-eastus',     11, 'standard', '{"redundancy":"lrs"}'),
   ('azure-blob-archive-eastus', 11, 'archive',  '{"redundancy":"lrs"}');
@@ -86,8 +86,8 @@ INSERT INTO prices VALUES
 
 -- azure-functions: x86_64 in eastus + westeurope.
 INSERT INTO skus VALUES
-  ('azure-fn-x86_64-eastus', 'azure','functions','compute.function','x86_64','eastus',    'us-east','hFN1'),
-  ('azure-fn-x86_64-weu',    'azure','functions','compute.function','x86_64','westeurope','eu-west','hFN1');
+  ('azure-fn-x86_64-eastus', 'azure','functions','compute.function','x86_64','eastus',    'us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3'),
+  ('azure-fn-x86_64-weu',    'azure','functions','compute.function','x86_64','westeurope','eu-west','4b0dbf5efbd01c9e5f0a3f2e39227bc3');
 INSERT INTO resource_attrs(sku_id, architecture, extra) VALUES
   ('azure-fn-x86_64-eastus','x86_64','{"plan":"consumption"}'),
   ('azure-fn-x86_64-weu',   'x86_64','{"plan":"consumption"}');
@@ -102,8 +102,8 @@ INSERT INTO prices VALUES
 
 -- azure-disks: standard-ssd + premium-ssd in eastus.
 INSERT INTO skus VALUES
-  ('azure-disk-std-ssd-eastus',  'azure','disks','storage.block','standard-ssd','eastus','us-east','hDISK1'),
-  ('azure-disk-prem-ssd-eastus', 'azure','disks','storage.block','premium-ssd', 'eastus','us-east','hDISK1');
+  ('azure-disk-std-ssd-eastus',  'azure','disks','storage.block','standard-ssd','eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3'),
+  ('azure-disk-prem-ssd-eastus', 'azure','disks','storage.block','premium-ssd', 'eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3');
 INSERT INTO resource_attrs(sku_id, extra) VALUES
   ('azure-disk-std-ssd-eastus', '{"redundancy":"lrs"}'),
   ('azure-disk-prem-ssd-eastus','{"redundancy":"lrs"}');
