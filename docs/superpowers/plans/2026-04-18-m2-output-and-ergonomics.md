@@ -409,7 +409,7 @@ git commit -m "feat(config): resolve CLI>env>profile>default settings"
 
 Wire the flag set once on the root so every subcommand sees them. Stash resolved `Settings` into `cmd.Context()` via `context.WithValue` under a private `settingsKey` so leaves grab it with `globalSettings(cmd)`.
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Write `cmd/sku/globals_test.go`:
 
@@ -448,7 +448,7 @@ func TestRoot_PresetEnvPropagates(t *testing.T) {
 Run: `go test ./cmd/sku/ -run TestRoot_Global -v`
 Expected: FAIL (flags missing).
 
-- [ ] **Step 2: Add `cmd/sku/globals.go`**
+- [x] **Step 2: Add `cmd/sku/globals.go`**
 
 Expose the flag-bag + settings-in-context helpers:
 
@@ -550,7 +550,7 @@ func readFlagBag(cmd *cobra.Command) config.FlagBag {
 }
 ```
 
-- [ ] **Step 3: Modify `cmd/sku/root.go`**
+- [x] **Step 3: Modify `cmd/sku/root.go`**
 
 ```go
 package sku
@@ -602,12 +602,12 @@ func newRootCmd() *cobra.Command {
 }
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `go test ./cmd/sku/... -run TestRoot -v`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/sku/
