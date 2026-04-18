@@ -40,10 +40,13 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone. Next plan (m3a.2: aws-s3 / aws-lambda /
-aws-ebs) to be authored under `docs/superpowers/plans/`.
+**M3a.2 — AWS S3 + Lambda + EBS shards (on-demand).** See
+`docs/superpowers/plans/2026-04-18-m3a.2-s3-lambda-ebs.md`. Three
+production-shaped shards ingested via DuckDB; `sku aws s3 {price,list}`,
+`sku aws lambda {price,list}`, `sku aws ebs {price,list}` return valid §4
+envelopes with multi-dimensional `price[]` arrays where applicable.
 
-### Quick path (agent, repeatable, M3a.1 surface)
+### Quick path (agent, repeatable, M3a.2 surface)
 
 ```bash
 make openrouter-shard aws-shards                        # build all local shards
@@ -66,6 +69,13 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku aws rds price --instance-type db.m5.large --region us-east-1 \
   --engine postgres --deployment-option single-az
 ./bin/sku aws rds list  --instance-type db.m5.large --engine postgres
+
+./bin/sku aws s3     price --storage-class standard --region us-east-1 --preset agent
+./bin/sku aws s3     list  --storage-class standard
+./bin/sku aws lambda price --architecture arm64     --region us-east-1
+./bin/sku aws lambda list  --architecture x86_64
+./bin/sku aws ebs    price --volume-type gp3        --region us-east-1
+./bin/sku aws ebs    list  --volume-type gp3
 ```
 
 ## Global flags (all subcommands)
