@@ -16,5 +16,6 @@ func newAWSCmd() *cobra.Command {
 	c.AddCommand(newAWSLambdaCmd())
 	c.AddCommand(newAWSEBSCmd())
 	c.AddCommand(newAWSDynamoDBCmd())
+	c.AddCommand(newAWSCloudFrontCmd())
 	return c
 }
