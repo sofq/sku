@@ -130,6 +130,8 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/aws-ebs.db    || (echo "run 'make aws-ebs-shard' first"    && exit 2)
 	@test -f dist/pipeline/aws-dynamodb.db   || (echo "run 'make aws-dynamodb-shard' first"   && exit 2)
 	@test -f dist/pipeline/aws-cloudfront.db || (echo "run 'make aws-cloudfront-shard' first" && exit 2)
+	@test -f dist/pipeline/azure-vm.db       || (echo "run 'make azure-vm-shard' first"      && exit 2)
+	@test -f dist/pipeline/azure-sql.db      || (echo "run 'make azure-sql-shard' first"     && exit 2)
 	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
 	  SKU_TEST_SHARD_DIR=$(CURDIR)/dist/pipeline \
 	  $(GO) test -tags=integration -race -count=1 ./...

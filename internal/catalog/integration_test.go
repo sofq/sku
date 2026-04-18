@@ -164,3 +164,39 @@ func TestIntegration_CloudFrontPointLookup(t *testing.T) {
 	require.Len(t, rows, 1)
 	require.Equal(t, "data_transfer_out", rows[0].Prices[0].Dimension)
 }
+
+func TestIntegration_AzureVMPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "azure-vm.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "azure", Service: "vm",
+		InstanceType: "Standard_D2_v3", Region: "eastus",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+}
+
+func TestIntegration_AzureSQLPointLookup(t *testing.T) {
+	dir := os.Getenv("SKU_TEST_SHARD_DIR")
+	if dir == "" {
+		t.Skip("SKU_TEST_SHARD_DIR not set")
+	}
+	cat, err := catalog.Open(filepath.Join(dir, "azure-sql.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+
+	rows, err := cat.LookupDBRelational(context.Background(), catalog.DBRelationalFilter{
+		Provider: "azure", Service: "sql",
+		InstanceType: "GP_Gen5_2", Region: "eastus",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "azure-sql", OS: "single-az"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+}
