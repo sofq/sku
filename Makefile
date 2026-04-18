@@ -76,8 +76,22 @@ aws-ebs-shard: ## Build aws-ebs shard from fixtures
 	@mv dist/pipeline/aws_ebs.db dist/pipeline/aws-ebs.db
 	@mv dist/pipeline/aws_ebs.rows.jsonl dist/pipeline/aws-ebs.rows.jsonl
 
+.PHONY: aws-dynamodb-shard
+aws-dynamodb-shard: ## Build aws-dynamodb shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_dynamodb FIXTURE=testdata/aws_dynamodb \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_dynamodb.db dist/pipeline/aws-dynamodb.db
+	@mv dist/pipeline/aws_dynamodb.rows.jsonl dist/pipeline/aws-dynamodb.rows.jsonl
+
+.PHONY: aws-cloudfront-shard
+aws-cloudfront-shard: ## Build aws-cloudfront shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_cloudfront FIXTURE=testdata/aws_cloudfront \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_cloudfront.db dist/pipeline/aws-cloudfront.db
+	@mv dist/pipeline/aws_cloudfront.rows.jsonl dist/pipeline/aws-cloudfront.rows.jsonl
+
 .PHONY: aws-shards
-aws-shards: aws-ec2-shard aws-rds-shard aws-s3-shard aws-lambda-shard aws-ebs-shard ## Build all aws shards (m3a.1+m3a.2)
+aws-shards: aws-ec2-shard aws-rds-shard aws-s3-shard aws-lambda-shard aws-ebs-shard aws-dynamodb-shard aws-cloudfront-shard ## Build all aws shards (m3a.1+m3a.2+m3a.3)
 
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
@@ -97,6 +111,8 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/aws-s3.db     || (echo "run 'make aws-s3-shard' first"     && exit 2)
 	@test -f dist/pipeline/aws-lambda.db || (echo "run 'make aws-lambda-shard' first" && exit 2)
 	@test -f dist/pipeline/aws-ebs.db    || (echo "run 'make aws-ebs-shard' first"    && exit 2)
+	@test -f dist/pipeline/aws-dynamodb.db   || (echo "run 'make aws-dynamodb-shard' first"   && exit 2)
+	@test -f dist/pipeline/aws-cloudfront.db || (echo "run 'make aws-cloudfront-shard' first" && exit 2)
 	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
 	  SKU_TEST_SHARD_DIR=$(CURDIR)/dist/pipeline \
 	  $(GO) test -tags=integration -race -count=1 ./...
