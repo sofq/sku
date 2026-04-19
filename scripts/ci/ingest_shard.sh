@@ -91,7 +91,9 @@ python -m package.build_shard \
 
 # Rename to dashed form so the filename matches the Go binary's expectation
 # (SKU_DATA_DIR lookups) and the public release-asset URL shape.
-mv "$OUT_DIR/$SHARD.db"          "$OUT_DIR/${public_shard}.db"
-mv "$OUT_DIR/$SHARD.rows.jsonl"  "$OUT_DIR/${public_shard}.rows.jsonl"
+if [ "$SHARD" != "$public_shard" ]; then
+  mv "$OUT_DIR/$SHARD.db"          "$OUT_DIR/${public_shard}.db"
+  mv "$OUT_DIR/$SHARD.rows.jsonl"  "$OUT_DIR/${public_shard}.rows.jsonl"
+fi
 
 echo "ingest_shard.sh: built $OUT_DIR/${public_shard}.db"

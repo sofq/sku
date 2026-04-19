@@ -103,7 +103,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     path_literal = str(offer_path).replace("'", "''")
     con.execute(
         f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'})"
+        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=134217728)"
     )
 
     # Collect: (storage_class, region) -> {"storage": {sku,usd,unit,volume_type}, ...}

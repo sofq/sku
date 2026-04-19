@@ -81,12 +81,14 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     path_literal = str(offer_path).replace("'", "''")
     con.execute(
         f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'})"
+        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=134217728)"
     )
 
     grouped: dict[tuple[str, str], dict[str, Any]] = {}
 
     for sku_id, location_raw, unit, usd, begin_range in con.execute(_SQL).fetchall():
+        if location_raw is None:
+            continue
         if location_raw not in LOCATION_MAP:
             raise KeyError(location_raw)
         region = LOCATION_MAP[location_raw]
