@@ -40,7 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-m4.2 — cross-provider `sku compare --kind compute.vm` (in progress).
+v1.0 shipped — no open milestone.
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
