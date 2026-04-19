@@ -53,3 +53,32 @@ func TestLLMTextEstimator_promptAndCompletion(t *testing.T) {
 		t.Fatalf("bad line: %+v", li)
 	}
 }
+
+func TestLLMTextEstimator_promptOnly(t *testing.T) {
+	prev := lookupLLM
+	t.Cleanup(func() { lookupLLM = prev })
+	lookupLLM = func(_ context.Context, _ string, _ catalog.LLMFilter) ([]catalog.Row, error) {
+		return []catalog.Row{{
+			SKUID: "x", Provider: "anthropic",
+			Prices: []catalog.Price{
+				{Dimension: "prompt", Amount: 1e-5, Unit: "token"},
+			},
+		}}, nil
+	}
+	it, _ := ParseItem("llm:anthropic/claude-opus-4.6:input=2M:serving_provider=anthropic")
+	li, err := llmTextEstimator{}.Estimate(context.Background(), it)
+	if err != nil {
+		t.Fatalf("estimate: %v", err)
+	}
+	want := 2e6 * 1e-5
+	if math.Abs(li.MonthlyUSD-want) > 1e-9 {
+		t.Fatalf("monthly = %v, want %v", li.MonthlyUSD, want)
+	}
+}
+
+func TestLLMTextEstimator_missingBothQuantities(t *testing.T) {
+	it, _ := ParseItem("llm:anthropic/claude-opus-4.6:serving_provider=anthropic")
+	if _, err := (llmTextEstimator{}).Estimate(context.Background(), it); err == nil {
+		t.Fatal("expected error when input and output are both zero")
+	}
+}
