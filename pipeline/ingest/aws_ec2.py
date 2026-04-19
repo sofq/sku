@@ -31,45 +31,42 @@ _OS_MAP: dict[str, str] = {"Linux": "linux", "Windows": "windows", "RHEL": "rhel
 _TENANCY_MAP: dict[str, str] = {"Shared": "shared", "Dedicated": "dedicated"}
 
 _SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
+WITH products_flat AS (
   SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.instanceType') AS instance_type,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.operatingSystem') AS os_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.tenancy') AS tenancy_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.preInstalledSw') AS pre_sw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.capacitystatus') AS cap,
-    json_extract_string(products, '$."' || sku_id || '".attributes.vcpu') AS vcpu,
-    json_extract_string(products, '$."' || sku_id || '".attributes.memory') AS memory,
-    json_extract_string(products, '$."' || sku_id || '".attributes.physicalProcessor') AS cpu,
-    json_extract_string(products, '$."' || sku_id || '".attributes.networkPerformance') AS net,
-    terms
-  FROM prod_keys
+    p.key AS sku_id,
+    json_extract_string(p.value, '$.productFamily') AS family,
+    json_extract_string(p.value, '$.attributes.instanceType') AS instance_type,
+    json_extract_string(p.value, '$.attributes.regionCode') AS region,
+    json_extract_string(p.value, '$.attributes.operatingSystem') AS os_raw,
+    json_extract_string(p.value, '$.attributes.tenancy') AS tenancy_raw,
+    json_extract_string(p.value, '$.attributes.preInstalledSw') AS pre_sw,
+    json_extract_string(p.value, '$.attributes.capacitystatus') AS cap,
+    json_extract_string(p.value, '$.attributes.vcpu') AS vcpu,
+    json_extract_string(p.value, '$.attributes.memory') AS memory,
+    json_extract_string(p.value, '$.attributes.physicalProcessor') AS cpu,
+    json_extract_string(p.value, '$.attributes.networkPerformance') AS net
+  FROM offer, json_each(offer.products) AS p(key, value)
+  WHERE json_extract_string(p.value, '$.productFamily') = 'Compute Instance'
+    AND json_extract_string(p.value, '$.attributes.preInstalledSw') = 'NA'
+    AND json_extract_string(p.value, '$.attributes.capacitystatus') = 'Used'
 ),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
+terms_flat AS (
+  SELECT
+    t.key AS sku_id,
+    (json_keys(t.value))[1] AS term_key,
+    t.value AS term_obj
+  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
 ),
 pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
+  SELECT tf.sku_id, tf.term_key, tf.term_obj,
+    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
+  FROM terms_flat tf
 )
-SELECT sku_id, instance_type, region, os_raw, tenancy_raw, vcpu, memory, cpu, net,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd
-FROM pd_keys
-WHERE family = 'Compute Instance' AND pre_sw = 'NA' AND cap = 'Used'
+SELECT pf.sku_id, pf.instance_type, pf.region, pf.os_raw, pf.tenancy_raw, pf.vcpu, pf.memory, pf.cpu, pf.net,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
+  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd
+FROM products_flat pf
+JOIN pd_keys pk ON pf.sku_id = pk.sku_id
 """
 
 

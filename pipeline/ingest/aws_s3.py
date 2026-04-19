@@ -60,40 +60,34 @@ _REQUEST_GROUP_MAP: dict[str, str] = {
 # on-demand term has one non-tiered priceDimension per SKU for the m3a.2
 # scope (first tier only for storage); we take the first pd_key.
 _SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
+WITH products_flat AS (
   SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.volumeType') AS volume_type,
-    json_extract_string(products, '$."' || sku_id || '".attributes.group') AS group_raw,
-    terms
-  FROM prod_keys
+    p.key AS sku_id,
+    json_extract_string(p.value, '$.productFamily') AS family,
+    json_extract_string(p.value, '$.attributes.regionCode') AS region,
+    json_extract_string(p.value, '$.attributes.volumeType') AS volume_type,
+    json_extract_string(p.value, '$.attributes.group') AS group_raw
+  FROM offer, json_each(offer.products) AS p(key, value)
+  WHERE json_extract_string(p.value, '$.productFamily') IN ('Storage', 'API Request')
 ),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
+terms_flat AS (
+  SELECT
+    t.key AS sku_id,
+    (json_keys(t.value))[1] AS term_key,
+    t.value AS term_obj
+  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
 ),
 pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
+  SELECT tf.sku_id, tf.term_key, tf.term_obj,
+    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
+  FROM terms_flat tf
 )
-SELECT sku_id, family, region, volume_type, group_raw,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".beginRange') AS begin_range
-FROM pd_keys
-WHERE family IN ('Storage', 'API Request')
+SELECT pf.sku_id, pf.family, pf.region, pf.volume_type, pf.group_raw,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
+  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".beginRange') AS begin_range
+FROM products_flat pf
+JOIN pd_keys pk ON pf.sku_id = pk.sku_id
 """
 
 

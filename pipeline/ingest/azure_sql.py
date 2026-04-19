@@ -35,7 +35,7 @@ WITH items AS (
   FROM read_json_auto('{path}', maximum_object_size=33554432)
 )
 SELECT
-  meterId       AS sku_id,
+  CAST(meterId AS VARCHAR) AS sku_id,
   skuName       AS resource_name,
   armRegionName AS region,
   productName   AS product_name,

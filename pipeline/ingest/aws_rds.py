@@ -25,42 +25,37 @@ _ENGINE_MAP = {"PostgreSQL": "postgres", "MySQL": "mysql", "MariaDB": "mariadb"}
 _DEPL_MAP = {"Single-AZ": "single-az", "Multi-AZ": "multi-az"}
 
 _SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
+WITH products_flat AS (
   SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.instanceType') AS instance_type,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.databaseEngine') AS engine_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.deploymentOption') AS depl_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.licenseModel') AS license_model,
-    json_extract_string(products, '$."' || sku_id || '".attributes.vcpu') AS vcpu,
-    json_extract_string(products, '$."' || sku_id || '".attributes.memory') AS memory,
-    terms
-  FROM prod_keys
+    p.key AS sku_id,
+    json_extract_string(p.value, '$.productFamily') AS family,
+    json_extract_string(p.value, '$.attributes.instanceType') AS instance_type,
+    json_extract_string(p.value, '$.attributes.regionCode') AS region,
+    json_extract_string(p.value, '$.attributes.databaseEngine') AS engine_raw,
+    json_extract_string(p.value, '$.attributes.deploymentOption') AS depl_raw,
+    json_extract_string(p.value, '$.attributes.licenseModel') AS license_model,
+    json_extract_string(p.value, '$.attributes.vcpu') AS vcpu,
+    json_extract_string(p.value, '$.attributes.memory') AS memory
+  FROM offer, json_each(offer.products) AS p(key, value)
+  WHERE json_extract_string(p.value, '$.productFamily') = 'Database Instance'
 ),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
+terms_flat AS (
+  SELECT
+    t.key AS sku_id,
+    (json_keys(t.value))[1] AS term_key,
+    t.value AS term_obj
+  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
 ),
 pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
+  SELECT tf.sku_id, tf.term_key, tf.term_obj,
+    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
+  FROM terms_flat tf
 )
-SELECT sku_id, instance_type, region, engine_raw, depl_raw, license_model, vcpu, memory,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd
-FROM pd_keys
-WHERE family = 'Database Instance'
+SELECT pf.sku_id, pf.instance_type, pf.region, pf.engine_raw, pf.depl_raw, pf.license_model, pf.vcpu, pf.memory,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
+  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd
+FROM products_flat pf
+JOIN pd_keys pk ON pf.sku_id = pk.sku_id
 """
 
 

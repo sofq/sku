@@ -25,37 +25,32 @@ _KIND = "storage.block"
 _ALLOWED_TYPES: set[str] = {"gp3", "gp2", "io2", "st1", "sc1"}
 
 _SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
+WITH products_flat AS (
   SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.volumeApiName') AS vol_type,
-    terms
-  FROM prod_keys
+    p.key AS sku_id,
+    json_extract_string(p.value, '$.productFamily') AS family,
+    json_extract_string(p.value, '$.attributes.regionCode') AS region,
+    json_extract_string(p.value, '$.attributes.volumeApiName') AS vol_type
+  FROM offer, json_each(offer.products) AS p(key, value)
+  WHERE json_extract_string(p.value, '$.productFamily') = 'Storage'
 ),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
+terms_flat AS (
+  SELECT
+    t.key AS sku_id,
+    (json_keys(t.value))[1] AS term_key,
+    t.value AS term_obj
+  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
 ),
 pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
+  SELECT tf.sku_id, tf.term_key, tf.term_obj,
+    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
+  FROM terms_flat tf
 )
-SELECT sku_id, region, vol_type,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd
-FROM pd_keys
-WHERE family = 'Storage'
+SELECT pf.sku_id, pf.region, pf.vol_type,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
+  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd
+FROM products_flat pf
+JOIN pd_keys pk ON pf.sku_id = pk.sku_id
 """
 
 

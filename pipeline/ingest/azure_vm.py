@@ -26,7 +26,7 @@ _KIND = "compute.vm"
 _SQL = """
 WITH items AS (
   SELECT UNNEST(Items, recursive := true)
-  FROM read_json_auto('{path}', maximum_object_size=134217728)
+  FROM read_json_auto('{path}', maximum_object_size=536870912)
 )
 SELECT
   meterId       AS sku_id,
