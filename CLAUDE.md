@@ -125,6 +125,10 @@ echo '{"items":[{"provider":"aws","service":"ec2","resource":"m5.large","params"
 ./bin/sku estimate --item aws/s3:standard:region=us-east-1:gb_month=500:put_requests=1000:get_requests=5000 --pretty
 ./bin/sku estimate --item azure/blob:hot:region=eastus:gb_month=200:put_requests=500:get_requests=2000 --pretty
 ./bin/sku estimate --item gcp/gcs:standard:region=us-east1:gb_month=1000:put_requests=10000:get_requests=50000 --pretty
+# llm.text estimator (m5.4)
+./bin/sku estimate --item llm:anthropic/claude-opus-4.6:input=1M:output=500K:serving_provider=anthropic --pretty
+./bin/sku estimate --item llm:anthropic/claude-opus-4.6:input=2M:output=1M:serving_provider=aws-bedrock --pretty
+./bin/sku estimate --config docs/examples/workload-llm.yaml --pretty
 ```
 
 ## Global flags (all subcommands)
