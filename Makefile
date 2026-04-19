@@ -228,3 +228,8 @@ npm-pack-smoke: build ## Pack root npm package and run `sku version` via shim
 pypi-wheel-smoke: build ## Stage local binary + build a single wheel
 	mkdir -p python/sku_cli/bin && cp bin/sku python/sku_cli/bin/
 	cd python && python3 -m build --wheel
+
+.PHONY: docs-verify
+docs-verify: build ## Re-run every verified snippet in docs/getting-started.md + docs/commands/
+	@test -d dist/pipeline || (echo "run 'make openrouter-shard aws-shards azure-shards gcp-shards' first" && exit 2)
+	bash scripts/verify-docs-snippets.sh
