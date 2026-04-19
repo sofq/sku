@@ -145,8 +145,29 @@ gcp-cloud-sql-shard: ## Build gcp-cloud-sql shard from fixtures
 	@mv dist/pipeline/gcp_cloud_sql.db dist/pipeline/gcp-cloud-sql.db
 	@mv dist/pipeline/gcp_cloud_sql.rows.jsonl dist/pipeline/gcp-cloud-sql.rows.jsonl
 
+.PHONY: gcp-gcs-shard
+gcp-gcs-shard: ## Build gcp-gcs shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=gcp_gcs FIXTURE=testdata/gcp_gcs \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/gcp_gcs.db dist/pipeline/gcp-gcs.db
+	@mv dist/pipeline/gcp_gcs.rows.jsonl dist/pipeline/gcp-gcs.rows.jsonl
+
+.PHONY: gcp-run-shard
+gcp-run-shard: ## Build gcp-run shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=gcp_run FIXTURE=testdata/gcp_run \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/gcp_run.db dist/pipeline/gcp-run.db
+	@mv dist/pipeline/gcp_run.rows.jsonl dist/pipeline/gcp-run.rows.jsonl
+
+.PHONY: gcp-functions-shard
+gcp-functions-shard: ## Build gcp-functions shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=gcp_functions FIXTURE=testdata/gcp_functions \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/gcp_functions.db dist/pipeline/gcp-functions.db
+	@mv dist/pipeline/gcp_functions.rows.jsonl dist/pipeline/gcp-functions.rows.jsonl
+
 .PHONY: gcp-shards
-gcp-shards: gcp-gce-shard gcp-cloud-sql-shard ## Build gcp shards (m3b.3)
+gcp-shards: gcp-gce-shard gcp-cloud-sql-shard gcp-gcs-shard gcp-run-shard gcp-functions-shard ## Build gcp shards (m3b.3+m3b.4)
 
 .PHONY: pipeline-test
 pipeline-test: ## Run Python pipeline tests
@@ -175,6 +196,9 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/azure-disks.db     || (echo "run 'make azure-disks-shard' first"     && exit 2)
 	@test -f dist/pipeline/gcp-gce.db         || (echo "run 'make gcp-gce-shard' first"         && exit 2)
 	@test -f dist/pipeline/gcp-cloud-sql.db   || (echo "run 'make gcp-cloud-sql-shard' first"   && exit 2)
+	@test -f dist/pipeline/gcp-gcs.db         || (echo "run 'make gcp-gcs-shard' first"         && exit 2)
+	@test -f dist/pipeline/gcp-run.db         || (echo "run 'make gcp-run-shard' first"         && exit 2)
+	@test -f dist/pipeline/gcp-functions.db   || (echo "run 'make gcp-functions-shard' first"   && exit 2)
 	SKU_TEST_SHARD=$(CURDIR)/dist/pipeline/openrouter.db \
 	  SKU_TEST_SHARD_DIR=$(CURDIR)/dist/pipeline \
 	  $(GO) test -tags=integration -race -count=1 ./...
