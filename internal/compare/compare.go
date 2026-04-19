@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	"golang.org/x/sync/errgroup"
 
@@ -26,19 +27,51 @@ type Request struct {
 	MemoryGB float64
 	GPUCount int64
 	MaxPrice float64
-	Regions  []string
-	Sort     string
-	Limit    int
-	Targets  []ShardTarget
+
+	// storage.object
+	StorageClass     string
+	DurabilityNines  int64
+	AvailabilityTier string
+
+	// db.relational
+	StorageGB        float64
+	Engine           string
+	DeploymentOption string
+
+	Regions []string
+	Sort    string
+	Limit   int
+	Targets []ShardTarget
 }
 
 const defaultLimit = 20
 
+type kindQuery func(ctx context.Context, c *catalog.Catalog, req Request) ([]catalog.Row, error)
+
+var kindRegistry = map[string]kindQuery{
+	"compute.vm": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryVM(ctx, c, kinds.VMSpec{
+			VCPU: r.VCPU, MemoryGB: r.MemoryGB, GPUCount: r.GPUCount,
+			MaxPrice: r.MaxPrice, Regions: r.Regions,
+		})
+	},
+}
+
+func supportedKinds() string {
+	keys := make([]string, 0, len(kindRegistry))
+	for k := range kindRegistry {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return strings.Join(keys, ", ")
+}
+
 // Run fans out the request across every target shard in parallel, merges the
 // returned rows, applies Sort + Limit, and returns. Rows are safe to render.
 func Run(ctx context.Context, req Request) ([]catalog.Row, error) {
-	if req.Kind != "compute.vm" {
-		return nil, fmt.Errorf("compare: kind %q not supported in m4.2 (compute.vm only)", req.Kind)
+	query, ok := kindRegistry[req.Kind]
+	if !ok {
+		return nil, fmt.Errorf("compare: unsupported kind %q; supported: %s", req.Kind, supportedKinds())
 	}
 	if len(req.Targets) == 0 {
 		return nil, fmt.Errorf("compare: no shards available; run `sku update` or pass --auto-fetch (m5)")
@@ -58,13 +91,7 @@ func Run(ctx context.Context, req Request) ([]catalog.Row, error) {
 				return fmt.Errorf("compare: open %s: %w", t.Name, err)
 			}
 			defer func() { _ = cat.Close() }()
-			rows, err := kinds.QueryVM(gctx, cat, kinds.VMSpec{
-				VCPU:     req.VCPU,
-				MemoryGB: req.MemoryGB,
-				GPUCount: req.GPUCount,
-				MaxPrice: req.MaxPrice,
-				Regions:  req.Regions,
-			})
+			rows, err := query(gctx, cat, req)
 			if err != nil {
 				return fmt.Errorf("compare: %s: %w", t.Name, err)
 			}

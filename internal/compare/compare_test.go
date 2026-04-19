@@ -54,8 +54,12 @@ func TestRun_cancelledContext(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestRun_unsupportedKind(t *testing.T) {
-	_, err := Run(context.Background(), Request{Kind: "storage.object"})
+func TestRun_rejectsUnknownKind(t *testing.T) {
+	_, err := Run(context.Background(), Request{
+		Kind:    "queue.messaging",
+		Targets: []ShardTarget{{Name: "nope", Path: "/dev/null"}},
+	})
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "storage.object")
+	require.Contains(t, err.Error(), "unsupported")
+	require.Contains(t, err.Error(), "queue.messaging")
 }
