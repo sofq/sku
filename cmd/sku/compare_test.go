@@ -40,10 +40,10 @@ func TestCompare_unsupportedKind(t *testing.T) {
 	cmd := newRootCmd()
 	cmd.SetOut(&stdout)
 	cmd.SetErr(&stderr)
-	cmd.SetArgs([]string{"compare", "--kind", "storage.object"})
+	cmd.SetArgs([]string{"compare", "--kind", "llm.text"})
 	err := cmd.Execute()
 	require.Error(t, err)
-	require.Contains(t, stderr.String(), "storage.object")
+	require.Contains(t, stderr.String(), "llm.text")
 }
 
 func TestCompare_dryRun(t *testing.T) {
