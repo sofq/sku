@@ -2,8 +2,7 @@ name: release
 
 # Required repository secrets (set in GitHub Settings → Secrets):
 #   HOMEBREW_TAP_TOKEN   — PAT with contents:write on sofq/homebrew-tap + sofq/scoop-bucket
-#   NPM_TOKEN            — npm automation token (used by release-npm.yml)
-#   PYPI_API_TOKEN       — PyPI API token (used by release-pypi.yml)
+# npm/PyPI use OIDC trusted publishing via GitHub environments (npm-publish, pypi-publish).
 # GITHUB_TOKEN is auto-injected. id-token: write enables cosign keyless + SLSA.
 
 on:
@@ -88,8 +87,6 @@ jobs:
     with:
       version: ${{ needs.compute-version.outputs.version }}
       prerelease: ${{ needs.compute-version.outputs.prerelease == 'true' }}
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   release-pypi:
     needs: [compute-version, goreleaser]
@@ -97,5 +94,3 @@ jobs:
     with:
       version: ${{ needs.compute-version.outputs.version }}
       prerelease: ${{ needs.compute-version.outputs.prerelease == 'true' }}
-    secrets:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
