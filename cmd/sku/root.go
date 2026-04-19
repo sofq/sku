@@ -51,6 +51,7 @@ func newRootCmd() *cobra.Command {
 	root.AddCommand(newSearchCmd())
 	root.AddCommand(newCompareCmd())
 	root.AddCommand(newEstimateCmd())
+	root.AddCommand(newBatchCmd())
 	root.AddCommand(newConfigureCmd())
 	root.AddCommand(newCompletionCmd())
 	return root
