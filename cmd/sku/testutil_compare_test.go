@@ -34,3 +34,39 @@ func testutilSeededComputeVMCatalog(t *testing.T) string {
 	}
 	return dir
 }
+
+func testutilSeededStorageObjectCatalog(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	cases := []struct {
+		shard, seed string
+	}{
+		{"aws-s3", filepath.Join("..", "..", "internal", "catalog", "testdata", "seed_aws_m3a2.sql")},
+		{"azure-blob", filepath.Join("..", "..", "internal", "catalog", "testdata", "seed_azure_m3b2.sql")},
+		{"gcp-gcs", filepath.Join("..", "..", "internal", "catalog", "testdata", "seed_gcp_m3b4.sql")},
+	}
+	for _, c := range cases {
+		b, err := os.ReadFile(c.seed) //nolint:gosec
+		require.NoError(t, err)
+		require.NoError(t, catalog.BuildFromSQL(filepath.Join(dir, c.shard+".db"), string(b)))
+	}
+	return dir
+}
+
+func testutilSeededDBRelationalCatalog(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	cases := []struct {
+		shard, seed string
+	}{
+		{"aws-rds", filepath.Join("..", "..", "internal", "catalog", "testdata", "seed_aws.sql")},
+		{"azure-sql", filepath.Join("..", "..", "internal", "catalog", "testdata", "seed_azure.sql")},
+		{"gcp-cloud-sql", filepath.Join("..", "..", "internal", "catalog", "testdata", "seed_gcp.sql")},
+	}
+	for _, c := range cases {
+		b, err := os.ReadFile(c.seed) //nolint:gosec
+		require.NoError(t, err)
+		require.NoError(t, catalog.BuildFromSQL(filepath.Join(dir, c.shard+".db"), string(b)))
+	}
+	return dir
+}
