@@ -3,6 +3,7 @@ package sku
 import (
 	"bytes"
 	"encoding/json"
+	"math"
 	"strings"
 	"testing"
 )
@@ -162,5 +163,46 @@ func TestEstimate_storageObject_configYAML(t *testing.T) {
 	}
 	if items[0].(map[string]any)["kind"] != "storage.object" {
 		t.Fatalf("bad envelope: %s", stdout.String())
+	}
+}
+
+func TestEstimate_llmText_endToEnd(t *testing.T) {
+	_ = testutilSeededEstimateCatalogLLM(t)
+
+	cmd := newRootCmd()
+	var stdout, stderr bytes.Buffer
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{
+		"estimate",
+		"--item", "llm:anthropic/claude-opus-4.6:input=1M:output=500K:serving_provider=anthropic",
+	})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr:\n%s", err, stderr.String())
+	}
+
+	var got struct {
+		MonthlyTotalUSD float64 `json:"monthly_total_usd"`
+		Items           []struct {
+			MonthlyUSD   float64 `json:"monthly_usd"`
+			QuantityUnit string  `json:"quantity_unit"`
+			Kind         string  `json:"kind"`
+		} `json:"items"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &got); err != nil {
+		t.Fatalf("json: %v\nout:\n%s", err, stdout.String())
+	}
+	if len(got.Items) != 1 {
+		t.Fatalf("items = %d, want 1", len(got.Items))
+	}
+	want := 1e6*1.5e-5 + 5e5*7.5e-5
+	if math.Abs(got.Items[0].MonthlyUSD-want) > 1e-6 {
+		t.Fatalf("monthly = %v, want %v", got.Items[0].MonthlyUSD, want)
+	}
+	if got.Items[0].QuantityUnit != "token" {
+		t.Fatalf("quantity_unit = %q, want token", got.Items[0].QuantityUnit)
+	}
+	if got.Items[0].Kind != "llm.text" {
+		t.Fatalf("kind = %q, want llm.text", got.Items[0].Kind)
 	}
 }
