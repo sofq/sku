@@ -103,7 +103,7 @@ git commit -m "feat(m6): goreleaser — add cosign checksum signing, syft SBOMs,
 **Files:**
 - Modify: `.goreleaser.yml`
 
-- [ ] **Step 1: Add brews + scoops blocks**
+- [x] **Step 1: Add brews + scoops blocks**
 
 Append to `.goreleaser.yml` (after `nfpms:`):
 
@@ -135,17 +135,17 @@ scoops:
 
 Note: `skip_upload: auto` causes goreleaser to skip brew/scoop on any tag matching `*-rc.*` / `*-pre*`, matching spec §7 "Versioning policy" ("Pre-releases skip brew/npm/pypi").
 
-- [ ] **Step 2: Snapshot build to confirm config parses**
+- [x] **Step 2: Snapshot build to confirm config parses**
 
 Run: `goreleaser release --snapshot --clean --skip=sign,publish,docker,sbom`
 Expected: Exit 0. `dist/sku.rb` (brew formula) and `dist/sku.json` (scoop manifest) present.
 
-- [ ] **Step 3: Inspect generated formula and scoop manifest**
+- [x] **Step 3: Inspect generated formula and scoop manifest**
 
 Run: `cat dist/sku.rb && cat dist/sku.json`
 Expected: Formula has `url "...sku_<version>_darwin_arm64.tar.gz"` with a sha256. Scoop manifest has windows urls.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .goreleaser.yml
