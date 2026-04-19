@@ -73,7 +73,7 @@ brews:
     repository:
       owner: sofq
       name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: "https://github.com/sofq/sku"
     description: "Agent-friendly CLI for cloud + LLM pricing."
     license: "Apache-2.0"
@@ -86,7 +86,7 @@ scoops:
     repository:
       owner: sofq
       name: scoop-bucket
-      token: "{{ .Env.SCOOP_GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: "https://github.com/sofq/sku"
     description: "Agent-friendly CLI for cloud + LLM pricing."
     license: Apache-2.0

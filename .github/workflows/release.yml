@@ -1,10 +1,9 @@
 name: release
 
 # Required repository secrets (set in GitHub Settings → Secrets):
-#   HOMEBREW_TAP_GITHUB_TOKEN   — PAT with contents:write on sofq/homebrew-tap
-#   SCOOP_GITHUB_TOKEN          — PAT with contents:write on sofq/scoop-bucket
-#   NPM_TOKEN                   — npm automation token (used by release-npm.yml)
-#   PYPI_API_TOKEN              — PyPI API token (used by release-pypi.yml)
+#   HOMEBREW_TAP_TOKEN   — PAT with contents:write on sofq/homebrew-tap + sofq/scoop-bucket
+#   NPM_TOKEN            — npm automation token (used by release-npm.yml)
+#   PYPI_API_TOKEN       — PyPI API token (used by release-pypi.yml)
 # GITHUB_TOKEN is auto-injected. id-token: write enables cosign keyless + SLSA.
 
 on:
@@ -75,8 +74,7 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
-          SCOOP_GITHUB_TOKEN: ${{ secrets.SCOOP_GITHUB_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           COSIGN_EXPERIMENTAL: "1"
 
       - name: Attest build provenance (SLSA L3)
