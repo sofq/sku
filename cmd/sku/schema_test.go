@@ -59,3 +59,11 @@ func TestSchema_Base_ListsProvidersAndGlobals(t *testing.T) {
 	require.Contains(t, providers, "openrouter")
 	require.NotEmpty(t, doc["globals"])
 }
+
+func TestSchema_listCommands_includesBatchRegistry(t *testing.T) {
+	out, _, code := runSchema(t, "--list-commands")
+	require.Zero(t, code)
+	for _, n := range []string{"aws ec2 price", "compare", "estimate", "llm price"} {
+		require.Contains(t, out, n, "schema list missing %q", n)
+	}
+}

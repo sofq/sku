@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/sofq/sku/internal/batch"
 	"github.com/sofq/sku/internal/catalog"
 	skuerrors "github.com/sofq/sku/internal/errors"
 )
@@ -19,10 +20,11 @@ import (
 // view lands in a later task.
 func newSchemaCmd() *cobra.Command {
 	var (
-		list        bool
-		errs        bool
-		listServing bool
-		format      string
+		list         bool
+		errs         bool
+		listServing  bool
+		listCommands bool
+		format       string
 	)
 	c := &cobra.Command{
 		Use:   "schema [provider [service [verb]]]",
@@ -32,6 +34,11 @@ func newSchemaCmd() *cobra.Command {
 			enc := json.NewEncoder(w)
 
 			switch {
+			case listCommands:
+				return enc.Encode(map[string]any{
+					"commands": batch.RegisteredNames(),
+				})
+
 			case errs:
 				return enc.Encode(skuerrors.ErrorCatalog())
 
@@ -99,6 +106,8 @@ func newSchemaCmd() *cobra.Command {
 	c.Flags().BoolVar(&errs, "errors", false, "emit error-code catalog")
 	c.Flags().BoolVar(&listServing, "list-serving-providers", false,
 		"list serving providers in the openrouter shard")
+	c.Flags().BoolVar(&listCommands, "list-commands", false,
+		"list batch-registered command names")
 	c.Flags().StringVar(&format, "format", "json", "json | text")
 	return c
 }
