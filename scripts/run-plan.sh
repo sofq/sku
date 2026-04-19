@@ -97,7 +97,19 @@ Execution contract:
       d. Tag: \`git tag milestone/<slug>\` where slug is a short form of the
          closed plan (e.g. \`2026-04-18-m1-openrouter-...\` → \`milestone/m1\`).
          Do NOT push the tag.
-      e. Print "MILESTONE CLOSED: <basename>" to stdout, then exit.
+      e. Fast-forward \`main\` to the just-tagged tip so main always points
+         at the latest shipped milestone:
+            CURRENT=\$(git rev-parse --abbrev-ref HEAD)
+            git checkout main
+            git merge --ff-only "\$CURRENT" || {
+              echo "WARNING: main is not a fast-forward of \$CURRENT — leaving main alone."
+              git checkout "\$CURRENT"
+              # continue; do not abort the milestone-close
+            }
+            git checkout "\$CURRENT"
+         Only \`--ff-only\` is allowed. Never merge with conflicts. Never
+         push. If main has diverged, leave it alone and warn.
+      f. Print "MILESTONE CLOSED: <basename>" to stdout, then exit.
 
 Hard rules:
 - Never use --no-verify or skip hooks. If a hook fails, fix the root cause.
