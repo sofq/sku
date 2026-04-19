@@ -76,3 +76,28 @@ func TestParseItem_errors(t *testing.T) {
 		}
 	}
 }
+
+func TestParseItem_llmForm(t *testing.T) {
+	it, err := ParseItem("llm:anthropic/claude-opus-4.6:input=1M:output=500K")
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if it.Provider != "llm" || it.Service != "text" {
+		t.Fatalf("provider/service = %q/%q, want llm/text", it.Provider, it.Service)
+	}
+	if it.Resource != "anthropic/claude-opus-4.6" {
+		t.Fatalf("resource = %q, want anthropic/claude-opus-4.6", it.Resource)
+	}
+	if it.Kind != "llm.text" {
+		t.Fatalf("kind = %q, want llm.text", it.Kind)
+	}
+	if it.Params["input"] != "1M" || it.Params["output"] != "500K" {
+		t.Fatalf("params = %v", it.Params)
+	}
+}
+
+func TestParseItem_llmMissingModel(t *testing.T) {
+	if _, err := ParseItem("llm::input=1M"); err == nil {
+		t.Fatal("expected error on empty model")
+	}
+}
