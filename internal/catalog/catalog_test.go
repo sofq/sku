@@ -367,3 +367,67 @@ func TestLookupDBRelational_GCPCloudSQLRegionalDifferentTermsHash(t *testing.T) 
 		"zonal and regional must hash to different terms rows")
 	require.Greater(t, regional[0].Prices[0].Amount, zonal[0].Prices[0].Amount)
 }
+
+func openSeededGCPM3b4(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_gcp_m3b4.sql", "gcp-gcs.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupStorageObject_GCPGCSPointLookup(t *testing.T) {
+	cat := openSeededGCPM3b4(t)
+	rows, err := cat.LookupStorageObject(context.Background(), catalog.StorageObjectFilter{
+		Provider: "gcp", Service: "gcs",
+		StorageClass: "standard", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "standard", rows[0].ResourceName)
+	dims := map[string]bool{}
+	for _, p := range rows[0].Prices {
+		dims[p.Dimension] = true
+	}
+	for _, want := range []string{"storage", "read-ops", "write-ops"} {
+		require.Truef(t, dims[want], "missing dimension %s", want)
+	}
+}
+
+func TestLookupStorageObject_GCPGCSRegionOptional(t *testing.T) {
+	cat := openSeededGCPM3b4(t)
+	rows, err := cat.LookupStorageObject(context.Background(), catalog.StorageObjectFilter{
+		Provider: "gcp", Service: "gcs",
+		StorageClass: "standard",
+		Terms:        catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1, "standard class exists only in us-east1 in the seed")
+}
+
+func TestLookupServerlessFunction_GCPRunPointLookup(t *testing.T) {
+	cat := openSeededGCPM3b4(t)
+	rows, err := cat.LookupServerlessFunction(context.Background(), catalog.ServerlessFunctionFilter{
+		Provider: "gcp", Service: "run",
+		Architecture: "x86_64", Region: "europe-west1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "run", rows[0].Service)
+	require.Equal(t, "x86_64", rows[0].ResourceName)
+}
+
+func TestLookupServerlessFunction_GCPFunctionsPointLookup(t *testing.T) {
+	cat := openSeededGCPM3b4(t)
+	rows, err := cat.LookupServerlessFunction(context.Background(), catalog.ServerlessFunctionFilter{
+		Provider: "gcp", Service: "functions",
+		Architecture: "x86_64", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "functions", rows[0].Service)
+	require.Equal(t, "x86_64", rows[0].ResourceName)
+}
