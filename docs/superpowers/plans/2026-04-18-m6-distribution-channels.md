@@ -954,7 +954,7 @@ git commit -m "feat(m6): chained release workflows — npm (platform packages) +
 - Create: `docs/contributing/RELEASING.md`
 - Create: `docs/install.md`
 
-- [ ] **Step 1: Add Makefile targets**
+- [x] **Step 1: Add Makefile targets**
 
 Append to `Makefile`:
 
@@ -974,7 +974,7 @@ pypi-wheel-smoke: build ## Stage local binary + build a single wheel
 	cd python && python3 -m build --wheel
 ```
 
-- [ ] **Step 2: Write RELEASING.md**
+- [x] **Step 2: Write RELEASING.md**
 
 Create `docs/contributing/RELEASING.md`:
 
@@ -1024,7 +1024,7 @@ Every release is driven by a signed, annotated tag pushed to `main`.
   pick it up automatically.
 ```
 
-- [ ] **Step 3: Write docs/install.md**
+- [x] **Step 3: Write docs/install.md**
 
 Create `docs/install.md`:
 
@@ -1061,7 +1061,7 @@ sha256sum -c checksums.txt
 ```
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add Makefile docs/contributing/RELEASING.md docs/install.md

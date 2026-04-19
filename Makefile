@@ -214,3 +214,17 @@ docker-smoke: ## Build a local Docker image from the snapshot binary and run sku
 		-f Dockerfile.goreleaser -t sku:smoke \
 		dist/sku_linux_amd64_v1/
 	docker run --rm sku:smoke version
+
+.PHONY: release-check
+release-check: ## Full local goreleaser dry-run incl. sign/sbom/docker (requires cosign+syft+docker)
+	goreleaser release --snapshot --clean
+
+.PHONY: npm-pack-smoke
+npm-pack-smoke: build ## Pack root npm package and run `sku version` via shim
+	cd npm && npm pack --dry-run
+	node npm/bin/sku.js version || true
+
+.PHONY: pypi-wheel-smoke
+pypi-wheel-smoke: build ## Stage local binary + build a single wheel
+	mkdir -p python/sku_cli/bin && cp bin/sku python/sku_cli/bin/
+	cd python && python3 -m build --wheel
