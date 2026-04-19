@@ -131,14 +131,17 @@ func newLLMPriceCmd() *cobra.Command {
 
 			// Stale warning (not fatal) still emitted from the Cobra path; batch
 			// callers don't get stderr warnings in v1.
-			if cat, openErr := catalog.Open(catalog.ShardPath("openrouter")); openErr == nil {
-				age := cat.Age(time.Now().UTC())
-				if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
-					_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
-						"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
-						age, s.StaleWarningDays)
+			shardPath := catalog.ShardPath("openrouter")
+			if _, statErr := os.Stat(shardPath); statErr == nil {
+				if cat, openErr := catalog.Open(shardPath); openErr == nil {
+					age := cat.Age(time.Now().UTC())
+					if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
+						_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
+							"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
+							age, s.StaleWarningDays)
+					}
+					_ = cat.Close()
 				}
-				_ = cat.Close()
 			}
 
 			opts := output.Options{
