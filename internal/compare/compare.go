@@ -55,6 +55,26 @@ var kindRegistry = map[string]kindQuery{
 			MaxPrice: r.MaxPrice, Regions: r.Regions,
 		})
 	},
+	"storage.object": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryStorageObject(ctx, c, kinds.StorageObjectSpec{
+			StorageClass:     r.StorageClass,
+			DurabilityNines:  r.DurabilityNines,
+			AvailabilityTier: r.AvailabilityTier,
+			MaxPrice:         r.MaxPrice,
+			Regions:          r.Regions,
+		})
+	},
+	"db.relational": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryDBRelational(ctx, c, kinds.DBRelationalSpec{
+			VCPU:             r.VCPU,
+			MemoryGB:         r.MemoryGB,
+			StorageGB:        r.StorageGB,
+			Engine:           r.Engine,
+			DeploymentOption: r.DeploymentOption,
+			MaxPrice:         r.MaxPrice,
+			Regions:          r.Regions,
+		})
+	},
 }
 
 func supportedKinds() string {
