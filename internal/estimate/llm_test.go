@@ -139,3 +139,26 @@ func TestLLMTextEstimator_servingProviderOpenrouter(t *testing.T) {
 		t.Fatalf("serving_provider = %q, want openrouter", got.ServingProvider)
 	}
 }
+
+func TestLLMTextEstimator_aliasDimensions(t *testing.T) {
+	prev := lookupLLM
+	t.Cleanup(func() { lookupLLM = prev })
+	lookupLLM = func(_ context.Context, _ string, _ catalog.LLMFilter) ([]catalog.Row, error) {
+		return []catalog.Row{{
+			SKUID: "x", Provider: "anthropic",
+			Prices: []catalog.Price{
+				{Dimension: "input_tokens", Amount: 3e-6, Unit: "token"},
+				{Dimension: "output_tokens", Amount: 9e-6, Unit: "token"},
+			},
+		}}, nil
+	}
+	it, _ := ParseItem("llm:anthropic/claude-opus-4.6:input=1M:output=1M:serving_provider=anthropic")
+	li, err := llmTextEstimator{}.Estimate(context.Background(), it)
+	if err != nil {
+		t.Fatalf("estimate: %v", err)
+	}
+	want := 1e6*3e-6 + 1e6*9e-6
+	if math.Abs(li.MonthlyUSD-want) > 1e-9 {
+		t.Fatalf("monthly = %v, want %v", li.MonthlyUSD, want)
+	}
+}
