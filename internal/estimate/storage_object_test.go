@@ -86,3 +86,73 @@ func TestStorageObjectEstimator_gcpAliases(t *testing.T) {
 		t.Fatalf("monthly = %v, want %v", li.MonthlyUSD, want)
 	}
 }
+
+func TestStorageObjectEstimator_regionRequired(t *testing.T) {
+	it, _ := ParseItem("aws/s3:standard")
+	if _, err := (storageObjectEstimator{}).Estimate(context.Background(), it); err == nil {
+		t.Fatal("expected region-required error")
+	}
+}
+
+func TestStorageObjectEstimator_notFound(t *testing.T) {
+	prev := lookupStorageObject
+	t.Cleanup(func() { lookupStorageObject = prev })
+	lookupStorageObject = func(_ context.Context, _ string, _ catalog.StorageObjectFilter) ([]catalog.Row, error) {
+		return nil, nil
+	}
+	it, _ := ParseItem("aws/s3:standard:region=us-east-1:gb_month=10")
+	if _, err := (storageObjectEstimator{}).Estimate(context.Background(), it); err == nil {
+		t.Fatal("expected not-found error")
+	}
+}
+
+func TestStorageObjectEstimator_ambiguous(t *testing.T) {
+	prev := lookupStorageObject
+	t.Cleanup(func() { lookupStorageObject = prev })
+	lookupStorageObject = func(_ context.Context, _ string, _ catalog.StorageObjectFilter) ([]catalog.Row, error) {
+		return []catalog.Row{{SKUID: "a"}, {SKUID: "b"}}, nil
+	}
+	it, _ := ParseItem("aws/s3:standard:region=us-east-1:gb_month=10")
+	if _, err := (storageObjectEstimator{}).Estimate(context.Background(), it); err == nil {
+		t.Fatal("expected ambiguous error")
+	}
+}
+
+func TestStorageObjectEstimator_missingStorageDim(t *testing.T) {
+	prev := lookupStorageObject
+	t.Cleanup(func() { lookupStorageObject = prev })
+	lookupStorageObject = func(_ context.Context, _ string, _ catalog.StorageObjectFilter) ([]catalog.Row, error) {
+		return []catalog.Row{{
+			SKUID: "x",
+			Prices: []catalog.Price{
+				{Dimension: "requests-put", Amount: 1e-5, Unit: "requests"},
+			},
+		}}, nil
+	}
+	it, _ := ParseItem("aws/s3:standard:region=us-east-1:gb_month=10")
+	if _, err := (storageObjectEstimator{}).Estimate(context.Background(), it); err == nil {
+		t.Fatal("expected missing-storage-dimension error")
+	}
+}
+
+func TestStorageObjectEstimator_zeroGbSkipsStorageDim(t *testing.T) {
+	prev := lookupStorageObject
+	t.Cleanup(func() { lookupStorageObject = prev })
+	lookupStorageObject = func(_ context.Context, _ string, _ catalog.StorageObjectFilter) ([]catalog.Row, error) {
+		return []catalog.Row{{
+			SKUID: "x",
+			Prices: []catalog.Price{
+				{Dimension: "requests-put", Amount: 1e-5, Unit: "requests"},
+			},
+		}}, nil
+	}
+	it, _ := ParseItem("aws/s3:standard:region=us-east-1:put_requests=10000")
+	li, err := storageObjectEstimator{}.Estimate(context.Background(), it)
+	if err != nil {
+		t.Fatalf("estimate: %v", err)
+	}
+	want := 1e-5 * 10000
+	if math.Abs(li.MonthlyUSD-want) > 1e-9 {
+		t.Fatalf("monthly = %v, want %v", li.MonthlyUSD, want)
+	}
+}
