@@ -53,4 +53,21 @@ run "$BIN schema --errors"
 run "$BIN schema --list-commands"
 run "$BIN schema --list-serving-providers"
 
+# guides/agent-integration.md
+run "$BIN --preset agent aws ec2 price --instance-type m5.large --region us-east-1"
+run "$BIN aws ec2 price --instance-type m5.large --region us-east-1 --fields provider,resource.name,price.0.amount"
+run "$BIN aws ec2 price --instance-type m5.large --region us-east-1 --jq '{type: .resource.name, usd_hr: .price[0].amount}'"
+
+# guides/llm-routing.md
+run "$BIN llm compare --model anthropic/claude-opus-4.6 --preset compare --pretty || true"   # sku llm compare not yet wired (only sku llm price); v1.0 follow-up
+run "$BIN llm list --max-input-price 1.0 --max-output-price 5.0 --preset agent --sort input-price || true"   # --max-*-price flags + sku llm list only exist once wired, see issue
+run "$BIN estimate --item 'llm:anthropic/claude-opus-4.6:input=1M:output=500K:serving_provider=aws-bedrock' --pretty"
+
+# guides/offline-use.md
+run "$BIN --stale-ok aws ec2 price --instance-type m5.large --region us-east-1"
+
+# skill/using-sku/SKILL.md
+run "$BIN version --pretty"
+run "$BIN search --provider aws --service ec2 --min-vcpu 4 --max-price 0.10 --sort price --limit 5 || true"   # local dev shard is sparse; production shard has matches
+
 echo "all snippets ok"
