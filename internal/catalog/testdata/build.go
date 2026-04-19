@@ -16,6 +16,9 @@ var seedAWS string
 //go:embed seed_aws_m3a2.sql
 var seedAWSM3A2 string
 
+//go:embed seed.sql
+var seedOpenRouter string
+
 // BuildAWSShard writes an aws-ec2 shard at dst using the checked-in AWS seed.
 func BuildAWSShard(dst string) error {
 	return catalog.BuildFromSQL(dst, seedAWS)
@@ -26,4 +29,11 @@ func BuildAWSShard(dst string) error {
 // carries storage + requests-put + requests-get prices.
 func BuildAWSS3Shard(dst string) error {
 	return catalog.BuildFromSQL(dst, seedAWSM3A2)
+}
+
+// BuildOpenRouterShard writes an openrouter shard at dst using the M1 LLM
+// seed, which ships three rows for anthropic/claude-opus-4.6 (anthropic,
+// aws-bedrock, openrouter aggregated) with prompt + completion prices.
+func BuildOpenRouterShard(dst string) error {
+	return catalog.BuildFromSQL(dst, seedOpenRouter)
 }
