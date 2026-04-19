@@ -42,7 +42,7 @@ Agent quick-start for the `sku` repo.
 
 v1.0 shipped — no open milestone.
 
-### Quick path (agent, repeatable, M3b.3 surface)
+### Quick path (agent, repeatable, M3b.4 surface)
 
 ```bash
 make openrouter-shard aws-shards azure-shards gcp-shards  # build all local shards
@@ -96,6 +96,13 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku gcp cloud-sql price --tier db-custom-2-7680 --region us-east1 \
                               --engine postgres --deployment-option zonal --preset agent
 ./bin/sku gcp cloud-sql list  --tier db-custom-2-7680  --engine postgres
+
+./bin/sku gcp gcs       price --storage-class standard --region us-east1 --preset agent
+./bin/sku gcp gcs       list  --storage-class standard
+./bin/sku gcp run       price --architecture x86_64 --region us-east1 --preset agent
+./bin/sku gcp run       list  --architecture x86_64
+./bin/sku gcp functions price --architecture x86_64 --region us-east1 --preset agent
+./bin/sku gcp functions list  --architecture x86_64
 
 ./bin/sku search --provider aws --service ec2 --min-vcpu 4 --limit 5 --preset agent
 ./bin/sku search --provider aws --service ec2 --max-price 0.10 --sort price
