@@ -19,6 +19,9 @@ Agent quick-start for the `sku` repo.
 | Run Go integration tests | `make test-integration` |
 | Run benchmarks | `make bench` |
 | Run Python pipeline tests | `make pipeline-test` |
+| Run discover (fixture / dry-run) | `make discover` |
+| Run discover against real upstreams | `DISCOVER_LIVE=1 GCP_BILLING_API_KEY=... make discover` |
+| Live-ingest a single shard | `make shard-live SHARD=aws_ec2 SRC=/path/to/offer.json` |
 
 ## Repo map
 
