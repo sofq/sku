@@ -1,11 +1,8 @@
 name: data-daily
 
 on:
-  schedule:
-    # DISABLED until one successful workflow_dispatch run proves the pipeline
-    # end-to-end. Re-enabled by Task 12 of plan m3a.4.2 after green dry-run +
-    # publish-run from a draft PR.
-    # - cron: "0 3 * * *"
+  # schedule:  # Re-enable in Task 12 after a green dry-run + publish-run.
+  #   - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
