@@ -259,7 +259,7 @@ git commit -m "feat(m6): multi-arch Docker image published to ghcr.io/sofq/sku w
 **Files:**
 - Modify: `.github/workflows/release.yml`
 
-- [ ] **Step 1: Replace release.yml body**
+- [x] **Step 1: Replace release.yml body**
 
 Overwrite `.github/workflows/release.yml` with:
 
@@ -328,7 +328,7 @@ jobs:
           subject-path: "dist/*.tar.gz,dist/*.zip,dist/checksums.txt"
 ```
 
-- [ ] **Step 2: Add comment block documenting required repo secrets**
+- [x] **Step 2: Add comment block documenting required repo secrets**
 
 Prepend to `.github/workflows/release.yml` (after the `name:` line but before `on:`), as a YAML comment:
 
@@ -341,12 +341,12 @@ Prepend to `.github/workflows/release.yml` (after the `name:` line but before `o
 # GITHUB_TOKEN is auto-injected. id-token: write enables cosign keyless + SLSA.
 ```
 
-- [ ] **Step 3: Lint the workflow file**
+- [x] **Step 3: Lint the workflow file**
 
 Run: `yq '.' .github/workflows/release.yml > /dev/null && echo "yaml ok"` (fallback if yq missing: `python3 -c 'import yaml,sys;yaml.safe_load(open(".github/workflows/release.yml"))' && echo "yaml ok"`)
 Expected: `yaml ok`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .github/workflows/release.yml
