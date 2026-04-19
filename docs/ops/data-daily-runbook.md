@@ -47,8 +47,8 @@ After this run:
 
 - `gh release view data-$(date -u +%Y.%m.%d)` should list every shard's
   `.db.zst` + `.sha256`, a `manifest.json`, and `state.json`.
-- The `data` branch must exist and contain `data/manifest.json`.
-- `curl https://cdn.jsdelivr.net/gh/sofq/sku@latest/data/manifest.json`
+- The `data` branch must exist and contain `manifest.json` at its root.
+- `curl https://cdn.jsdelivr.net/gh/sofq/sku@data/manifest.json`
   should return the new manifest (may take up to 30s after the purge step).
 
 Only after both runs are green do you enable the cron schedule (next section).
@@ -100,7 +100,7 @@ To clear:
 
 ```bash
 curl --fail --silent --show-error \
-  https://purge.jsdelivr.net/gh/sofq/sku@latest/data/manifest.json
+  https://purge.jsdelivr.net/gh/sofq/sku@data/manifest.json
 
 gh issue close <issue-number> --comment "Purge verified; manifest fresh on jsDelivr."
 ```

@@ -30,9 +30,10 @@ git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_RE
 git checkout -q --orphan data
 git rm -rfq . 2>/dev/null || true
 
-mkdir -p data
-cp "$workspace/$MANIFEST_SRC" data/manifest.json
-git add data/manifest.json
+# Manifest lives at the branch root so jsDelivr serves it as
+#   https://cdn.jsdelivr.net/gh/<repo>@data/manifest.json
+cp "$workspace/$MANIFEST_SRC" manifest.json
+git add manifest.json
 git -c user.email="bot@sku" -c user.name="sku-data-bot" commit -q -m "data-${CATALOG_VERSION}"
 git push -qf origin data
 

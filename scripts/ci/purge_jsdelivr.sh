@@ -11,7 +11,7 @@
 # users start seeing stale data.
 set -euo pipefail
 
-URL="https://purge.jsdelivr.net/gh/sofq/sku@latest/data/manifest.json"
+URL="https://purge.jsdelivr.net/gh/sofq/sku@data/manifest.json"
 
 for attempt in 1 2 3; do
   if curl --fail --silent --show-error "$URL" >/dev/null; then
