@@ -38,8 +38,3 @@ func argStringSlice(args map[string]any, key string) []string {
 	}
 	return out
 }
-
-func argBool(args map[string]any, key string) bool {
-	b, _ := args[key].(bool)
-	return b
-}

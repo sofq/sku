@@ -13,9 +13,10 @@ import (
 // Format is the detected stdin format.
 type Format int
 
+// Format constants enumerate the two accepted stdin shapes.
 const (
-	FormatNDJSON Format = iota
-	FormatArray
+	FormatNDJSON Format = iota // one JSON object per line, `#`-prefixed comments allowed
+	FormatArray                // single top-level JSON array
 )
 
 // ErrBadFormat is returned when the first non-whitespace byte is neither

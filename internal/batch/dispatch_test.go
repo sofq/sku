@@ -11,10 +11,10 @@ import (
 
 func TestDispatch_happyPathAndUnknown(t *testing.T) {
 	ResetForTest(t)
-	Register("hi", func(ctx context.Context, args map[string]any, env Env) (any, error) {
+	Register("hi", func(_ context.Context, _ map[string]any, _ Env) (any, error) {
 		return map[string]any{"ok": true}, nil
 	})
-	Register("notfound", func(ctx context.Context, args map[string]any, env Env) (any, error) {
+	Register("notfound", func(_ context.Context, _ map[string]any, _ Env) (any, error) {
 		return nil, skuerrors.NotFound("aws", "ec2", map[string]any{"instance_type": "x"}, "try another")
 	})
 
@@ -41,7 +41,7 @@ func TestDispatch_happyPathAndUnknown(t *testing.T) {
 
 func TestDispatch_genericErrorBoxed(t *testing.T) {
 	ResetForTest(t)
-	Register("boom", func(ctx context.Context, _ map[string]any, _ Env) (any, error) {
+	Register("boom", func(_ context.Context, _ map[string]any, _ Env) (any, error) {
 		return nil, errors.New("raw failure")
 	})
 	recs := Dispatch(context.Background(), []Op{{Command: "boom"}}, Env{Settings: &Settings{}})

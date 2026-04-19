@@ -34,7 +34,7 @@ func newEstimateCmd() *cobra.Command {
 // handleEstimate is the shared body used by the standalone Cobra command and
 // the batch dispatcher. Batch inputs only support the `items` arg (string
 // slice of inline DSL); --config/--stdin are Cobra-only.
-func handleEstimate(ctx context.Context, args map[string]any, env batch.Env) (any, error) {
+func handleEstimate(ctx context.Context, args map[string]any, _ batch.Env) (any, error) {
 	raws := argStringSlice(args, "items")
 	if len(raws) == 0 {
 		return nil, skuerrors.Validation("flag_invalid", "items", "",
