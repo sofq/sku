@@ -1,0 +1,22 @@
+{
+  "name": "@sofq/sku",
+  "version": "0.0.0",
+  "description": "Agent-friendly CLI for cloud + LLM pricing. This is a thin npm wrapper that exec()s a prebuilt Go binary installed via an optional platform dependency.",
+  "homepage": "https://github.com/sofq/sku",
+  "license": "Apache-2.0",
+  "bin": {
+    "sku": "bin/sku.js"
+  },
+  "scripts": {
+    "test": "node bin/sku.js version"
+  },
+  "files": ["bin/"],
+  "optionalDependencies": {
+    "@sofq/sku-linux-x64": "0.0.0",
+    "@sofq/sku-linux-arm64": "0.0.0",
+    "@sofq/sku-darwin-x64": "0.0.0",
+    "@sofq/sku-darwin-arm64": "0.0.0",
+    "@sofq/sku-win32-x64": "0.0.0",
+    "@sofq/sku-win32-arm64": "0.0.0"
+  }
+}

@@ -364,7 +364,7 @@ git commit -m "feat(m6): release workflow — cosign, syft, GHCR login, SLSA L3 
 - Create: `npm/platform-packages/README.md`
 - Create: `npm/platform-packages/template/package.json.tmpl`
 
-- [ ] **Step 1: Write root npm/package.json**
+- [x] **Step 1: Write root npm/package.json**
 
 Create `npm/package.json`:
 
@@ -395,7 +395,7 @@ Create `npm/package.json`:
 
 Version `0.0.0` is a placeholder; goreleaser stamps the real version in at release time (see Task 7).
 
-- [ ] **Step 2: Write the exec shim**
+- [x] **Step 2: Write the exec shim**
 
 Create `npm/bin/sku.js`:
 
@@ -447,7 +447,7 @@ if (res.error) {
 process.exit(res.status === null ? 1 : res.status);
 ```
 
-- [ ] **Step 3: Write platform package template**
+- [x] **Step 3: Write platform package template**
 
 Create `npm/platform-packages/template/package.json.tmpl` (consumed by release-npm.yml; one concrete package per supported `os`/`cpu` pair):
 
@@ -466,7 +466,7 @@ Create `npm/platform-packages/template/package.json.tmpl` (consumed by release-n
 
 Placeholders `{OS}`, `{ARCH}`, `{NODE_OS}`, `{NODE_ARCH}`, `{VERSION}` are replaced by the publish script (Task 7). Node's allowed `os`/`cpu` values differ slightly from Go's (`darwin`/`linux`/`win32`; `x64`/`arm64`) — the script maps them explicitly.
 
-- [ ] **Step 4: Write npm/platform-packages/README.md**
+- [x] **Step 4: Write npm/platform-packages/README.md**
 
 Create `npm/platform-packages/README.md`:
 
@@ -484,7 +484,7 @@ Supported platforms: linux-x64, linux-arm64, darwin-x64, darwin-arm64,
 win32-x64, win32-arm64.
 ```
 
-- [ ] **Step 5: Write npm/README.md**
+- [x] **Step 5: Write npm/README.md**
 
 Create `npm/README.md`:
 
@@ -500,7 +500,7 @@ root shim `bin/sku.js` execs it. No postinstall network download.
 Source: https://github.com/sofq/sku
 ```
 
-- [ ] **Step 6: Smoke-test the shim logic locally**
+- [x] **Step 6: Smoke-test the shim logic locally**
 
 Run:
 
@@ -513,7 +513,7 @@ cd /tmp/sku-npm-smoke && node bin/sku.js version
 
 Expected: exit 0, prints JSON version. If `bin/sku` doesn't exist, run `make build` first.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add npm/
