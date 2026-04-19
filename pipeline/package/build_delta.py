@@ -86,7 +86,6 @@ def _compute_statements(prev_db: Path, new_db: Path) -> list[str]:
         curr_sku_ids = {r[0] for r in curr.execute("SELECT sku_id FROM skus")}
 
         deleted = sorted(prev_sku_ids - curr_sku_ids)
-        common = prev_sku_ids & curr_sku_ids
         added = sorted(curr_sku_ids - prev_sku_ids)
 
         # Gather per-table column lists once.
@@ -211,9 +210,11 @@ def _part_path(out_sql_gz: Path, index: int, total: int) -> Path:
 
 def _write_gzip(path: Path, payload: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "wb") as raw:
-        with gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=9, mtime=0) as fh:
-            fh.write(payload)
+    with (
+        open(path, "wb") as raw,
+        gzip.GzipFile(fileobj=raw, mode="wb", compresslevel=9, mtime=0) as fh,
+    ):
+        fh.write(payload)
 
 
 def _format_payload(statements: Iterable[str], *, header: str | None = None) -> bytes:

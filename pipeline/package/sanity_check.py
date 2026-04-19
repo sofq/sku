@@ -65,9 +65,7 @@ def sanity_check(
 
         generated_at = _metadata_value(con, "generated_at")
         if not generated_at:
-            raise SanityError(
-                shard, "missing_generated_at", "metadata.generated_at is NULL/empty"
-            )
+            raise SanityError(shard, "missing_generated_at", "metadata.generated_at is NULL/empty")
 
         # FK integrity: every price row must reference a live sku row.
         orphan_prices = con.execute(
@@ -101,7 +99,8 @@ def sanity_check(
             added = sorted(curr_schema.keys() - prev_schema.keys())
             removed = sorted(prev_schema.keys() - curr_schema.keys())
             changed = sorted(
-                k for k in curr_schema.keys() & prev_schema.keys()
+                k
+                for k in curr_schema.keys() & prev_schema.keys()
                 if curr_schema[k] != prev_schema[k]
             )
             raise SanityError(

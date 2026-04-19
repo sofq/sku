@@ -39,7 +39,7 @@ def _write_shard(tmp_path: Path, name: str, rows: list[dict], version: str) -> P
         shard=name,
         out_path=out,
         catalog_version=version,
-        generated_at=f"2026-04-18T00:00:00Z",
+        generated_at="2026-04-18T00:00:00Z",
         source_url="https://example.com",
     )
     return out
@@ -113,9 +113,11 @@ def test_round_trip_deletions(tmp_path: Path):
     # Confirm we actually emitted DELETE statements for the 3 removed skus.
     assert sql.count("DELETE FROM skus WHERE sku_id =") == 3
     # No bulk upsert of unchanged rows.
-    assert "sku-0::anthropic::default" not in sql or "INSERT OR REPLACE INTO skus" not in sql.split(
-        "DELETE FROM metadata"
-    )[0].split("sku-0::anthropic::default")[0]
+    assert (
+        "sku-0::anthropic::default" not in sql
+        or "INSERT OR REPLACE INTO skus"
+        not in sql.split("DELETE FROM metadata")[0].split("sku-0::anthropic::default")[0]
+    )
 
 
 def test_split_when_gzipped_exceeds_max_bytes(tmp_path: Path):
