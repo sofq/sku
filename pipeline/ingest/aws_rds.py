@@ -78,7 +78,9 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if engine_raw not in _ENGINE_MAP or depl_raw not in _DEPL_MAP:
             continue
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": _ENGINE_MAP[engine_raw],

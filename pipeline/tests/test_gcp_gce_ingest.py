@@ -48,8 +48,8 @@ def test_non_usd_filtered():
     assert "SKU-N1S2-EUW1-EUR" not in out_ids
 
 
-def test_unknown_region_rejected(tmp_path):
-    """A SKU in a region not in regions.yaml must fail the ingest."""
+def test_unknown_region_skipped(tmp_path):
+    """A SKU in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())
     for sku in bad["skus"]:
         if sku["category"]["usageType"] == "OnDemand" and sku["pricingInfo"][0]["pricingExpression"][
@@ -59,5 +59,5 @@ def test_unknown_region_rejected(tmp_path):
             break
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="gcp/us-central1"):
-        list(ingest(skus_path=p))
+    rows = list(ingest(skus_path=p))
+    assert all(r["region"] != "us-central1" for r in rows)

@@ -29,7 +29,7 @@ WITH items AS (
   FROM read_json_auto('{path}', maximum_object_size=536870912)
 )
 SELECT
-  meterId       AS sku_id,
+  CAST(meterId AS VARCHAR) AS sku_id,
   armSkuName    AS resource_name,
   armRegionName AS region,
   productName   AS product_name,
@@ -66,7 +66,9 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         # OS detection: productName contains "Windows" for Windows VMs;
         # everything else is Linux (the only two surfaces we ship in m3b.1).
         os_value = "windows" if "Windows" in product else "linux"
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         divisor, unit = parse_unit_of_measure(uom)
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",

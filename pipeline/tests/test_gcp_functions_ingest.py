@@ -57,7 +57,7 @@ def test_architecture_attr():
         assert row["resource_name"] == "x86_64"
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     for sku in bad["skus"]:
         if sku["category"]["resourceGroup"] == "CloudFunctionsV2" and sku["category"]["usageType"] == "OnDemand":
@@ -65,5 +65,5 @@ def test_unknown_region_rejected(tmp_path):
                 sku["serviceRegions"] = ["mars-1"]
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="gcp/mars-1"):
-        list(ingest(skus_path=p))
+    rows = list(ingest(skus_path=p))
+    assert all(r["region"] != "mars-1" for r in rows)

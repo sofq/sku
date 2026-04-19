@@ -77,7 +77,8 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         dim = _GROUP_MAP.get(group_raw)
         if arch is None or dim is None:
             continue
-        normalizer.normalize(_PROVIDER, region)  # early reject on unknown region
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
         key = (arch, region)
         grouped.setdefault(key, {})[dim] = {"sku": sku_id, "usd": usd, "unit": unit}
 

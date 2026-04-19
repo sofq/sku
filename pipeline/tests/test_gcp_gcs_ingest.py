@@ -57,7 +57,7 @@ def test_three_dimensions_per_row():
         assert sorted(p["dimension"] for p in row["prices"]) == expected
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     # Point the standard-storage / read-ops / write-ops meters at an unknown region.
     for sku in bad["skus"]:
@@ -66,5 +66,5 @@ def test_unknown_region_rejected(tmp_path):
                 sku["serviceRegions"] = ["mars-1"]
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="gcp/mars-1"):
-        list(ingest(skus_path=p))
+    rows = list(ingest(skus_path=p))
+    assert all(r["region"] != "mars-1" for r in rows)

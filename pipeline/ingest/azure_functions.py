@@ -70,7 +70,8 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         dim = _DIM_MAP.get(meter_name)
         if dim is None:
             continue
-        normalizer.normalize(_PROVIDER, region)
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
         if dim == "executions":
             divisor, unit = parse_request_uom(uom)
             amount = price / divisor

@@ -72,7 +72,9 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         deployment = _classify_deployment(product)
         if deployment is None:
             continue
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         divisor, unit = parse_unit_of_measure(uom)
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",

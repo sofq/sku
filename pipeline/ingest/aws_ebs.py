@@ -70,7 +70,9 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     rows = [r for r in rows if r[2] in _ALLOWED_TYPES]
 
     for sku_id, region, vol_type, unit, usd in rows:
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "",

@@ -89,7 +89,8 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if dim == "storage" and begin_range not in (None, "0"):
             continue
-        normalizer.normalize(_PROVIDER, region)
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue
         key = (klass, region)
         grouped.setdefault(key, {})[dim] = {"sku": sku_id, "usd": usd, "unit": unit}
 

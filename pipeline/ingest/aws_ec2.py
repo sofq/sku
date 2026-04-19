@@ -87,7 +87,9 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     ):
         if os_raw not in _OS_MAP or tenancy_raw not in _TENANCY_MAP:
             continue
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": _TENANCY_MAP[tenancy_raw],

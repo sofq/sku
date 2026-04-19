@@ -65,7 +65,9 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         if disk_type is None:
             continue  # Ultra + reserved + others skipped
         divisor, unit = parse_storage_uom(uom)
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "",

@@ -93,7 +93,8 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         dim = _dim_for(meter_name)
         if dim is None:
             continue
-        normalizer.normalize(_PROVIDER, region)  # early reject on unknown region
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
         if dim == "storage":
             divisor, unit = parse_storage_uom(uom)
         else:

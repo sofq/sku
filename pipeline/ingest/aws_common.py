@@ -29,6 +29,15 @@ class RegionNormalizer:
         except KeyError as exc:
             raise KeyError(f"{provider}/{region}") from exc
 
+    def try_normalize(self, provider: str, region: str) -> str | None:
+        """Return canonical group, or None when the region is not tracked.
+
+        Live AWS/Azure/GCP price feeds include regions outside our coverage
+        (new launches, opt-in regions, etc.). Ingest callers use this helper
+        to skip those rows instead of failing the whole shard.
+        """
+        return self.table.get((provider, region))
+
 
 def load_region_normalizer() -> RegionNormalizer:
     """Load the repo's regions.yaml and build a (provider, region) -> group map."""

@@ -35,12 +35,12 @@ def test_terms_hash_matches_terms_content():
         assert r["terms_hash"] == terms_hash(r["terms"])
 
 
-def test_unknown_region_rejected(tmp_path):
-    """A product in a region not in regions.yaml must fail the ingest."""
+def test_unknown_region_skipped(tmp_path):
+    """A product in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())
     first_sku = next(iter(bad["products"]))
     bad["products"][first_sku]["attributes"]["regionCode"] = "ap-south-9"
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="ap-south-9"):
-        list(ingest(offer_path=p))
+    rows = list(ingest(offer_path=p))
+    assert all(r["region"] != "ap-south-9" for r in rows)

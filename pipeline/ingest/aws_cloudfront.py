@@ -94,7 +94,8 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         region = LOCATION_MAP[location_raw]
         if begin_range not in (None, "0"):
             continue
-        normalizer.normalize(_PROVIDER, region)
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
         key = ("standard", region)
         grouped[key] = {"sku": sku_id, "usd": usd, "unit": unit}
 

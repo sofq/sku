@@ -54,7 +54,7 @@ def test_non_usd_rows_filtered():
         assert eur_ids.isdisjoint(parts)
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     for it in bad["Items"]:
         if it["type"] == "Consumption" and it["currencyCode"] == "USD":
@@ -62,5 +62,5 @@ def test_unknown_region_rejected(tmp_path):
             break
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="centralus"):
-        list(ingest(prices_path=p))
+    rows = list(ingest(prices_path=p))
+    assert all(r["region"] != "centralus" for r in rows)
