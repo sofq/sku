@@ -19,7 +19,7 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["ingest", "normalize", "package"]
+packages = ["ingest", "normalize", "package", "discover"]
 
 [tool.ruff]
 line-length = 100
