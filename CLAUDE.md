@@ -117,6 +117,10 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku estimate --item aws/ec2:m5.large:region=us-east-1:count=10:hours=730 --pretty
 ./bin/sku estimate --item aws/ec2:m5.large:region=us-east-1:count=2:hours=100 \
                    --item aws/ec2:m5.xlarge:region=us-east-1:count=1:hours=730
+# Workload from YAML file
+./bin/sku estimate --config docs/examples/workload-vm.yaml --pretty
+# Workload from stdin
+echo '{"items":[{"provider":"aws","service":"ec2","resource":"m5.large","params":{"region":"us-east-1","count":2,"hours":100}}]}' | ./bin/sku estimate --stdin --pretty
 ```
 
 ## Global flags (all subcommands)

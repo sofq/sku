@@ -25,7 +25,7 @@ func readEstimateConfig(path string) ([]estimate.Item, error) {
 	default:
 		return nil, fmt.Errorf("estimate/config: unsupported extension %q (use .yaml, .yml, or .json)", ext)
 	}
-	f, err := os.Open(path)
+	f, err := os.Open(path) //nolint:gosec // G304: operator-provided workload path
 	if err != nil {
 		return nil, fmt.Errorf("estimate/config: open %q: %w", path, err)
 	}
