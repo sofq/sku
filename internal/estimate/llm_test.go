@@ -113,3 +113,29 @@ func TestLLMTextEstimator_notFound(t *testing.T) {
 		t.Fatal("expected not-found error")
 	}
 }
+
+func TestLLMTextEstimator_servingProviderOpenrouter(t *testing.T) {
+	prev := lookupLLM
+	t.Cleanup(func() { lookupLLM = prev })
+	var got catalog.LLMFilter
+	lookupLLM = func(_ context.Context, _ string, f catalog.LLMFilter) ([]catalog.Row, error) {
+		got = f
+		return []catalog.Row{{
+			SKUID: "aggregated", Provider: "openrouter",
+			Prices: []catalog.Price{
+				{Dimension: "prompt", Amount: 2e-5, Unit: "token"},
+				{Dimension: "completion", Amount: 8e-5, Unit: "token"},
+			},
+		}}, nil
+	}
+	it, _ := ParseItem("llm:anthropic/claude-opus-4.6:input=1M:output=1M:serving_provider=openrouter")
+	if _, err := (llmTextEstimator{}).Estimate(context.Background(), it); err != nil {
+		t.Fatalf("estimate: %v", err)
+	}
+	if !got.IncludeAggregated {
+		t.Fatal("IncludeAggregated must be true when serving_provider=openrouter")
+	}
+	if got.ServingProvider != "openrouter" {
+		t.Fatalf("serving_provider = %q, want openrouter", got.ServingProvider)
+	}
+}
