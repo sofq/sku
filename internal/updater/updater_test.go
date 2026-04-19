@@ -155,6 +155,7 @@ func TestDefaultSources_Contains(t *testing.T) {
 		"azure-vm", "azure-sql",
 		"azure-blob", "azure-functions", "azure-disks",
 		"gcp-gce", "gcp-cloud-sql",
+		"gcp-gcs", "gcp-run", "gcp-functions",
 	} {
 		if _, ok := updater.DefaultSources[shard]; !ok {
 			t.Errorf("DefaultSources missing shard %q", shard)

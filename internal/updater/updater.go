@@ -44,6 +44,9 @@ var DefaultSources = map[string]string{
 	"azure-disks":     "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-disks",
 	"gcp-gce":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gce",
 	"gcp-cloud-sql":   "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-cloud-sql",
+	"gcp-gcs":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gcs",
+	"gcp-run":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-run",
+	"gcp-functions":   "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-functions",
 }
 
 // ShardNames returns the keys of DefaultSources. Used by the Cobra
