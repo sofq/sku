@@ -82,3 +82,34 @@ func TestLLMTextEstimator_missingBothQuantities(t *testing.T) {
 		t.Fatal("expected error when input and output are both zero")
 	}
 }
+
+func TestLLMTextEstimator_ambiguous(t *testing.T) {
+	prev := lookupLLM
+	t.Cleanup(func() { lookupLLM = prev })
+	lookupLLM = func(_ context.Context, _ string, f catalog.LLMFilter) ([]catalog.Row, error) {
+		if f.ServingProvider != "" {
+			t.Fatalf("serving_provider filter should be empty, got %q", f.ServingProvider)
+		}
+		return []catalog.Row{
+			{SKUID: "a", Provider: "anthropic"},
+			{SKUID: "b", Provider: "aws-bedrock"},
+		}, nil
+	}
+	it, _ := ParseItem("llm:anthropic/claude-opus-4.6:input=1M")
+	_, err := llmTextEstimator{}.Estimate(context.Background(), it)
+	if err == nil {
+		t.Fatal("expected ambiguous error")
+	}
+}
+
+func TestLLMTextEstimator_notFound(t *testing.T) {
+	prev := lookupLLM
+	t.Cleanup(func() { lookupLLM = prev })
+	lookupLLM = func(_ context.Context, _ string, _ catalog.LLMFilter) ([]catalog.Row, error) {
+		return nil, nil
+	}
+	it, _ := ParseItem("llm:unknown/model:input=1M:serving_provider=anthropic")
+	if _, err := (llmTextEstimator{}).Estimate(context.Background(), it); err == nil {
+		t.Fatal("expected not-found error")
+	}
+}
