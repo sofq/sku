@@ -138,6 +138,15 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku schema --list-commands
 ```
 
+### Distribution smoke (M6)
+
+```bash
+make release-check          # Full local goreleaser dry-run
+make docker-smoke           # Build + run sku:smoke container
+make npm-pack-smoke         # Dry npm pack + shim sanity-check
+make pypi-wheel-smoke       # Build one wheel with the local binary vendored
+```
+
 ## Global flags (all subcommands)
 
 `--profile`, `--preset {agent|full|price|compare}`, `--json|--yaml|--toml`, `--pretty`,

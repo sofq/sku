@@ -1076,7 +1076,7 @@ git commit -m "docs(m6): RELEASING.md + install.md + make release-check/npm-pack
 - Modify: `CHANGELOG.md` (create if missing)
 - Modify: `CLAUDE.md` (add M6 agent quick path lines)
 
-- [ ] **Step 1: Confirm full goreleaser dry-run is clean**
+- [x] **Step 1: Confirm full goreleaser dry-run is clean** *(ran with `--skip=sign,sbom,docker`; syft/docker unavailable locally — CI runs the full pipeline)*
 
 Run: `make release-check`
 Expected: Exit 0. `dist/` contains:
@@ -1089,7 +1089,7 @@ Expected: Exit 0. `dist/` contains:
 
 If cosign or syft missing locally, re-run with `--skip=sign,sbom` and record the skip in the task notes.
 
-- [ ] **Step 2: Write CHANGELOG.md v0.1.0 entry**
+- [x] **Step 2: Write CHANGELOG.md v0.1.0 entry**
 
 Create or prepend to `CHANGELOG.md`:
 
@@ -1113,7 +1113,7 @@ Create or prepend to `CHANGELOG.md`:
   the authoritative pre-release artifacts.
 ```
 
-- [ ] **Step 3: Add M6 verification lines to CLAUDE.md**
+- [x] **Step 3: Add M6 verification lines to CLAUDE.md**
 
 Edit `/Users/quan.hoang/quanhh/quanhoang/sku/CLAUDE.md`. Under "Quick path" add a new subsection header before the backlog block:
 
