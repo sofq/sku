@@ -206,3 +206,11 @@ test-integration: ## Run Go integration tests (requires built shards)
 .PHONY: release-dry
 release-dry: ## Snapshot build via goreleaser; no publish
 	goreleaser release --snapshot --clean
+
+.PHONY: docker-smoke
+docker-smoke: ## Build a local Docker image from the snapshot binary and run sku version
+	goreleaser release --snapshot --clean --skip=sign,publish,sbom
+	docker buildx build --platform linux/amd64 --load \
+		-f Dockerfile.goreleaser -t sku:smoke \
+		dist/sku_linux_amd64_v1/
+	docker run --rm sku:smoke version

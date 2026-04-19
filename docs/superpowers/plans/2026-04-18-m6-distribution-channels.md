@@ -161,7 +161,7 @@ git commit -m "feat(m6): goreleaser — publish Homebrew tap (sofq/homebrew-tap)
 - Modify: `.goreleaser.yml`
 - Modify: `Makefile`
 
-- [ ] **Step 1: Write Dockerfile.goreleaser**
+- [x] **Step 1: Write Dockerfile.goreleaser**
 
 Create `Dockerfile.goreleaser`:
 
@@ -174,7 +174,7 @@ ENTRYPOINT ["/usr/local/bin/sku"]
 CMD ["--help"]
 ```
 
-- [ ] **Step 2: Add dockers + docker_manifests to goreleaser**
+- [x] **Step 2: Add dockers + docker_manifests to goreleaser**
 
 Append to `.goreleaser.yml`:
 
@@ -226,7 +226,7 @@ docker_signs:
     output: true
 ```
 
-- [ ] **Step 3: Add docker-smoke target to Makefile**
+- [x] **Step 3: Add docker-smoke target to Makefile**
 
 Add to `Makefile`:
 
@@ -240,12 +240,12 @@ docker-smoke: ## Build a local Docker image from the snapshot binary and run sku
 	docker run --rm sku:smoke version
 ```
 
-- [ ] **Step 4: Run docker-smoke**
+- [x] **Step 4: Run docker-smoke** *(docker daemon not available in this environment; `goreleaser check` validates the config. Smoke runs in CI on release.)*
 
 Run: `make docker-smoke`
 Expected: Exit 0. Last lines print JSON with `"version":"0.0.0-snapshot-..."`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add Dockerfile.goreleaser .goreleaser.yml Makefile

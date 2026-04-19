@@ -92,6 +92,52 @@ scoops:
     license: Apache-2.0
     skip_upload: auto
 
+dockers:
+  - id: sku-amd64
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-amd64"
+    dockerfile: Dockerfile.goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.source=https://github.com/sofq/sku"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+  - id: sku-arm64
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-arm64"
+    dockerfile: Dockerfile.goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.source=https://github.com/sofq/sku"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+
+docker_manifests:
+  - name_template: "ghcr.io/sofq/sku:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-amd64"
+      - "ghcr.io/sofq/sku:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/sofq/sku:latest"
+    skip_push: auto
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-amd64"
+      - "ghcr.io/sofq/sku:{{ .Version }}-arm64"
+
+docker_signs:
+  - cmd: cosign
+    artifacts: manifests
+    args:
+      - sign
+      - "${artifact}@${digest}"
+      - "--yes"
+    output: true
+
 snapshot:
   version_template: "0.0.0-snapshot-{{ .ShortCommit }}"
 
