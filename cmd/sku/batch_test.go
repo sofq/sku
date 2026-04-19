@@ -2,6 +2,7 @@ package sku
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -76,6 +77,39 @@ func TestBatch_unknownCommand(t *testing.T) {
 	errMap := recs[0]["error"].(map[string]any)
 	if errMap["code"] != "validation" {
 		t.Fatalf("code = %v, want validation", errMap["code"])
+	}
+}
+
+func TestBatch_perOpPresetOverrideDoesNotLeak(t *testing.T) {
+	batch.ResetForTest(t)
+	var seenPresets []string
+	batch.Register("probe", func(_ context.Context, _ map[string]any, env batch.Env) (any, error) {
+		seenPresets = append(seenPresets, env.Settings.Preset)
+		return nil, nil
+	})
+	in := `[
+	  {"command":"probe"},
+	  {"command":"probe","preset":"compare"},
+	  {"command":"probe"}
+	]`
+	_, _, _ = runBatch(t, strings.NewReader(in))
+	if len(seenPresets) != 3 || seenPresets[1] != "compare" {
+		t.Fatalf("overrides lost: %v", seenPresets)
+	}
+	if seenPresets[0] == "compare" || seenPresets[2] == "compare" {
+		t.Fatalf("override leaked: %v", seenPresets)
+	}
+}
+
+func TestBatch_cancelledContextServerExit(t *testing.T) {
+	ops := []batch.Op{{Command: "aws ec2 price"}, {Command: "llm price"}}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	recs := batch.Dispatch(ctx, ops, batch.Env{Settings: &batch.Settings{}})
+	for i, r := range recs {
+		if r.ExitCode != skuerrors.CodeServer.ExitCode() {
+			t.Fatalf("rec %d exit = %d, want server", i, r.ExitCode)
+		}
 	}
 }
 
