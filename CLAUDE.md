@@ -40,7 +40,7 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone.
+m4.2 — cross-provider `sku compare --kind compute.vm` (in progress).
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
@@ -107,6 +107,9 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku search --provider aws --service ec2 --min-vcpu 4 --limit 5 --preset agent
 ./bin/sku search --provider aws --service ec2 --max-price 0.10 --sort price
 ./bin/sku search --provider aws --service ec2 --region us-east-1 --kind compute.vm
+
+./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions us-east --limit 5 --preset compare
+./bin/sku compare --kind compute.vm --vcpu 8 --memory 32 --regions us-east,eu-west --sort price
 ```
 
 ## Global flags (all subcommands)
