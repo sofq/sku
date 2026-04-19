@@ -43,6 +43,22 @@ func TestParseItem_resourcePreservesCase(t *testing.T) {
 	}
 }
 
+func TestParseItem_storageObjectKinds(t *testing.T) {
+	for _, raw := range []string{
+		"aws/s3:standard:region=us-east-1",
+		"azure/blob:hot:region=eastus",
+		"gcp/gcs:standard:region=us-east1",
+	} {
+		it, err := ParseItem(raw)
+		if err != nil {
+			t.Fatalf("%s: parse: %v", raw, err)
+		}
+		if it.Kind != "storage.object" {
+			t.Fatalf("%s: kind = %q, want storage.object", raw, it.Kind)
+		}
+	}
+}
+
 func TestParseItem_errors(t *testing.T) {
 	cases := map[string]string{
 		"empty":            "",
