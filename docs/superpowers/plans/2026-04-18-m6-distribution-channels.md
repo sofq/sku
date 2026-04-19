@@ -673,7 +673,7 @@ git commit -m "feat(m6): PyPI wrapper (sku-cli) with cibuildwheel platform-tagge
 - Create: `.github/workflows/release-pypi.yml`
 - Modify: `.github/workflows/release.yml` (chain these jobs)
 
-- [ ] **Step 1: Write release-npm.yml**
+- [x] **Step 1: Write release-npm.yml**
 
 Create `.github/workflows/release-npm.yml`:
 
@@ -731,7 +731,7 @@ jobs:
           npm publish --access public
 ```
 
-- [ ] **Step 2: Write the publish-npm.js helper**
+- [x] **Step 2: Write the publish-npm.js helper**
 
 Create `scripts/publish-npm.js`:
 
@@ -797,7 +797,7 @@ for (const m of matrix) {
 }
 ```
 
-- [ ] **Step 3: Write release-pypi.yml**
+- [x] **Step 3: Write release-pypi.yml**
 
 Create `.github/workflows/release-pypi.yml`:
 
@@ -899,7 +899,7 @@ jobs:
           twine upload dist/*.whl
 ```
 
-- [ ] **Step 4: Chain wrapper jobs from release.yml**
+- [x] **Step 4: Chain wrapper jobs from release.yml**
 
 Append to `.github/workflows/release.yml`:
 
@@ -933,12 +933,12 @@ Note: GitHub Actions does not ship a `trimPrefix` function. Replace with an inli
 
 Refactor the chained jobs to use a small `compute-version` job that outputs `version` and `prerelease`, and have `release-npm` / `release-pypi` depend on it.
 
-- [ ] **Step 5: Lint all three workflow files**
+- [x] **Step 5: Lint all three workflow files**
 
 Run: `for f in .github/workflows/release*.yml; do python3 -c "import yaml;yaml.safe_load(open('$f'))" && echo "$f ok"; done`
 Expected: three `ok` lines.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .github/workflows/release-npm.yml .github/workflows/release-pypi.yml .github/workflows/release.yml scripts/publish-npm.js
