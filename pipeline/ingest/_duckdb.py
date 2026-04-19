@@ -27,7 +27,6 @@ def _terms_hash_udf(
 def open_conn() -> duckdb.DuckDBPyConnection:
     """Return an in-memory conn with `sku_terms_hash(...)` bound as a scalar UDF."""
     con = duckdb.connect(":memory:")
-    con.execute("SET memory_limit='4GB'")
     con.execute("SET temp_directory='/tmp/sku_duckdb'")
     con.create_function(
         "sku_terms_hash",

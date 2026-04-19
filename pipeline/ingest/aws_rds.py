@@ -74,7 +74,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     path_literal = str(offer_path).replace("'", "''")
     con.execute(
         f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=134217728)"
+        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=536870912)"
     )
     for sku_id, instance_type, region, engine_raw, depl_raw, license_model, vcpu_raw, memory_raw, unit, usd in (
         con.execute(_SQL).fetchall()
