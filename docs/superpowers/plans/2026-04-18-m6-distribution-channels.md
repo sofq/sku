@@ -531,7 +531,7 @@ git commit -m "feat(m6): npm wrapper (@sofq/sku) using platform-optional-depende
 - Create: `python/MANIFEST.in`
 - Create: `python/README.md`
 
-- [ ] **Step 1: Write pyproject.toml**
+- [x] **Step 1: Write pyproject.toml**
 
 Create `python/pyproject.toml`:
 
@@ -580,7 +580,7 @@ skip = ["*-musllinux_*"]  # musllinux covered via a dedicated matrix entry
 archs = { linux = ["x86_64", "aarch64"], macos = ["x86_64", "arm64"], windows = ["AMD64", "ARM64"] }
 ```
 
-- [ ] **Step 2: Write the exec shim**
+- [x] **Step 2: Write the exec shim**
 
 Create `python/sku_cli/__init__.py` (empty) and `python/sku_cli/__main__.py`:
 
@@ -623,7 +623,7 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 3: Write MANIFEST.in and README**
+- [x] **Step 3: Write MANIFEST.in and README**
 
 Create `python/MANIFEST.in`:
 
@@ -646,7 +646,7 @@ at install time. No postinstall hooks, no network fetches.
 Source: https://github.com/sofq/sku
 ```
 
-- [ ] **Step 4: Local sdist smoke**
+- [x] **Step 4: Local sdist smoke**
 
 Run (requires `python3 -m pip install --user build`):
 
@@ -657,7 +657,7 @@ ls dist/ | grep "sku_cli-0.0.0.tar.gz" && echo "sdist ok"
 
 Expected: `sdist ok`. Wheel build requires `cibuildwheel` + platform toolchain, covered in Task 7.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add python/
