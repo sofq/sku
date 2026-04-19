@@ -74,6 +74,13 @@ Hard rules:
 - Do NOT execute any outstanding task. If a task is incomplete, leave it alone.
 - Do NOT modify any file other than the plan itself.
 - Never use --no-verify. No AI attribution or Co-Authored-By lines.
+- NEVER run destructive git commands: no \`git clean\`, no
+  \`git reset --hard\`, no \`git checkout -- .\`, no \`git stash drop\`,
+  no \`git stash -u\` followed by drop, no broad \`git restore\`.
+- NEVER touch \`scripts/\`, \`docs/superpowers/specs/\`, or \`.planning/\`.
+  Treat them as read-only — they are runner infrastructure.
+- If the working tree has untracked files unrelated to this reconcile,
+  leave them alone. Do not "tidy up".
 - When in doubt, leave it unchecked. False negatives (leaving a done task
   unchecked) are safe — the runner will re-examine. False positives (marking
   an incomplete task done) cause the runner to skip real work.
@@ -85,10 +92,21 @@ echo "[reconcile] unchecked before: $BEFORE"
 echo "[reconcile] log:              $LOG_FILE"
 echo
 
+START_TS="$(date +%s)"
+START_HUMAN="$(date '+%Y-%m-%d %H:%M:%S')"
+echo "[reconcile] start:            $START_HUMAN"
+
 set +e
 claude -p "$PROMPT" --permission-mode bypassPermissions 2>&1 | tee "$LOG_FILE"
 CLAUDE_EXIT="${PIPESTATUS[0]}"
 set -e
+
+END_TS="$(date +%s)"
+END_HUMAN="$(date '+%Y-%m-%d %H:%M:%S')"
+DUR=$((END_TS - START_TS))
+DUR_FMT="$(printf '%dm%02ds' $((DUR / 60)) $((DUR % 60)))"
+echo "[reconcile] end:              $END_HUMAN (duration: $DUR_FMT)"
+
 if [[ "$CLAUDE_EXIT" -ne 0 ]]; then
   echo "[reconcile] claude exited $CLAUDE_EXIT — see $LOG_FILE" >&2
   exit 1

@@ -165,12 +165,22 @@ for attempt in $(seq 1 "$MAX_RETRIES"); do
     CLAUDE_ARGS+=(--model "$SKU_RUNNER_MODEL")
   fi
 
+  ATTEMPT_START_TS="$(date +%s)"
+  ATTEMPT_START_HUMAN="$(date '+%Y-%m-%d %H:%M:%S')"
+  echo "[runner] attempt $attempt start: $ATTEMPT_START_HUMAN"
+
   # Don't abort the bash script on non-zero from claude — we want to inspect
   # progress and decide whether to retry.
   set +e
   claude "${CLAUDE_ARGS[@]}" 2>&1 | tee "$LOG_FILE"
   CLAUDE_EXIT="${PIPESTATUS[0]}"
   set -e
+
+  ATTEMPT_END_TS="$(date +%s)"
+  ATTEMPT_END_HUMAN="$(date '+%Y-%m-%d %H:%M:%S')"
+  ATTEMPT_DUR=$((ATTEMPT_END_TS - ATTEMPT_START_TS))
+  ATTEMPT_DUR_FMT="$(printf '%dm%02ds' $((ATTEMPT_DUR / 60)) $((ATTEMPT_DUR % 60)))"
+  echo "[runner] attempt $attempt end:   $ATTEMPT_END_HUMAN (duration: $ATTEMPT_DUR_FMT)"
 
   NOW_UNCHECKED="$(count_unchecked)"
   echo "[runner] attempt $attempt done — unchecked=$NOW_UNCHECKED (claude exit=$CLAUDE_EXIT)"

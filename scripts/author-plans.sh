@@ -110,10 +110,20 @@ if [[ -n "${SKU_AUTHOR_MODEL:-}" ]]; then
   CLAUDE_ARGS+=(--model "$SKU_AUTHOR_MODEL")
 fi
 
+START_TS="$(date +%s)"
+START_HUMAN="$(date '+%Y-%m-%d %H:%M:%S')"
+echo "[author] start:     $START_HUMAN"
+
 set +e
 claude "${CLAUDE_ARGS[@]}" 2>&1 | tee "$LOG_FILE"
 EXIT="${PIPESTATUS[0]}"
 set -e
+
+END_TS="$(date +%s)"
+END_HUMAN="$(date '+%Y-%m-%d %H:%M:%S')"
+DUR=$((END_TS - START_TS))
+DUR_FMT="$(printf '%dm%02ds' $((DUR / 60)) $((DUR % 60)))"
+echo "[author] end:       $END_HUMAN (duration: $DUR_FMT)"
 
 if [[ "$EXIT" -ne 0 ]]; then
   echo "[author] claude exited $EXIT — inspect $LOG_FILE" >&2
