@@ -38,3 +38,34 @@ func TestQueryDBRelational_pinsPostgresSingleAZByDefault(t *testing.T) {
 		require.Equal(t, "single-az", r.Terms.OS)
 	}
 }
+
+func TestQueryDBRelational_multiAZExcludesSingleAZ(t *testing.T) {
+	cat := seedDBRelationalShard(t, filepath.Join("..", "..", "catalog", "testdata", "seed_aws.sql"))
+	rows, err := QueryDBRelational(context.Background(), cat, DBRelationalSpec{
+		Engine: "postgres", DeploymentOption: "multi-az",
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, rows)
+	for _, r := range rows {
+		require.Equal(t, "multi-az", r.Terms.OS)
+	}
+}
+
+func TestQueryDBRelational_vcpuPredicateFiltersUnderspec(t *testing.T) {
+	cat := seedDBRelationalShard(t, filepath.Join("..", "..", "catalog", "testdata", "seed_aws.sql"))
+	rows, err := QueryDBRelational(context.Background(), cat, DBRelationalSpec{
+		Engine: "postgres", DeploymentOption: "single-az",
+		VCPU: 64,
+	})
+	require.NoError(t, err)
+	require.Empty(t, rows)
+}
+
+func TestQueryDBRelational_requiresEngineAndDeploymentOption(t *testing.T) {
+	cat := seedDBRelationalShard(t, filepath.Join("..", "..", "catalog", "testdata", "seed_aws.sql"))
+	_, err := QueryDBRelational(context.Background(), cat, DBRelationalSpec{
+		Engine: "",
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "engine")
+}
