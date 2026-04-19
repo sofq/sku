@@ -1,0 +1,67 @@
+{
+  "skus": [
+    {
+      "skuId": "FN-USEAST1-CPU",
+      "description": "Cloud Functions gen2 CPU Time us-east1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 24000}}]}}]
+    },
+    {
+      "skuId": "FN-USEAST1-MEM",
+      "description": "Cloud Functions gen2 Memory Time us-east1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 2500}}]}}]
+    },
+    {
+      "skuId": "FN-USEAST1-REQ",
+      "description": "Cloud Functions gen2 Invocations us-east1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 400}}]}}]
+    },
+    {
+      "skuId": "FN-EUWEST1-CPU",
+      "description": "Cloud Functions gen2 CPU Time europe-west1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 26000}}]}}]
+    },
+    {
+      "skuId": "FN-EUWEST1-MEM",
+      "description": "Cloud Functions gen2 Memory Time europe-west1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 2700}}]}}]
+    },
+    {
+      "skuId": "FN-EUWEST1-REQ",
+      "description": "Cloud Functions gen2 Invocations europe-west1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 440}}]}}]
+    },
+    {
+      "skuId": "FN-USEAST1-CPU-GEN1",
+      "description": "Cloud Functions gen1 CPU Time us-east1",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctions", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 24000}}]}}]
+    },
+    {
+      "skuId": "FN-USEAST1-CPU-EUR",
+      "description": "Cloud Functions gen2 CPU Time us-east1 (EUR)",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "EUR", "units": "0", "nanos": 22000}}]}}]
+    },
+    {
+      "skuId": "FN-USEAST1-CPU-CUD",
+      "description": "Cloud Functions gen2 CPU Time us-east1 CUD",
+      "category": {"serviceDisplayName": "Cloud Functions", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudFunctionsV2", "usageType": "Commitment"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 18000}}]}}]
+    }
+  ]
+}

@@ -22,6 +22,8 @@ _USAGE_UNITS: dict[str, tuple[float, str]] = {
     "GiBy.mo":  (1.0, "gb-mo"),
     "By.mo":    (1.0 / (1024 ** 3), "gb-mo"),   # byte-month → gb-month
     "count":    (1.0, "requests"),
+    "s":        (1.0, "s"),                     # serverless CPU/request duration
+    "GiBy.s":   (1.0, "gb-s"),                  # serverless memory allocation time
 }
 
 

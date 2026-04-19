@@ -1,0 +1,69 @@
+"""Golden-row and invariant tests for the Cloud Run ingester."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from ingest.gcp_run import ingest
+
+
+FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_run" / "skus.json"
+GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "gcp_run_rows.jsonl"
+
+
+def _canonical(rows):
+    return sorted(rows, key=lambda r: r["region"])
+
+
+def test_fixture_matches_golden():
+    rows = list(ingest(skus_path=FIXTURE))
+    expected = [json.loads(line) for line in GOLDEN.read_text().splitlines() if line.strip()]
+    assert _canonical(rows) == _canonical(expected)
+
+
+def test_all_rows_are_compute_function_kind():
+    rows = list(ingest(skus_path=FIXTURE))
+    assert rows, "fixture produced zero rows"
+    assert {r["kind"] for r in rows} == {"compute.function"}
+
+
+def test_gen1_rows_filtered():
+    ids = {r["sku_id"] for r in ingest(skus_path=FIXTURE)}
+    assert "RUN-USEAST1-CPU-GEN1" not in ids
+
+
+def test_non_usd_rows_filtered():
+    ids = {r["sku_id"] for r in ingest(skus_path=FIXTURE)}
+    assert "RUN-USEAST1-CPU-EUR" not in ids
+
+
+def test_commitment_rows_filtered():
+    for row in ingest(skus_path=FIXTURE):
+        assert row["terms"]["commitment"] == "on_demand"
+
+
+def test_three_dimensions_per_row():
+    expected = ["cpu-second", "memory-gb-second", "requests"]
+    for row in ingest(skus_path=FIXTURE):
+        assert sorted(p["dimension"] for p in row["prices"]) == expected
+
+
+def test_architecture_attr():
+    for row in ingest(skus_path=FIXTURE):
+        assert row["resource_attrs"]["architecture"] == "x86_64"
+        assert row["resource_name"] == "x86_64"
+
+
+def test_unknown_region_rejected(tmp_path):
+    bad = json.loads(FIXTURE.read_text())
+    for sku in bad["skus"]:
+        if sku["category"]["resourceGroup"] == "CloudRunV2" and sku["category"]["usageType"] == "OnDemand":
+            if sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]["unitPrice"]["currencyCode"] == "USD":
+                sku["serviceRegions"] = ["mars-1"]
+    p = tmp_path / "bad.json"
+    p.write_text(json.dumps(bad))
+    with pytest.raises(KeyError, match="gcp/mars-1"):
+        list(ingest(skus_path=p))
