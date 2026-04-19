@@ -33,3 +33,61 @@ func TestDecodeWorkload_jsonHappyPath(t *testing.T) {
 		t.Fatalf("raw = %q", got.Raw)
 	}
 }
+
+func TestDecodeWorkload_yamlHappyPath(t *testing.T) {
+	in := strings.NewReader(`items:
+  - provider: aws
+    service: ec2
+    resource: m5.large
+    params:
+      region: us-east-1
+      count: 3
+      hours: 730
+`)
+	items, err := DecodeWorkload(in, "yaml")
+	if err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(items) != 1 {
+		t.Fatalf("items = %d", len(items))
+	}
+	if items[0].Params["count"] != "3" {
+		t.Fatalf("count = %q, want 3", items[0].Params["count"])
+	}
+	if items[0].Params["hours"] != "730" {
+		t.Fatalf("hours = %q, want 730", items[0].Params["hours"])
+	}
+}
+
+func TestDecodeWorkload_rejectsEmptyItems(t *testing.T) {
+	in := strings.NewReader(`{"items":[]}`)
+	if _, err := DecodeWorkload(in, "json"); err == nil {
+		t.Fatal("expected error for empty items")
+	}
+}
+
+func TestDecodeWorkload_rejectsUnknownField(t *testing.T) {
+	in := strings.NewReader(`{"items":[{"provider":"aws","service":"ec2","resource":"m5.large","extra":1}]}`)
+	if _, err := DecodeWorkload(in, "json"); err == nil {
+		t.Fatal("expected error for unknown field")
+	}
+}
+
+func TestDecodeWorkload_rejectsUnknownProviderService(t *testing.T) {
+	in := strings.NewReader(`{"items":[{"provider":"acme","service":"widgets","resource":"x"}]}`)
+	_, err := DecodeWorkload(in, "json")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "unsupported provider/service") {
+		t.Fatalf("wrong error: %v", err)
+	}
+}
+
+func TestDecodeWorkload_rejectsOversizeInput(t *testing.T) {
+	big := strings.Repeat("a", (1<<20)+10)
+	_, err := DecodeWorkload(strings.NewReader(big), "json")
+	if err == nil || !strings.Contains(err.Error(), "exceeds") {
+		t.Fatalf("wrong error: %v", err)
+	}
+}
