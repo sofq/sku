@@ -87,6 +87,10 @@ jobs:
         run: make pipeline-test
       - name: Fixture shard builds (every provider)
         run: make openrouter-shard aws-shards azure-shards gcp-shards
+      - name: Dry-run discover against empty state
+        run: |
+          make discover
+          python -c "import json; d=json.load(open('dist/pipeline/discover/changed.json')); assert d['baseline_rebuild'] is True and d['shards']==[], d"
       - name: Smoke the built shards with the Go binary
         run: |
           make build
