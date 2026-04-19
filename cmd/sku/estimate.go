@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/sofq/sku/internal/batch"
 	skuerrors "github.com/sofq/sku/internal/errors"
 	"github.com/sofq/sku/internal/estimate"
 	"github.com/sofq/sku/internal/output"
@@ -28,6 +29,32 @@ func newEstimateCmd() *cobra.Command {
 	c.Flags().StringVar(&f.config, "config", "", "workload file (.yaml, .yml, or .json)")
 	c.Flags().BoolVar(&f.stdin, "stdin", false, "read JSON workload document from stdin")
 	return c
+}
+
+// handleEstimate is the shared body used by the standalone Cobra command and
+// the batch dispatcher. Batch inputs only support the `items` arg (string
+// slice of inline DSL); --config/--stdin are Cobra-only.
+func handleEstimate(ctx context.Context, args map[string]any, env batch.Env) (any, error) {
+	raws := argStringSlice(args, "items")
+	if len(raws) == 0 {
+		return nil, skuerrors.Validation("flag_invalid", "items", "",
+			"pass items as a JSON string array, e.g. \"items\":[\"aws/ec2:m5.large:region=us-east-1:count=1:hours=730\"]")
+	}
+	items := make([]estimate.Item, 0, len(raws))
+	for i, raw := range raws {
+		it, perr := estimate.ParseItem(raw)
+		if perr != nil {
+			e := skuerrors.Validation("flag_invalid", "item", raw, perr.Error())
+			e.Details["item_index"] = i
+			return nil, e
+		}
+		items = append(items, it)
+	}
+	res, err := estimate.Run(ctx, estimate.Config{Items: items})
+	if err != nil {
+		return nil, fmt.Errorf("estimate: %w", err)
+	}
+	return res, nil
 }
 
 func runEstimate(cmd *cobra.Command, f *estimateFlags) error {

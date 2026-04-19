@@ -6,4 +6,6 @@ func init() {
 	batch.Register("llm price", handleLLMPrice)
 	batch.Register("aws ec2 price", handleAWSEC2Price)
 	batch.Register("aws ec2 list", handleAWSEC2List)
+	batch.Register("compare", handleCompare)
+	batch.Register("estimate", handleEstimate)
 }

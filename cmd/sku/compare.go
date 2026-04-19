@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/sofq/sku/internal/batch"
 	"github.com/sofq/sku/internal/catalog"
 	"github.com/sofq/sku/internal/compare"
 	skuerrors "github.com/sofq/sku/internal/errors"
@@ -76,14 +78,12 @@ func newCompareCmd() *cobra.Command {
 	return c
 }
 
-func runCompare(cmd *cobra.Command, f *compareFlags) error {
-	s := globalSettings(cmd)
-
+// compareValidate validates the requested compareFlags and returns a
+// *skuerrors.E envelope (nil if valid) plus the expanded region literals.
+func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E) {
 	if f.kind == "" {
-		e := skuerrors.Validation("flag_invalid", "kind", "",
+		return nil, skuerrors.Validation("flag_invalid", "kind", "",
 			"pass --kind compute.vm | storage.object | db.relational")
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
 	}
 	supportedKinds := map[string]bool{
 		"compute.vm":     true,
@@ -91,63 +91,195 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		"db.relational":  true,
 	}
 	if !supportedKinds[f.kind] {
-		e := skuerrors.Validation("flag_invalid", "kind", f.kind,
+		return nil, skuerrors.Validation("flag_invalid", "kind", f.kind,
 			"supported kinds in m4.3: compute.vm, storage.object, db.relational (llm.text arrives in m4.4)")
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
 	}
-
 	switch f.kind {
 	case "compute.vm":
 		if f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 {
-			e := skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"compute.vm does not accept --storage-class / --durability-nines / --availability-tier / --storage-gb")
-			skuerrors.Write(cmd.ErrOrStderr(), e)
-			return e
 		}
 	case "storage.object":
 		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageGB != 0 {
-			e := skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"storage.object does not accept --vcpu / --memory / --gpu-count / --storage-gb")
-			skuerrors.Write(cmd.ErrOrStderr(), e)
-			return e
 		}
 	case "db.relational":
 		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" {
-			e := skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"db.relational does not accept --gpu-count / --storage-class / --durability-nines / --availability-tier")
-			skuerrors.Write(cmd.ErrOrStderr(), e)
-			return e
 		}
 	}
-
 	switch f.sort {
 	case "price", "vcpu", "memory":
 	default:
-		e := skuerrors.Validation("flag_invalid", "sort", f.sort,
-			"allowed: price | vcpu | memory")
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+		return nil, skuerrors.Validation("flag_invalid", "sort", f.sort, "allowed: price | vcpu | memory")
 	}
 	if f.kind == "storage.object" && (f.sort == "vcpu" || f.sort == "memory") {
-		e := skuerrors.Validation("flag_invalid", "sort", f.sort, "storage.object supports --sort price only")
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+		return nil, skuerrors.Validation("flag_invalid", "sort", f.sort, "storage.object supports --sort price only")
 	}
-
-	var regionLiterals []string
 	if f.regions != "" {
 		raw := strings.Split(f.regions, ",")
 		for i := range raw {
 			raw[i] = strings.TrimSpace(raw[i])
 		}
-		lits, _, err := compare.Expand(raw)
-		if err != nil {
-			e := skuerrors.Validation("flag_invalid", "regions", f.regions, err.Error())
-			skuerrors.Write(cmd.ErrOrStderr(), e)
-			return e
+		lits, _, expErr := compare.Expand(raw)
+		if expErr != nil {
+			return nil, skuerrors.Validation("flag_invalid", "regions", f.regions, expErr.Error())
 		}
 		regionLiterals = lits
+	}
+	return regionLiterals, nil
+}
+
+// compareLookup is the shared body used by the standalone Cobra command and
+// the batch handler. Returns []catalog.Row on success, a *skuerrors.E envelope
+// on failure.
+func compareLookup(ctx context.Context, f compareFlags, s *batch.Settings) ([]catalog.Row, error) {
+	regionLiterals, vErr := compareValidate(f)
+	if vErr != nil {
+		return nil, vErr
+	}
+	kindShards := shardsForKind(f.kind)
+
+	installed, err := catalog.InstalledShards()
+	if err != nil {
+		return nil, &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
+	}
+	installedSet := map[string]bool{}
+	for _, n := range installed {
+		installedSet[n] = true
+	}
+	var targets []compare.ShardTarget
+	var missing []string
+	for _, name := range kindShards {
+		if !installedSet[name] {
+			missing = append(missing, name)
+			continue
+		}
+		targets = append(targets, compare.ShardTarget{Name: name, Path: catalog.ShardPath(name)})
+	}
+	if len(targets) == 0 {
+		return nil, &skuerrors.E{
+			Code:       skuerrors.CodeNotFound,
+			Message:    fmt.Sprintf("no %s shards installed", f.kind),
+			Suggestion: "Run: sku update " + strings.Join(kindShards, " "),
+			Details:    map[string]any{"shards_required": kindShards, "missing": missing},
+		}
+	}
+
+	// Stale error gate (no stderr writes here).
+	for _, t := range targets {
+		cat, err := catalog.Open(t.Path)
+		if err != nil {
+			return nil, &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
+		}
+		if s != nil && s.StaleErrorDays > 0 && !s.StaleOK {
+			age := cat.Age(time.Now().UTC())
+			if age >= s.StaleErrorDays {
+				_ = cat.Close()
+				return nil, &skuerrors.E{
+					Code:       skuerrors.CodeStaleData,
+					Message:    fmt.Sprintf("catalog %d days old exceeds threshold %d", age, s.StaleErrorDays),
+					Suggestion: "Run: sku update " + t.Name,
+					Details:    map[string]any{"shard": t.Name, "age_days": age, "threshold_days": s.StaleErrorDays},
+				}
+			}
+		}
+		_ = cat.Close()
+	}
+
+	req := compare.Request{
+		Kind:             f.kind,
+		VCPU:             f.vcpu,
+		MemoryGB:         f.memoryGB,
+		GPUCount:         f.gpuCount,
+		MaxPrice:         f.maxPrice,
+		StorageClass:     f.storageClass,
+		DurabilityNines:  f.durabilityNines,
+		AvailabilityTier: f.availabilityTier,
+		StorageGB:        f.storageGB,
+		Engine:           f.engine,
+		DeploymentOption: f.deploymentOption,
+		Regions:          regionLiterals,
+		Sort:             f.sort,
+		Limit:            f.limit,
+		Targets:          targets,
+	}
+	rows, err := compare.Run(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("compare: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil, skuerrors.NotFound("compare", f.kind,
+			map[string]any{
+				"vcpu": f.vcpu, "memory_gb": f.memoryGB, "gpu_count": f.gpuCount,
+				"regions": regionLiterals, "max_price": f.maxPrice,
+			},
+			"Try relaxing --vcpu / --memory or widening --regions")
+	}
+	return rows, nil
+}
+
+func compareFlagsFromArgs(args map[string]any) compareFlags {
+	vcpu, _ := argFloat(args, "vcpu")
+	mem, _ := argFloat(args, "memory")
+	gpu, _ := argFloat(args, "gpu_count")
+	maxPrice, _ := argFloat(args, "max_price")
+	durNines, _ := argFloat(args, "durability_nines")
+	storageGB, _ := argFloat(args, "storage_gb")
+	limit, ok := argFloat(args, "limit")
+	if !ok {
+		limit = 20
+	}
+	regions := argString(args, "regions")
+	if regions == "" {
+		if regs := argStringSlice(args, "regions"); len(regs) > 0 {
+			regions = strings.Join(regs, ",")
+		}
+	}
+	sort := argString(args, "sort")
+	if sort == "" {
+		sort = "price"
+	}
+	engine := argString(args, "engine")
+	if engine == "" {
+		engine = "postgres"
+	}
+	deployment := argString(args, "deployment_option")
+	if deployment == "" {
+		deployment = "single-az"
+	}
+	return compareFlags{
+		kind:             argString(args, "kind"),
+		vcpu:             int64(vcpu),
+		memoryGB:         mem,
+		gpuCount:         int64(gpu),
+		maxPrice:         maxPrice,
+		regions:          regions,
+		sort:             sort,
+		limit:            int(limit),
+		storageClass:     argString(args, "storage_class"),
+		durabilityNines:  int64(durNines),
+		availabilityTier: argString(args, "availability_tier"),
+		engine:           engine,
+		deploymentOption: deployment,
+		storageGB:        storageGB,
+	}
+}
+
+func handleCompare(ctx context.Context, args map[string]any, env batch.Env) (any, error) {
+	return compareLookup(ctx, compareFlagsFromArgs(args), env.Settings)
+}
+
+func runCompare(cmd *cobra.Command, f *compareFlags) error {
+	s := globalSettings(cmd)
+
+	regionLiterals, vErr := compareValidate(*f)
+	if vErr != nil {
+		skuerrors.Write(cmd.ErrOrStderr(), vErr)
+		return vErr
 	}
 
 	kindShards := shardsForKind(f.kind)
@@ -184,6 +316,8 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		})
 	}
 
+	// Emit the "missing shards" stderr warning + stale warnings here; the
+	// batch handler skips them.
 	installed, err := catalog.InstalledShards()
 	if err != nil {
 		e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
@@ -194,77 +328,34 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 	for _, n := range installed {
 		installedSet[n] = true
 	}
-	var targets []compare.ShardTarget
 	var missing []string
 	for _, name := range kindShards {
 		if !installedSet[name] {
 			missing = append(missing, name)
-			continue
 		}
-		targets = append(targets, compare.ShardTarget{Name: name, Path: catalog.ShardPath(name)})
 	}
-	if len(targets) == 0 {
-		e := &skuerrors.E{
-			Code:       skuerrors.CodeNotFound,
-			Message:    fmt.Sprintf("no %s shards installed", f.kind),
-			Suggestion: "Run: sku update " + strings.Join(kindShards, " "),
-			Details:    map[string]any{"shards_required": kindShards, "missing": missing},
-		}
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
-	}
-	if len(missing) > 0 && !s.StaleOK {
+	if len(missing) > 0 && !s.StaleOK && len(missing) != len(kindShards) {
 		_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
 			"warning: missing shards %v; compare is incomplete (run `sku update %s`)\n",
 			missing, strings.Join(missing, " "))
 	}
-
-	for _, t := range targets {
-		cat, err := catalog.Open(t.Path)
+	for _, name := range kindShards {
+		if !installedSet[name] {
+			continue
+		}
+		cat, err := catalog.Open(catalog.ShardPath(name))
 		if err != nil {
-			e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
-			skuerrors.Write(cmd.ErrOrStderr(), e)
-			return e
+			continue
 		}
-		stale := applyStaleGate(cmd, cat, t.Name, s)
+		_ = applyStaleGate(cmd, cat, name, s) // emits stale-warning lines only (error-gate is re-checked in compareLookup)
 		_ = cat.Close()
-		if stale != nil {
-			return stale
-		}
 	}
 
-	req := compare.Request{
-		Kind:             f.kind,
-		VCPU:             f.vcpu,
-		MemoryGB:         f.memoryGB,
-		GPUCount:         f.gpuCount,
-		MaxPrice:         f.maxPrice,
-		StorageClass:     f.storageClass,
-		DurabilityNines:  f.durabilityNines,
-		AvailabilityTier: f.availabilityTier,
-		StorageGB:        f.storageGB,
-		Engine:           f.engine,
-		DeploymentOption: f.deploymentOption,
-		Regions:          regionLiterals,
-		Sort:             f.sort,
-		Limit:            f.limit,
-		Targets:          targets,
-	}
-	rows, err := compare.Run(context.Background(), req)
+	bs := ToBatchSettings(s)
+	rows, err := compareLookup(context.Background(), *f, &bs)
 	if err != nil {
-		wrapped := fmt.Errorf("compare: %w", err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
-	}
-	if len(rows) == 0 {
-		e := skuerrors.NotFound("compare", f.kind,
-			map[string]any{
-				"vcpu": f.vcpu, "memory_gb": f.memoryGB, "gpu_count": f.gpuCount,
-				"regions": regionLiterals, "max_price": f.maxPrice,
-			},
-			"Try relaxing --vcpu / --memory or widening --regions")
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+		skuerrors.Write(cmd.ErrOrStderr(), err)
+		return err
 	}
 
 	if s.Preset == "" || s.Preset == "agent" {
