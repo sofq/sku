@@ -30,6 +30,10 @@
 
 set -euo pipefail
 
+# Trap SIGINT so Ctrl+C produces a clear stop message instead of bleeding
+# into the next loop iteration and falsely declaring "Spec shipped".
+trap 'echo; echo "[spec] interrupted by user (SIGINT) — stopping."; exit 130' INT
+
 MAX_RETRIES="${1:-5}"
 PLANS_DIR="docs/superpowers/plans"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

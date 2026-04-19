@@ -120,4 +120,14 @@ if [[ "$EXIT" -ne 0 ]]; then
   exit "$EXIT"
 fi
 
+# Sentinel check: a clean run MUST end with "AUTHOR COMPLETE — N plan(s) written".
+# Absence means the session was interrupted, crashed, or returned malformed
+# output even though the exit code was 0 (e.g. SIGINT swallowed by the pipe).
+# Treat that as a hard failure so run-spec.sh doesn't proceed on bad data.
+if ! grep -qE '^AUTHOR COMPLETE — [0-9]+ plan\(s\) written' "$LOG_FILE"; then
+  echo "[author] no AUTHOR COMPLETE sentinel in $LOG_FILE — session did not finish cleanly." >&2
+  echo "[author] possible causes: SIGINT, crash, model truncation, prompt drift." >&2
+  exit 3
+fi
+
 echo "[author] done."
