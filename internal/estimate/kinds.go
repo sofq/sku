@@ -11,4 +11,5 @@ var providerServiceKind = map[string]string{
 	"aws/s3":     "storage.object",
 	"azure/blob": "storage.object",
 	"gcp/gcs":    "storage.object",
+	"llm/text":   "llm.text",
 }

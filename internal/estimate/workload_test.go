@@ -91,3 +91,31 @@ func TestDecodeWorkload_rejectsOversizeInput(t *testing.T) {
 		t.Fatalf("wrong error: %v", err)
 	}
 }
+
+func TestDecodeWorkload_llmText(t *testing.T) {
+	yamlIn := `items:
+  - provider: llm
+    service: text
+    resource: anthropic/claude-opus-4.6
+    params:
+      input: 1M
+      output: 500K
+`
+	items, err := DecodeWorkload(strings.NewReader(yamlIn), "yaml")
+	if err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+	it := items[0]
+	if it.Kind != "llm.text" {
+		t.Fatalf("kind = %q, want llm.text", it.Kind)
+	}
+	if it.Resource != "anthropic/claude-opus-4.6" {
+		t.Fatalf("resource = %q", it.Resource)
+	}
+	if it.Params["input"] != "1M" || it.Params["output"] != "500K" {
+		t.Fatalf("params = %v", it.Params)
+	}
+}
