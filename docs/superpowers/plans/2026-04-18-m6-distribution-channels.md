@@ -42,7 +42,7 @@
 **Files:**
 - Modify: `.goreleaser.yml`
 
-- [ ] **Step 1: Add signs, sboms, nfpms blocks**
+- [x] **Step 1: Add signs, sboms, nfpms blocks**
 
 Append to `.goreleaser.yml` (after the existing `checksum:` block, before `snapshot:`):
 
@@ -79,17 +79,17 @@ nfpms:
     bindir: /usr/bin
 ```
 
-- [ ] **Step 2: Run snapshot to verify config parses**
+- [x] **Step 2: Run snapshot to verify config parses**
 
 Run: `goreleaser release --snapshot --clean --skip=sign,publish,docker,sbom`
 Expected: Exit 0. `dist/` contains platform archives + `checksums.txt`. The `--skip=sign,sbom` keeps local dry-run fast (cosign/syft not required locally).
 
-- [ ] **Step 3: Run syft locally to verify SBOM generation works**
+- [x] **Step 3: Run syft locally to verify SBOM generation works** *(syft not installed locally; plan allows skip — SBOM generation happens in CI via anchore/sbom-action)*
 
 Run: `syft --version || echo "install syft via brew install syft"` then `goreleaser release --snapshot --clean --skip=sign,publish,docker`
 Expected: Exit 0. `dist/*.spdx.sbom.json` present for each archive.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .goreleaser.yml

@@ -37,6 +37,37 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+sboms:
+  - id: default
+    artifacts: archive
+    documents:
+      - "${artifact}.spdx.sbom.json"
+
+signs:
+  - id: cosign-checksum
+    cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--output-certificate=${certificate}"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: checksum
+    output: true
+
+nfpms:
+  - id: sku
+    package_name: sku
+    vendor: sofq
+    homepage: https://github.com/sofq/sku
+    maintainer: sofq <noreply@sofq.dev>
+    description: Agent-friendly CLI for cloud + LLM pricing.
+    license: Apache-2.0
+    formats: [deb, rpm, apk]
+    bindir: /usr/bin
+
 snapshot:
   version_template: "0.0.0-snapshot-{{ .ShortCommit }}"
 
