@@ -53,7 +53,7 @@ func (c *Catalog) Search(ctx context.Context, f SearchFilter) ([]Row, error) {
 		}
 		r.CatalogVersion = c.catalogVersion
 		r.Currency = c.currency
-		if err := c.fillPrices(ctx, &r); err != nil {
+		if err := c.FillPrices(ctx, &r); err != nil {
 			return nil, err
 		}
 		out = append(out, r)

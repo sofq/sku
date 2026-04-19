@@ -30,6 +30,11 @@ type Row struct {
 	Health        *Health
 
 	Aggregated bool // true iff this is the synthetic openrouter row
+
+	// MinPrice is caller-populated from MIN(prices.amount) when the query
+	// carries it. Used by internal/compare for cross-row sort only; not
+	// serialised.
+	MinPrice float64 `json:"-"`
 }
 
 // Terms is the shard-side terms row.
@@ -196,7 +201,7 @@ WHERE `
 		r.Aggregated = r.Provider == "openrouter"
 
 		// Load prices in a second query so scan code stays readable.
-		if err := c.fillPrices(ctx, &r); err != nil {
+		if err := c.FillPrices(ctx, &r); err != nil {
 			return nil, err
 		}
 		out = append(out, r)
@@ -443,7 +448,7 @@ WHERE `
 		if extraJSON.Valid && extraJSON.String != "" {
 			_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
 		}
-		if err := c.fillPrices(ctx, &r); err != nil {
+		if err := c.FillPrices(ctx, &r); err != nil {
 			return nil, err
 		}
 		out = append(out, r)
@@ -451,7 +456,7 @@ WHERE `
 	return out, rs.Err()
 }
 
-func (c *Catalog) fillPrices(ctx context.Context, r *Row) error {
+func (c *Catalog) FillPrices(ctx context.Context, r *Row) error {
 	rs, err := c.db.QueryContext(ctx,
 		"SELECT dimension, tier, amount, unit FROM prices WHERE sku_id = ? ORDER BY dimension, tier",
 		r.SKUID,

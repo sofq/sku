@@ -2,6 +2,7 @@
 package catalog
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -92,6 +93,15 @@ func (c *Catalog) loadMetadata() error {
 
 // Close releases the underlying SQLite handle.
 func (c *Catalog) Close() error { return c.db.Close() }
+
+// QueryContext exposes the underlying *sql.DB QueryContext so adjacent packages
+// (internal/compare/kinds) can author their own SELECTs without importing
+// database/sql glue through catalog. The returned *sql.Rows must be closed by
+// the caller. Intentionally narrow: only compose kind-specific equivalence
+// queries through this; normal lookups go through the typed helpers.
+func (c *Catalog) QueryContext(ctx context.Context, q string, args ...any) (*sql.Rows, error) {
+	return c.db.QueryContext(ctx, q, args...)
+}
 
 // SchemaVersion returns the shard's declared schema_version string.
 func (c *Catalog) SchemaVersion() string { return c.schemaVersion }
