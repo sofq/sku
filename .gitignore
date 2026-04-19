@@ -13,3 +13,6 @@ coverage.*
 .idea/
 .vscode/
 *.swp
+
+# Plan runner logs (scripts/run-plan.sh)
+/.planning/
