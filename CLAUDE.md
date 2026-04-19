@@ -40,9 +40,8 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M6 — Distribution channels: pre-release `v0.1.0-rc.1` cut.
-Exit-gated on fresh-machine install verification for the first non-pre-release tag.
-Next: M7 — Docs, polish, v1.0.
+M7.1 — Docs foundation: README v1, getting-started, install polish, per-command reference, examples verified by `make docs-verify`.
+Next: M7.2 — Guides and reference (kinds, presets, exit codes, agent-integration, llm-routing, offline-use, `skill/using-sku/SKILL.md`).
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
