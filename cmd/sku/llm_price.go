@@ -9,10 +9,75 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/sofq/sku/internal/batch"
 	"github.com/sofq/sku/internal/catalog"
 	skuerrors "github.com/sofq/sku/internal/errors"
 	"github.com/sofq/sku/internal/output"
 )
+
+// handleLLMPrice is the shared body used by both the standalone Cobra command
+// and the batch dispatcher. Returns []catalog.Row on success; any *skuerrors.E
+// on failure propagates unchanged.
+func handleLLMPrice(ctx context.Context, args map[string]any, env batch.Env) (any, error) {
+	model := argString(args, "model")
+	servingProvider := argString(args, "serving_provider")
+	if model == "" {
+		return nil, skuerrors.Validation(
+			"flag_invalid", "model", "",
+			"pass --model <author>/<slug>, e.g. --model anthropic/claude-opus-4.6",
+		)
+	}
+	shardPath := catalog.ShardPath("openrouter")
+	if _, err := os.Stat(shardPath); err != nil {
+		return nil, &skuerrors.E{
+			Code:       skuerrors.CodeNotFound,
+			Message:    "openrouter shard not installed",
+			Suggestion: "Run: sku update openrouter",
+			Details:    map[string]any{"shard": "openrouter", "install_hint": "sku update openrouter"},
+		}
+	}
+	cat, err := catalog.Open(shardPath)
+	if err != nil {
+		return nil, &skuerrors.E{
+			Code:       skuerrors.CodeServer,
+			Message:    err.Error(),
+			Suggestion: "Check that the shard file is readable and not truncated",
+		}
+	}
+	defer func() { _ = cat.Close() }()
+
+	s := env.Settings
+	age := cat.Age(time.Now().UTC())
+	if s != nil && s.StaleErrorDays > 0 && age >= s.StaleErrorDays && !s.StaleOK {
+		return nil, &skuerrors.E{
+			Code:       skuerrors.CodeStaleData,
+			Message:    fmt.Sprintf("catalog %d days old exceeds threshold %d", age, s.StaleErrorDays),
+			Suggestion: "Run: sku update openrouter",
+			Details:    map[string]any{"shard": "openrouter", "age_days": age, "threshold_days": s.StaleErrorDays},
+		}
+	}
+
+	includeAggregated := false
+	if s != nil {
+		includeAggregated = s.IncludeAggregated
+	}
+	rows, err := cat.LookupLLM(ctx, catalog.LLMFilter{
+		Model:             model,
+		ServingProvider:   servingProvider,
+		IncludeAggregated: includeAggregated,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("llm price: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil, skuerrors.NotFound(
+			"openrouter", "llm",
+			map[string]any{"model": model, "serving_provider": servingProvider},
+			"Try `sku update openrouter` or drop --serving-provider",
+		)
+	}
+	return rows, nil
+}
 
 func newLLMPriceCmd() *cobra.Command {
 	var (
@@ -46,80 +111,34 @@ func newLLMPriceCmd() *cobra.Command {
 				})
 			}
 
-			shardPath := catalog.ShardPath("openrouter")
-			if _, statErr := os.Stat(shardPath); statErr != nil {
-				err := &skuerrors.E{
-					Code:       skuerrors.CodeNotFound,
-					Message:    "openrouter shard not installed",
-					Suggestion: "Run: sku update openrouter",
-					Details: map[string]any{
-						"shard":        "openrouter",
-						"install_hint": "sku update openrouter",
-					},
-				}
+			batchSettings := ToBatchSettings(s)
+			args := map[string]any{"model": model, "serving_provider": servingProvider}
+			result, err := handleLLMPrice(context.Background(), args, batch.Env{
+				Settings: &batchSettings,
+				Stdout:   cmd.OutOrStdout(),
+				Stderr:   cmd.ErrOrStderr(),
+			})
+			if err != nil {
 				skuerrors.Write(cmd.ErrOrStderr(), err)
 				return err
 			}
-
-			cat, err := catalog.Open(shardPath)
-			if err != nil {
-				skuErr := &skuerrors.E{
-					Code:       skuerrors.CodeServer,
-					Message:    err.Error(),
-					Suggestion: "Check that the shard file is readable and not truncated",
-				}
-				skuerrors.Write(cmd.ErrOrStderr(), skuErr)
-				return skuErr
-			}
-			defer func() { _ = cat.Close() }()
+			rows := result.([]catalog.Row)
 
 			if s.Verbose {
 				output.Log(cmd.ErrOrStderr(), "catalog.open",
-					map[string]any{"shard": "openrouter", "path": shardPath})
+					map[string]any{"shard": "openrouter", "path": catalog.ShardPath("openrouter")})
 			}
 
-			age := cat.Age(time.Now().UTC())
-			if s.StaleErrorDays > 0 && age >= s.StaleErrorDays && !s.StaleOK {
-				staleErr := &skuerrors.E{
-					Code:       skuerrors.CodeStaleData,
-					Message:    fmt.Sprintf("catalog %d days old exceeds threshold %d", age, s.StaleErrorDays),
-					Suggestion: "Run: sku update openrouter",
-					Details: map[string]any{
-						"shard":          "openrouter",
-						"age_days":       age,
-						"threshold_days": s.StaleErrorDays,
-					},
+			// Stale warning (not fatal) still emitted from the Cobra path; batch
+			// callers don't get stderr warnings in v1.
+			if cat, openErr := catalog.Open(catalog.ShardPath("openrouter")); openErr == nil {
+				age := cat.Age(time.Now().UTC())
+				if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
+					_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
+						"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
+						age, s.StaleWarningDays)
 				}
-				skuerrors.Write(cmd.ErrOrStderr(), staleErr)
-				return staleErr
-			}
-			if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
-				_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
-					"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
-					age, s.StaleWarningDays)
-			}
-
-			rows, err := cat.LookupLLM(context.Background(), catalog.LLMFilter{
-				Model:             model,
-				ServingProvider:   servingProvider,
-				IncludeAggregated: s.IncludeAggregated,
-			})
-			if err != nil {
-				wrappedErr := fmt.Errorf("llm price: %w", err)
-				skuerrors.Write(cmd.ErrOrStderr(), wrappedErr)
-				return wrappedErr
-			}
-			if len(rows) == 0 {
-				notFoundErr := skuerrors.NotFound(
-					"openrouter", "llm",
-					map[string]any{
-						"model":            model,
-						"serving_provider": servingProvider,
-					},
-					"Try `sku update openrouter` or drop --serving-provider",
-				)
-				skuerrors.Write(cmd.ErrOrStderr(), notFoundErr)
-				return notFoundErr
+				_ = cat.Close()
 			}
 
 			opts := output.Options{
