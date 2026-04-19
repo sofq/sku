@@ -46,6 +46,92 @@ func TestCompare_unsupportedKind(t *testing.T) {
 	require.Contains(t, stderr.String(), "llm.text")
 }
 
+func TestCompareCmd_storageObjectEndToEnd(t *testing.T) {
+	dir := testutilSeededStorageObjectCatalog(t)
+	t.Setenv("SKU_DATA_DIR", dir)
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "storage.object",
+		"--storage-class", "standard", "--sort", "price", "--json", "--limit", "10"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"provider":"aws"`)
+}
+
+func TestCompareCmd_storageObjectRejectsVCPU(t *testing.T) {
+	testutilSeededStorageObjectCatalog(t)
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "storage.object",
+		"--storage-class", "standard", "--vcpu", "4"})
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, stderr.String(), `"reason":"flag_invalid"`)
+}
+
+func TestCompareCmd_dryRunStorageObject(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "storage.object",
+		"--storage-class", "standard", "--availability-tier", "standard",
+		"--regions", "us-east", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"command":"compare"`)
+	require.Contains(t, stdout.String(), `"storage_class":"standard"`)
+	require.Contains(t, stdout.String(), `"availability_tier":"standard"`)
+	require.Contains(t, stdout.String(), `"aws-s3"`)
+}
+
+func TestCompareCmd_dbRelationalEndToEnd(t *testing.T) {
+	dir := testutilSeededDBRelationalCatalog(t)
+	t.Setenv("SKU_DATA_DIR", dir)
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "db.relational",
+		"--vcpu", "2", "--memory", "8",
+		"--engine", "postgres", "--deployment-option", "single-az",
+		"--sort", "price", "--json", "--limit", "10"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"kind":"db.relational"`)
+	require.Contains(t, stdout.String(), `"commitment":"on_demand"`)
+}
+
+func TestCompareCmd_dbRelationalNoRowsExitsNotFound(t *testing.T) {
+	dir := testutilSeededDBRelationalCatalog(t)
+	t.Setenv("SKU_DATA_DIR", dir)
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "db.relational",
+		"--vcpu", "128", "--engine", "postgres", "--deployment-option", "single-az"})
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, stderr.String(), `"not_found"`)
+}
+
+func TestCompareCmd_dryRunDBRelational(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "db.relational",
+		"--vcpu", "2", "--memory", "8",
+		"--engine", "postgres", "--deployment-option", "multi-az",
+		"--regions", "us-east", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"engine":"postgres"`)
+	require.Contains(t, stdout.String(), `"deployment_option":"multi-az"`)
+	require.Contains(t, stdout.String(), `"aws-rds"`)
+}
+
 func TestCompare_dryRun(t *testing.T) {
 	testutilSeededComputeVMCatalog(t)
 	var stdout bytes.Buffer

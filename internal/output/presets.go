@@ -50,7 +50,7 @@ func projectCompare(env Envelope, kind string) Envelope {
 		Price:    env.Price,
 	}
 	if env.Resource != nil {
-		out.Resource = &Resource{Name: env.Resource.Name}
+		out.Resource = &Resource{Kind: env.Resource.Kind, Name: env.Resource.Name}
 	}
 	if env.Location != nil {
 		out.Location = &Location{NormalizedRegion: env.Location.NormalizedRegion}
@@ -72,6 +72,24 @@ func projectCompare(env Envelope, kind string) Envelope {
 			out.Resource.VCPU = env.Resource.VCPU
 			out.Resource.MemoryGB = env.Resource.MemoryGB
 			out.Resource.GPUCount = env.Resource.GPUCount
+		}
+	case "storage.object":
+		if env.Resource != nil && out.Resource != nil {
+			out.Resource.DurabilityNines = env.Resource.DurabilityNines
+			out.Resource.AvailabilityTier = env.Resource.AvailabilityTier
+		}
+	case "db.relational":
+		if env.Resource != nil && out.Resource != nil {
+			out.Resource.VCPU = env.Resource.VCPU
+			out.Resource.MemoryGB = env.Resource.MemoryGB
+			out.Resource.StorageGB = env.Resource.StorageGB
+		}
+		if env.Terms != nil {
+			out.Terms = &Terms{
+				Commitment: env.Terms.Commitment,
+				Tenancy:    env.Terms.Tenancy,
+				OS:         env.Terms.OS,
+			}
 		}
 	}
 	return out

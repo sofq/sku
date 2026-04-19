@@ -51,8 +51,10 @@ type Resource struct {
 	GPUCount        *int64         `json:"gpu_count,omitempty"`
 	ContextLength   *int64         `json:"context_length,omitempty"`
 	MaxOutputTokens *int64         `json:"max_output_tokens,omitempty"`
-	Capabilities    []string       `json:"capabilities,omitempty"`
-	Attributes      map[string]any `json:"attributes,omitempty"`
+	Capabilities     []string       `json:"capabilities,omitempty"`
+	DurabilityNines  *int64         `json:"durability_nines,omitempty"`
+	AvailabilityTier *string        `json:"availability_tier,omitempty"`
+	Attributes       map[string]any `json:"attributes,omitempty"`
 }
 
 // Location is the §4 location block.
@@ -163,9 +165,11 @@ func buildFull(r catalog.Row) Envelope {
 		MemoryGB:        r.ResourceAttrs.MemoryGB,
 		StorageGB:       r.ResourceAttrs.StorageGB,
 		GPUCount:        r.ResourceAttrs.GPUCount,
-		ContextLength:   r.ResourceAttrs.ContextLength,
-		MaxOutputTokens: r.ResourceAttrs.MaxOutputTokens,
-		Capabilities:    r.ResourceAttrs.Capabilities,
+		ContextLength:    r.ResourceAttrs.ContextLength,
+		MaxOutputTokens:  r.ResourceAttrs.MaxOutputTokens,
+		Capabilities:     r.ResourceAttrs.Capabilities,
+		DurabilityNines:  r.ResourceAttrs.DurabilityNines,
+		AvailabilityTier: r.ResourceAttrs.AvailabilityTier,
 	}
 	if r.Aggregated {
 		resource.Attributes = map[string]any{"aggregated": true}
