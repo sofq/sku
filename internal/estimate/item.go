@@ -30,7 +30,7 @@ func ParseItem(raw string) (Item, error) {
 	if strings.ToLower(ps) == "llm" {
 		model := segs[1]
 		if model == "" {
-			return Item{}, fmt.Errorf("estimate/item: %q: empty model after llm:", raw)
+			return Item{}, fmt.Errorf("estimate/item: %q: empty model after 'llm:'", raw)
 		}
 		params, err := parseItemParams(raw, segs[2:])
 		if err != nil {
