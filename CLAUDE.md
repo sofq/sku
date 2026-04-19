@@ -40,8 +40,8 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M7.1 — Docs foundation: README v1, getting-started, install polish, per-command reference, examples verified by `make docs-verify`.
-Next: M7.2 — Guides and reference (kinds, presets, exit codes, agent-integration, llm-routing, offline-use, `skill/using-sku/SKILL.md`).
+M7.2 — Guides, reference, agent skill: all docs/guides/*, docs/reference/*, and skill/using-sku/SKILL.md published. `make docs-verify` green.
+Next: M7.3 — Security, bench regression gate, v1.0.0 release.
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
