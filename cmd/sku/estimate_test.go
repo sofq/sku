@@ -140,3 +140,27 @@ func TestEstimate_storageObject_endToEnd(t *testing.T) {
 		t.Fatalf("monthly_usd = %v, want > 0 (full envelope: %s)", m, stdout.String())
 	}
 }
+
+func TestEstimate_storageObject_configYAML(t *testing.T) {
+	_ = testutilSeededEstimateCatalogS3(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{"estimate", "--config", "testdata/workload-storage.yaml"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	items, _ := obj["items"].([]any)
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+	if items[0].(map[string]any)["kind"] != "storage.object" {
+		t.Fatalf("bad envelope: %s", stdout.String())
+	}
+}
