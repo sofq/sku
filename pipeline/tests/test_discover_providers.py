@@ -21,11 +21,11 @@ from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS
 def test_aws_discover_returns_publicationDate():
     with requests_mock.Mocker() as m:
         m.get(
-            f"{_AWS_OFFER_BASE}/AmazonEC2/current/index.json",
+            f"{_AWS_OFFER_BASE}/AmazonEC2/index.json",
             json={"publicationDate": "2026-04-18T00:00:00Z"},
         )
         m.get(
-            f"{_AWS_OFFER_BASE}/AmazonRDS/current/index.json",
+            f"{_AWS_OFFER_BASE}/AmazonRDS/index.json",
             json={"publicationDate": "2026-04-17T00:00:00Z"},
         )
         result = aws_disc.discover(["aws_ec2", "aws_rds"])
@@ -38,7 +38,7 @@ def test_aws_discover_returns_publicationDate():
 def test_aws_discover_ebs_maps_to_ec2_endpoint():
     with requests_mock.Mocker() as m:
         m.get(
-            f"{_AWS_OFFER_BASE}/AmazonEC2/current/index.json",
+            f"{_AWS_OFFER_BASE}/AmazonEC2/index.json",
             json={"publicationDate": "2026-04-18T00:00:00Z"},
         )
         result = aws_disc.discover(["aws_ebs"])
@@ -47,7 +47,7 @@ def test_aws_discover_ebs_maps_to_ec2_endpoint():
 
 def test_aws_discover_http_failure_raises_runtimeerror():
     with requests_mock.Mocker() as m:
-        m.get(f"{_AWS_OFFER_BASE}/AmazonEC2/current/index.json", status_code=500)
+        m.get(f"{_AWS_OFFER_BASE}/AmazonEC2/index.json", status_code=500)
         with pytest.raises(RuntimeError, match="aws_discover_http_500"):
             aws_disc.discover(["aws_ec2"])
 
@@ -55,13 +55,13 @@ def test_aws_discover_http_failure_raises_runtimeerror():
 def test_aws_discover_indicator_changes_when_upstream_changes():
     with requests_mock.Mocker() as m:
         m.get(
-            f"{_AWS_OFFER_BASE}/AmazonEC2/current/index.json",
+            f"{_AWS_OFFER_BASE}/AmazonEC2/index.json",
             json={"publicationDate": "2026-04-18T00:00:00Z"},
         )
         a = aws_disc.discover(["aws_ec2"])
     with requests_mock.Mocker() as m:
         m.get(
-            f"{_AWS_OFFER_BASE}/AmazonEC2/current/index.json",
+            f"{_AWS_OFFER_BASE}/AmazonEC2/index.json",
             json={"publicationDate": "2026-04-19T00:00:00Z"},
         )
         b = aws_disc.discover(["aws_ec2"])

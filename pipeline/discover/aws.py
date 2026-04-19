@@ -31,7 +31,7 @@ def discover(shards: Iterable[str], *, session: requests.Session | None = None) 
         out: dict[str, str] = {}
         for shard in shards:
             service = _AWS_SERVICE_CODES[shard]
-            url = f"{_AWS_OFFER_BASE}/{service}/current/index.json"
+            url = f"{_AWS_OFFER_BASE}/{service}/index.json"
             resp = session.get(url, headers={"User-Agent": _UA}, timeout=60)
             if resp.status_code != 200:
                 raise RuntimeError(f"aws_discover_http_{resp.status_code}: {url}")
