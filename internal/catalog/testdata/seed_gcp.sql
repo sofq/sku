@@ -72,12 +72,12 @@ INSERT INTO terms VALUES
   ('gcp-sql-pg-c2-use1-regional',      'on_demand','cloud-sql-postgres','regional','','',''),
   ('gcp-sql-my-c2-use1-zonal',         'on_demand','cloud-sql-mysql','zonal','','','');
 
-INSERT INTO resource_attrs (sku_id, architecture, extra) VALUES
-  ('gcp-gce-n1std2-use1-linux',        'x86_64','{}'),
-  ('gcp-gce-e2std2-use1-linux',        'x86_64','{}'),
-  ('gcp-sql-pg-c2-use1-zonal',         NULL,'{"engine":"cloud-sql-postgres","deployment_option":"zonal"}'),
-  ('gcp-sql-pg-c2-use1-regional',      NULL,'{"engine":"cloud-sql-postgres","deployment_option":"regional"}'),
-  ('gcp-sql-my-c2-use1-zonal',         NULL,'{"engine":"cloud-sql-mysql","deployment_option":"zonal"}');
+INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture, extra) VALUES
+  ('gcp-gce-n1std2-use1-linux',        2, 7.5,  'x86_64','{}'),
+  ('gcp-gce-e2std2-use1-linux',        2, 8.0,  'x86_64','{}'),
+  ('gcp-sql-pg-c2-use1-zonal',         NULL, NULL, NULL,'{"engine":"cloud-sql-postgres","deployment_option":"zonal"}'),
+  ('gcp-sql-pg-c2-use1-regional',      NULL, NULL, NULL,'{"engine":"cloud-sql-postgres","deployment_option":"regional"}'),
+  ('gcp-sql-my-c2-use1-zonal',         NULL, NULL, NULL,'{"engine":"cloud-sql-mysql","deployment_option":"zonal"}');
 
 INSERT INTO prices VALUES
   ('gcp-gce-n1std2-use1-linux',        'compute','',0.095,'hrs'),

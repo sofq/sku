@@ -456,6 +456,9 @@ WHERE `
 	return out, rs.Err()
 }
 
+// FillPrices loads the prices rows for r.SKUID and appends them to r.Prices.
+// Exported so internal/compare/kinds can reuse the same scan path without
+// duplicating the query.
 func (c *Catalog) FillPrices(ctx context.Context, r *Row) error {
 	rs, err := c.db.QueryContext(ctx,
 		"SELECT dimension, tier, amount, unit FROM prices WHERE sku_id = ? ORDER BY dimension, tier",

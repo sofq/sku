@@ -21,7 +21,7 @@ func TestInstalledShards_filtersAndSorts(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("SKU_DATA_DIR", dir)
 	for _, name := range []string{"gcp-gce.db", "aws-ec2.db", "README.md", "azure-vm.db", "stale.db-journal"} {
-		require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte{}, 0o644))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte{}, 0o600))
 	}
 	got, err := InstalledShards()
 	require.NoError(t, err)

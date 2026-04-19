@@ -13,7 +13,7 @@ import (
 
 func buildShard(t *testing.T, dir, name, seedRel string) string {
 	t.Helper()
-	seed, err := os.ReadFile(seedRel)
+	seed, err := os.ReadFile(seedRel) //nolint:gosec // test-only fixture path
 	require.NoError(t, err)
 	path := filepath.Join(dir, name+".db")
 	require.NoError(t, catalog.BuildFromSQL(path, string(seed)))

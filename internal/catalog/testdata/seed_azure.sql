@@ -63,11 +63,11 @@ INSERT INTO terms VALUES
   ('azure-sql-gp-gen5-2-eastus-single',  'on_demand','azure-sql','single-az','','',''),
   ('azure-sql-bc-gen5-2-eastus-mi',      'on_demand','azure-sql','managed-instance','','','');
 
-INSERT INTO resource_attrs (sku_id, architecture, extra) VALUES
-  ('azure-vm-d2v3-eastus-linux',        'x86_64','{}'),
-  ('azure-vm-d2v3-eastus-windows',      'x86_64','{}'),
-  ('azure-sql-gp-gen5-2-eastus-single', NULL, '{"deployment_option":"single-az"}'),
-  ('azure-sql-bc-gen5-2-eastus-mi',     NULL, '{"deployment_option":"managed-instance"}');
+INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture, extra) VALUES
+  ('azure-vm-d2v3-eastus-linux',        2, 8.0,  'x86_64','{}'),
+  ('azure-vm-d2v3-eastus-windows',      2, 8.0,  'x86_64','{}'),
+  ('azure-sql-gp-gen5-2-eastus-single', NULL, NULL, NULL, '{"deployment_option":"single-az"}'),
+  ('azure-sql-bc-gen5-2-eastus-mi',     NULL, NULL, NULL, '{"deployment_option":"managed-instance"}');
 
 INSERT INTO prices VALUES
   ('azure-vm-d2v3-eastus-linux',        'compute','',0.096,'hrs'),
