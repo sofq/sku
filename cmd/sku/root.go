@@ -50,6 +50,7 @@ func newRootCmd() *cobra.Command {
 	root.AddCommand(newSchemaCmd())
 	root.AddCommand(newSearchCmd())
 	root.AddCommand(newCompareCmd())
+	root.AddCommand(newEstimateCmd())
 	root.AddCommand(newConfigureCmd())
 	root.AddCommand(newCompletionCmd())
 	return root
