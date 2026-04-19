@@ -129,6 +129,13 @@ echo '{"items":[{"provider":"aws","service":"ec2","resource":"m5.large","params"
 ./bin/sku estimate --item llm:anthropic/claude-opus-4.6:input=1M:output=500K:serving_provider=anthropic --pretty
 ./bin/sku estimate --item llm:anthropic/claude-opus-4.6:input=2M:output=1M:serving_provider=aws-bedrock --pretty
 ./bin/sku estimate --config docs/examples/workload-llm.yaml --pretty
+# sku batch (m5.5)
+echo '[
+  {"command":"aws ec2 price","args":{"instance_type":"m5.large","region":"us-east-1"}},
+  {"command":"llm price","args":{"model":"anthropic/claude-opus-4.6"}}
+]' | ./bin/sku batch --pretty
+cat docs/examples/batch-queries.ndjson | ./bin/sku batch
+./bin/sku schema --list-commands
 ```
 
 ## Global flags (all subcommands)

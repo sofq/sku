@@ -1,0 +1,3 @@
+# example batch input — pipe into `sku batch`
+{"command":"llm price","args":{"model":"anthropic/claude-opus-4.6","serving_provider":"aws-bedrock"},"preset":"price"}
+{"command":"aws ec2 price","args":{"instance_type":"m5.large","region":"us-east-1"}}
