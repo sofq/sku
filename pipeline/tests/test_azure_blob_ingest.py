@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.azure_blob import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "azure_blob" / "prices.json"
@@ -31,7 +29,8 @@ def test_each_row_carries_three_dims():
     rows = list(ingest(prices_path=FIXTURE))
     for r in rows:
         dims = {p["dimension"] for p in r["prices"]}
-        assert dims == {"storage", "read-ops", "write-ops"}, f"row {r['sku_id']} missing dims: {dims}"
+        assert dims == {"storage", "read-ops", "write-ops"}, \
+            f"row {r['sku_id']} missing dims: {dims}"
 
 
 def test_reservation_rows_filtered():

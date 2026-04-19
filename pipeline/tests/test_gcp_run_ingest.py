@@ -5,10 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.gcp_run import ingest
-
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_run" / "skus.json"
 GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "gcp_run_rows.jsonl"
@@ -60,9 +57,14 @@ def test_architecture_attr():
 def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     for sku in bad["skus"]:
-        if sku["category"]["resourceGroup"] == "CloudRunV2" and sku["category"]["usageType"] == "OnDemand":
-            if sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]["unitPrice"]["currencyCode"] == "USD":
-                sku["serviceRegions"] = ["mars-1"]
+        cat = sku["category"]
+        rate = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]
+        if (
+            cat["resourceGroup"] == "CloudRunV2"
+            and cat["usageType"] == "OnDemand"
+            and rate["unitPrice"]["currencyCode"] == "USD"
+        ):
+            sku["serviceRegions"] = ["mars-1"]
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
     rows = list(ingest(skus_path=p))

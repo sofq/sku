@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.gcp_gce import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_gce" / "skus.json"
@@ -52,9 +50,11 @@ def test_unknown_region_skipped(tmp_path):
     """A SKU in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())
     for sku in bad["skus"]:
-        if sku["category"]["usageType"] == "OnDemand" and sku["pricingInfo"][0]["pricingExpression"][
-            "tieredRates"
-        ][0]["unitPrice"]["currencyCode"] == "USD":
+        rate = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]
+        if (
+            sku["category"]["usageType"] == "OnDemand"
+            and rate["unitPrice"]["currencyCode"] == "USD"
+        ):
             sku["serviceRegions"] = ["us-central1"]
             break
     p = tmp_path / "bad.json"

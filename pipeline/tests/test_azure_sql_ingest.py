@@ -43,7 +43,7 @@ def test_business_critical_more_expensive_than_general_purpose():
 
 
 def test_unit_of_measure_divisor_applied():
-    """The one '100 Hours' row in the fixture must come out at the same per-hour rate as its '1 Hour' twin."""
+    """The one '100 Hours' row must match the per-hour rate of its '1 Hour' twin."""
     rows = list(ingest(prices_path=FIXTURE))
     # Group by (sku, region, deployment); we expect equal-or-very-close per-hour amounts
     # for the row priced as '100 Hours' and any sibling priced as '1 Hour'. Since the

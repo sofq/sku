@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.aws_lambda import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "aws_lambda" / "offer.json"

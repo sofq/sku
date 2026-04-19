@@ -5,8 +5,9 @@ from pathlib import Path
 
 from ingest.azure_functions import ingest
 
-FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "azure_functions" / "prices.json"
-GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "azure_functions_rows.jsonl"
+_DATA = Path(__file__).resolve().parent.parent / "testdata"
+FIXTURE = _DATA / "azure_functions" / "prices.json"
+GOLDEN = _DATA / "golden" / "azure_functions_rows.jsonl"
 
 
 def _canonical(rows):

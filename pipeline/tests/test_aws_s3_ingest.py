@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.aws_s3 import ingest
 from normalize.terms import terms_hash
 

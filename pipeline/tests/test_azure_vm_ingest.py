@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.azure_vm import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "azure_vm" / "prices.json"

@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.gcp_cloud_sql import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_cloud_sql" / "skus.json"
