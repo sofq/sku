@@ -13,7 +13,17 @@ import (
 //go:embed seed_aws.sql
 var seedAWS string
 
+//go:embed seed_aws_m3a2.sql
+var seedAWSM3A2 string
+
 // BuildAWSShard writes an aws-ec2 shard at dst using the checked-in AWS seed.
 func BuildAWSShard(dst string) error {
 	return catalog.BuildFromSQL(dst, seedAWS)
+}
+
+// BuildAWSS3Shard writes an aws-s3 shard at dst using the m3a.2 seed, which
+// ships with storage.object rows for storage-class=standard in us-east-1 and
+// carries storage + requests-put + requests-get prices.
+func BuildAWSS3Shard(dst string) error {
+	return catalog.BuildFromSQL(dst, seedAWSM3A2)
 }
