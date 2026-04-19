@@ -37,3 +37,18 @@ func testutilSeededEstimateCatalogS3(t *testing.T) string {
 	}
 	return dir
 }
+
+// testutilSeededEstimateCatalogLLM seeds an openrouter.db under SKU_DATA_DIR
+// so llm.text estimator end-to-end tests can run without network access.
+func testutilSeededEstimateCatalogLLM(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	t.Setenv("SKU_DATA_DIR", dir)
+	if err := testdata.BuildOpenRouterShard(filepath.Join(dir, "openrouter.db")); err != nil {
+		t.Fatalf("seed openrouter: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "openrouter.db")); err != nil {
+		t.Fatalf("openrouter shard missing: %v", err)
+	}
+	return dir
+}
