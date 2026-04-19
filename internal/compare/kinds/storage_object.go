@@ -11,7 +11,7 @@ import (
 // StorageObjectSpec captures the cross-provider storage.object equivalence
 // shape. Zero values disable the matching predicate. StorageClass is an exact
 // match on s.resource_name ("standard", "standard-ia", "hot", ...).
-// Term pin: on_demand / '' / '' — storage has no tenancy/os.
+// Term pin: on_demand / ” / ” — storage has no tenancy/os.
 type StorageObjectSpec struct {
 	StorageClass     string
 	DurabilityNines  int64
@@ -20,6 +20,8 @@ type StorageObjectSpec struct {
 	Regions          []string
 }
 
+// QueryStorageObject runs the storage.object equivalence query against a
+// single shard and returns rows with prices populated. Term pin: on_demand/”/”.
 func QueryStorageObject(ctx context.Context, c *catalog.Catalog, spec StorageObjectSpec) ([]catalog.Row, error) {
 	where := []string{
 		"s.kind = 'storage.object'",

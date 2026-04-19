@@ -43,14 +43,14 @@ type Envelope struct {
 
 // Resource is the §4 resource block.
 type Resource struct {
-	Kind            string         `json:"kind,omitempty"`
-	Name            string         `json:"name,omitempty"`
-	VCPU            *int64         `json:"vcpu,omitempty"`
-	MemoryGB        *float64       `json:"memory_gb,omitempty"`
-	StorageGB       *float64       `json:"storage_gb,omitempty"`
-	GPUCount        *int64         `json:"gpu_count,omitempty"`
-	ContextLength   *int64         `json:"context_length,omitempty"`
-	MaxOutputTokens *int64         `json:"max_output_tokens,omitempty"`
+	Kind             string         `json:"kind,omitempty"`
+	Name             string         `json:"name,omitempty"`
+	VCPU             *int64         `json:"vcpu,omitempty"`
+	MemoryGB         *float64       `json:"memory_gb,omitempty"`
+	StorageGB        *float64       `json:"storage_gb,omitempty"`
+	GPUCount         *int64         `json:"gpu_count,omitempty"`
+	ContextLength    *int64         `json:"context_length,omitempty"`
+	MaxOutputTokens  *int64         `json:"max_output_tokens,omitempty"`
 	Capabilities     []string       `json:"capabilities,omitempty"`
 	DurabilityNines  *int64         `json:"durability_nines,omitempty"`
 	AvailabilityTier *string        `json:"availability_tier,omitempty"`
@@ -159,12 +159,12 @@ func buildFull(r catalog.Row) Envelope {
 	}
 
 	resource := &Resource{
-		Kind:            r.Kind,
-		Name:            r.ResourceName,
-		VCPU:            r.ResourceAttrs.VCPU,
-		MemoryGB:        r.ResourceAttrs.MemoryGB,
-		StorageGB:       r.ResourceAttrs.StorageGB,
-		GPUCount:        r.ResourceAttrs.GPUCount,
+		Kind:             r.Kind,
+		Name:             r.ResourceName,
+		VCPU:             r.ResourceAttrs.VCPU,
+		MemoryGB:         r.ResourceAttrs.MemoryGB,
+		StorageGB:        r.ResourceAttrs.StorageGB,
+		GPUCount:         r.ResourceAttrs.GPUCount,
 		ContextLength:    r.ResourceAttrs.ContextLength,
 		MaxOutputTokens:  r.ResourceAttrs.MaxOutputTokens,
 		Capabilities:     r.ResourceAttrs.Capabilities,

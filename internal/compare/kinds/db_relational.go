@@ -24,6 +24,9 @@ type DBRelationalSpec struct {
 	Regions          []string
 }
 
+// QueryDBRelational runs the db.relational equivalence query against a single
+// shard and returns rows with prices populated. Term pin:
+// on_demand / <Engine> / <DeploymentOption>.
 func QueryDBRelational(ctx context.Context, c *catalog.Catalog, spec DBRelationalSpec) ([]catalog.Row, error) {
 	if spec.Engine == "" || spec.DeploymentOption == "" {
 		return nil, fmt.Errorf("compare: db.relational requires engine + deployment option")
