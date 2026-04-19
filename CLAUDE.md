@@ -40,7 +40,9 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-v1.0 shipped — no open milestone.
+M6 — Distribution channels: pre-release `v0.1.0-rc.1` cut.
+Exit-gated on fresh-machine install verification for the first non-pre-release tag.
+Next: M7 — Docs, polish, v1.0.
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
