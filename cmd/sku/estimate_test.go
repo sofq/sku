@@ -206,3 +206,23 @@ func TestEstimate_llmText_endToEnd(t *testing.T) {
 		t.Fatalf("kind = %q, want llm.text", got.Items[0].Kind)
 	}
 }
+
+func TestEstimate_llmText_configYAML(t *testing.T) {
+	_ = testutilSeededEstimateCatalogLLM(t)
+
+	cmd := newRootCmd()
+	var stdout, stderr bytes.Buffer
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{
+		"estimate",
+		"--config", "testdata/workload-llm.yaml",
+	})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr:\n%s", err, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"kind":"llm.text"`)) &&
+		!bytes.Contains(stdout.Bytes(), []byte(`"kind": "llm.text"`)) {
+		t.Fatalf("expected llm.text kind in output:\n%s", stdout.String())
+	}
+}
