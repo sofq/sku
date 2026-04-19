@@ -106,3 +106,37 @@ func TestEstimate_mutuallyExclusive(t *testing.T) {
 		t.Fatalf("stderr missing hint: %s", stderr.String())
 	}
 }
+
+func TestEstimate_storageObject_endToEnd(t *testing.T) {
+	_ = testutilSeededEstimateCatalogS3(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{
+		"estimate",
+		"--item", "aws/s3:standard:region=us-east-1:gb_month=500:put_requests=1000:get_requests=5000",
+	})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	items, _ := obj["items"].([]any)
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+	first := items[0].(map[string]any)
+	if first["kind"] != "storage.object" {
+		t.Fatalf("kind = %v, want storage.object", first["kind"])
+	}
+	if first["quantity_unit"] != "gb-mo" {
+		t.Fatalf("quantity_unit = %v, want gb-mo", first["quantity_unit"])
+	}
+	if m, _ := first["monthly_usd"].(float64); m <= 0 {
+		t.Fatalf("monthly_usd = %v, want > 0 (full envelope: %s)", m, stdout.String())
+	}
+}
