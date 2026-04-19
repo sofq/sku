@@ -48,7 +48,7 @@ func (vmEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) {
 	if err != nil {
 		return LineItem{}, err
 	}
-	os_ := param(it.Params, "os", "linux")
+	osName := param(it.Params, "os", "linux")
 	tenancy := param(it.Params, "tenancy", "shared")
 	commitment := param(it.Params, "commitment", "on_demand")
 
@@ -60,7 +60,7 @@ func (vmEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) {
 	rows, err := lookupVM(ctx, shard, catalog.VMFilter{
 		Provider: it.Provider, Service: it.Service,
 		InstanceType: it.Resource, Region: region,
-		Terms: catalog.Terms{Commitment: commitment, Tenancy: tenancy, OS: os_},
+		Terms: catalog.Terms{Commitment: commitment, Tenancy: tenancy, OS: osName},
 	})
 	if err != nil {
 		return LineItem{}, fmt.Errorf("estimate/compute.vm: lookup: %w", err)
@@ -101,7 +101,7 @@ func param(p map[string]string, k, def string) string {
 	return def
 }
 
-func paramInt(p map[string]string, k string, def, min int) (int, error) {
+func paramInt(p map[string]string, k string, def, minVal int) (int, error) {
 	s, ok := p[k]
 	if !ok {
 		return def, nil
@@ -110,13 +110,13 @@ func paramInt(p map[string]string, k string, def, min int) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("estimate/compute.vm: %s=%q: %w", k, s, err)
 	}
-	if n < min {
-		return 0, fmt.Errorf("estimate/compute.vm: %s=%d below minimum %d", k, n, min)
+	if n < minVal {
+		return 0, fmt.Errorf("estimate/compute.vm: %s=%d below minimum %d", k, n, minVal)
 	}
 	return n, nil
 }
 
-func paramFloat(p map[string]string, k string, def, min float64) (float64, error) {
+func paramFloat(p map[string]string, k string, def, minVal float64) (float64, error) {
 	s, ok := p[k]
 	if !ok {
 		return def, nil
@@ -125,8 +125,8 @@ func paramFloat(p map[string]string, k string, def, min float64) (float64, error
 	if err != nil {
 		return 0, fmt.Errorf("estimate/compute.vm: %s=%q: %w", k, s, err)
 	}
-	if f < min {
-		return 0, fmt.Errorf("estimate/compute.vm: %s=%v below minimum %v", k, f, min)
+	if f < minVal {
+		return 0, fmt.Errorf("estimate/compute.vm: %s=%v below minimum %v", k, f, minVal)
 	}
 	return f, nil
 }

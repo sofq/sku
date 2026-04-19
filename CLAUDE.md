@@ -110,6 +110,10 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 
 ./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind compute.vm --vcpu 8 --memory 32 --regions us-east,eu-west --sort price
+
+./bin/sku estimate --item aws/ec2:m5.large:region=us-east-1:count=10:hours=730 --pretty
+./bin/sku estimate --item aws/ec2:m5.large:region=us-east-1:count=2:hours=100 \
+                   --item aws/ec2:m5.xlarge:region=us-east-1:count=1:hours=730
 ```
 
 ## Global flags (all subcommands)
