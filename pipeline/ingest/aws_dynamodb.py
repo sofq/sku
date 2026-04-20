@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
@@ -40,38 +41,32 @@ _GROUP_MAP: dict[str, str] = {
 }
 
 _SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
+WITH products_flat AS (
   SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.storageClass') AS klass_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.group') AS group_raw,
-    terms
-  FROM prod_keys
+    p.key AS sku_id,
+    json_extract_string(p.value, '$.attributes.regionCode') AS region,
+    json_extract_string(p.value, '$.attributes.storageClass') AS klass_raw,
+    json_extract_string(p.value, '$.attributes.group') AS group_raw
+  FROM offer, json_each(offer.products) AS p(key, value)
 ),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
+terms_flat AS (
+  SELECT
+    t.key AS sku_id,
+    (json_keys(t.value))[1] AS term_key,
+    t.value AS term_obj
+  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
 ),
 pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
+  SELECT tf.sku_id, tf.term_key, tf.term_obj,
+    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
+  FROM terms_flat tf
 )
-SELECT sku_id, region, klass_raw, group_raw,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".beginRange') AS begin_range
-FROM pd_keys
+SELECT pf.sku_id, pf.region, pf.klass_raw, pf.group_raw,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
+  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd,
+  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".beginRange') AS begin_range
+FROM products_flat pf
+JOIN pd_keys pk ON pf.sku_id = pk.sku_id
 """
 
 
@@ -95,7 +90,8 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if dim == "storage" and begin_range not in (None, "0"):
             continue
-        normalizer.normalize(_PROVIDER, region)
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue
         key = (klass, region)
         grouped.setdefault(key, {})[dim] = {"sku": sku_id, "usd": usd, "unit": unit}
 

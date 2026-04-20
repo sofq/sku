@@ -228,3 +228,37 @@ npm-pack-smoke: build ## Pack root npm package and run `sku version` via shim
 pypi-wheel-smoke: build ## Stage local binary + build a single wheel
 	mkdir -p python/sku_cli/bin && cp bin/sku python/sku_cli/bin/
 	cd python && python3 -m build --wheel
+
+.PHONY: docs-verify
+docs-verify: build ## Re-run every verified snippet in docs/getting-started.md + docs/commands/
+	@test -d dist/pipeline || (echo "run 'make openrouter-shard aws-shards azure-shards gcp-shards' first" && exit 2)
+	bash scripts/verify-docs-snippets.sh
+
+# ---------------------------------------------------------------------------
+# Discover + live ingest (m3a.4.1)
+
+.PHONY: discover
+discover: ## Run the discover module; DISCOVER_LIVE=1 hits real upstreams
+	@mkdir -p $(CURDIR)/dist/pipeline/discover
+	$(MAKE) -C pipeline setup
+	cd pipeline && .venv/bin/python -m discover \
+	  --state $(CURDIR)/dist/pipeline/discover/state.json \
+	  --out   $(CURDIR)/dist/pipeline/discover/changed.json \
+	  $(if $(DISCOVER_LIVE),--live,) \
+	  $(if $(BASELINE_REBUILD),--baseline-rebuild,) \
+	  $(if $(DISCOVER_SHARDS),--shards $(DISCOVER_SHARDS),)
+
+# Map SHARD=<underscored> to the correct live-source flag for its ingest script.
+_SHARD_LIVE_FLAG = $(if $(filter aws_%,$(SHARD)),--offer,\
+                    $(if $(filter azure_%,$(SHARD)),--prices,\
+                    $(if $(filter gcp_%,$(SHARD)),--skus,)))
+
+.PHONY: shard-live
+shard-live: ## Ingest + package SHARD=<name> using SRC=<local-offer-path>
+	@test -n "$(SHARD)" || (echo "SHARD=<name> required" && exit 2)
+	@test -n "$(SRC)"   || (echo "SRC=<local-offer-path> required" && exit 2)
+	@test -n "$(_SHARD_LIVE_FLAG)" || \
+	  (echo "shard-live: SHARD=$(SHARD) is not aws_*, azure_*, or gcp_*" && exit 2)
+	mkdir -p dist/pipeline
+	$(MAKE) -C pipeline shard SHARD=$(SHARD) \
+	  INGEST_EXTRA='$(_SHARD_LIVE_FLAG) $(SRC) $(INGEST_EXTRA)'

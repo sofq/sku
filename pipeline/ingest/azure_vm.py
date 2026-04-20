@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
@@ -26,10 +27,10 @@ _KIND = "compute.vm"
 _SQL = """
 WITH items AS (
   SELECT UNNEST(Items, recursive := true)
-  FROM read_json_auto('{path}', maximum_object_size=33554432)
+  FROM read_json_auto('{path}', maximum_object_size=536870912)
 )
 SELECT
-  meterId       AS sku_id,
+  CAST(meterId AS VARCHAR) AS sku_id,
   armSkuName    AS resource_name,
   armRegionName AS region,
   productName   AS product_name,
@@ -52,6 +53,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
     con = open_conn()
     path_literal = str(prices_path).replace("'", "''")
     sql = _SQL.replace("{path}", path_literal)
+    seen: set[str] = set()
     for (
         sku_id, arm_sku, region, product, price, uom, currency, row_type, service_name,
     ) in con.execute(sql).fetchall():
@@ -63,10 +65,13 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if any(hint in product for hint in _SPOT_HINTS):
             continue
-        # OS detection: productName contains "Windows" for Windows VMs;
-        # everything else is Linux (the only two surfaces we ship in m3b.1).
+        if sku_id in seen:
+            continue
+        seen.add(sku_id)
         os_value = "windows" if "Windows" in product else "linux"
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         divisor, unit = parse_unit_of_measure(uom)
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",

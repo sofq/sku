@@ -7,12 +7,14 @@ pair plus one synthetic aggregated row per model with provider='openrouter'.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
 import time
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults, load_enums
 from normalize.terms import terms_hash
@@ -22,8 +24,6 @@ from .http import FixtureClient, LiveClient
 
 class NonUSDError(RuntimeError):
     """Raised when an upstream endpoint declares a non-USD currency."""
-
-
 
 
 def _kind_for_modality(modality: str | None, input_modalities: list[str] | None) -> str:
@@ -261,6 +261,49 @@ def _write_rows(rows: Iterable[dict[str, Any]], out: Path | None) -> None:
         with out.open("w") as fh:
             for r in rows:
                 fh.write(encode(r) + "\n")
+
+
+def fetch(target_dir: Path, *, client: LiveClient | None = None) -> str:
+    """Materialise a full OpenRouter fixture tree under `target_dir`:
+
+        target_dir/models.json
+        target_dir/endpoints/{author}__{slug}.json
+
+    Returns SHA256 hex digest over the sorted list of ``id`` strings from
+    ``models.json.data[*].id`` — the version indicator for the OpenRouter shard.
+    Atomic per-file write: write to ``<name>.part``, os.replace onto final name.
+    Creates parent directories as needed.
+    """
+    client = client or LiveClient()
+
+    models_payload = client.get("/api/v1/models")
+
+    # Write models.json atomically.
+    target_dir = Path(target_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    models_content = json.dumps(models_payload, sort_keys=True, separators=(",", ":"))
+    models_final = target_dir / "models.json"
+    models_part = target_dir / "models.json.part"
+    models_part.write_text(models_content, encoding="utf-8")
+    os.replace(models_part, models_final)
+
+    # Write one endpoint file per model, atomically.
+    endpoints_dir = target_dir / "endpoints"
+    for model in models_payload.get("data", []):
+        model_id: str = model["id"]
+        ep_payload = client.get(f"/api/v1/models/{model_id}/endpoints")
+        ep_content = json.dumps(ep_payload, sort_keys=True, separators=(",", ":"))
+        flat = model_id.replace("/", "__")
+        endpoints_dir.mkdir(parents=True, exist_ok=True)
+        ep_final = endpoints_dir / f"{flat}.json"
+        ep_part = endpoints_dir / f"{flat}.json.part"
+        ep_part.write_text(ep_content, encoding="utf-8")
+        os.replace(ep_part, ep_final)
+
+    # Compute version digest over sorted model id list.
+    sorted_ids = sorted(m["id"] for m in models_payload.get("data", []))
+    digest = hashlib.sha256(json.dumps(sorted_ids).encode()).hexdigest()
+    return digest
 
 
 def main() -> int:

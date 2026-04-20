@@ -1,0 +1,9 @@
+items:
+  - provider: aws
+    service: s3
+    resource: standard
+    params:
+      region: us-east-1
+      gb_month: "500"
+      put_requests: "1000"
+      get_requests: "5000"

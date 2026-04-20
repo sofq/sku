@@ -1,4 +1,4 @@
-"""Normalize AWS RDS offer JSON into sku row dicts via DuckDB.
+"""Normalize AWS RDS offer JSON into sku row dicts.
 
 Spec §5 db.relational kind. Engine and deployment-option ride the
 terms.tenancy and terms.os slots — see enums.yaml comment for rationale.
@@ -7,14 +7,16 @@ terms.tenancy and terms.os slots — see enums.yaml comment for rationale.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
-from ._duckdb import dumps, open_conn
+from ._duckdb import dumps
 from .aws_common import load_region_normalizer
 
 _PROVIDER = "aws"
@@ -24,66 +26,50 @@ _KIND = "db.relational"
 _ENGINE_MAP = {"PostgreSQL": "postgres", "MySQL": "mysql", "MariaDB": "mariadb"}
 _DEPL_MAP = {"Single-AZ": "single-az", "Multi-AZ": "multi-az"}
 
-_SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
-  SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.instanceType') AS instance_type,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.databaseEngine') AS engine_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.deploymentOption') AS depl_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.licenseModel') AS license_model,
-    json_extract_string(products, '$."' || sku_id || '".attributes.vcpu') AS vcpu,
-    json_extract_string(products, '$."' || sku_id || '".attributes.memory') AS memory,
-    terms
-  FROM prod_keys
-),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
-),
-pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
-)
-SELECT sku_id, instance_type, region, engine_raw, depl_raw, license_model, vcpu, memory,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd
-FROM pd_keys
-WHERE family = 'Database Instance'
-"""
-
 
 def _parse_memory(raw: str) -> float:
     return float(raw.split()[0])
 
 
+def _first_pd(term_data: dict) -> dict | None:
+    term = next(iter(term_data.values()), None)
+    if not term:
+        return None
+    return next(iter(term.get("priceDimensions", {}).values()), None)
+
+
 def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     normalizer = load_region_normalizer()
-    con = open_conn()
-    path_literal = str(offer_path).replace("'", "''")
-    con.execute(
-        f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'})"
-    )
-    for sku_id, instance_type, region, engine_raw, depl_raw, license_model, vcpu_raw, memory_raw, unit, usd in (
-        con.execute(_SQL).fetchall()
-    ):
+    with offer_path.open() as f:
+        offer = json.load(f)
+    products = offer.get("products", {})
+    terms_od = offer.get("terms", {}).get("OnDemand", {})
+
+    for sku_id, product in products.items():
+        if product.get("productFamily") != "Database Instance":
+            continue
+        attrs = product.get("attributes", {})
+        instance_type = attrs.get("instanceType", "")
+        region = attrs.get("regionCode", "")
+        engine_raw = attrs.get("databaseEngine", "")
+        depl_raw = attrs.get("deploymentOption", "")
+        license_model = attrs.get("licenseModel", "")
+        vcpu_raw = attrs.get("vcpu", "")
+        memory_raw = attrs.get("memory", "")
+
         if license_model and license_model != "No license required":
             continue
         if engine_raw not in _ENGINE_MAP or depl_raw not in _DEPL_MAP:
             continue
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
+        pd = _first_pd(terms_od.get(sku_id) or {})
+        if pd is None:
+            continue
+        usd = float(pd.get("pricePerUnit", {}).get("USD", "0"))
+        unit = pd.get("unit", "")
+
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": _ENGINE_MAP[engine_raw],

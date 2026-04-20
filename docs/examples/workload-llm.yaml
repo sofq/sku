@@ -1,0 +1,8 @@
+items:
+  - provider: llm
+    service: text
+    resource: anthropic/claude-opus-4.6
+    params:
+      input: 1M
+      output: 500K
+      serving_provider: anthropic

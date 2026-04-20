@@ -1,0 +1,8 @@
+items:
+  - provider: aws
+    service: ec2
+    resource: m5.large
+    params:
+      region: us-east-1
+      count: 2
+      hours: 100

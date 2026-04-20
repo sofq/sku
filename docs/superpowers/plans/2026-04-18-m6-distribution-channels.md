@@ -40,9 +40,10 @@
 ### Task 1: Expand goreleaser — checksum signing, SBOM, nfpms
 
 **Files:**
+
 - Modify: `.goreleaser.yml`
 
-- [x] **Step 1: Add signs, sboms, nfpms blocks**
+- [X] **Step 1: Add signs, sboms, nfpms blocks**
 
 Append to `.goreleaser.yml` (after the existing `checksum:` block, before `snapshot:`):
 
@@ -79,17 +80,17 @@ nfpms:
     bindir: /usr/bin
 ```
 
-- [x] **Step 2: Run snapshot to verify config parses**
+- [X] **Step 2: Run snapshot to verify config parses**
 
 Run: `goreleaser release --snapshot --clean --skip=sign,publish,docker,sbom`
 Expected: Exit 0. `dist/` contains platform archives + `checksums.txt`. The `--skip=sign,sbom` keeps local dry-run fast (cosign/syft not required locally).
 
-- [x] **Step 3: Run syft locally to verify SBOM generation works** *(syft not installed locally; plan allows skip — SBOM generation happens in CI via anchore/sbom-action)*
+- [X] **Step 3: Run syft locally to verify SBOM generation works** *(syft not installed locally; plan allows skip — SBOM generation happens in CI via anchore/sbom-action)*
 
 Run: `syft --version || echo "install syft via brew install syft"` then `goreleaser release --snapshot --clean --skip=sign,publish,docker`
 Expected: Exit 0. `dist/*.spdx.sbom.json` present for each archive.
 
-- [x] **Step 4: Commit**
+- [X] **Step 4: Commit**
 
 ```bash
 git add .goreleaser.yml
@@ -101,9 +102,10 @@ git commit -m "feat(m6): goreleaser — add cosign checksum signing, syft SBOMs,
 ### Task 2: Expand goreleaser — Homebrew tap and Scoop bucket
 
 **Files:**
+
 - Modify: `.goreleaser.yml`
 
-- [x] **Step 1: Add brews + scoops blocks**
+- [X] **Step 1: Add brews + scoops blocks**
 
 Append to `.goreleaser.yml` (after `nfpms:`):
 
@@ -135,17 +137,17 @@ scoops:
 
 Note: `skip_upload: auto` causes goreleaser to skip brew/scoop on any tag matching `*-rc.*` / `*-pre*`, matching spec §7 "Versioning policy" ("Pre-releases skip brew/npm/pypi").
 
-- [x] **Step 2: Snapshot build to confirm config parses**
+- [X] **Step 2: Snapshot build to confirm config parses**
 
 Run: `goreleaser release --snapshot --clean --skip=sign,publish,docker,sbom`
 Expected: Exit 0. `dist/sku.rb` (brew formula) and `dist/sku.json` (scoop manifest) present.
 
-- [x] **Step 3: Inspect generated formula and scoop manifest**
+- [X] **Step 3: Inspect generated formula and scoop manifest**
 
 Run: `cat dist/sku.rb && cat dist/sku.json`
 Expected: Formula has `url "...sku_<version>_darwin_arm64.tar.gz"` with a sha256. Scoop manifest has windows urls.
 
-- [x] **Step 4: Commit**
+- [X] **Step 4: Commit**
 
 ```bash
 git add .goreleaser.yml
@@ -157,11 +159,12 @@ git commit -m "feat(m6): goreleaser — publish Homebrew tap (sofq/homebrew-tap)
 ### Task 3: Dockerfile.goreleaser + multi-arch GHCR publishing
 
 **Files:**
+
 - Create: `Dockerfile.goreleaser`
 - Modify: `.goreleaser.yml`
 - Modify: `Makefile`
 
-- [x] **Step 1: Write Dockerfile.goreleaser**
+- [X] **Step 1: Write Dockerfile.goreleaser**
 
 Create `Dockerfile.goreleaser`:
 
@@ -174,7 +177,7 @@ ENTRYPOINT ["/usr/local/bin/sku"]
 CMD ["--help"]
 ```
 
-- [x] **Step 2: Add dockers + docker_manifests to goreleaser**
+- [X] **Step 2: Add dockers + docker_manifests to goreleaser**
 
 Append to `.goreleaser.yml`:
 
@@ -226,7 +229,7 @@ docker_signs:
     output: true
 ```
 
-- [x] **Step 3: Add docker-smoke target to Makefile**
+- [X] **Step 3: Add docker-smoke target to Makefile**
 
 Add to `Makefile`:
 
@@ -240,12 +243,12 @@ docker-smoke: ## Build a local Docker image from the snapshot binary and run sku
 	docker run --rm sku:smoke version
 ```
 
-- [x] **Step 4: Run docker-smoke** *(docker daemon not available in this environment; `goreleaser check` validates the config. Smoke runs in CI on release.)*
+- [X] **Step 4: Run docker-smoke** *(docker daemon not available in this environment; `goreleaser check` validates the config. Smoke runs in CI on release.)*
 
 Run: `make docker-smoke`
 Expected: Exit 0. Last lines print JSON with `"version":"0.0.0-snapshot-..."`.
 
-- [x] **Step 5: Commit**
+- [X] **Step 5: Commit**
 
 ```bash
 git add Dockerfile.goreleaser .goreleaser.yml Makefile
@@ -257,9 +260,10 @@ git commit -m "feat(m6): multi-arch Docker image published to ghcr.io/sofq/sku w
 ### Task 4: release.yml — install cosign + syft + docker, enable OIDC + attestations
 
 **Files:**
+
 - Modify: `.github/workflows/release.yml`
 
-- [x] **Step 1: Replace release.yml body**
+- [X] **Step 1: Replace release.yml body**
 
 Overwrite `.github/workflows/release.yml` with:
 
@@ -328,7 +332,7 @@ jobs:
           subject-path: "dist/*.tar.gz,dist/*.zip,dist/checksums.txt"
 ```
 
-- [x] **Step 2: Add comment block documenting required repo secrets**
+- [X] **Step 2: Add comment block documenting required repo secrets**
 
 Prepend to `.github/workflows/release.yml` (after the `name:` line but before `on:`), as a YAML comment:
 
@@ -341,12 +345,12 @@ Prepend to `.github/workflows/release.yml` (after the `name:` line but before `o
 # GITHUB_TOKEN is auto-injected. id-token: write enables cosign keyless + SLSA.
 ```
 
-- [x] **Step 3: Lint the workflow file**
+- [X] **Step 3: Lint the workflow file**
 
 Run: `yq '.' .github/workflows/release.yml > /dev/null && echo "yaml ok"` (fallback if yq missing: `python3 -c 'import yaml,sys;yaml.safe_load(open(".github/workflows/release.yml"))' && echo "yaml ok"`)
 Expected: `yaml ok`.
 
-- [x] **Step 4: Commit**
+- [X] **Step 4: Commit**
 
 ```bash
 git add .github/workflows/release.yml
@@ -358,13 +362,14 @@ git commit -m "feat(m6): release workflow — cosign, syft, GHCR login, SLSA L3 
 ### Task 5: npm wrapper — platform-optional-dependencies pattern
 
 **Files:**
+
 - Create: `npm/package.json`
 - Create: `npm/bin/sku.js`
 - Create: `npm/README.md`
 - Create: `npm/platform-packages/README.md`
 - Create: `npm/platform-packages/template/package.json.tmpl`
 
-- [x] **Step 1: Write root npm/package.json**
+- [X] **Step 1: Write root npm/package.json**
 
 Create `npm/package.json`:
 
@@ -395,7 +400,7 @@ Create `npm/package.json`:
 
 Version `0.0.0` is a placeholder; goreleaser stamps the real version in at release time (see Task 7).
 
-- [x] **Step 2: Write the exec shim**
+- [X] **Step 2: Write the exec shim**
 
 Create `npm/bin/sku.js`:
 
@@ -447,7 +452,7 @@ if (res.error) {
 process.exit(res.status === null ? 1 : res.status);
 ```
 
-- [x] **Step 3: Write platform package template**
+- [X] **Step 3: Write platform package template**
 
 Create `npm/platform-packages/template/package.json.tmpl` (consumed by release-npm.yml; one concrete package per supported `os`/`cpu` pair):
 
@@ -466,7 +471,7 @@ Create `npm/platform-packages/template/package.json.tmpl` (consumed by release-n
 
 Placeholders `{OS}`, `{ARCH}`, `{NODE_OS}`, `{NODE_ARCH}`, `{VERSION}` are replaced by the publish script (Task 7). Node's allowed `os`/`cpu` values differ slightly from Go's (`darwin`/`linux`/`win32`; `x64`/`arm64`) — the script maps them explicitly.
 
-- [x] **Step 4: Write npm/platform-packages/README.md**
+- [X] **Step 4: Write npm/platform-packages/README.md**
 
 Create `npm/platform-packages/README.md`:
 
@@ -484,7 +489,7 @@ Supported platforms: linux-x64, linux-arm64, darwin-x64, darwin-arm64,
 win32-x64, win32-arm64.
 ```
 
-- [x] **Step 5: Write npm/README.md**
+- [X] **Step 5: Write npm/README.md**
 
 Create `npm/README.md`:
 
@@ -500,7 +505,7 @@ root shim `bin/sku.js` execs it. No postinstall network download.
 Source: https://github.com/sofq/sku
 ```
 
-- [x] **Step 6: Smoke-test the shim logic locally**
+- [X] **Step 6: Smoke-test the shim logic locally**
 
 Run:
 
@@ -513,7 +518,7 @@ cd /tmp/sku-npm-smoke && node bin/sku.js version
 
 Expected: exit 0, prints JSON version. If `bin/sku` doesn't exist, run `make build` first.
 
-- [x] **Step 7: Commit**
+- [X] **Step 7: Commit**
 
 ```bash
 git add npm/
@@ -525,13 +530,14 @@ git commit -m "feat(m6): npm wrapper (@sofq/sku) using platform-optional-depende
 ### Task 6: PyPI wrapper — cibuildwheel platform-tagged wheels
 
 **Files:**
+
 - Create: `python/pyproject.toml`
 - Create: `python/sku_cli/__init__.py`
 - Create: `python/sku_cli/__main__.py`
 - Create: `python/MANIFEST.in`
 - Create: `python/README.md`
 
-- [x] **Step 1: Write pyproject.toml**
+- [X] **Step 1: Write pyproject.toml**
 
 Create `python/pyproject.toml`:
 
@@ -580,7 +586,7 @@ skip = ["*-musllinux_*"]  # musllinux covered via a dedicated matrix entry
 archs = { linux = ["x86_64", "aarch64"], macos = ["x86_64", "arm64"], windows = ["AMD64", "ARM64"] }
 ```
 
-- [x] **Step 2: Write the exec shim**
+- [X] **Step 2: Write the exec shim**
 
 Create `python/sku_cli/__init__.py` (empty) and `python/sku_cli/__main__.py`:
 
@@ -623,7 +629,7 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [x] **Step 3: Write MANIFEST.in and README**
+- [X] **Step 3: Write MANIFEST.in and README**
 
 Create `python/MANIFEST.in`:
 
@@ -646,7 +652,7 @@ at install time. No postinstall hooks, no network fetches.
 Source: https://github.com/sofq/sku
 ```
 
-- [x] **Step 4: Local sdist smoke**
+- [X] **Step 4: Local sdist smoke**
 
 Run (requires `python3 -m pip install --user build`):
 
@@ -657,7 +663,7 @@ ls dist/ | grep "sku_cli-0.0.0.tar.gz" && echo "sdist ok"
 
 Expected: `sdist ok`. Wheel build requires `cibuildwheel` + platform toolchain, covered in Task 7.
 
-- [x] **Step 5: Commit**
+- [X] **Step 5: Commit**
 
 ```bash
 git add python/
@@ -669,11 +675,12 @@ git commit -m "feat(m6): PyPI wrapper (sku-cli) with cibuildwheel platform-tagge
 ### Task 7: release-npm.yml + release-pypi.yml — publish wrappers after goreleaser
 
 **Files:**
+
 - Create: `.github/workflows/release-npm.yml`
 - Create: `.github/workflows/release-pypi.yml`
 - Modify: `.github/workflows/release.yml` (chain these jobs)
 
-- [x] **Step 1: Write release-npm.yml**
+- [X] **Step 1: Write release-npm.yml**
 
 Create `.github/workflows/release-npm.yml`:
 
@@ -731,7 +738,7 @@ jobs:
           npm publish --access public
 ```
 
-- [x] **Step 2: Write the publish-npm.js helper**
+- [X] **Step 2: Write the publish-npm.js helper**
 
 Create `scripts/publish-npm.js`:
 
@@ -797,7 +804,7 @@ for (const m of matrix) {
 }
 ```
 
-- [x] **Step 3: Write release-pypi.yml**
+- [X] **Step 3: Write release-pypi.yml**
 
 Create `.github/workflows/release-pypi.yml`:
 
@@ -899,7 +906,7 @@ jobs:
           twine upload dist/*.whl
 ```
 
-- [x] **Step 4: Chain wrapper jobs from release.yml**
+- [X] **Step 4: Chain wrapper jobs from release.yml**
 
 Append to `.github/workflows/release.yml`:
 
@@ -933,12 +940,12 @@ Note: GitHub Actions does not ship a `trimPrefix` function. Replace with an inli
 
 Refactor the chained jobs to use a small `compute-version` job that outputs `version` and `prerelease`, and have `release-npm` / `release-pypi` depend on it.
 
-- [x] **Step 5: Lint all three workflow files**
+- [X] **Step 5: Lint all three workflow files**
 
 Run: `for f in .github/workflows/release*.yml; do python3 -c "import yaml;yaml.safe_load(open('$f'))" && echo "$f ok"; done`
 Expected: three `ok` lines.
 
-- [x] **Step 6: Commit**
+- [X] **Step 6: Commit**
 
 ```bash
 git add .github/workflows/release-npm.yml .github/workflows/release-pypi.yml .github/workflows/release.yml scripts/publish-npm.js
@@ -950,11 +957,12 @@ git commit -m "feat(m6): chained release workflows — npm (platform packages) +
 ### Task 8: Makefile smoke targets + RELEASING.md + install docs
 
 **Files:**
+
 - Modify: `Makefile`
 - Create: `docs/contributing/RELEASING.md`
 - Create: `docs/install.md`
 
-- [x] **Step 1: Add Makefile targets**
+- [X] **Step 1: Add Makefile targets**
 
 Append to `Makefile`:
 
@@ -974,7 +982,7 @@ pypi-wheel-smoke: build ## Stage local binary + build a single wheel
 	cd python && python3 -m build --wheel
 ```
 
-- [x] **Step 2: Write RELEASING.md**
+- [X] **Step 2: Write RELEASING.md**
 
 Create `docs/contributing/RELEASING.md`:
 
@@ -1024,7 +1032,7 @@ Every release is driven by a signed, annotated tag pushed to `main`.
   pick it up automatically.
 ```
 
-- [x] **Step 3: Write docs/install.md**
+- [X] **Step 3: Write docs/install.md**
 
 Create `docs/install.md`:
 
@@ -1059,6 +1067,7 @@ cosign verify-blob \
   checksums.txt
 sha256sum -c checksums.txt
 ```
+
 ```
 
 - [x] **Step 4: Commit**
@@ -1073,13 +1082,15 @@ git commit -m "docs(m6): RELEASING.md + install.md + make release-check/npm-pack
 ### Task 9: Full local dry-run, pre-release tag, and exit-criteria verification
 
 **Files:**
+
 - Modify: `CHANGELOG.md` (create if missing)
 - Modify: `CLAUDE.md` (add M6 agent quick path lines)
 
-- [x] **Step 1: Confirm full goreleaser dry-run is clean** *(ran with `--skip=sign,sbom,docker`; syft/docker unavailable locally — CI runs the full pipeline)*
+- [X] **Step 1: Confirm full goreleaser dry-run is clean** *(ran with `--skip=sign,sbom,docker`; syft/docker unavailable locally — CI runs the full pipeline)*
 
 Run: `make release-check`
 Expected: Exit 0. `dist/` contains:
+
 - `sku_<v>_linux_amd64.tar.gz`, `_linux_arm64.tar.gz`, `_darwin_amd64.tar.gz`, `_darwin_arm64.tar.gz`, `_windows_amd64.zip`, `_windows_arm64.zip`
 - `checksums.txt`, `checksums.txt.sig` (only if cosign available locally; skipped gracefully otherwise)
 - `*.spdx.sbom.json` per archive
@@ -1089,7 +1100,7 @@ Expected: Exit 0. `dist/` contains:
 
 If cosign or syft missing locally, re-run with `--skip=sign,sbom` and record the skip in the task notes.
 
-- [x] **Step 2: Write CHANGELOG.md v0.1.0 entry**
+- [X] **Step 2: Write CHANGELOG.md v0.1.0 entry**
 
 Create or prepend to `CHANGELOG.md`:
 
@@ -1113,7 +1124,7 @@ Create or prepend to `CHANGELOG.md`:
   the authoritative pre-release artifacts.
 ```
 
-- [x] **Step 3: Add M6 verification lines to CLAUDE.md**
+- [X] **Step 3: Add M6 verification lines to CLAUDE.md**
 
 Edit `/Users/quan.hoang/quanhh/quanhoang/sku/CLAUDE.md`. Under "Quick path" add a new subsection header before the backlog block:
 
@@ -1126,11 +1137,11 @@ make docker-smoke           # Build + run sku:smoke container
 make npm-pack-smoke         # Dry npm pack + shim sanity-check
 make pypi-wheel-smoke       # Build one wheel with the local binary vendored
 ```
-```
 
+```
 Use the Edit tool to insert this block just before the "Global flags" section. The exact anchor to locate is the line `## Global flags (all subcommands)`.
 
-- [ ] **Step 4: Tag and push the pre-release**
+- [x] **Step 4: Tag and push the pre-release**
 
 Run:
 
@@ -1142,13 +1153,14 @@ git push origin v0.1.0-rc.1
 ```
 
 Only push the tag after the user has confirmed:
+
 1. All M6 secrets are populated in GitHub Settings.
 2. External tap/bucket repos exist.
 3. They want the pre-release cut from this branch.
 
 If any answer is "no", STOP — record the blocker and do not push the tag.
 
-- [ ] **Step 5: Verify the live pre-release (only after tag push)**
+- [x] **Step 5: Verify the live pre-release (only after tag push)**
 
 For each of the following, run and capture output in the PR/milestone close notes:
 
@@ -1177,7 +1189,7 @@ the first non-pre-release tag (cut in a later session). For the `-rc.1` tag
 here, only GH Release, docker, and cosign/attestation checks apply — the
 others are correctly skipped.
 
-- [ ] **Step 6: Close M6 in CLAUDE.md**
+- [x] **Step 6: Close M6 in CLAUDE.md**
 
 Edit `CLAUDE.md`: replace the `## Current milestone` block body from its current
 content to:

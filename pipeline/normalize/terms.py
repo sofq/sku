@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Mapping
+from collections.abc import Mapping
 
 # Fixed field order — MUST NOT CHANGE without a schema_version bump.
 _FIELD_ORDER: tuple[str, ...] = (

@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.aws_dynamodb import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "aws_dynamodb" / "offer.json"
@@ -52,11 +50,11 @@ def test_standard_ia_storage_cheaper_than_standard_same_region():
             f"standard-ia storage {ia_storage} should be < standard {std_storage} in {region}"
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     first_sku = next(iter(bad["products"]))
     bad["products"][first_sku]["attributes"]["regionCode"] = "ap-south-9"
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="ap-south-9"):
-        list(ingest(offer_path=p))
+    rows = list(ingest(offer_path=p))
+    assert all(r["region"] != "ap-south-9" for r in rows)

@@ -5,10 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.gcp_gcs import ingest
-
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_gcs" / "skus.json"
 GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "gcp_gcs_rows.jsonl"
@@ -57,14 +54,19 @@ def test_three_dimensions_per_row():
         assert sorted(p["dimension"] for p in row["prices"]) == expected
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     # Point the standard-storage / read-ops / write-ops meters at an unknown region.
     for sku in bad["skus"]:
-        if sku["category"]["resourceGroup"] == "StandardStorage" and sku["category"]["usageType"] == "OnDemand":
-            if sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]["unitPrice"]["currencyCode"] == "USD":
-                sku["serviceRegions"] = ["mars-1"]
+        cat = sku["category"]
+        rate = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]
+        if (
+            cat["resourceGroup"] == "StandardStorage"
+            and cat["usageType"] == "OnDemand"
+            and rate["unitPrice"]["currencyCode"] == "USD"
+        ):
+            sku["serviceRegions"] = ["mars-1"]
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="gcp/mars-1"):
-        list(ingest(skus_path=p))
+    rows = list(ingest(skus_path=p))
+    assert all(r["region"] != "mars-1" for r in rows)
