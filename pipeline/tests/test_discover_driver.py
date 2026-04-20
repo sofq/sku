@@ -26,8 +26,8 @@ def _mock_all_providers(m: requests_mock.Mocker, *, aws_pub: str = "2026-04-18T0
     m.get(_AZURE_RETAIL_BASE, json={"Items": []})
     for service_id in _GCP_SERVICE_IDS.values():
         m.get(
-            f"{_GCP_BILLING_BASE}/services/{service_id}",
-            json={"displayName": "svc", "updateTime": "t"},
+            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+            json={"skus": [{"skuId": f"sku-{service_id}"}]},
         )
     m.get("https://openrouter.ai/api/v1/models", json={"data": []})
 

@@ -121,36 +121,9 @@ def test_azure_discover_uses_top_one_param():
 # -----------------------------------------------------------------------------
 
 
-def test_gcp_discover_uses_parent_service_updateTime():
+def test_gcp_discover_hashes_first_sku():
     service_id = _GCP_SERVICE_IDS["gcp_gce"]
     with requests_mock.Mocker() as m:
-        m.get(
-            f"{_GCP_BILLING_BASE}/services/{service_id}",
-            json={"displayName": "Compute Engine", "updateTime": "2026-04-18T00:00:00Z"},
-        )
-        result = gcp_disc.discover(["gcp_gce"], api_key="test-key")
-    assert result == {"gcp_gce": "Compute Engine|2026-04-18T00:00:00Z"}
-
-
-def test_gcp_discover_api_key_in_query():
-    service_id = _GCP_SERVICE_IDS["gcp_gce"]
-    with requests_mock.Mocker() as m:
-        m.get(
-            f"{_GCP_BILLING_BASE}/services/{service_id}",
-            json={"displayName": "GCE", "updateTime": "t"},
-        )
-        gcp_disc.discover(["gcp_gce"], api_key="secret-key")
-        qs = m.request_history[0].qs
-    assert qs.get("key") == ["secret-key"]
-
-
-def test_gcp_discover_falls_back_to_sku_hash_when_no_updateTime():
-    service_id = _GCP_SERVICE_IDS["gcp_gce"]
-    with requests_mock.Mocker() as m:
-        m.get(
-            f"{_GCP_BILLING_BASE}/services/{service_id}",
-            json={"displayName": "GCE"},  # no updateTime
-        )
         m.get(
             f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
             json={"skus": [{"skuId": "one"}]},
@@ -160,10 +133,52 @@ def test_gcp_discover_falls_back_to_sku_hash_when_no_updateTime():
     assert len(result["gcp_gce"]) == len("sha256:") + 64
 
 
+def test_gcp_discover_hash_is_deterministic():
+    service_id = _GCP_SERVICE_IDS["gcp_gce"]
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+            json={"skus": [{"skuId": "one"}]},
+        )
+        first = gcp_disc.discover(["gcp_gce"], api_key="k")
+        second = gcp_disc.discover(["gcp_gce"], api_key="k")
+    assert first == second
+
+
+def test_gcp_discover_hash_changes_when_first_sku_changes():
+    service_id = _GCP_SERVICE_IDS["gcp_gce"]
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+            json={"skus": [{"skuId": "one"}]},
+        )
+        before = gcp_disc.discover(["gcp_gce"], api_key="k")
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+            json={"skus": [{"skuId": "two"}]},
+        )
+        after = gcp_disc.discover(["gcp_gce"], api_key="k")
+    assert before["gcp_gce"] != after["gcp_gce"]
+
+
+def test_gcp_discover_sends_api_key_and_pagesize():
+    service_id = _GCP_SERVICE_IDS["gcp_gce"]
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+            json={"skus": []},
+        )
+        gcp_disc.discover(["gcp_gce"], api_key="secret-key")
+        qs = m.request_history[0].qs
+    assert qs.get("key") == ["secret-key"]
+    assert qs.get("pagesize") == ["1"]
+
+
 def test_gcp_discover_http_failure_raises():
     service_id = _GCP_SERVICE_IDS["gcp_gce"]
     with requests_mock.Mocker() as m:
-        m.get(f"{_GCP_BILLING_BASE}/services/{service_id}", status_code=403)
+        m.get(f"{_GCP_BILLING_BASE}/services/{service_id}/skus", status_code=403)
         with pytest.raises(RuntimeError, match="gcp_discover_http_403"):
             gcp_disc.discover(["gcp_gce"], api_key="k")
 

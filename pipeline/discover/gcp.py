@@ -1,11 +1,11 @@
 """GCP version-indicator discoverer.
 
-For each GCP shard, issues a parent-service GET (`/services/{service_id}`) and
-returns `displayName + '|' + updateTime` when both are present. If the parent
-record omits `updateTime`, falls back to a `pageSize=1` SKU fetch and hashes
-the single row. The fallback is rare — Cloud Billing populates `updateTime`
-for all the shards we care about — but it keeps the discoverer self-consistent
-across upstream quirks.
+Cloud Billing Catalog API has no `services.get`, only `services.list` and
+`services/{id}/skus.list`. For each shard we fetch a single SKU
+(`pageSize=1`) and hash the row — the hash changes whenever the catalog
+publishes a new or changed SKU at the head of the page, triggering a
+rebuild. Weekly `--baseline-rebuild` covers any head-of-page
+reordering we miss.
 """
 
 from __future__ import annotations
@@ -36,30 +36,16 @@ def discover(
         out: dict[str, str] = {}
         for shard in shards:
             service_id = _GCP_SERVICE_IDS[shard]
-            # Parent service record — cheap (< 1 KB).
-            url = f"{_GCP_BILLING_BASE}/services/{service_id}"
+            url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
             resp = session.get(
-                url, params={"key": api_key}, headers={"User-Agent": _UA}, timeout=30
-            )
-            if resp.status_code != 200:
-                raise RuntimeError(f"gcp_discover_http_{resp.status_code}: {shard}")
-            doc = resp.json()
-            update_time = doc.get("updateTime") or doc.get("serviceInfo", {}).get("updateTime")
-            display_name = doc.get("displayName", "")
-            if update_time:
-                out[shard] = f"{display_name}|{update_time}"
-                continue
-            # Fallback: hash over a single SKU.
-            sku_url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
-            sku_resp = session.get(
-                sku_url,
+                url,
                 params={"key": api_key, "pageSize": "1"},
                 headers={"User-Agent": _UA},
                 timeout=30,
             )
-            if sku_resp.status_code != 200:
-                raise RuntimeError(f"gcp_discover_fallback_http_{sku_resp.status_code}: {shard}")
-            skus = sku_resp.json().get("skus", [])
+            if resp.status_code != 200:
+                raise RuntimeError(f"gcp_discover_http_{resp.status_code}: {shard}")
+            skus = resp.json().get("skus", [])
             payload = json.dumps(skus, separators=(",", ":"), sort_keys=True).encode()
             out[shard] = "sha256:" + hashlib.sha256(payload).hexdigest()
         return out
