@@ -6,8 +6,9 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 _HERE = Path(__file__).resolve().parent
 _SCHEMA_SQL = (_HERE / "schema.sql").read_text()

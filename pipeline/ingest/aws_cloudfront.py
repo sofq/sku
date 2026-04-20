@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
@@ -81,18 +82,21 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     path_literal = str(offer_path).replace("'", "''")
     con.execute(
         f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'})"
+        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=134217728)"
     )
 
     grouped: dict[tuple[str, str], dict[str, Any]] = {}
 
     for sku_id, location_raw, unit, usd, begin_range in con.execute(_SQL).fetchall():
+        if location_raw is None:
+            continue
         if location_raw not in LOCATION_MAP:
             raise KeyError(location_raw)
         region = LOCATION_MAP[location_raw]
         if begin_range not in (None, "0"):
             continue
-        normalizer.normalize(_PROVIDER, region)
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
         key = ("standard", region)
         grouped[key] = {"sku": sku_id, "usd": usd, "unit": unit}
 

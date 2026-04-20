@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.azure_blob import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "azure_blob" / "prices.json"
@@ -31,7 +29,8 @@ def test_each_row_carries_three_dims():
     rows = list(ingest(prices_path=FIXTURE))
     for r in rows:
         dims = {p["dimension"] for p in r["prices"]}
-        assert dims == {"storage", "read-ops", "write-ops"}, f"row {r['sku_id']} missing dims: {dims}"
+        assert dims == {"storage", "read-ops", "write-ops"}, \
+            f"row {r['sku_id']} missing dims: {dims}"
 
 
 def test_reservation_rows_filtered():
@@ -54,7 +53,7 @@ def test_non_usd_rows_filtered():
         assert eur_ids.isdisjoint(parts)
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     for it in bad["Items"]:
         if it["type"] == "Consumption" and it["currencyCode"] == "USD":
@@ -62,5 +61,5 @@ def test_unknown_region_rejected(tmp_path):
             break
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="centralus"):
-        list(ingest(prices_path=p))
+    rows = list(ingest(prices_path=p))
+    assert all(r["region"] != "centralus" for r in rows)

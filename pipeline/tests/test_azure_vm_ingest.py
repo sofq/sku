@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.azure_vm import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "azure_vm" / "prices.json"
@@ -51,8 +49,8 @@ def test_non_usd_rows_rejected():
         assert r["prices"][0]["amount"] > 0  # smoke
 
 
-def test_unknown_region_rejected(tmp_path):
-    """An item in a region not in regions.yaml must fail the ingest."""
+def test_unknown_region_skipped(tmp_path):
+    """An item in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())
     # Mutate the first Consumption USD item to an unseen region.
     for it in bad["Items"]:
@@ -61,5 +59,5 @@ def test_unknown_region_rejected(tmp_path):
             break
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="centralus"):
-        list(ingest(prices_path=p))
+    rows = list(ingest(prices_path=p))
+    assert all(r["region"] != "centralus" for r in rows)

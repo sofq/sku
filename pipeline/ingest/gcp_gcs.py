@@ -23,8 +23,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
@@ -89,7 +90,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     # (class, region) -> {sku_id for storage meter, description, resource_group, region_normalized, prices:{dim: {...}}}
     grouped: dict[tuple[str, str], dict[str, Any]] = {}
     for (
-        sku_id, description, svc_name, resource_family, resource_group, usage_type,
+        sku_id, description, svc_name, _resource_family, resource_group, usage_type,
         service_regions, usage_unit, currency, price_units, price_nanos,
     ) in con.execute(sql).fetchall():
         if svc_name != "Cloud Storage":
@@ -104,7 +105,9 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         if not service_regions:
             continue
         region = service_regions[0]
-        region_normalized = normalizer.normalize(_PROVIDER, region)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         divisor, unit = parse_usage_unit(usage_unit)
         amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
         dim = _dimension(description)

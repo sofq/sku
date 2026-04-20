@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
@@ -93,7 +94,8 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         dim = _dim_for(meter_name)
         if dim is None:
             continue
-        normalizer.normalize(_PROVIDER, region)  # early reject on unknown region
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
         if dim == "storage":
             divisor, unit = parse_storage_uom(uom)
         else:

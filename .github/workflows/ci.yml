@@ -65,3 +65,43 @@ jobs:
         with:
           version: "~> v2"
           args: release --snapshot --clean --skip=sign,publish,sbom,docker
+
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/pyproject.toml
+      - name: Install pipeline package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e 'pipeline[dev]'
+      - name: Pipeline unit tests
+        run: make pipeline-test
+      - name: Fixture shard builds (every provider)
+        run: make openrouter-shard aws-shards azure-shards gcp-shards
+      - name: Dry-run discover against empty state
+        run: |
+          make discover
+          python -c "import json; d=json.load(open('dist/pipeline/discover/changed.json')); assert d['baseline_rebuild'] is True and d['shards']==[], d"
+      - name: Smoke the built shards with the Go binary
+        run: |
+          make build
+          export SKU_DATA_DIR="$(pwd)/dist/pipeline"
+          ./bin/sku llm       price --model anthropic/claude-opus-4.6 --preset price
+          ./bin/sku aws ec2   price --instance-type m5.large --region us-east-1 --jq '.price[0].amount'
+          ./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region eastus --os linux --jq '.price[0].amount'
+          ./bin/sku gcp gce   price --machine-type n1-standard-2 --region us-east1 --jq '.price[0].amount'
+      - name: Upload fixture shards as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixture-shards
+          path: dist/pipeline/*.db
+          retention-days: 7
