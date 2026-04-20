@@ -61,6 +61,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
     con = open_conn()
     path_literal = str(prices_path).replace("'", "''")
     sql = _SQL.replace("{path}", path_literal)
+    seen: set[str] = set()
     for (
         sku_id, sku_name, region, product, price, uom, currency, row_type, service_name,
     ) in con.execute(sql).fetchall():
@@ -80,6 +81,9 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             divisor, unit = parse_unit_of_measure(uom)
         except ValueError:
             continue  # skip non-hourly meters (monthly, per-request, etc.)
+        if sku_id in seen:
+            continue
+        seen.add(sku_id)
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "azure-sql",
