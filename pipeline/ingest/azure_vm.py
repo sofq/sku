@@ -53,6 +53,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
     con = open_conn()
     path_literal = str(prices_path).replace("'", "''")
     sql = _SQL.replace("{path}", path_literal)
+    seen: set[str] = set()
     for (
         sku_id, arm_sku, region, product, price, uom, currency, row_type, service_name,
     ) in con.execute(sql).fetchall():
@@ -64,8 +65,9 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if any(hint in product for hint in _SPOT_HINTS):
             continue
-        # OS detection: productName contains "Windows" for Windows VMs;
-        # everything else is Linux (the only two surfaces we ship in m3b.1).
+        if sku_id in seen:
+            continue
+        seen.add(sku_id)
         os_value = "windows" if "Windows" in product else "linux"
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:

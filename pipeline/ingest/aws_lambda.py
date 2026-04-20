@@ -1,4 +1,4 @@
-"""Normalize AWS Lambda offer JSON into sku row dicts via DuckDB.
+"""Normalize AWS Lambda offer JSON into sku row dicts.
 
 Spec §5 compute.function kind. Lambda rows carry two price dimensions:
 - requests (unit: requests) from group=AWS-Lambda-Requests
@@ -11,6 +11,7 @@ ephemeral-storage surcharges are out of scope for m3a.2 (see non-goals).
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -19,7 +20,7 @@ from typing import Any
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
-from ._duckdb import dumps, open_conn
+from ._duckdb import dumps
 from .aws_common import load_region_normalizer
 
 _PROVIDER = "aws"
@@ -32,56 +33,39 @@ _GROUP_MAP: dict[str, str] = {
     "AWS-Lambda-Duration": "duration",
 }
 
-_SQL = """
-WITH products_flat AS (
-  SELECT
-    p.key AS sku_id,
-    json_extract_string(p.value, '$.productFamily') AS family,
-    json_extract_string(p.value, '$.attributes.regionCode') AS region,
-    json_extract_string(p.value, '$.attributes.archSupport') AS arch_raw,
-    json_extract_string(p.value, '$.attributes.group') AS group_raw
-  FROM offer, json_each(offer.products) AS p(key, value)
-  WHERE json_extract_string(p.value, '$.productFamily') = 'Serverless'
-),
-terms_flat AS (
-  SELECT
-    t.key AS sku_id,
-    (json_keys(t.value))[1] AS term_key,
-    t.value AS term_obj
-  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
-),
-pd_keys AS (
-  SELECT tf.sku_id, tf.term_key, tf.term_obj,
-    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
-  FROM terms_flat tf
-)
-SELECT pf.sku_id, pf.region, pf.arch_raw, pf.group_raw,
-  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
-  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd
-FROM products_flat pf
-JOIN pd_keys pk ON pf.sku_id = pk.sku_id
-"""
+
+def _first_pd(term_data: dict) -> dict | None:
+    term = next(iter(term_data.values()), None)
+    if not term:
+        return None
+    return next(iter(term.get("priceDimensions", {}).values()), None)
 
 
 def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     normalizer = load_region_normalizer()
-    con = open_conn()
-    path_literal = str(offer_path).replace("'", "''")
-    con.execute(
-        f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=134217728)"
-    )
+    with offer_path.open() as f:
+        offer = json.load(f)
+    products = offer.get("products", {})
+    terms_od = offer.get("terms", {}).get("OnDemand", {})
 
     grouped: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
-    for sku_id, region, arch_raw, group_raw, unit, usd in con.execute(_SQL).fetchall():
-        arch = _ARCH_MAP.get(arch_raw)
-        dim = _GROUP_MAP.get(group_raw)
+    for sku_id, product in products.items():
+        if product.get("productFamily") != "Serverless":
+            continue
+        attrs = product.get("attributes", {})
+        region = attrs.get("regionCode", "")
+        arch = _ARCH_MAP.get(attrs.get("archSupport", ""))
+        dim = _GROUP_MAP.get(attrs.get("group", ""))
         if arch is None or dim is None:
             continue
         if normalizer.try_normalize(_PROVIDER, region) is None:
-            continue  # skip regions outside our coverage map
-        key = (arch, region)
-        grouped.setdefault(key, {})[dim] = {"sku": sku_id, "usd": usd, "unit": unit}
+            continue
+        pd = _first_pd(terms_od.get(sku_id) or {})
+        if pd is None:
+            continue
+        usd = float(pd.get("pricePerUnit", {}).get("USD", "0"))
+        unit = pd.get("unit", "")
+        grouped.setdefault((arch, region), {})[dim] = {"sku": sku_id, "usd": usd, "unit": unit}
 
     for (arch, region), dims in sorted(grouped.items()):
         if {"requests", "duration"} - dims.keys():

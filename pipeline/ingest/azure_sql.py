@@ -76,7 +76,10 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:
             continue
-        divisor, unit = parse_unit_of_measure(uom)
+        try:
+            divisor, unit = parse_unit_of_measure(uom)
+        except ValueError:
+            continue  # skip non-hourly meters (monthly, per-request, etc.)
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "azure-sql",
