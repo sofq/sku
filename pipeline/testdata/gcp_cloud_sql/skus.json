@@ -1,0 +1,193 @@
+{
+  "skus": [
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C2-USE1-ZONAL",
+      "skuId": "SQL-PG-C2-USE1-ZONAL",
+      "description": "Cloud SQL for PostgreSQL: Zonal - db-custom-2-7680 in Americas",
+      "category": {
+        "serviceDisplayName": "Cloud SQL",
+        "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 115000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C2-USE1-REGIONAL",
+      "skuId": "SQL-PG-C2-USE1-REGIONAL",
+      "description": "Cloud SQL for PostgreSQL: Regional - db-custom-2-7680 in Americas",
+      "category": {
+        "serviceDisplayName": "Cloud SQL",
+        "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 230000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C2-EUW1-ZONAL",
+      "skuId": "SQL-PG-C2-EUW1-ZONAL",
+      "description": "Cloud SQL for PostgreSQL: Zonal - db-custom-2-7680 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 126500000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C2-EUW1-REGIONAL",
+      "skuId": "SQL-PG-C2-EUW1-REGIONAL",
+      "description": "Cloud SQL for PostgreSQL: Regional - db-custom-2-7680 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 253000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C4-USE1-ZONAL",
+      "skuId": "SQL-PG-C4-USE1-ZONAL",
+      "description": "Cloud SQL for PostgreSQL: Zonal - db-custom-4-15360 in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 230000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C4-USE1-REGIONAL",
+      "skuId": "SQL-PG-C4-USE1-REGIONAL",
+      "description": "Cloud SQL for PostgreSQL: Regional - db-custom-4-15360 in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 460000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C4-EUW1-ZONAL",
+      "skuId": "SQL-PG-C4-EUW1-ZONAL",
+      "description": "Cloud SQL for PostgreSQL: Zonal - db-custom-4-15360 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 253000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C4-EUW1-REGIONAL",
+      "skuId": "SQL-PG-C4-EUW1-REGIONAL",
+      "description": "Cloud SQL for PostgreSQL: Regional - db-custom-4-15360 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 506000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C2-USE1-ZONAL",
+      "skuId": "SQL-MY-C2-USE1-ZONAL",
+      "description": "Cloud SQL for MySQL: Zonal - db-custom-2-7680 in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 103000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C2-USE1-REGIONAL",
+      "skuId": "SQL-MY-C2-USE1-REGIONAL",
+      "description": "Cloud SQL for MySQL: Regional - db-custom-2-7680 in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 206000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C2-EUW1-ZONAL",
+      "skuId": "SQL-MY-C2-EUW1-ZONAL",
+      "description": "Cloud SQL for MySQL: Zonal - db-custom-2-7680 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 113300000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C2-EUW1-REGIONAL",
+      "skuId": "SQL-MY-C2-EUW1-REGIONAL",
+      "description": "Cloud SQL for MySQL: Regional - db-custom-2-7680 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 226600000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C4-USE1-ZONAL",
+      "skuId": "SQL-MY-C4-USE1-ZONAL",
+      "description": "Cloud SQL for MySQL: Zonal - db-custom-4-15360 in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 206000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C4-USE1-REGIONAL",
+      "skuId": "SQL-MY-C4-USE1-REGIONAL",
+      "description": "Cloud SQL for MySQL: Regional - db-custom-4-15360 in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 412000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C4-EUW1-ZONAL",
+      "skuId": "SQL-MY-C4-EUW1-ZONAL",
+      "description": "Cloud SQL for MySQL: Zonal - db-custom-4-15360 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 226600000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-MY-C4-EUW1-REGIONAL",
+      "skuId": "SQL-MY-C4-EUW1-REGIONAL",
+      "description": "Cloud SQL for MySQL: Regional - db-custom-4-15360 in EMEA",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 453200000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-STORAGE-SSD-USE1",
+      "skuId": "SQL-STORAGE-SSD-USE1",
+      "description": "Cloud SQL: SSD storage in Americas",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Storage",
+        "resourceGroup": "SSD", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.mo",
+        "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 170000000}}]}}]
+    },
+    {
+      "name": "services/9662-B51E-5089/skus/SQL-PG-C2-EUW1-EUR",
+      "skuId": "SQL-PG-C2-EUW1-EUR",
+      "description": "Cloud SQL for PostgreSQL: Zonal - db-custom-2-7680 in EMEA (EUR)",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Compute",
+        "resourceGroup": "SQLGen2InstancesN1Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["europe-west1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h",
+        "tieredRates": [{"unitPrice": {"currencyCode": "EUR", "units": "0", "nanos": 115000000}}]}}]
+    }
+  ],
+  "nextPageToken": ""
+}

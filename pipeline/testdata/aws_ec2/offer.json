@@ -1,0 +1,780 @@
+{
+  "formatVersion": "v1.0",
+  "offerCode": "AmazonEC2",
+  "products": {
+    "SKU-M5LARGE-EUWEST1-LIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-EUWEST1-LIN-SHR"
+    },
+    "SKU-M5LARGE-EUWEST1-LIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-EUWEST1-LIN-TEN"
+    },
+    "SKU-M5LARGE-EUWEST1-WIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-EUWEST1-WIN-SHR"
+    },
+    "SKU-M5LARGE-EUWEST1-WIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-EUWEST1-WIN-TEN"
+    },
+    "SKU-M5LARGE-USEAST1-LIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-USEAST1-LIN-SHR"
+    },
+    "SKU-M5LARGE-USEAST1-LIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-USEAST1-LIN-TEN"
+    },
+    "SKU-M5LARGE-USEAST1-WIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-USEAST1-WIN-SHR"
+    },
+    "SKU-M5LARGE-USEAST1-WIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.large",
+        "memory": "8 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5LARGE-USEAST1-WIN-TEN"
+    },
+    "SKU-M5XLARGE-EUWEST1-LIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-EUWEST1-LIN-SHR"
+    },
+    "SKU-M5XLARGE-EUWEST1-LIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-EUWEST1-LIN-TEN"
+    },
+    "SKU-M5XLARGE-EUWEST1-WIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-EUWEST1-WIN-SHR"
+    },
+    "SKU-M5XLARGE-EUWEST1-WIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-EUWEST1-WIN-TEN"
+    },
+    "SKU-M5XLARGE-USEAST1-LIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-USEAST1-LIN-SHR"
+    },
+    "SKU-M5XLARGE-USEAST1-LIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-USEAST1-LIN-TEN"
+    },
+    "SKU-M5XLARGE-USEAST1-WIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-USEAST1-WIN-SHR"
+    },
+    "SKU-M5XLARGE-USEAST1-WIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "m5.xlarge",
+        "memory": "16 GiB",
+        "networkPerformance": "Up to 10 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "4"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-M5XLARGE-USEAST1-WIN-TEN"
+    },
+    "SKU-T3MEDIUM-EUWEST1-LIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-EUWEST1-LIN-SHR"
+    },
+    "SKU-T3MEDIUM-EUWEST1-LIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-EUWEST1-LIN-TEN"
+    },
+    "SKU-T3MEDIUM-EUWEST1-WIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-EUWEST1-WIN-SHR"
+    },
+    "SKU-T3MEDIUM-EUWEST1-WIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "eu-west-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-EUWEST1-WIN-TEN"
+    },
+    "SKU-T3MEDIUM-USEAST1-LIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-USEAST1-LIN-SHR"
+    },
+    "SKU-T3MEDIUM-USEAST1-LIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Linux",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-USEAST1-LIN-TEN"
+    },
+    "SKU-T3MEDIUM-USEAST1-WIN-SHR": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Shared",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-USEAST1-WIN-SHR"
+    },
+    "SKU-T3MEDIUM-USEAST1-WIN-TEN": {
+      "attributes": {
+        "capacitystatus": "Used",
+        "instanceType": "t3.medium",
+        "memory": "4 GiB",
+        "networkPerformance": "Up to 5 Gigabit",
+        "operatingSystem": "Windows",
+        "physicalProcessor": "Intel Xeon Platinum 8175",
+        "preInstalledSw": "NA",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonEC2",
+        "tenancy": "Dedicated",
+        "vcpu": "2"
+      },
+      "productFamily": "Compute Instance",
+      "sku": "SKU-T3MEDIUM-USEAST1-WIN-TEN"
+    }
+  },
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "terms": {
+    "OnDemand": {
+      "SKU-M5LARGE-EUWEST1-LIN-SHR": {
+        "SKU-M5LARGE-EUWEST1-LIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-EUWEST1-LIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.096 per On Demand Linux m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0960000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-EUWEST1-LIN-SHR"
+        }
+      },
+      "SKU-M5LARGE-EUWEST1-LIN-TEN": {
+        "SKU-M5LARGE-EUWEST1-LIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-EUWEST1-LIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.12 per On Demand Linux m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1200000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-EUWEST1-LIN-TEN"
+        }
+      },
+      "SKU-M5LARGE-EUWEST1-WIN-SHR": {
+        "SKU-M5LARGE-EUWEST1-WIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-EUWEST1-WIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.144 per On Demand Windows m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1440000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-EUWEST1-WIN-SHR"
+        }
+      },
+      "SKU-M5LARGE-EUWEST1-WIN-TEN": {
+        "SKU-M5LARGE-EUWEST1-WIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-EUWEST1-WIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.18 per On Demand Windows m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1800000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-EUWEST1-WIN-TEN"
+        }
+      },
+      "SKU-M5LARGE-USEAST1-LIN-SHR": {
+        "SKU-M5LARGE-USEAST1-LIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-USEAST1-LIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.096 per On Demand Linux m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0960000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-USEAST1-LIN-SHR"
+        }
+      },
+      "SKU-M5LARGE-USEAST1-LIN-TEN": {
+        "SKU-M5LARGE-USEAST1-LIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-USEAST1-LIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.12 per On Demand Linux m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1200000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-USEAST1-LIN-TEN"
+        }
+      },
+      "SKU-M5LARGE-USEAST1-WIN-SHR": {
+        "SKU-M5LARGE-USEAST1-WIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-USEAST1-WIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.144 per On Demand Windows m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1440000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-USEAST1-WIN-SHR"
+        }
+      },
+      "SKU-M5LARGE-USEAST1-WIN-TEN": {
+        "SKU-M5LARGE-USEAST1-WIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5LARGE-USEAST1-WIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.18 per On Demand Windows m5.large Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1800000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5LARGE-USEAST1-WIN-TEN"
+        }
+      },
+      "SKU-M5XLARGE-EUWEST1-LIN-SHR": {
+        "SKU-M5XLARGE-EUWEST1-LIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-EUWEST1-LIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.192 per On Demand Linux m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1920000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-EUWEST1-LIN-SHR"
+        }
+      },
+      "SKU-M5XLARGE-EUWEST1-LIN-TEN": {
+        "SKU-M5XLARGE-EUWEST1-LIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-EUWEST1-LIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.24 per On Demand Linux m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2400000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-EUWEST1-LIN-TEN"
+        }
+      },
+      "SKU-M5XLARGE-EUWEST1-WIN-SHR": {
+        "SKU-M5XLARGE-EUWEST1-WIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-EUWEST1-WIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.288 per On Demand Windows m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2880000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-EUWEST1-WIN-SHR"
+        }
+      },
+      "SKU-M5XLARGE-EUWEST1-WIN-TEN": {
+        "SKU-M5XLARGE-EUWEST1-WIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-EUWEST1-WIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.36 per On Demand Windows m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.3600000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-EUWEST1-WIN-TEN"
+        }
+      },
+      "SKU-M5XLARGE-USEAST1-LIN-SHR": {
+        "SKU-M5XLARGE-USEAST1-LIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-USEAST1-LIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.192 per On Demand Linux m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.1920000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-USEAST1-LIN-SHR"
+        }
+      },
+      "SKU-M5XLARGE-USEAST1-LIN-TEN": {
+        "SKU-M5XLARGE-USEAST1-LIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-USEAST1-LIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.24 per On Demand Linux m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2400000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-USEAST1-LIN-TEN"
+        }
+      },
+      "SKU-M5XLARGE-USEAST1-WIN-SHR": {
+        "SKU-M5XLARGE-USEAST1-WIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-USEAST1-WIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.288 per On Demand Windows m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2880000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-USEAST1-WIN-SHR"
+        }
+      },
+      "SKU-M5XLARGE-USEAST1-WIN-TEN": {
+        "SKU-M5XLARGE-USEAST1-WIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-M5XLARGE-USEAST1-WIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.36 per On Demand Windows m5.xlarge Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.3600000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-M5XLARGE-USEAST1-WIN-TEN"
+        }
+      },
+      "SKU-T3MEDIUM-EUWEST1-LIN-SHR": {
+        "SKU-T3MEDIUM-EUWEST1-LIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-EUWEST1-LIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.048 per On Demand Linux t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0480000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-EUWEST1-LIN-SHR"
+        }
+      },
+      "SKU-T3MEDIUM-EUWEST1-LIN-TEN": {
+        "SKU-T3MEDIUM-EUWEST1-LIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-EUWEST1-LIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.06 per On Demand Linux t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0600000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-EUWEST1-LIN-TEN"
+        }
+      },
+      "SKU-T3MEDIUM-EUWEST1-WIN-SHR": {
+        "SKU-T3MEDIUM-EUWEST1-WIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-EUWEST1-WIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.072 per On Demand Windows t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0720000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-EUWEST1-WIN-SHR"
+        }
+      },
+      "SKU-T3MEDIUM-EUWEST1-WIN-TEN": {
+        "SKU-T3MEDIUM-EUWEST1-WIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-EUWEST1-WIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.09 per On Demand Windows t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0900000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-EUWEST1-WIN-TEN"
+        }
+      },
+      "SKU-T3MEDIUM-USEAST1-LIN-SHR": {
+        "SKU-T3MEDIUM-USEAST1-LIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-USEAST1-LIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.048 per On Demand Linux t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0480000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-USEAST1-LIN-SHR"
+        }
+      },
+      "SKU-T3MEDIUM-USEAST1-LIN-TEN": {
+        "SKU-T3MEDIUM-USEAST1-LIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-USEAST1-LIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.06 per On Demand Linux t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0600000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-USEAST1-LIN-TEN"
+        }
+      },
+      "SKU-T3MEDIUM-USEAST1-WIN-SHR": {
+        "SKU-T3MEDIUM-USEAST1-WIN-SHR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-USEAST1-WIN-SHR.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.072 per On Demand Windows t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0720000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-USEAST1-WIN-SHR"
+        }
+      },
+      "SKU-T3MEDIUM-USEAST1-WIN-TEN": {
+        "SKU-T3MEDIUM-USEAST1-WIN-TEN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "SKU-T3MEDIUM-USEAST1-WIN-TEN.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.09 per On Demand Windows t3.medium Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.0900000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "SKU-T3MEDIUM-USEAST1-WIN-TEN"
+        }
+      }
+    }
+  },
+  "version": "20260415000000"
+}

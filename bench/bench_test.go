@@ -38,11 +38,134 @@ func BenchmarkPointLookup_Warm(b *testing.B) {
 		var buf bytes.Buffer
 		for _, r := range rows {
 			env := output.Render(r, output.PresetAgent)
-			if err := output.Encode(&buf, env, false); err != nil {
+			if err := output.EncodeEnvelope(&buf, env, false); err != nil {
 				b.Fatal(err)
 			}
 		}
 		_ = json.Valid(buf.Bytes())
+	}
+}
+
+// BenchmarkEC2PointLookup_Warm measures an in-process EC2 point lookup
+// with the catalog already open. Absolute numbers are only meaningful
+// against a production-scale shard; m3a.3 wires that in CI.
+func BenchmarkEC2PointLookup_Warm(b *testing.B) {
+	path := os.Getenv("SKU_BENCH_EC2_SHARD")
+	if path == "" {
+		b.Skip("SKU_BENCH_EC2_SHARD not set")
+	}
+	cat, err := catalog.Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.Cleanup(func() { _ = cat.Close() })
+	ctx := context.Background()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		rows, err := cat.LookupVM(ctx, catalog.VMFilter{
+			Provider: "aws", Service: "ec2",
+			InstanceType: "m5.large", Region: "us-east-1",
+			Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+		})
+		if err != nil || len(rows) != 1 {
+			b.Fatalf("unexpected: %v %d", err, len(rows))
+		}
+	}
+}
+
+// BenchmarkEC2PointLookup_Cold re-opens the shard per iteration to measure
+// the cold-start path (the number §5's "<60 ms cold" target tracks).
+func BenchmarkEC2PointLookup_Cold(b *testing.B) {
+	path := os.Getenv("SKU_BENCH_EC2_SHARD")
+	if path == "" {
+		b.Skip("SKU_BENCH_EC2_SHARD not set")
+	}
+	ctx := context.Background()
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		cat, err := catalog.Open(path)
+		if err != nil {
+			b.Fatal(err)
+		}
+		b.StartTimer()
+		rows, err := cat.LookupVM(ctx, catalog.VMFilter{
+			Provider: "aws", Service: "ec2",
+			InstanceType: "m5.large", Region: "us-east-1",
+			Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+		})
+		if err != nil || len(rows) != 1 {
+			b.Fatalf("unexpected: %v %d", err, len(rows))
+		}
+		b.StopTimer()
+		_ = cat.Close()
+		b.StartTimer()
+	}
+}
+
+// BenchmarkAzureVMPointLookup_Warm measures an in-process Azure VM point
+// lookup with the catalog already open. Mirrors BenchmarkEC2PointLookup_Warm.
+func BenchmarkAzureVMPointLookup_Warm(b *testing.B) {
+	path := os.Getenv("SKU_BENCH_AZURE_VM_SHARD")
+	if path == "" {
+		b.Skip("SKU_BENCH_AZURE_VM_SHARD not set")
+	}
+	cat, err := catalog.Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.Cleanup(func() { _ = cat.Close() })
+
+	// Warm one query so the page cache is populated; benchmark is the
+	// next loop. Mirrors the EC2 pattern.
+	_, _ = cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "azure", Service: "vm",
+		InstanceType: "Standard_D2_v3", Region: "eastus",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+			Provider: "azure", Service: "vm",
+			InstanceType: "Standard_D2_v3", Region: "eastus",
+			Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+// BenchmarkGCPGCEPointLookup_Warm measures an in-process GCP GCE point lookup
+// with the catalog already open. Mirrors BenchmarkAzureVMPointLookup_Warm.
+func BenchmarkGCPGCEPointLookup_Warm(b *testing.B) {
+	path := os.Getenv("SKU_BENCH_GCP_GCE_SHARD")
+	if path == "" {
+		b.Skip("SKU_BENCH_GCP_GCE_SHARD not set")
+	}
+	cat, err := catalog.Open(path)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.Cleanup(func() { _ = cat.Close() })
+
+	// Warm the page cache.
+	_, _ = cat.LookupVM(context.Background(), catalog.VMFilter{
+		Provider: "gcp", Service: "gce",
+		InstanceType: "n1-standard-2", Region: "us-east1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+	})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := cat.LookupVM(context.Background(), catalog.VMFilter{
+			Provider: "gcp", Service: "gce",
+			InstanceType: "n1-standard-2", Region: "us-east1",
+			Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "linux"},
+		})
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 

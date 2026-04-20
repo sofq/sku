@@ -1,0 +1,228 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AWSLambda",
+  "version": "20260415000000",
+  "products": {
+    "SKU-LAMBDA-X86-USE1-REQ": {
+      "sku": "SKU-LAMBDA-X86-USE1-REQ",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "us-east-1",
+        "archSupport": "x86",
+        "group": "AWS-Lambda-Requests",
+        "usagetype": "USE1-Request",
+        "groupDescription": "Requests"
+      }
+    },
+    "SKU-LAMBDA-X86-USE1-DUR": {
+      "sku": "SKU-LAMBDA-X86-USE1-DUR",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "us-east-1",
+        "archSupport": "x86",
+        "group": "AWS-Lambda-Duration",
+        "usagetype": "USE1-Lambda-GB-Second",
+        "groupDescription": "Duration"
+      }
+    },
+    "SKU-LAMBDA-X86-EUW1-REQ": {
+      "sku": "SKU-LAMBDA-X86-EUW1-REQ",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "eu-west-1",
+        "archSupport": "x86",
+        "group": "AWS-Lambda-Requests",
+        "usagetype": "EUW1-Request",
+        "groupDescription": "Requests"
+      }
+    },
+    "SKU-LAMBDA-X86-EUW1-DUR": {
+      "sku": "SKU-LAMBDA-X86-EUW1-DUR",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "eu-west-1",
+        "archSupport": "x86",
+        "group": "AWS-Lambda-Duration",
+        "usagetype": "EUW1-Lambda-GB-Second",
+        "groupDescription": "Duration"
+      }
+    },
+    "SKU-LAMBDA-ARM-USE1-REQ": {
+      "sku": "SKU-LAMBDA-ARM-USE1-REQ",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "us-east-1",
+        "archSupport": "arm",
+        "group": "AWS-Lambda-Requests",
+        "usagetype": "USE1-Request",
+        "groupDescription": "Requests"
+      }
+    },
+    "SKU-LAMBDA-ARM-USE1-DUR": {
+      "sku": "SKU-LAMBDA-ARM-USE1-DUR",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "us-east-1",
+        "archSupport": "arm",
+        "group": "AWS-Lambda-Duration",
+        "usagetype": "USE1-Lambda-GB-Second",
+        "groupDescription": "Duration"
+      }
+    },
+    "SKU-LAMBDA-ARM-EUW1-REQ": {
+      "sku": "SKU-LAMBDA-ARM-EUW1-REQ",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "eu-west-1",
+        "archSupport": "arm",
+        "group": "AWS-Lambda-Requests",
+        "usagetype": "EUW1-Request",
+        "groupDescription": "Requests"
+      }
+    },
+    "SKU-LAMBDA-ARM-EUW1-DUR": {
+      "sku": "SKU-LAMBDA-ARM-EUW1-DUR",
+      "productFamily": "Serverless",
+      "attributes": {
+        "servicecode": "AWSLambda",
+        "regionCode": "eu-west-1",
+        "archSupport": "arm",
+        "group": "AWS-Lambda-Duration",
+        "usagetype": "EUW1-Lambda-GB-Second",
+        "groupDescription": "Duration"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SKU-LAMBDA-X86-USE1-REQ": {
+        "SKU-LAMBDA-X86-USE1-REQ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-X86-USE1-REQ",
+          "priceDimensions": {
+            "SKU-LAMBDA-X86-USE1-REQ.JRTCKXETXF.F1": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.000000200000"
+              },
+              "description": "$0.2000 per 1M requests"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-X86-USE1-DUR": {
+        "SKU-LAMBDA-X86-USE1-DUR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-X86-USE1-DUR",
+          "priceDimensions": {
+            "SKU-LAMBDA-X86-USE1-DUR.JRTCKXETXF.F1": {
+              "unit": "second",
+              "pricePerUnit": {
+                "USD": "0.000016666700"
+              },
+              "description": "$0.0000166667 per GB-second"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-X86-EUW1-REQ": {
+        "SKU-LAMBDA-X86-EUW1-REQ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-X86-EUW1-REQ",
+          "priceDimensions": {
+            "SKU-LAMBDA-X86-EUW1-REQ.JRTCKXETXF.F1": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.000000210000"
+              },
+              "description": "$0.2100 per 1M requests"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-X86-EUW1-DUR": {
+        "SKU-LAMBDA-X86-EUW1-DUR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-X86-EUW1-DUR",
+          "priceDimensions": {
+            "SKU-LAMBDA-X86-EUW1-DUR.JRTCKXETXF.F1": {
+              "unit": "second",
+              "pricePerUnit": {
+                "USD": "0.000017500035"
+              },
+              "description": "$0.0000175000 per GB-second"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-ARM-USE1-REQ": {
+        "SKU-LAMBDA-ARM-USE1-REQ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-ARM-USE1-REQ",
+          "priceDimensions": {
+            "SKU-LAMBDA-ARM-USE1-REQ.JRTCKXETXF.F1": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.000000160000"
+              },
+              "description": "$0.1600 per 1M requests"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-ARM-USE1-DUR": {
+        "SKU-LAMBDA-ARM-USE1-DUR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-ARM-USE1-DUR",
+          "priceDimensions": {
+            "SKU-LAMBDA-ARM-USE1-DUR.JRTCKXETXF.F1": {
+              "unit": "second",
+              "pricePerUnit": {
+                "USD": "0.000013333360"
+              },
+              "description": "$0.0000133334 per GB-second"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-ARM-EUW1-REQ": {
+        "SKU-LAMBDA-ARM-EUW1-REQ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-ARM-EUW1-REQ",
+          "priceDimensions": {
+            "SKU-LAMBDA-ARM-EUW1-REQ.JRTCKXETXF.F1": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.000000168000"
+              },
+              "description": "$0.1680 per 1M requests"
+            }
+          }
+        }
+      },
+      "SKU-LAMBDA-ARM-EUW1-DUR": {
+        "SKU-LAMBDA-ARM-EUW1-DUR.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-LAMBDA-ARM-EUW1-DUR",
+          "priceDimensions": {
+            "SKU-LAMBDA-ARM-EUW1-DUR.JRTCKXETXF.F1": {
+              "unit": "second",
+              "pricePerUnit": {
+                "USD": "0.000014000028"
+              },
+              "description": "$0.0000140000 per GB-second"
+            }
+          }
+        }
+      }
+    }
+  }
+}

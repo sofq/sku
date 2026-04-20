@@ -1,0 +1,308 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AmazonDynamoDB",
+  "version": "20260415000000",
+  "products": {
+    "SKU-DDB-STD-USE1-STORAGE": {
+      "sku": "SKU-DDB-STD-USE1-STORAGE",
+      "productFamily": "Database Storage",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "us-east-1",
+        "storageClass": "Standard",
+        "group": "DDB-StorageUsage",
+        "usagetype": "USE1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-DDB-STD-USE1-READ": {
+      "sku": "SKU-DDB-STD-USE1-READ",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "us-east-1",
+        "storageClass": "Standard",
+        "group": "DDB-ReadUnits",
+        "usagetype": "USE1-ReadRequestUnits"
+      }
+    },
+    "SKU-DDB-STD-USE1-WRITE": {
+      "sku": "SKU-DDB-STD-USE1-WRITE",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "us-east-1",
+        "storageClass": "Standard",
+        "group": "DDB-WriteUnits",
+        "usagetype": "USE1-WriteRequestUnits"
+      }
+    },
+    "SKU-DDB-IA-USE1-STORAGE": {
+      "sku": "SKU-DDB-IA-USE1-STORAGE",
+      "productFamily": "Database Storage",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "us-east-1",
+        "storageClass": "Standard - Infrequent Access",
+        "group": "DDB-StorageUsage",
+        "usagetype": "USE1-IA-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-DDB-IA-USE1-READ": {
+      "sku": "SKU-DDB-IA-USE1-READ",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "us-east-1",
+        "storageClass": "Standard - Infrequent Access",
+        "group": "DDB-ReadUnits",
+        "usagetype": "USE1-IA-ReadRequestUnits"
+      }
+    },
+    "SKU-DDB-IA-USE1-WRITE": {
+      "sku": "SKU-DDB-IA-USE1-WRITE",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "us-east-1",
+        "storageClass": "Standard - Infrequent Access",
+        "group": "DDB-WriteUnits",
+        "usagetype": "USE1-IA-WriteRequestUnits"
+      }
+    },
+    "SKU-DDB-STD-EUW1-STORAGE": {
+      "sku": "SKU-DDB-STD-EUW1-STORAGE",
+      "productFamily": "Database Storage",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "eu-west-1",
+        "storageClass": "Standard",
+        "group": "DDB-StorageUsage",
+        "usagetype": "EUW1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-DDB-STD-EUW1-READ": {
+      "sku": "SKU-DDB-STD-EUW1-READ",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "eu-west-1",
+        "storageClass": "Standard",
+        "group": "DDB-ReadUnits",
+        "usagetype": "EUW1-ReadRequestUnits"
+      }
+    },
+    "SKU-DDB-STD-EUW1-WRITE": {
+      "sku": "SKU-DDB-STD-EUW1-WRITE",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "eu-west-1",
+        "storageClass": "Standard",
+        "group": "DDB-WriteUnits",
+        "usagetype": "EUW1-WriteRequestUnits"
+      }
+    },
+    "SKU-DDB-IA-EUW1-STORAGE": {
+      "sku": "SKU-DDB-IA-EUW1-STORAGE",
+      "productFamily": "Database Storage",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "eu-west-1",
+        "storageClass": "Standard - Infrequent Access",
+        "group": "DDB-StorageUsage",
+        "usagetype": "EUW1-IA-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-DDB-IA-EUW1-READ": {
+      "sku": "SKU-DDB-IA-EUW1-READ",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "eu-west-1",
+        "storageClass": "Standard - Infrequent Access",
+        "group": "DDB-ReadUnits",
+        "usagetype": "EUW1-IA-ReadRequestUnits"
+      }
+    },
+    "SKU-DDB-IA-EUW1-WRITE": {
+      "sku": "SKU-DDB-IA-EUW1-WRITE",
+      "productFamily": "Amazon DynamoDB PayPerRequest Throughput",
+      "attributes": {
+        "servicecode": "AmazonDynamoDB",
+        "regionCode": "eu-west-1",
+        "storageClass": "Standard - Infrequent Access",
+        "group": "DDB-WriteUnits",
+        "usagetype": "EUW1-IA-WriteRequestUnits"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SKU-DDB-STD-USE1-STORAGE": {
+        "SKU-DDB-STD-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-STD-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-DDB-STD-USE1-STORAGE.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {"USD": "0.2500000000"},
+              "description": "$0.25 per GB-Mo standard storage (us-east-1)",
+              "beginRange": "0",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-DDB-STD-USE1-READ": {
+        "SKU-DDB-STD-USE1-READ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-STD-USE1-READ",
+          "priceDimensions": {
+            "SKU-DDB-STD-USE1-READ.JRTCKXETXF.F1": {
+              "unit": "ReadRequestUnits",
+              "pricePerUnit": {"USD": "0.0000001250"},
+              "description": "$0.125 per million read request units (us-east-1 standard)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-STD-USE1-WRITE": {
+        "SKU-DDB-STD-USE1-WRITE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-STD-USE1-WRITE",
+          "priceDimensions": {
+            "SKU-DDB-STD-USE1-WRITE.JRTCKXETXF.F1": {
+              "unit": "WriteRequestUnits",
+              "pricePerUnit": {"USD": "0.0000006250"},
+              "description": "$0.625 per million write request units (us-east-1 standard)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-IA-USE1-STORAGE": {
+        "SKU-DDB-IA-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-IA-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-DDB-IA-USE1-STORAGE.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {"USD": "0.1125000000"},
+              "description": "$0.1125 per GB-Mo standard-ia storage (us-east-1)",
+              "beginRange": "0",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-DDB-IA-USE1-READ": {
+        "SKU-DDB-IA-USE1-READ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-IA-USE1-READ",
+          "priceDimensions": {
+            "SKU-DDB-IA-USE1-READ.JRTCKXETXF.F1": {
+              "unit": "ReadRequestUnits",
+              "pricePerUnit": {"USD": "0.0000002500"},
+              "description": "$0.25 per million read request units (us-east-1 standard-ia)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-IA-USE1-WRITE": {
+        "SKU-DDB-IA-USE1-WRITE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-IA-USE1-WRITE",
+          "priceDimensions": {
+            "SKU-DDB-IA-USE1-WRITE.JRTCKXETXF.F1": {
+              "unit": "WriteRequestUnits",
+              "pricePerUnit": {"USD": "0.0000012500"},
+              "description": "$1.25 per million write request units (us-east-1 standard-ia)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-STD-EUW1-STORAGE": {
+        "SKU-DDB-STD-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-STD-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-DDB-STD-EUW1-STORAGE.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {"USD": "0.2830000000"},
+              "description": "$0.283 per GB-Mo standard storage (eu-west-1)",
+              "beginRange": "0",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-DDB-STD-EUW1-READ": {
+        "SKU-DDB-STD-EUW1-READ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-STD-EUW1-READ",
+          "priceDimensions": {
+            "SKU-DDB-STD-EUW1-READ.JRTCKXETXF.F1": {
+              "unit": "ReadRequestUnits",
+              "pricePerUnit": {"USD": "0.0000001420"},
+              "description": "$0.142 per million read request units (eu-west-1 standard)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-STD-EUW1-WRITE": {
+        "SKU-DDB-STD-EUW1-WRITE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-STD-EUW1-WRITE",
+          "priceDimensions": {
+            "SKU-DDB-STD-EUW1-WRITE.JRTCKXETXF.F1": {
+              "unit": "WriteRequestUnits",
+              "pricePerUnit": {"USD": "0.0000007080"},
+              "description": "$0.708 per million write request units (eu-west-1 standard)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-IA-EUW1-STORAGE": {
+        "SKU-DDB-IA-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-IA-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-DDB-IA-EUW1-STORAGE.JRTCKXETXF.F1": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {"USD": "0.1273500000"},
+              "description": "$0.12735 per GB-Mo standard-ia storage (eu-west-1)",
+              "beginRange": "0",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-DDB-IA-EUW1-READ": {
+        "SKU-DDB-IA-EUW1-READ.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-IA-EUW1-READ",
+          "priceDimensions": {
+            "SKU-DDB-IA-EUW1-READ.JRTCKXETXF.F1": {
+              "unit": "ReadRequestUnits",
+              "pricePerUnit": {"USD": "0.0000002840"},
+              "description": "$0.284 per million read request units (eu-west-1 standard-ia)"
+            }
+          }
+        }
+      },
+      "SKU-DDB-IA-EUW1-WRITE": {
+        "SKU-DDB-IA-EUW1-WRITE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-DDB-IA-EUW1-WRITE",
+          "priceDimensions": {
+            "SKU-DDB-IA-EUW1-WRITE.JRTCKXETXF.F1": {
+              "unit": "WriteRequestUnits",
+              "pricePerUnit": {"USD": "0.0000014160"},
+              "description": "$1.416 per million write request units (eu-west-1 standard-ia)"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,188 @@
+package catalog
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"strings"
+)
+
+// SearchFilter captures the full set of filters `sku search` exposes in M4.1.
+// All fields are optional except Provider + Service (which pin the shard).
+// Zero values disable the corresponding predicate.
+type SearchFilter struct {
+	Provider     string
+	Service      string
+	Kind         string
+	ResourceName string
+	Region       string
+	MinVCPU      int64
+	MinMemoryGB  float64
+	MaxPrice     float64 // 0 disables; negative is rejected by the caller
+	Sort         string  // "", "price", "vcpu", "memory", "resource_name"
+	Limit        int     // 0 disables (caller passes default)
+}
+
+// Search runs a generic filtered query over the shard's skus table. Unlike
+// LookupVM / LookupDBRelational, Search does not require a resource_name or
+// region and is free to return an empty slice. No-match is not an error —
+// callers wrap empty results into skuerrors.NotFound at the command layer.
+func (c *Catalog) Search(ctx context.Context, f SearchFilter) ([]Row, error) {
+	if f.Provider == "" {
+		return nil, fmt.Errorf("catalog: Search requires Provider")
+	}
+	if f.Service == "" {
+		return nil, fmt.Errorf("catalog: Search requires Service")
+	}
+	query, args, err := buildSearchQuery(f)
+	if err != nil {
+		return nil, err
+	}
+	rs, err := c.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("catalog: Search: %w", err)
+	}
+	defer func() { _ = rs.Close() }()
+
+	var out []Row
+	for rs.Next() {
+		r, err := scanSearchRow(rs)
+		if err != nil {
+			return nil, err
+		}
+		r.CatalogVersion = c.catalogVersion
+		r.Currency = c.currency
+		if err := c.FillPrices(ctx, &r); err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, rs.Err()
+}
+
+// sortColumns whitelists ORDER BY expressions. Keys are the user-visible
+// --sort values; values are the SQL fragment that gets concatenated into
+// the query. This map is the only path user input influences ORDER BY;
+// every other mention of ORDER BY is a compile-time literal.
+var sortColumns = map[string]string{
+	"":              "s.resource_name, s.sku_id",
+	"resource_name": "s.resource_name, s.sku_id",
+	"price":         "COALESCE(mp.min_price, 1e308) ASC, s.sku_id",
+	"vcpu":          "ra.vcpu ASC, s.sku_id",
+	"memory":        "ra.memory_gb ASC, s.sku_id",
+}
+
+// buildSearchQuery composes the SELECT + WHERE + ORDER BY + LIMIT clauses
+// from f. Only compile-time literals (never user input) are ever
+// concatenated into the SQL text; every user-supplied value is bound as a ?.
+func buildSearchQuery(f SearchFilter) (string, []any, error) {
+	var where []string
+	var args []any
+	where = append(where, "s.provider = ?")
+	args = append(args, f.Provider)
+	where = append(where, "s.service = ?")
+	args = append(args, f.Service)
+	if f.Kind != "" {
+		where = append(where, "s.kind = ?")
+		args = append(args, f.Kind)
+	}
+	if f.ResourceName != "" {
+		where = append(where, "s.resource_name = ?")
+		args = append(args, f.ResourceName)
+	}
+	if f.Region != "" {
+		where = append(where, "s.region = ?")
+		args = append(args, f.Region)
+	}
+	if f.MinVCPU > 0 {
+		where = append(where, "ra.vcpu >= ?")
+		args = append(args, f.MinVCPU)
+	}
+	if f.MinMemoryGB > 0 {
+		where = append(where, "ra.memory_gb >= ?")
+		args = append(args, f.MinMemoryGB)
+	}
+	if f.MaxPrice > 0 {
+		where = append(where, "mp.min_price IS NOT NULL AND mp.min_price <= ?")
+		args = append(args, f.MaxPrice)
+	}
+
+	const base = `
+SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,
+       s.region_normalized, s.terms_hash,
+       t.commitment, t.tenancy, t.os, t.support_tier, t.upfront, t.payment_option,
+       ra.vcpu, ra.memory_gb, ra.storage_gb, ra.gpu_count, ra.gpu_model,
+       ra.architecture, ra.extra,
+       COALESCE(mp.min_price, 0) AS min_price
+FROM skus s
+JOIN terms t ON t.sku_id = s.sku_id
+LEFT JOIN resource_attrs ra ON ra.sku_id = s.sku_id
+LEFT JOIN (
+  SELECT sku_id, MIN(amount) AS min_price FROM prices GROUP BY sku_id
+) mp ON mp.sku_id = s.sku_id
+WHERE `
+	sortFrag, ok := sortColumns[f.Sort]
+	if !ok {
+		return "", nil, fmt.Errorf("catalog: Search: unsupported --sort %q; allowed: resource_name|price|vcpu|memory", f.Sort)
+	}
+	query := base + strings.Join(where, " AND ") +
+		"\nORDER BY " + sortFrag //nolint:gosec // G202: sortFrag is an allow-list lookup, never user input
+	if f.Limit > 0 {
+		query += "\nLIMIT ?"
+		args = append(args, f.Limit)
+	}
+	return query, args, nil
+}
+
+func scanSearchRow(rs *sql.Rows) (Row, error) {
+	var r Row
+	var supportTier, upfront, paymentOption sql.NullString
+	var vcpu sql.NullInt64
+	var mem, storage sql.NullFloat64
+	var gpuCount sql.NullInt64
+	var gpuModel, arch, extraJSON sql.NullString
+	var minPrice sql.NullFloat64
+	if err := rs.Scan(
+		&r.SKUID, &r.Provider, &r.Service, &r.Kind, &r.ResourceName, &r.Region,
+		&r.RegionGroup, &r.TermsHash,
+		&r.Terms.Commitment, &r.Terms.Tenancy, &r.Terms.OS,
+		&supportTier, &upfront, &paymentOption,
+		&vcpu, &mem, &storage, &gpuCount, &gpuModel, &arch, &extraJSON,
+		&minPrice,
+	); err != nil {
+		return r, err
+	}
+	_ = minPrice // M4.1 only uses min_price as a WHERE/ORDER-BY column, not on Row.
+	r.Terms.SupportTier = supportTier.String
+	r.Terms.Upfront = upfront.String
+	r.Terms.PaymentOption = paymentOption.String
+	if vcpu.Valid {
+		v := vcpu.Int64
+		r.ResourceAttrs.VCPU = &v
+	}
+	if mem.Valid {
+		v := mem.Float64
+		r.ResourceAttrs.MemoryGB = &v
+	}
+	if storage.Valid {
+		v := storage.Float64
+		r.ResourceAttrs.StorageGB = &v
+	}
+	if gpuCount.Valid {
+		v := gpuCount.Int64
+		r.ResourceAttrs.GPUCount = &v
+	}
+	if gpuModel.Valid {
+		v := gpuModel.String
+		r.ResourceAttrs.GPUModel = &v
+	}
+	if arch.Valid {
+		v := arch.String
+		r.ResourceAttrs.Architecture = &v
+	}
+	if extraJSON.Valid && extraJSON.String != "" {
+		_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
+	}
+	return r, nil
+}

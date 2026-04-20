@@ -1,0 +1,228 @@
+package sku
+
+import (
+	"bytes"
+	"encoding/json"
+	"math"
+	"strings"
+	"testing"
+)
+
+func TestEstimate_endToEnd(t *testing.T) {
+	_ = testutilSeededEstimateCatalog(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{
+		"estimate",
+		"--item", "aws/ec2:m5.large:region=us-east-1:count=2:hours=100",
+	})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	items, _ := obj["items"].([]any)
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+	total, _ := obj["monthly_total"].(map[string]any)
+	if total == nil {
+		t.Fatalf("missing monthly_total in %s", stdout.String())
+	}
+}
+
+func TestEstimate_requiresItem(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{"estimate"})
+	if err := root.Execute(); err == nil {
+		t.Fatal("expected error when no --item is given")
+	}
+}
+
+func TestEstimate_stdinJSON(t *testing.T) {
+	_ = testutilSeededEstimateCatalog(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetIn(strings.NewReader(`{"items":[{"provider":"aws","service":"ec2","resource":"m5.large","params":{"region":"us-east-1","count":"2","hours":"100"}}]}`))
+	root.SetArgs([]string{"estimate", "--stdin"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	items, _ := obj["items"].([]any)
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+}
+
+func TestEstimate_configYAML(t *testing.T) {
+	_ = testutilSeededEstimateCatalog(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{"estimate", "--config", "testdata/workload-vm.yaml"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	total, _ := obj["monthly_total"].(map[string]any)
+	if total == nil {
+		t.Fatalf("missing monthly_total in %s", stdout.String())
+	}
+}
+
+func TestEstimate_mutuallyExclusive(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{
+		"estimate",
+		"--item", "aws/ec2:m5.large:region=us-east-1",
+		"--stdin",
+	})
+	if err := root.Execute(); err == nil {
+		t.Fatal("expected error when both --item and --stdin are set")
+	}
+	if !strings.Contains(stderr.String(), "mutually exclusive") {
+		t.Fatalf("stderr missing hint: %s", stderr.String())
+	}
+}
+
+func TestEstimate_storageObject_endToEnd(t *testing.T) {
+	_ = testutilSeededEstimateCatalogS3(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{
+		"estimate",
+		"--item", "aws/s3:standard:region=us-east-1:gb_month=500:put_requests=1000:get_requests=5000",
+	})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	items, _ := obj["items"].([]any)
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+	first := items[0].(map[string]any)
+	if first["kind"] != "storage.object" {
+		t.Fatalf("kind = %v, want storage.object", first["kind"])
+	}
+	if first["quantity_unit"] != "gb-mo" {
+		t.Fatalf("quantity_unit = %v, want gb-mo", first["quantity_unit"])
+	}
+	if m, _ := first["monthly_usd"].(float64); m <= 0 {
+		t.Fatalf("monthly_usd = %v, want > 0 (full envelope: %s)", m, stdout.String())
+	}
+}
+
+func TestEstimate_storageObject_configYAML(t *testing.T) {
+	_ = testutilSeededEstimateCatalogS3(t)
+
+	var stdout, stderr bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&stdout)
+	root.SetErr(&stderr)
+	root.SetArgs([]string{"estimate", "--config", "testdata/workload-storage.yaml"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr: %s", err, stderr.String())
+	}
+	var obj map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &obj); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, stdout.String())
+	}
+	items, _ := obj["items"].([]any)
+	if len(items) != 1 {
+		t.Fatalf("items = %d, want 1", len(items))
+	}
+	if items[0].(map[string]any)["kind"] != "storage.object" {
+		t.Fatalf("bad envelope: %s", stdout.String())
+	}
+}
+
+func TestEstimate_llmText_endToEnd(t *testing.T) {
+	_ = testutilSeededEstimateCatalogLLM(t)
+
+	cmd := newRootCmd()
+	var stdout, stderr bytes.Buffer
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{
+		"estimate",
+		"--item", "llm:anthropic/claude-opus-4.6:input=1M:output=500K:serving_provider=anthropic",
+	})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr:\n%s", err, stderr.String())
+	}
+
+	var got struct {
+		MonthlyTotalUSD float64 `json:"monthly_total_usd"`
+		Items           []struct {
+			MonthlyUSD   float64 `json:"monthly_usd"`
+			QuantityUnit string  `json:"quantity_unit"`
+			Kind         string  `json:"kind"`
+		} `json:"items"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &got); err != nil {
+		t.Fatalf("json: %v\nout:\n%s", err, stdout.String())
+	}
+	if len(got.Items) != 1 {
+		t.Fatalf("items = %d, want 1", len(got.Items))
+	}
+	want := 1e6*1.5e-5 + 5e5*7.5e-5
+	if math.Abs(got.Items[0].MonthlyUSD-want) > 1e-6 {
+		t.Fatalf("monthly = %v, want %v", got.Items[0].MonthlyUSD, want)
+	}
+	if got.Items[0].QuantityUnit != "token" {
+		t.Fatalf("quantity_unit = %q, want token", got.Items[0].QuantityUnit)
+	}
+	if got.Items[0].Kind != "llm.text" {
+		t.Fatalf("kind = %q, want llm.text", got.Items[0].Kind)
+	}
+}
+
+func TestEstimate_llmText_configYAML(t *testing.T) {
+	_ = testutilSeededEstimateCatalogLLM(t)
+
+	cmd := newRootCmd()
+	var stdout, stderr bytes.Buffer
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{
+		"estimate",
+		"--config", "testdata/workload-llm.yaml",
+	})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute: %v\nstderr:\n%s", err, stderr.String())
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte(`"kind":"llm.text"`)) &&
+		!bytes.Contains(stdout.Bytes(), []byte(`"kind": "llm.text"`)) {
+		t.Fatalf("expected llm.text kind in output:\n%s", stdout.String())
+	}
+}

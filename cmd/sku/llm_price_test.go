@@ -129,6 +129,67 @@ func TestLLMPrice_ShardMissing_ReturnsExit3(t *testing.T) {
 	require.Equal(t, "openrouter", details["shard"])
 }
 
+func TestLLMPrice_YAMLOutput(t *testing.T) {
+	seedTestDataDir(t)
+	out, _, _ := runLLMPrice(t,
+		"--model", "anthropic/claude-opus-4.6",
+		"--serving-provider", "aws-bedrock",
+		"--yaml",
+	)
+	require.Contains(t, out, "provider: aws-bedrock")
+}
+
+func TestLLMPrice_JQReducesOutput(t *testing.T) {
+	seedTestDataDir(t)
+	out, _, _ := runLLMPrice(t,
+		"--model", "anthropic/claude-opus-4.6",
+		"--serving-provider", "aws-bedrock",
+		"--jq", ".price[0].amount",
+	)
+	require.Regexp(t, `^[\d.e-]+\n$`, out)
+}
+
+func TestLLMPrice_FieldsProjection(t *testing.T) {
+	seedTestDataDir(t)
+	out, _, _ := runLLMPrice(t,
+		"--model", "anthropic/claude-opus-4.6",
+		"--serving-provider", "aws-bedrock",
+		"--fields", "provider,price.0.amount",
+	)
+	require.Contains(t, out, `"provider":"aws-bedrock"`)
+	require.NotContains(t, out, `"service"`)
+}
+
+func TestLLMPrice_StaleCatalog_StaleOKSuppresses(t *testing.T) {
+	seedTestDataDir(t)
+	_, stderr, code := runLLMPrice(t,
+		"--model", "anthropic/claude-opus-4.6",
+		"--serving-provider", "aws-bedrock",
+		"--stale-ok",
+	)
+	require.Zero(t, code)
+	require.NotContains(t, stderr, "warning: catalog")
+}
+
+func TestLLMPrice_DryRun_DoesNotTouchShard(t *testing.T) {
+	t.Setenv("SKU_DATA_DIR", t.TempDir())
+	out, _, code := runLLMPrice(t, "--model", "anthropic/claude-opus-4.6", "--dry-run")
+	require.Zero(t, code)
+	require.Contains(t, out, `"dry_run":true`)
+	require.Contains(t, out, `"command":"llm price"`)
+}
+
+func TestLLMPrice_PresetPrice(t *testing.T) {
+	seedTestDataDir(t)
+	out, _, _ := runLLMPrice(t,
+		"--model", "anthropic/claude-opus-4.6",
+		"--serving-provider", "aws-bedrock",
+		"--preset", "price",
+	)
+	require.Contains(t, out, `"price":[`)
+	require.NotContains(t, out, `"provider"`)
+}
+
 func splitLines(s string) []string {
 	var out []string
 	start := 0

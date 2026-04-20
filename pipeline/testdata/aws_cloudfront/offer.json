@@ -1,0 +1,93 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AmazonCloudFront",
+  "version": "20260415000000",
+  "products": {
+    "SKU-CF-USMEXCA-DTO": {
+      "sku": "SKU-CF-USMEXCA-DTO",
+      "productFamily": "Data Transfer",
+      "attributes": {
+        "servicecode": "AmazonCloudFront",
+        "location": "United States, Mexico, & Canada",
+        "locationType": "Edge Location",
+        "fromLocation": "United States, Mexico, & Canada",
+        "transferType": "CloudFront Outbound",
+        "usagetype": "DataTransfer-Out-Bytes"
+      }
+    },
+    "SKU-CF-EU-DTO": {
+      "sku": "SKU-CF-EU-DTO",
+      "productFamily": "Data Transfer",
+      "attributes": {
+        "servicecode": "AmazonCloudFront",
+        "location": "Europe, Israel",
+        "locationType": "Edge Location",
+        "fromLocation": "Europe, Israel",
+        "transferType": "CloudFront Outbound",
+        "usagetype": "EU-DataTransfer-Out-Bytes"
+      }
+    },
+    "SKU-CF-AP-DTO": {
+      "sku": "SKU-CF-AP-DTO",
+      "productFamily": "Data Transfer",
+      "attributes": {
+        "servicecode": "AmazonCloudFront",
+        "location": "Asia Pacific (including Japan & Taiwan)",
+        "locationType": "Edge Location",
+        "fromLocation": "Asia Pacific (including Japan & Taiwan)",
+        "transferType": "CloudFront Outbound",
+        "usagetype": "APS1-DataTransfer-Out-Bytes"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SKU-CF-USMEXCA-DTO": {
+        "SKU-CF-USMEXCA-DTO.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-CF-USMEXCA-DTO",
+          "priceDimensions": {
+            "SKU-CF-USMEXCA-DTO.JRTCKXETXF.F1": {
+              "unit": "GB",
+              "pricePerUnit": {"USD": "0.0850000000"},
+              "description": "$0.085 per GB out (first 10 TB/mo)",
+              "beginRange": "0",
+              "endRange": "10240"
+            }
+          }
+        }
+      },
+      "SKU-CF-EU-DTO": {
+        "SKU-CF-EU-DTO.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-CF-EU-DTO",
+          "priceDimensions": {
+            "SKU-CF-EU-DTO.JRTCKXETXF.F1": {
+              "unit": "GB",
+              "pricePerUnit": {"USD": "0.0850000000"},
+              "description": "$0.085 per GB out (first 10 TB/mo)",
+              "beginRange": "0",
+              "endRange": "10240"
+            }
+          }
+        }
+      },
+      "SKU-CF-AP-DTO": {
+        "SKU-CF-AP-DTO.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-CF-AP-DTO",
+          "priceDimensions": {
+            "SKU-CF-AP-DTO.JRTCKXETXF.F1": {
+              "unit": "GB",
+              "pricePerUnit": {"USD": "0.1140000000"},
+              "description": "$0.114 per GB out (first 10 TB/mo)",
+              "beginRange": "0",
+              "endRange": "10240"
+            }
+          }
+        }
+      }
+    }
+  }
+}

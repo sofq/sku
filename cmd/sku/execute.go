@@ -1,8 +1,10 @@
 package sku
 
 import (
+	"errors"
 	"os"
 
+	"github.com/sofq/sku/internal/batch"
 	skuerrors "github.com/sofq/sku/internal/errors"
 )
 
@@ -10,15 +12,20 @@ import (
 // any error to stderr as the spec §4 JSON envelope. Returning int (rather than
 // calling os.Exit internally) lets Execute be covered by unit tests and keeps
 // the exit-code taxonomy in one place — the skuerrors package.
-//
-// newRootCmd intentionally stays unexported: future milestones (M2 batch
-// registry) populate the command registry from init() side-effects on leaves
-// registered by NewCommand-style constructors, not by walking the Cobra tree
-// externally. Keeping newRootCmd private prevents callers from reaching into
-// Cobra internals and accidentally depending on traversal order.
 func Execute() int {
-	if err := newRootCmd().Execute(); err != nil {
-		return skuerrors.Write(os.Stderr, err)
+	err := newRootCmd().Execute()
+	if err == nil {
+		return 0
 	}
-	return 0
+	// Batch aggregate: per-op errors already live inside the stdout records,
+	// so the batch command returns an ErrAggregate-wrapped *skuerrors.E that
+	// carries only the aggregated exit code — no stderr envelope.
+	if errors.Is(err, batch.ErrAggregate) {
+		var e *skuerrors.E
+		if errors.As(err, &e) {
+			return e.Code.ExitCode()
+		}
+		return 1
+	}
+	return skuerrors.Write(os.Stderr, err)
 }

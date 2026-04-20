@@ -1,0 +1,10 @@
+{
+  "Items": [
+    {"meterId": "fn-exec-eastus",  "armSkuName": "Consumption", "armRegionName": "eastus",     "productName": "Functions", "skuName": "Consumption", "meterName": "Total Executions",      "serviceName": "Functions", "unitOfMeasure": "1000000", "retailPrice": 0.20, "currencyCode": "USD", "type": "Consumption"},
+    {"meterId": "fn-dur-eastus",   "armSkuName": "Consumption", "armRegionName": "eastus",     "productName": "Functions", "skuName": "Consumption", "meterName": "Execution Time",        "serviceName": "Functions", "unitOfMeasure": "1",       "retailPrice": 0.000016, "currencyCode": "USD", "type": "Consumption"},
+    {"meterId": "fn-exec-weu",     "armSkuName": "Consumption", "armRegionName": "westeurope", "productName": "Functions", "skuName": "Consumption", "meterName": "Total Executions",      "serviceName": "Functions", "unitOfMeasure": "1000000", "retailPrice": 0.22, "currencyCode": "USD", "type": "Consumption"},
+    {"meterId": "fn-dur-weu",      "armSkuName": "Consumption", "armRegionName": "westeurope", "productName": "Functions", "skuName": "Consumption", "meterName": "Execution Time",        "serviceName": "Functions", "unitOfMeasure": "1",       "retailPrice": 0.000018, "currencyCode": "USD", "type": "Consumption"},
+    {"meterId": "fn-premium-eastus","armSkuName":"Premium EP1", "armRegionName": "eastus",     "productName": "Functions", "skuName": "Premium EP1", "meterName": "vCPU Duration",         "serviceName": "Functions", "unitOfMeasure": "1 Hour",  "retailPrice": 0.173, "currencyCode": "USD", "type": "Consumption"}
+  ],
+  "NextPageLink": null
+}

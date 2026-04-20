@@ -1,0 +1,832 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AmazonS3",
+  "version": "20260415000000",
+  "products": {
+    "SKU-S3-STD-USE1-STORAGE": {
+      "sku": "SKU-S3-STD-USE1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Standard",
+        "storageClass": "General Purpose",
+        "usagetype": "USE1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-STD-USE1-REQ-PUT": {
+      "sku": "SKU-S3-STD-USE1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Standard",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "USE1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-STD-USE1-REQ-GET": {
+      "sku": "SKU-S3-STD-USE1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Standard",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "USE1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-STD-EUW1-STORAGE": {
+      "sku": "SKU-S3-STD-EUW1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Standard",
+        "storageClass": "General Purpose",
+        "usagetype": "EUW1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-STD-EUW1-REQ-PUT": {
+      "sku": "SKU-S3-STD-EUW1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Standard",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "EUW1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-STD-EUW1-REQ-GET": {
+      "sku": "SKU-S3-STD-EUW1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Standard",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "EUW1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-SIA-USE1-STORAGE": {
+      "sku": "SKU-S3-SIA-USE1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Standard - Infrequent Access",
+        "storageClass": "General Purpose",
+        "usagetype": "USE1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-SIA-USE1-REQ-PUT": {
+      "sku": "SKU-S3-SIA-USE1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Standard - Infrequent Access",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "USE1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-SIA-USE1-REQ-GET": {
+      "sku": "SKU-S3-SIA-USE1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Standard - Infrequent Access",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "USE1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-SIA-EUW1-STORAGE": {
+      "sku": "SKU-S3-SIA-EUW1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Standard - Infrequent Access",
+        "storageClass": "General Purpose",
+        "usagetype": "EUW1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-SIA-EUW1-REQ-PUT": {
+      "sku": "SKU-S3-SIA-EUW1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Standard - Infrequent Access",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "EUW1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-SIA-EUW1-REQ-GET": {
+      "sku": "SKU-S3-SIA-EUW1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Standard - Infrequent Access",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "EUW1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-OZIA-USE1-STORAGE": {
+      "sku": "SKU-S3-OZIA-USE1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "One Zone - Infrequent Access",
+        "storageClass": "Non-Critical Data",
+        "usagetype": "USE1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-OZIA-USE1-REQ-PUT": {
+      "sku": "SKU-S3-OZIA-USE1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "One Zone - Infrequent Access",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "USE1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-OZIA-USE1-REQ-GET": {
+      "sku": "SKU-S3-OZIA-USE1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "One Zone - Infrequent Access",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "USE1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-OZIA-EUW1-STORAGE": {
+      "sku": "SKU-S3-OZIA-EUW1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "One Zone - Infrequent Access",
+        "storageClass": "Non-Critical Data",
+        "usagetype": "EUW1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-OZIA-EUW1-REQ-PUT": {
+      "sku": "SKU-S3-OZIA-EUW1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "One Zone - Infrequent Access",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "EUW1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-OZIA-EUW1-REQ-GET": {
+      "sku": "SKU-S3-OZIA-EUW1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "One Zone - Infrequent Access",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "EUW1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-INT-USE1-STORAGE": {
+      "sku": "SKU-S3-INT-USE1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Intelligent-Tiering Frequent Access",
+        "storageClass": "Intelligent-Tiering",
+        "usagetype": "USE1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-INT-USE1-REQ-PUT": {
+      "sku": "SKU-S3-INT-USE1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Intelligent-Tiering Frequent Access",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "USE1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-INT-USE1-REQ-GET": {
+      "sku": "SKU-S3-INT-USE1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Intelligent-Tiering Frequent Access",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "USE1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-INT-EUW1-STORAGE": {
+      "sku": "SKU-S3-INT-EUW1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Intelligent-Tiering Frequent Access",
+        "storageClass": "Intelligent-Tiering",
+        "usagetype": "EUW1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-INT-EUW1-REQ-PUT": {
+      "sku": "SKU-S3-INT-EUW1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Intelligent-Tiering Frequent Access",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "EUW1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-INT-EUW1-REQ-GET": {
+      "sku": "SKU-S3-INT-EUW1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Intelligent-Tiering Frequent Access",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "EUW1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-GIR-USE1-STORAGE": {
+      "sku": "SKU-S3-GIR-USE1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Amazon Glacier Instant Retrieval",
+        "storageClass": "Archive Instant Retrieval",
+        "usagetype": "USE1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-GIR-USE1-REQ-PUT": {
+      "sku": "SKU-S3-GIR-USE1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Amazon Glacier Instant Retrieval",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "USE1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-GIR-USE1-REQ-GET": {
+      "sku": "SKU-S3-GIR-USE1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "us-east-1",
+        "volumeType": "Amazon Glacier Instant Retrieval",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "USE1-Requests-Tier2"
+      }
+    },
+    "SKU-S3-GIR-EUW1-STORAGE": {
+      "sku": "SKU-S3-GIR-EUW1-STORAGE",
+      "productFamily": "Storage",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Amazon Glacier Instant Retrieval",
+        "storageClass": "Archive Instant Retrieval",
+        "usagetype": "EUW1-TimedStorage-ByteHrs"
+      }
+    },
+    "SKU-S3-GIR-EUW1-REQ-PUT": {
+      "sku": "SKU-S3-GIR-EUW1-REQ-PUT",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Amazon Glacier Instant Retrieval",
+        "group": "S3-API-Tier1",
+        "groupDescription": "PUT/COPY/POST/LIST requests",
+        "usagetype": "EUW1-Requests-Tier1"
+      }
+    },
+    "SKU-S3-GIR-EUW1-REQ-GET": {
+      "sku": "SKU-S3-GIR-EUW1-REQ-GET",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonS3",
+        "regionCode": "eu-west-1",
+        "volumeType": "Amazon Glacier Instant Retrieval",
+        "group": "S3-API-Tier2",
+        "groupDescription": "GET/SELECT requests",
+        "usagetype": "EUW1-Requests-Tier2"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SKU-S3-STD-USE1-STORAGE": {
+        "SKU-S3-STD-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-STD-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-STD-USE1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0230000000"
+              },
+              "description": "$0.0230 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-STD-USE1-REQ-PUT": {
+        "SKU-S3-STD-USE1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-STD-USE1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-STD-USE1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000050000"
+              },
+              "description": "$0.0050 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-STD-USE1-REQ-GET": {
+        "SKU-S3-STD-USE1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-STD-USE1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-STD-USE1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000004000"
+              },
+              "description": "$0.0004 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-STD-EUW1-STORAGE": {
+        "SKU-S3-STD-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-STD-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-STD-EUW1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0241500000"
+              },
+              "description": "$0.0242 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-STD-EUW1-REQ-PUT": {
+        "SKU-S3-STD-EUW1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-STD-EUW1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-STD-EUW1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000052500"
+              },
+              "description": "$0.0052 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-STD-EUW1-REQ-GET": {
+        "SKU-S3-STD-EUW1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-STD-EUW1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-STD-EUW1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000004200"
+              },
+              "description": "$0.0004 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-SIA-USE1-STORAGE": {
+        "SKU-S3-SIA-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-SIA-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-SIA-USE1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0125000000"
+              },
+              "description": "$0.0125 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-SIA-USE1-REQ-PUT": {
+        "SKU-S3-SIA-USE1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-SIA-USE1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-SIA-USE1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000100000"
+              },
+              "description": "$0.0100 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-SIA-USE1-REQ-GET": {
+        "SKU-S3-SIA-USE1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-SIA-USE1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-SIA-USE1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000010000"
+              },
+              "description": "$0.0010 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-SIA-EUW1-STORAGE": {
+        "SKU-S3-SIA-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-SIA-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-SIA-EUW1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0131250000"
+              },
+              "description": "$0.0131 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-SIA-EUW1-REQ-PUT": {
+        "SKU-S3-SIA-EUW1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-SIA-EUW1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-SIA-EUW1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000105000"
+              },
+              "description": "$0.0105 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-SIA-EUW1-REQ-GET": {
+        "SKU-S3-SIA-EUW1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-SIA-EUW1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-SIA-EUW1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000010500"
+              },
+              "description": "$0.0010 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-OZIA-USE1-STORAGE": {
+        "SKU-S3-OZIA-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-OZIA-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-OZIA-USE1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0100000000"
+              },
+              "description": "$0.0100 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-OZIA-USE1-REQ-PUT": {
+        "SKU-S3-OZIA-USE1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-OZIA-USE1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-OZIA-USE1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000100000"
+              },
+              "description": "$0.0100 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-OZIA-USE1-REQ-GET": {
+        "SKU-S3-OZIA-USE1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-OZIA-USE1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-OZIA-USE1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000010000"
+              },
+              "description": "$0.0010 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-OZIA-EUW1-STORAGE": {
+        "SKU-S3-OZIA-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-OZIA-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-OZIA-EUW1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0105000000"
+              },
+              "description": "$0.0105 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-OZIA-EUW1-REQ-PUT": {
+        "SKU-S3-OZIA-EUW1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-OZIA-EUW1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-OZIA-EUW1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000105000"
+              },
+              "description": "$0.0105 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-OZIA-EUW1-REQ-GET": {
+        "SKU-S3-OZIA-EUW1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-OZIA-EUW1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-OZIA-EUW1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000010500"
+              },
+              "description": "$0.0010 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-INT-USE1-STORAGE": {
+        "SKU-S3-INT-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-INT-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-INT-USE1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0230000000"
+              },
+              "description": "$0.0230 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-INT-USE1-REQ-PUT": {
+        "SKU-S3-INT-USE1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-INT-USE1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-INT-USE1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000050000"
+              },
+              "description": "$0.0050 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-INT-USE1-REQ-GET": {
+        "SKU-S3-INT-USE1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-INT-USE1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-INT-USE1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000004000"
+              },
+              "description": "$0.0004 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-INT-EUW1-STORAGE": {
+        "SKU-S3-INT-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-INT-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-INT-EUW1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0241500000"
+              },
+              "description": "$0.0242 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-INT-EUW1-REQ-PUT": {
+        "SKU-S3-INT-EUW1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-INT-EUW1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-INT-EUW1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000052500"
+              },
+              "description": "$0.0052 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-INT-EUW1-REQ-GET": {
+        "SKU-S3-INT-EUW1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-INT-EUW1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-INT-EUW1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000004200"
+              },
+              "description": "$0.0004 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-GIR-USE1-STORAGE": {
+        "SKU-S3-GIR-USE1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-GIR-USE1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-GIR-USE1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0040000000"
+              },
+              "description": "$0.0040 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-GIR-USE1-REQ-PUT": {
+        "SKU-S3-GIR-USE1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-GIR-USE1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-GIR-USE1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000200000"
+              },
+              "description": "$0.0200 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-GIR-USE1-REQ-GET": {
+        "SKU-S3-GIR-USE1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-GIR-USE1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-GIR-USE1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000100000"
+              },
+              "description": "$0.0100 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-GIR-EUW1-STORAGE": {
+        "SKU-S3-GIR-EUW1-STORAGE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-GIR-EUW1-STORAGE",
+          "priceDimensions": {
+            "SKU-S3-GIR-EUW1-STORAGE.JRTCKXETXF.FIRST": {
+              "unit": "GB-Mo",
+              "pricePerUnit": {
+                "USD": "0.0042000000"
+              },
+              "description": "$0.0042 per GB - first 50 TB / Month",
+              "beginRange": "0",
+              "endRange": "51200"
+            }
+          }
+        }
+      },
+      "SKU-S3-GIR-EUW1-REQ-PUT": {
+        "SKU-S3-GIR-EUW1-REQ-PUT.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-GIR-EUW1-REQ-PUT",
+          "priceDimensions": {
+            "SKU-S3-GIR-EUW1-REQ-PUT.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000210000"
+              },
+              "description": "$0.0210 per 1,000 PUT, COPY, POST, or LIST requests"
+            }
+          }
+        }
+      },
+      "SKU-S3-GIR-EUW1-REQ-GET": {
+        "SKU-S3-GIR-EUW1-REQ-GET.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-S3-GIR-EUW1-REQ-GET",
+          "priceDimensions": {
+            "SKU-S3-GIR-EUW1-REQ-GET.JRTCKXETXF.FIRST": {
+              "unit": "requests",
+              "pricePerUnit": {
+                "USD": "0.0000105000"
+              },
+              "description": "$0.0105 per 1,000 GET and SELECT requests"
+            }
+          }
+        }
+      }
+    }
+  }
+}

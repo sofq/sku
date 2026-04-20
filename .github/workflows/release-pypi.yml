@@ -1,0 +1,89 @@
+name: release-pypi
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      prerelease:
+        required: true
+        type: boolean
+
+jobs:
+  wheels:
+    if: ${{ !inputs.prerelease }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest,  goOs: linux,   goArch: amd64, wheelPlat: "manylinux_2_28_x86_64" }
+          - { os: ubuntu-latest,  goOs: linux,   goArch: arm64, wheelPlat: "manylinux_2_28_aarch64" }
+          - { os: ubuntu-latest,  goOs: linux,   goArch: amd64, wheelPlat: "musllinux_1_2_x86_64" }
+          - { os: ubuntu-latest,  goOs: linux,   goArch: arm64, wheelPlat: "musllinux_1_2_aarch64" }
+          - { os: macos-13,       goOs: darwin,  goArch: amd64, wheelPlat: "macosx_11_0_x86_64" }
+          - { os: macos-14,       goOs: darwin,  goArch: arm64, wheelPlat: "macosx_11_0_arm64" }
+          - { os: windows-latest, goOs: windows, goArch: amd64, wheelPlat: "win_amd64" }
+          - { os: windows-11-arm, goOs: windows, goArch: arm64, wheelPlat: "win_arm64" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download matching goreleaser artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          ext=tar.gz; [[ "${{ matrix.goOs }}" == "windows" ]] && ext=zip
+          mkdir -p artifacts
+          gh release download "v${{ inputs.version }}" -D artifacts \
+            --pattern "sku_${{ inputs.version }}_${{ matrix.goOs }}_${{ matrix.goArch }}.${ext}"
+
+      - name: Stage binary inside python/sku_cli/bin/
+        shell: bash
+        run: |
+          mkdir -p python/sku_cli/bin
+          ext=tar.gz; bin=sku
+          if [[ "${{ matrix.goOs }}" == "windows" ]]; then ext=zip; bin=sku.exe; fi
+          cd python/sku_cli/bin
+          if [[ "$ext" == "tar.gz" ]]; then
+            tar -xzf ../../../artifacts/sku_${{ inputs.version }}_${{ matrix.goOs }}_${{ matrix.goArch }}.tar.gz "$bin"
+          else
+            unzip -j ../../../artifacts/sku_${{ inputs.version }}_${{ matrix.goOs }}_${{ matrix.goArch }}.zip "$bin"
+          fi
+
+      - name: Build wheel with platform tag
+        shell: bash
+        run: |
+          cd python
+          python -m pip install --upgrade pip build wheel
+          python -m build --wheel
+          mkdir -p dist-tagged
+          w=$(ls dist/*.whl)
+          python -m wheel tags --platform-tag "${{ matrix.wheelPlat }}" --remove "$w"
+          mv dist/*"${{ matrix.wheelPlat }}"*.whl dist-tagged/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.wheelPlat }}
+          path: python/dist-tagged/*.whl
+
+  publish:
+    needs: wheels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    environment: pypi-publish
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/

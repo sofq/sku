@@ -7,13 +7,20 @@ dependencies = [
   "requests>=2.32",
   "pyyaml>=6.0",
   "zstandard>=0.22",
+  "duckdb>=0.10,<2",
+  "numpy>=1.26",
+  "ijson>=3.2",
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
   "ruff>=0.5",
+  "requests-mock>=1.12",
 ]
+
+[tool.setuptools]
+packages = ["ingest", "normalize", "package", "discover"]
 
 [tool.ruff]
 line-length = 100
@@ -21,3 +28,9 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# Ingest modules embed long json_extract_string() SQL inside triple-quoted
+# strings; ruff counts the string content as source lines. Splitting the SQL
+# to stay under 100 cols hurts readability more than it helps.
+"ingest/*.py" = ["E501"]

@@ -89,19 +89,19 @@ The two halves share one invariant that is continuously test-verified: the `term
 
 **Files:** none
 
-- [ ] **Step 1: Create working branch**
+- [x] **Step 1: Create working branch**
 
 ```bash
 git checkout -b m1-openrouter-shard
 git pull --rebase origin master 2>/dev/null || true
 ```
 
-- [ ] **Step 2: Confirm Python ≥ 3.11 available**
+- [x] **Step 2: Confirm Python ≥ 3.11 available**
 
 Run: `python3 --version`
 Expected: `Python 3.11.x` or newer. If not, install via `brew install python@3.12` (macOS) or `uv python install 3.12`.
 
-- [ ] **Step 3: Pull new Go deps**
+- [x] **Step 3: Pull new Go deps**
 
 ```bash
 go get modernc.org/sqlite@latest
@@ -112,7 +112,7 @@ go mod tidy
 
 Expected: `go.mod` gains all three in the `require` block. `go.sum` updates. No build errors (`go build ./...`).
 
-- [ ] **Step 4: Commit the dep bump**
+- [x] **Step 4: Commit the dep bump**
 
 ```bash
 git add go.mod go.sum
@@ -126,7 +126,7 @@ git commit -m "build: add modernc.org/sqlite, zstd, rapid for M1"
 **Files:**
 - Create: `pipeline/pyproject.toml`, `pipeline/Makefile`, `pipeline/.gitignore`
 
-- [ ] **Step 1: Write `pipeline/pyproject.toml`**
+- [x] **Step 1: Write `pipeline/pyproject.toml`**
 
 ```toml
 [project]
@@ -154,7 +154,7 @@ target-version = "py311"
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ```
 
-- [ ] **Step 2: Write `pipeline/Makefile`**
+- [x] **Step 2: Write `pipeline/Makefile`**
 
 ```make
 SHELL := bash
@@ -214,7 +214,7 @@ clean:
 	rm -rf $(VENV) .pytest_cache __pycache__ */__pycache__ */*/__pycache__
 ```
 
-- [ ] **Step 3: Write `pipeline/.gitignore`**
+- [x] **Step 3: Write `pipeline/.gitignore`**
 
 ```
 .venv/
@@ -224,12 +224,12 @@ __pycache__/
 .ruff_cache/
 ```
 
-- [ ] **Step 4: Smoke test the help target**
+- [x] **Step 4: Smoke test the help target**
 
 Run: `make -C pipeline help`
 Expected: help lines for `setup`, `ingest`, `package`, `shard`, `test`, `lint`, `clean`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pipeline/pyproject.toml pipeline/Makefile pipeline/.gitignore
@@ -245,9 +245,9 @@ These three files are the single source of truth for the pipeline; the Go side r
 **Files:**
 - Create: `pipeline/normalize/__init__.py`, `pipeline/normalize/regions.yaml`, `pipeline/normalize/enums.yaml`, `pipeline/normalize/terms_defaults.yaml`
 
-- [ ] **Step 1: Write `pipeline/normalize/__init__.py`** (empty file; package marker)
+- [x] **Step 1: Write `pipeline/normalize/__init__.py`** (empty file; package marker)
 
-- [ ] **Step 2: Write `pipeline/normalize/regions.yaml`**
+- [x] **Step 2: Write `pipeline/normalize/regions.yaml`**
 
 ```yaml
 # Canonical region-group map. M1 seed: only the global bucket used by
@@ -258,7 +258,7 @@ version: 1
 groups: {}
 ```
 
-- [ ] **Step 3: Write `pipeline/normalize/enums.yaml`**
+- [x] **Step 3: Write `pipeline/normalize/enums.yaml`**
 
 ```yaml
 # Every enum the shard-build validator enforces (§5 Enum validation).
@@ -307,7 +307,7 @@ payment_option:
   - ""
 ```
 
-- [ ] **Step 4: Write `pipeline/normalize/terms_defaults.yaml`**
+- [x] **Step 4: Write `pipeline/normalize/terms_defaults.yaml`**
 
 ```yaml
 # Per-kind defaults substituted before terms_hash is computed, so a user
@@ -353,7 +353,7 @@ defaults:
     payment_option: ""
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pipeline/normalize/__init__.py pipeline/normalize/regions.yaml pipeline/normalize/enums.yaml pipeline/normalize/terms_defaults.yaml
@@ -369,7 +369,7 @@ git commit -m "pipeline: add normalize/{regions,enums,terms_defaults}.yaml (M1 s
 **Files:**
 - Create: `internal/schema/testdata/terms_golden.jsonl`
 
-- [ ] **Step 1: Write `internal/schema/testdata/terms_golden.jsonl`**
+- [x] **Step 1: Write `internal/schema/testdata/terms_golden.jsonl`**
 
 The canonical encoding, baked once into fixture bytes so it can't drift:
 - Input: 6-tuple `(commitment, tenancy, os, support_tier, upfront, payment_option)`, each string (empty `""` allowed).
@@ -384,7 +384,7 @@ The canonical encoding, baked once into fixture bytes so it can't drift:
 
 Note: the `terms_hash` values above are placeholders — Step 3 of the next task computes the real digests and this file is regenerated once, then both sides assert against it. Keep them as-is for now; Task 5 writes the actual values.
 
-- [ ] **Step 2: Commit the placeholder fixture**
+- [x] **Step 2: Commit the placeholder fixture**
 
 ```bash
 git add internal/schema/testdata/terms_golden.jsonl
@@ -399,7 +399,7 @@ git commit -m "schema: add placeholder terms_hash golden fixture (real values in
 - Create: `pipeline/normalize/terms.py`, `pipeline/normalize/enums.py`
 - Create: `pipeline/tests/__init__.py`, `pipeline/tests/test_terms.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `pipeline/tests/test_terms.py`:
 
@@ -451,12 +451,12 @@ def test_missing_key_raises():
         terms_hash({"commitment": "on_demand"})  # incomplete
 ```
 
-- [ ] **Step 2: Run the test to confirm it fails**
+- [x] **Step 2: Run the test to confirm it fails**
 
 Run: `make -C pipeline setup && cd pipeline && .venv/bin/pytest tests/test_terms.py -q`
 Expected: `ModuleNotFoundError: No module named 'normalize.terms'` (or similar import-time error).
 
-- [ ] **Step 3: Write `pipeline/normalize/terms.py`**
+- [x] **Step 3: Write `pipeline/normalize/terms.py`**
 
 ```python
 """Canonical terms encoding + terms_hash. Must match internal/schema/terms.go byte-for-byte."""
@@ -495,7 +495,7 @@ def terms_hash(terms: Mapping[str, str]) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:32]
 ```
 
-- [ ] **Step 4: Write `pipeline/normalize/enums.py`**
+- [x] **Step 4: Write `pipeline/normalize/enums.py`**
 
 ```python
 """Loader + validator for the enums.yaml / terms_defaults.yaml files."""
@@ -545,7 +545,7 @@ def apply_kind_defaults(kind: str, terms: Mapping[str, str]) -> dict[str, str]:
     return out
 ```
 
-- [ ] **Step 5: Regenerate real golden values** (one-shot, then commit)
+- [x] **Step 5: Regenerate real golden values** (one-shot, then commit)
 
 Run: `cd pipeline && .venv/bin/python - <<'PY'
 import json, hashlib
@@ -569,7 +569,7 @@ PY
 
 Then re-run the pytest: `.venv/bin/pytest tests/test_terms.py -q` — expected: **PASS** on all three cases.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pipeline/normalize/terms.py pipeline/normalize/enums.py pipeline/tests/__init__.py pipeline/tests/test_terms.py internal/schema/testdata/terms_golden.jsonl
@@ -583,7 +583,7 @@ git commit -m "pipeline: add canonical terms_hash + enums loader (Python side)"
 **Files:**
 - Create: `internal/schema/terms.go`, `internal/schema/terms_test.go`, `internal/schema/kind.go`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `internal/schema/terms_test.go`:
 
@@ -661,12 +661,12 @@ func TestTermsHash_MatchesGolden(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run the test to confirm it fails**
+- [x] **Step 2: Run the test to confirm it fails**
 
 Run: `go test ./internal/schema/...`
 Expected: FAIL — `undefined: Terms`, `undefined: CanonicalizeTerms`, `undefined: TermsHash`.
 
-- [ ] **Step 3: Write `internal/schema/terms.go`**
+- [x] **Step 3: Write `internal/schema/terms.go`**
 
 ```go
 // Package schema holds shared data-schema primitives used by both the catalog
@@ -717,7 +717,7 @@ func TermsHash(t Terms) string {
 }
 ```
 
-- [ ] **Step 4: Write `internal/schema/kind.go`**
+- [x] **Step 4: Write `internal/schema/kind.go`**
 
 ```go
 package schema
@@ -746,12 +746,12 @@ func (k Kind) IsLLM() bool {
 }
 ```
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [x] **Step 5: Run the test to verify it passes**
 
 Run: `go test ./internal/schema/... -v`
 Expected: PASS on both tests across all three golden cases.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add internal/schema/terms.go internal/schema/kind.go internal/schema/terms_test.go
@@ -770,7 +770,7 @@ Before writing the ingest script, commit a trimmed, deterministic snapshot of th
 - Create: `pipeline/testdata/openrouter/endpoints/openai__gpt-5.json`
 - Create: `pipeline/testdata/openrouter/endpoints/non-usd-model__some-provider.json`
 
-- [ ] **Step 1: Write `pipeline/testdata/openrouter/models.json`**
+- [x] **Step 1: Write `pipeline/testdata/openrouter/models.json`**
 
 Three models chosen to exercise: (a) a pure-text LLM with two endpoints, (b) a multimodal LLM with one endpoint, (c) a model with a non-USD endpoint (triggers the USD guard).
 
@@ -853,7 +853,7 @@ Three models chosen to exercise: (a) a pure-text LLM with two endpoints, (b) a m
 }
 ```
 
-- [ ] **Step 2: Write `pipeline/testdata/openrouter/endpoints/anthropic__claude-opus-4.6.json`**
+- [x] **Step 2: Write `pipeline/testdata/openrouter/endpoints/anthropic__claude-opus-4.6.json`**
 
 (Two endpoints — the model's first-party `anthropic` + `aws-bedrock`.)
 
@@ -907,7 +907,7 @@ Three models chosen to exercise: (a) a pure-text LLM with two endpoints, (b) a m
 }
 ```
 
-- [ ] **Step 3: Write `pipeline/testdata/openrouter/endpoints/openai__gpt-5.json`**
+- [x] **Step 3: Write `pipeline/testdata/openrouter/endpoints/openai__gpt-5.json`**
 
 ```json
 {
@@ -942,7 +942,7 @@ Three models chosen to exercise: (a) a pure-text LLM with two endpoints, (b) a m
 }
 ```
 
-- [ ] **Step 4: Write `pipeline/testdata/openrouter/endpoints/non-usd-model__some-provider.json`**
+- [x] **Step 4: Write `pipeline/testdata/openrouter/endpoints/non-usd-model__some-provider.json`**
 
 ```json
 {
@@ -977,7 +977,7 @@ Three models chosen to exercise: (a) a pure-text LLM with two endpoints, (b) a m
 }
 ```
 
-- [ ] **Step 5: Commit the fixtures**
+- [x] **Step 5: Commit the fixtures**
 
 ```bash
 git add pipeline/testdata/openrouter/
@@ -992,9 +992,9 @@ git commit -m "pipeline: add OpenRouter ingest fixtures (3 models, USD guard cas
 - Create: `pipeline/ingest/__init__.py`, `pipeline/ingest/http.py`
 - Create: `pipeline/tests/test_http_fixture.py`
 
-- [ ] **Step 1: Write `pipeline/ingest/__init__.py`** (empty)
+- [x] **Step 1: Write `pipeline/ingest/__init__.py`** (empty)
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 `pipeline/tests/test_http_fixture.py`:
 
@@ -1018,12 +1018,12 @@ def test_fixture_client_loads_models_and_endpoint():
     assert len(ep["data"]["endpoints"]) == 2
 ```
 
-- [ ] **Step 3: Run it to confirm failure**
+- [x] **Step 3: Run it to confirm failure**
 
 Run: `cd pipeline && .venv/bin/pytest tests/test_http_fixture.py -q`
 Expected: `ModuleNotFoundError: No module named 'ingest.http'`.
 
-- [ ] **Step 4: Write `pipeline/ingest/http.py`**
+- [x] **Step 4: Write `pipeline/ingest/http.py`**
 
 ```python
 """HTTP client for OpenRouter: live mode (requests) + fixture mode (local files).
@@ -1098,12 +1098,12 @@ class FixtureClient:
             return json.load(fh)
 ```
 
-- [ ] **Step 5: Run the test to verify pass**
+- [x] **Step 5: Run the test to verify pass**
 
 Run: `cd pipeline && .venv/bin/pytest tests/test_http_fixture.py -q`
 Expected: `1 passed`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pipeline/ingest/__init__.py pipeline/ingest/http.py pipeline/tests/test_http_fixture.py
@@ -1138,7 +1138,7 @@ is_aggregated       bool   True for the synthetic openrouter row
 - Create: `pipeline/tests/test_openrouter_ingest.py`
 - Create: `pipeline/testdata/golden/openrouter_rows.jsonl`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `pipeline/tests/test_openrouter_ingest.py`:
 
@@ -1231,12 +1231,12 @@ def test_synthetic_aggregated_row_present():
     assert agg[0]["health"] is None
 ```
 
-- [ ] **Step 2: Run it to confirm failure**
+- [x] **Step 2: Run it to confirm failure**
 
 Run: `cd pipeline && .venv/bin/pytest tests/test_openrouter_ingest.py -q`
 Expected: `ModuleNotFoundError: No module named 'ingest.openrouter'`.
 
-- [ ] **Step 3: Write `pipeline/ingest/openrouter.py`**
+- [x] **Step 3: Write `pipeline/ingest/openrouter.py`**
 
 ```python
 """Normalize OpenRouter's two endpoints into row dicts ready for shard packaging.
@@ -1448,7 +1448,7 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 4: Generate the golden rows file**
+- [x] **Step 4: Generate the golden rows file**
 
 Run (from `pipeline/`, venv active):
 
@@ -1509,12 +1509,12 @@ observed_at = int(_fixed) if _fixed else int(time.time())
 
 Update the test to set `monkeypatch.setenv("SKU_FIXED_OBSERVED_AT", "1745020800")` at the top of the two tests that inspect row contents.
 
-- [ ] **Step 5: Run the tests to verify pass**
+- [x] **Step 5: Run the tests to verify pass**
 
 Run: `cd pipeline && .venv/bin/pytest tests/test_openrouter_ingest.py -q`
 Expected: `3 passed`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add pipeline/ingest/openrouter.py pipeline/tests/test_openrouter_ingest.py pipeline/testdata/golden/openrouter_rows.jsonl
@@ -1533,9 +1533,9 @@ Turns a NDJSON rows file into a SQLite shard that matches §5 exactly (tables, i
 - Create: `pipeline/package/build_shard.py`
 - Create: `pipeline/tests/test_build_shard.py`
 
-- [ ] **Step 1: Write `pipeline/package/__init__.py`** (empty)
+- [x] **Step 1: Write `pipeline/package/__init__.py`** (empty)
 
-- [ ] **Step 2: Write `pipeline/package/schema.sql`** — copy verbatim from §5
+- [x] **Step 2: Write `pipeline/package/schema.sql`** — copy verbatim from §5
 
 ```sql
 -- sku shard schema v1. Spec §5. Keep in sync across ingest + client.
@@ -1618,7 +1618,7 @@ CREATE INDEX idx_terms_commitment
   ON terms (commitment, tenancy, os);
 ```
 
-- [ ] **Step 3: Write the failing test**
+- [x] **Step 3: Write the failing test**
 
 `pipeline/tests/test_build_shard.py`:
 
@@ -1738,12 +1738,12 @@ def test_build_shard_seeds_metadata_from_rows(tmp_path: Path):
         con.close()
 ```
 
-- [ ] **Step 4: Run it to confirm failure**
+- [x] **Step 4: Run it to confirm failure**
 
 Run: `cd pipeline && .venv/bin/pytest tests/test_build_shard.py -q`
 Expected: `ModuleNotFoundError: No module named 'package.build_shard'`.
 
-- [ ] **Step 5: Write `pipeline/package/build_shard.py`**
+- [x] **Step 5: Write `pipeline/package/build_shard.py`**
 
 ```python
 """Build a SQLite shard from normalized NDJSON rows. Spec §5."""
@@ -1915,12 +1915,12 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 6: Run test to verify pass**
+- [x] **Step 6: Run test to verify pass**
 
 Run: `cd pipeline && .venv/bin/pytest tests/test_build_shard.py -q`
 Expected: `2 passed`.
 
-- [ ] **Step 7: Full pipeline smoke — fixture → rows → shard**
+- [x] **Step 7: Full pipeline smoke — fixture → rows → shard**
 
 ```bash
 cd pipeline
@@ -1959,7 +1959,7 @@ sqlite3 ../dist/pipeline/openrouter.db "SELECT count(*) FROM skus; SELECT value 
 
 Expected: file exists; ~4 rows (2 endpoints for Claude + aggregated; 1 endpoint for GPT-5 + aggregated); `allowed_kinds` = `["llm.multimodal","llm.text"]`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add pipeline/package/
@@ -1974,7 +1974,7 @@ git commit -m "pipeline(package): add shard packager matching spec §5 schema"
 **Files:**
 - Modify: `Makefile`
 
-- [ ] **Step 1: Add pipeline + bench targets to the root Makefile**
+- [x] **Step 1: Add pipeline + bench targets to the root Makefile**
 
 Append before the existing `release-dry` target so the file stays grouped:
 
@@ -2000,12 +2000,12 @@ test-integration: ## Run Go integration tests (requires built shard)
 	  $(GO) test -tags=integration -race -count=1 ./...
 ```
 
-- [ ] **Step 2: Adjust the help-awk filter** (only if targets are hidden) — confirm new targets show up:
+- [x] **Step 2: Adjust the help-awk filter** (only if targets are hidden) — confirm new targets show up:
 
 Run: `make help`
 Expected: lines for `openrouter-shard`, `pipeline-test`, `bench`, `test-integration`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Makefile
@@ -2021,7 +2021,7 @@ Implements the spec §4 stderr error envelope and the exit-code taxonomy. This r
 **Files:**
 - Create: `internal/errors/errors.go`, `internal/errors/errors_test.go`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `internal/errors/errors_test.go`:
 
@@ -2103,12 +2103,12 @@ func TestWrite_Nil_Returns0(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `go test ./internal/errors/...`
 Expected: `undefined: skuerrors.E`, etc.
 
-- [ ] **Step 3: Write `internal/errors/errors.go`**
+- [x] **Step 3: Write `internal/errors/errors.go`**
 
 ```go
 // Package errors implements the spec §4 error envelope + exit-code taxonomy.
@@ -2240,12 +2240,12 @@ func Validation(reason, flag, value string, hint string) *E {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify pass**
+- [x] **Step 4: Run tests to verify pass**
 
 Run: `go test ./internal/errors/... -v`
 Expected: all four tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/errors/
@@ -2262,11 +2262,11 @@ Folds in the M0 code-review suggestions: `Execute()` returns `int`, `main.go` ca
 - Modify: `cmd/sku/execute.go`, `main.go`
 - Modify: `cmd/sku/version_test.go` (if it depended on the old signature)
 
-- [ ] **Step 1: Read the current `cmd/sku/execute.go`**
+- [x] **Step 1: Read the current `cmd/sku/execute.go`**
 
 Run: `cat cmd/sku/execute.go`
 
-- [ ] **Step 2: Replace with the envelope-aware version**
+- [x] **Step 2: Replace with the envelope-aware version**
 
 ```go
 package sku
@@ -2295,7 +2295,7 @@ func Execute() int {
 }
 ```
 
-- [ ] **Step 3: Update `main.go`**
+- [x] **Step 3: Update `main.go`**
 
 ```go
 package main
@@ -2311,7 +2311,7 @@ func main() {
 }
 ```
 
-- [ ] **Step 4: Build + smoke-test**
+- [x] **Step 4: Build + smoke-test**
 
 Run:
 ```bash
@@ -2324,12 +2324,12 @@ Expected:
 - `sku version` emits JSON as before.
 - `sku notarealsubcmd` prints a JSON envelope to stderr (Cobra's "unknown command" error, wrapped as `generic_error`) and exits 1.
 
-- [ ] **Step 5: Run all tests**
+- [x] **Step 5: Run all tests**
 
 Run: `make test`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add cmd/sku/execute.go main.go
@@ -2347,7 +2347,7 @@ The catalog reader. Opens a shard in WAL mode, reads the metadata, checks schema
 - Create: `internal/catalog/testdata/seed.sql`
 - Create: `internal/catalog/catalog_test.go`
 
-- [ ] **Step 1: Write the seed fixture**
+- [x] **Step 1: Write the seed fixture**
 
 `internal/catalog/testdata/seed.sql`:
 
@@ -2432,7 +2432,7 @@ INSERT INTO health VALUES
 -- aggregated row has no health
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 `internal/catalog/catalog_test.go`:
 
@@ -2543,12 +2543,12 @@ func TestLookupLLM_NotFoundReturnsEmpty(t *testing.T) {
 }
 ```
 
-- [ ] **Step 3: Run to confirm failure**
+- [x] **Step 3: Run to confirm failure**
 
 Run: `go test ./internal/catalog/...`
 Expected: undefined symbols.
 
-- [ ] **Step 4: Write `internal/catalog/datadir.go`**
+- [x] **Step 4: Write `internal/catalog/datadir.go`**
 
 ```go
 package catalog
@@ -2588,7 +2588,7 @@ func ShardPath(shard string) string {
 }
 ```
 
-- [ ] **Step 5: Write `internal/catalog/catalog.go`**
+- [x] **Step 5: Write `internal/catalog/catalog.go`**
 
 ```go
 // Package catalog provides a read-only view over a sku SQLite shard. Spec §5.
@@ -2705,7 +2705,7 @@ func BuildFromSQL(path string, ddl string) error {
 }
 ```
 
-- [ ] **Step 6: Write `internal/catalog/lookup.go`**
+- [x] **Step 6: Write `internal/catalog/lookup.go`**
 
 ```go
 package catalog
@@ -2933,12 +2933,12 @@ func (c *Catalog) fillPrices(ctx context.Context, r *Row) error {
 }
 ```
 
-- [ ] **Step 7: Run tests to verify pass**
+- [x] **Step 7: Run tests to verify pass**
 
 Run: `go test ./internal/catalog/... -v`
 Expected: all five tests PASS.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add internal/catalog/
@@ -2954,7 +2954,7 @@ Translates `catalog.Row` to the §4 JSON output shape, applies the `agent` prese
 **Files:**
 - Create: `internal/output/render.go`, `internal/output/render_test.go`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `internal/output/render_test.go`:
 
@@ -3119,12 +3119,12 @@ func TestRender_AggregatedMarkedInAttributes(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `go test ./internal/output/...`
 Expected: undefined package.
 
-- [ ] **Step 3: Write `internal/output/render.go`**
+- [x] **Step 3: Write `internal/output/render.go`**
 
 ```go
 // Package output renders catalog.Row values into the spec §4 JSON envelope.
@@ -3366,12 +3366,12 @@ func Encode(w io.Writer, env Envelope, pretty bool) error {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify pass**
+- [x] **Step 4: Run tests to verify pass**
 
 Run: `go test ./internal/output/... -v`
 Expected: all four tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/output/
@@ -3386,7 +3386,7 @@ git commit -m "feat(output): render catalog.Row to spec §4 envelope, agent + fu
 - Create: `cmd/sku/llm.go`, `cmd/sku/llm_price.go`, `cmd/sku/llm_price_test.go`
 - Modify: `cmd/sku/root.go` (register `llm` subtree)
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `cmd/sku/llm_price_test.go`:
 
@@ -3540,12 +3540,12 @@ func splitLines(s string) []string {
 }
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `go test ./cmd/sku/...`
 Expected: `unknown command "llm"`.
 
-- [ ] **Step 3: Write `cmd/sku/llm.go`**
+- [x] **Step 3: Write `cmd/sku/llm.go`**
 
 ```go
 package sku
@@ -3562,7 +3562,7 @@ func newLLMCmd() *cobra.Command {
 }
 ```
 
-- [ ] **Step 4: Write `cmd/sku/llm_price.go`**
+- [x] **Step 4: Write `cmd/sku/llm_price.go`**
 
 ```go
 package sku
@@ -3657,16 +3657,16 @@ func newLLMPriceCmd() *cobra.Command {
 }
 ```
 
-- [ ] **Step 5: Register `llm` in `cmd/sku/root.go`**
+- [x] **Step 5: Register `llm` in `cmd/sku/root.go`**
 
 Edit `newRootCmd` to add `root.AddCommand(newLLMCmd())` just after the `newVersionCmd()` line.
 
-- [ ] **Step 6: Run tests to verify pass**
+- [x] **Step 6: Run tests to verify pass**
 
 Run: `go test ./cmd/sku/... -v`
 Expected: all six new tests PASS plus the existing version tests.
 
-- [ ] **Step 7: Build + smoke**
+- [x] **Step 7: Build + smoke**
 
 ```bash
 make openrouter-shard   # build a real local shard from fixtures
@@ -3675,7 +3675,7 @@ SKU_DATA_DIR=$(pwd)/dist/pipeline ./bin/sku llm price --model anthropic/claude-o
 
 Expected: two JSON lines on stdout.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add cmd/sku/llm.go cmd/sku/llm_price.go cmd/sku/llm_price_test.go cmd/sku/root.go
@@ -3691,7 +3691,7 @@ Baseline-only downloader: HTTP GET → sha256 verify → zstd decompress → ato
 **Files:**
 - Create: `cmd/sku/update.go`, `cmd/sku/update_test.go`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `cmd/sku/update_test.go`:
 
@@ -3823,12 +3823,12 @@ func TestUpdate_ServerError_ReturnsServerCode(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run to confirm failure**
+- [x] **Step 2: Run to confirm failure**
 
 Run: `go test ./cmd/sku/... -run TestUpdate`
 Expected: `unknown command "update"`.
 
-- [ ] **Step 3: Write `cmd/sku/update.go`**
+- [x] **Step 3: Write `cmd/sku/update.go`**
 
 ```go
 package sku
@@ -3996,16 +3996,16 @@ func decompressTo(src, dst string) error {
 }
 ```
 
-- [ ] **Step 4: Register `update` in `cmd/sku/root.go`**
+- [x] **Step 4: Register `update` in `cmd/sku/root.go`**
 
 Add `root.AddCommand(newUpdateCmd())` next to the other `AddCommand` calls.
 
-- [ ] **Step 5: Run tests to verify pass**
+- [x] **Step 5: Run tests to verify pass**
 
 Run: `go test ./cmd/sku/... -run TestUpdate -v`
 Expected: three tests PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add cmd/sku/update.go cmd/sku/update_test.go cmd/sku/root.go
@@ -4021,7 +4021,7 @@ Ties the halves together: build the real shard via `make openrouter-shard`, run 
 **Files:**
 - Create: `internal/catalog/integration_test.go`
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 `internal/catalog/integration_test.go`:
 
@@ -4064,7 +4064,7 @@ func TestIntegration_RealBuiltShard(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run it**
+- [x] **Step 2: Run it**
 
 ```bash
 make openrouter-shard
@@ -4073,7 +4073,7 @@ make test-integration
 
 Expected: PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add internal/catalog/integration_test.go
@@ -4089,7 +4089,7 @@ Establishes the M1 baseline per §5 perf targets: warm <5 ms p99, cold <60 ms en
 **Files:**
 - Create: `bench/bench_test.go`
 
-- [ ] **Step 1: Write the benchmark**
+- [x] **Step 1: Write the benchmark**
 
 `bench/bench_test.go`:
 
@@ -4171,7 +4171,7 @@ func BenchmarkPointLookup_Cold(b *testing.B) {
 }
 ```
 
-- [ ] **Step 2: Run the bench**
+- [x] **Step 2: Run the bench**
 
 ```bash
 make build
@@ -4181,11 +4181,11 @@ make bench
 
 Expected: two benchmark results with `ns/op` numbers. Record them in the M1 exit note. `warm` < 5,000,000 ns/op (5 ms) and `cold` < 60,000,000 ns/op (60 ms) are the targets.
 
-- [ ] **Step 3: If a target is missed**
+- [x] **Step 3: If a target is missed**
 
 Per spec §5: "if any target is unattainable the spec is updated before M2, not silently relaxed." Capture the measurement in `docs/ops/m1-bench-baseline.md` with a short analysis and adjust the spec `docs/superpowers/specs/2026-04-18-sku-design.md` §5 Performance targets in a separate commit if needed.
 
-- [ ] **Step 4: Commit the bench harness (results not checked in)**
+- [x] **Step 4: Commit the bench harness (results not checked in)**
 
 ```bash
 git add bench/
@@ -4201,7 +4201,7 @@ One-page maintainer runbook for the one-shot shard upload that `sku update` poin
 **Files:**
 - Create: `docs/ops/m1-bootstrap-release.md`
 
-- [ ] **Step 1: Write the runbook**
+- [x] **Step 1: Write the runbook**
 
 ```markdown
 # M1 bootstrap OpenRouter release
@@ -4284,7 +4284,7 @@ gh release delete-asset data-bootstrap-openrouter openrouter.db.zst openrouter.d
 Clients fail closed with exit code 6 (`conflict` — sha256 mismatch) until a new upload lands.
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add docs/ops/m1-bootstrap-release.md
@@ -4298,7 +4298,7 @@ git commit -m "docs(ops): add M1 OpenRouter bootstrap-release runbook"
 **Files:**
 - Modify: `CLAUDE.md`
 
-- [ ] **Step 1: Update the "Current milestone" section**
+- [x] **Step 1: Update the "Current milestone" section**
 
 Edit the bottom of `CLAUDE.md`:
 
@@ -4325,7 +4325,7 @@ And add a new row to the dev-commands table:
 | Run benchmarks | `make bench` |
 | Run Python pipeline tests | `make pipeline-test` |
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add CLAUDE.md
@@ -4338,7 +4338,7 @@ git commit -m "docs: bump CLAUDE.md to M1 with llm-price quick path"
 
 No code changes — a gate before declaring M1 done.
 
-- [ ] **Step 1: All tests green**
+- [x] **Step 1: All tests green**
 
 Run:
 ```bash
@@ -4350,12 +4350,12 @@ make test-integration
 
 Expected: PASS in all four.
 
-- [ ] **Step 2: Bench targets within budget**
+- [x] **Step 2: Bench targets within budget**
 
 Run: `make bench`
 Expected: warm < 5 ms/op, cold < 60 ms/op. If either is missed, write an analysis to `docs/ops/m1-bench-baseline.md` and amend the spec §5 perf targets in a follow-up commit before declaring M1 done (per spec §5 contract).
 
-- [ ] **Step 3: Bootstrap release uploaded**
+- [x] **Step 3: Bootstrap release uploaded**
 
 Follow `docs/ops/m1-bootstrap-release.md` to upload the shard; then verify:
 
@@ -4367,18 +4367,18 @@ SKU_DATA_DIR="$tmp" ./bin/sku llm price --model anthropic/claude-opus-4.6 --pret
 
 Expected: indented JSON emitted; exit 0.
 
-- [ ] **Step 4: CI green**
+- [x] **Step 4: CI green**
 
 Run: `git push -u origin m1-openrouter-shard`
 Expected: `ci.yml` green across 5-platform × 2-Go-minor. Fix any platform-specific breakage (likely: modernc.org/sqlite on windows/arm64 — if flaky, we document rather than debug-to-exhaustion per scope) before declaring M1 done.
 
-- [ ] **Step 5: Tag M1 completion**
+- [x] **Step 5: Tag M1 completion**
 
 ```bash
 git tag -s m1-done -m "M1 complete: OpenRouter shard + catalog reader + sku llm price"
 ```
 
-- [ ] **Step 6: Merge to master**
+- [x] **Step 6: Merge to master**
 
 Open a PR; once CI is green, merge.
 

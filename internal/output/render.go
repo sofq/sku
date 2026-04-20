@@ -8,18 +8,17 @@ package output
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 
 	"github.com/sofq/sku/internal/catalog"
 )
 
-// Preset enumerates the output-shape presets. M1 implements only Agent and
-// Full; Price and Compare are stubbed and wired to Agent until M2 fleshes
-// them out with kind-specific projections.
+// Preset enumerates the output-shape presets. Agent and Full are fully
+// implemented in M1; Price and Compare get kind-aware projections in M2.
 type Preset string
 
-// Output preset constants. Agent and Full are fully implemented in M1;
-// Price and Compare fall through to Agent until M2.
+// Output preset constants.
 const (
 	PresetAgent   Preset = "agent"
 	PresetPrice   Preset = "price"
@@ -30,12 +29,12 @@ const (
 // Envelope is the top-level §4 output object. Field ordering is enforced by
 // the struct layout; json.Encoder writes keys in declaration order.
 type Envelope struct {
-	Provider string    `json:"provider"`
-	Service  string    `json:"service"`
+	Provider string    `json:"provider,omitempty"`
+	Service  string    `json:"service,omitempty"`
 	SKUID    string    `json:"sku_id,omitempty"`
 	Resource *Resource `json:"resource,omitempty"`
 	Location *Location `json:"location,omitempty"`
-	Price    []Price   `json:"price"`
+	Price    []Price   `json:"price,omitempty"`
 	Terms    *Terms    `json:"terms,omitempty"`
 	Health   *Health   `json:"health,omitempty"`
 	Source   *Source   `json:"source,omitempty"`
@@ -44,16 +43,18 @@ type Envelope struct {
 
 // Resource is the §4 resource block.
 type Resource struct {
-	Kind            string         `json:"kind"`
-	Name            string         `json:"name"`
-	VCPU            *int64         `json:"vcpu,omitempty"`
-	MemoryGB        *float64       `json:"memory_gb,omitempty"`
-	StorageGB       *float64       `json:"storage_gb,omitempty"`
-	GPUCount        *int64         `json:"gpu_count,omitempty"`
-	ContextLength   *int64         `json:"context_length,omitempty"`
-	MaxOutputTokens *int64         `json:"max_output_tokens,omitempty"`
-	Capabilities    []string       `json:"capabilities,omitempty"`
-	Attributes      map[string]any `json:"attributes,omitempty"`
+	Kind             string         `json:"kind,omitempty"`
+	Name             string         `json:"name,omitempty"`
+	VCPU             *int64         `json:"vcpu,omitempty"`
+	MemoryGB         *float64       `json:"memory_gb,omitempty"`
+	StorageGB        *float64       `json:"storage_gb,omitempty"`
+	GPUCount         *int64         `json:"gpu_count,omitempty"`
+	ContextLength    *int64         `json:"context_length,omitempty"`
+	MaxOutputTokens  *int64         `json:"max_output_tokens,omitempty"`
+	Capabilities     []string       `json:"capabilities,omitempty"`
+	DurabilityNines  *int64         `json:"durability_nines,omitempty"`
+	AvailabilityTier *string        `json:"availability_tier,omitempty"`
+	Attributes       map[string]any `json:"attributes,omitempty"`
 }
 
 // Location is the §4 location block.
@@ -106,19 +107,43 @@ func nilIfEmpty(s string) *string {
 	return &s
 }
 
+// ErrDropped signals that Pipeline intentionally emitted nothing — e.g. an
+// aggregated row with IncludeAggregated=false. Callers should skip the row
+// without treating this as a fatal error.
+var ErrDropped = errors.New("output: row dropped by preset filter")
+
 // Render builds an Envelope for a single catalog.Row at the given preset.
-// The full envelope is built first and then trimmed per-preset so callers
-// can compare presets to the same canonical shape.
+// Retained as a convenience helper; the primary choke point is Pipeline.
 func Render(r catalog.Row, p Preset) Envelope {
-	env := buildFull(r)
-	switch p {
-	case PresetFull:
-		return env
-	case PresetAgent, PresetPrice, PresetCompare, "":
-		return trimForAgent(env)
-	default:
-		return trimForAgent(env)
+	return Project(buildFull(r), p, r.Kind)
+}
+
+// Pipeline is the single entry point used by every data-path command. It
+// preset-projects, applies --fields, applies --jq, and encodes in one call.
+// Callers writing multiple rows call Pipeline once per row so JSON output
+// streams as NDJSON.
+func Pipeline(r catalog.Row, opts Options) ([]byte, error) {
+	opts = opts.WithDefaults()
+	if !opts.IncludeAggregated && r.Aggregated {
+		return nil, ErrDropped
 	}
+	env := buildFull(r)
+	trimmed := Project(env, opts.Preset, r.Kind)
+	doc, err := toMap(trimmed)
+	if err != nil {
+		return nil, err
+	}
+	if opts.Fields != "" {
+		doc = ApplyFields(doc, opts.Fields)
+	}
+	var out any = doc
+	if opts.JQ != "" {
+		out, err = ApplyJQ(doc, opts.JQ)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return Encode(out, opts.Format, opts.Pretty)
 }
 
 func buildFull(r catalog.Row) Envelope {
@@ -134,15 +159,17 @@ func buildFull(r catalog.Row) Envelope {
 	}
 
 	resource := &Resource{
-		Kind:            r.Kind,
-		Name:            r.ResourceName,
-		VCPU:            r.ResourceAttrs.VCPU,
-		MemoryGB:        r.ResourceAttrs.MemoryGB,
-		StorageGB:       r.ResourceAttrs.StorageGB,
-		GPUCount:        r.ResourceAttrs.GPUCount,
-		ContextLength:   r.ResourceAttrs.ContextLength,
-		MaxOutputTokens: r.ResourceAttrs.MaxOutputTokens,
-		Capabilities:    r.ResourceAttrs.Capabilities,
+		Kind:             r.Kind,
+		Name:             r.ResourceName,
+		VCPU:             r.ResourceAttrs.VCPU,
+		MemoryGB:         r.ResourceAttrs.MemoryGB,
+		StorageGB:        r.ResourceAttrs.StorageGB,
+		GPUCount:         r.ResourceAttrs.GPUCount,
+		ContextLength:    r.ResourceAttrs.ContextLength,
+		MaxOutputTokens:  r.ResourceAttrs.MaxOutputTokens,
+		Capabilities:     r.ResourceAttrs.Capabilities,
+		DurabilityNines:  r.ResourceAttrs.DurabilityNines,
+		AvailabilityTier: r.ResourceAttrs.AvailabilityTier,
 	}
 	if r.Aggregated {
 		resource.Attributes = map[string]any{"aggregated": true}
@@ -195,33 +222,25 @@ func buildFull(r catalog.Row) Envelope {
 	}
 }
 
-// trimForAgent keeps the fields spec §4 "Presets" declares for the agent preset:
-// provider, service, resource.name, location.provider_region, price, terms.commitment.
-func trimForAgent(env Envelope) Envelope {
-	out := Envelope{
-		Provider: env.Provider,
-		Service:  env.Service,
-		Price:    env.Price,
+// toMap marshals an Envelope into a generic map so the downstream fields/jq
+// stages can operate without struct knowledge.
+func toMap(env Envelope) (map[string]any, error) {
+	b, err := json.Marshal(env)
+	if err != nil {
+		return nil, err
 	}
-	if env.Resource != nil {
-		out.Resource = &Resource{Name: env.Resource.Name}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil, err
 	}
-	if env.Location != nil {
-		out.Location = &Location{
-			ProviderRegion: env.Location.ProviderRegion,
-		}
-	}
-	if env.Terms != nil {
-		out.Terms = &Terms{Commitment: env.Terms.Commitment}
-	}
-	// health, source, raw dropped
-	return out
+	return m, nil
 }
 
-// Encode writes the envelope as JSON to w. When pretty is false the encoding
-// is compact (json.Encoder defaults); when true it's indented with two spaces.
-// Always writes a trailing newline.
-func Encode(w io.Writer, env Envelope, pretty bool) error {
+// EncodeEnvelope writes the envelope as JSON to w. When pretty is false the
+// encoding is compact (json.Encoder defaults); when true it's indented with
+// two spaces. Always writes a trailing newline. Retained for M1 callers until
+// Task 10 migrates them to Pipeline.
+func EncodeEnvelope(w io.Writer, env Envelope, pretty bool) error {
 	enc := json.NewEncoder(w)
 	if pretty {
 		enc.SetIndent("", "  ")

@@ -2,9 +2,13 @@
 package catalog
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "modernc.org/sqlite" // registers the "sqlite" driver
 )
@@ -23,6 +27,7 @@ type Catalog struct {
 	schemaVersion  string
 	catalogVersion string
 	currency       string
+	generatedAt    string
 	shardPath      string
 }
 
@@ -66,6 +71,8 @@ func (c *Catalog) loadMetadata() error {
 			c.catalogVersion = v
 		case "currency":
 			c.currency = v
+		case "generated_at":
+			c.generatedAt = v
 		}
 	}
 	if err := rows.Err(); err != nil {
@@ -87,6 +94,15 @@ func (c *Catalog) loadMetadata() error {
 // Close releases the underlying SQLite handle.
 func (c *Catalog) Close() error { return c.db.Close() }
 
+// QueryContext exposes the underlying *sql.DB QueryContext so adjacent packages
+// (internal/compare/kinds) can author their own SELECTs without importing
+// database/sql glue through catalog. The returned *sql.Rows must be closed by
+// the caller. Intentionally narrow: only compose kind-specific equivalence
+// queries through this; normal lookups go through the typed helpers.
+func (c *Catalog) QueryContext(ctx context.Context, q string, args ...any) (*sql.Rows, error) {
+	return c.db.QueryContext(ctx, q, args...)
+}
+
 // SchemaVersion returns the shard's declared schema_version string.
 func (c *Catalog) SchemaVersion() string { return c.schemaVersion }
 
@@ -95,6 +111,40 @@ func (c *Catalog) CatalogVersion() string { return c.catalogVersion }
 
 // Currency returns the shard's invariant currency.
 func (c *Catalog) Currency() string { return c.currency }
+
+// ServingProviders reads metadata.serving_providers from the shard and returns
+// the list. Accepts both JSON-array (the pipeline's canonical format) and
+// comma-separated encodings; returns an empty slice when the row is absent or
+// empty. Errors only surface on malformed JSON or a database failure.
+func (c *Catalog) ServingProviders() ([]string, error) {
+	var v string
+	err := c.db.QueryRow("SELECT value FROM metadata WHERE key = 'serving_providers'").Scan(&v)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return nil, nil
+	}
+	if strings.HasPrefix(v, "[") {
+		var out []string
+		if err := json.Unmarshal([]byte(v), &out); err != nil {
+			return nil, fmt.Errorf("catalog: parse serving_providers: %w", err)
+		}
+		return out, nil
+	}
+	parts := strings.Split(v, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if s := strings.TrimSpace(p); s != "" {
+			out = append(out, s)
+		}
+	}
+	return out, nil
+}
 
 // BuildFromSQL creates a fresh SQLite file at path, executes the provided SQL
 // (schema + seed), and closes the handle. Used only by tests.

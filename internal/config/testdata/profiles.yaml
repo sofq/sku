@@ -1,0 +1,16 @@
+profiles:
+  default:
+    preset: agent
+    channel: daily
+    default_regions: [us-east-1, eastus, us-east1]
+    stale_warning_days: 14
+    auto_fetch: false
+  cost-planning:
+    preset: full
+    include_raw: true
+    auto_fetch: true
+  ci:
+    preset: price
+    stale_warning_days: 3
+    stale_error_days: 7
+    auto_fetch: false

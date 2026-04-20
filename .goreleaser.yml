@@ -37,6 +37,107 @@ archives:
 checksum:
   name_template: "checksums.txt"
 
+sboms:
+  - id: default
+    artifacts: archive
+    documents:
+      - "${artifact}.spdx.sbom.json"
+
+signs:
+  - id: cosign-checksum
+    cmd: cosign
+    signature: "${artifact}.sig"
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--output-certificate=${certificate}"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - "--yes"
+    artifacts: checksum
+    output: true
+
+nfpms:
+  - id: sku
+    package_name: sku
+    vendor: sofq
+    homepage: https://github.com/sofq/sku
+    maintainer: sofq <noreply@sofq.dev>
+    description: Agent-friendly CLI for cloud + LLM pricing.
+    license: Apache-2.0
+    formats: [deb, rpm, apk]
+    bindir: /usr/bin
+
+brews:
+  - name: sku
+    repository:
+      owner: sofq
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/sofq/sku"
+    description: "Agent-friendly CLI for cloud + LLM pricing."
+    license: "Apache-2.0"
+    test: |
+      system "#{bin}/sku version"
+    skip_upload: auto
+
+scoops:
+  - name: sku
+    repository:
+      owner: sofq
+      name: scoop-bucket
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: "https://github.com/sofq/sku"
+    description: "Agent-friendly CLI for cloud + LLM pricing."
+    license: Apache-2.0
+    skip_upload: auto
+
+dockers:
+  - id: sku-amd64
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-amd64"
+    dockerfile: Dockerfile.goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.source=https://github.com/sofq/sku"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+  - id: sku-arm64
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-arm64"
+    dockerfile: Dockerfile.goreleaser
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.source=https://github.com/sofq/sku"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.licenses=Apache-2.0"
+
+docker_manifests:
+  - name_template: "ghcr.io/sofq/sku:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-amd64"
+      - "ghcr.io/sofq/sku:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/sofq/sku:latest"
+    skip_push: auto
+    image_templates:
+      - "ghcr.io/sofq/sku:{{ .Version }}-amd64"
+      - "ghcr.io/sofq/sku:{{ .Version }}-arm64"
+
+docker_signs:
+  - cmd: cosign
+    artifacts: manifests
+    args:
+      - sign
+      - "${artifact}@${digest}"
+      - "--yes"
+    output: true
+
 snapshot:
   version_template: "0.0.0-snapshot-{{ .ShortCommit }}"
 

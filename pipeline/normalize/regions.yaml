@@ -1,6 +1,23 @@
-# Canonical region-group map. M1 seed: only the global bucket used by
-# OpenRouter (regionless/global SKUs use `region=''`, `region_normalized=''`).
-# Real region groups land in M3a when cloud shards arrive.
-# Format per spec §5 Region normalization.
+# Canonical region-group map. M3a.1 seeded AWS; m3b.1 added Azure; m3b.3 adds GCP.
 version: 1
-groups: {}
+groups:
+  us-east:
+    - {provider: aws,   region: us-east-1}
+    - {provider: aws,   region: us-east-2}
+    - {provider: azure, region: eastus}
+    - {provider: azure, region: eastus2}
+    - {provider: azure, region: southcentralus}
+    - {provider: gcp,   region: us-east1}
+    - {provider: gcp,   region: us-east4}
+  us-west:
+    - {provider: aws,   region: us-west-2}
+    - {provider: azure, region: westus2}
+    - {provider: gcp,   region: us-west1}
+  eu-west:
+    - {provider: aws,   region: eu-west-1}
+    - {provider: azure, region: westeurope}
+    - {provider: gcp,   region: europe-west1}
+  asia-ne:
+    - {provider: aws,   region: ap-northeast-1}
+    - {provider: azure, region: japaneast}
+    - {provider: gcp,   region: asia-northeast1}

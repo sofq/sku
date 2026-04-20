@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sku-cli"
+version = "0.0.0"
+description = "Agent-friendly CLI for cloud + LLM pricing (PyPI wrapper)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "sofq" }]
+classifiers = [
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+sku = "sku_cli.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/sofq/sku"
+
+[tool.setuptools]
+packages = ["sku_cli"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+sku_cli = ["bin/*"]
+
+# cibuildwheel is driven from release-pypi.yml; keys here document the matrix.
+[tool.cibuildwheel]
+build = ["cp311-*"]
+skip = ["*-musllinux_*"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64", "aarch64"]
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64", "ARM64"]

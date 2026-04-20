@@ -1,0 +1,283 @@
+"""Shared AWS ingest helpers: region normalization, SKU ID passthrough."""
+
+from __future__ import annotations
+
+import contextlib
+import json
+import os
+import time
+from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import ijson
+import requests
+import yaml
+
+_REGIONS_YAML = Path(__file__).resolve().parent.parent / "normalize" / "regions.yaml"
+
+
+@dataclass(frozen=True)
+class RegionNormalizer:
+    """Maps (provider, provider-region) -> canonical group."""
+
+    table: Mapping[tuple[str, str], str]
+
+    def normalize(self, provider: str, region: str) -> str:
+        key = (provider, region)
+        try:
+            return self.table[key]
+        except KeyError as exc:
+            raise KeyError(f"{provider}/{region}") from exc
+
+    def try_normalize(self, provider: str, region: str) -> str | None:
+        """Return canonical group, or None when the region is not tracked.
+
+        Live AWS/Azure/GCP price feeds include regions outside our coverage
+        (new launches, opt-in regions, etc.). Ingest callers use this helper
+        to skip those rows instead of failing the whole shard.
+        """
+        return self.table.get((provider, region))
+
+
+def load_region_normalizer() -> RegionNormalizer:
+    """Load the repo's regions.yaml and build a (provider, region) -> group map."""
+    with _REGIONS_YAML.open() as fh:
+        doc = yaml.safe_load(fh)
+    table: dict[tuple[str, str], str] = {}
+    for group, entries in (doc.get("groups") or {}).items():
+        for entry in entries:
+            key = (entry["provider"], entry["region"])
+            table[key] = group
+    return RegionNormalizer(table)
+
+
+_AWS_OFFER_BASE = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws"
+_AWS_SERVICE_CODES: dict[str, str] = {
+    "aws_ec2": "AmazonEC2",
+    "aws_rds": "AmazonRDS",
+    "aws_s3": "AmazonS3",
+    "aws_lambda": "AWSLambda",
+    "aws_ebs": "AmazonEC2",
+    "aws_dynamodb": "AmazonDynamoDB",
+    "aws_cloudfront": "AmazonCloudFront",
+}
+
+_RETRY_STATUSES = {500, 502, 503, 504}
+
+
+def fetch_offer(
+    shard: str, target: Path, *, session: requests.Session | None = None, retries: int = 3
+) -> None:
+    """Download an AWS offer index.json for `shard` into `target`.
+
+    Streams to disk in 64 KiB chunks — we never hold the file in memory because
+    some offers (AmazonEC2 = 8+ GB) would OOM a 16 GiB runner.
+    """
+    service_code = _AWS_SERVICE_CODES[shard]
+    url = f"{_AWS_OFFER_BASE}/{service_code}/current/index.json"
+    _stream_download(url, target, session=session, retries=retries)
+
+
+def _stream_download(
+    url: str,
+    target: Path,
+    *,
+    session: requests.Session | None = None,
+    retries: int = 3,
+) -> None:
+    """Stream `url` to `target` atomically, with retry on 5xx and truncation check."""
+    if session is None:
+        session = requests.Session()
+    ua = "sku-pipeline/0.0 (+https://github.com/sofq/sku)"
+    part = target.with_suffix(target.suffix + ".part")
+    last: Exception | None = None
+    for attempt in range(retries):
+        try:
+            resp = session.get(url, stream=True, timeout=60, headers={"User-Agent": ua})
+        except requests.RequestException as exc:
+            last = exc
+            time.sleep(0.5 * 2**attempt)
+            continue
+        status = resp.status_code
+        if status in _RETRY_STATUSES:
+            last = RuntimeError(f"GET {url} returned {status}")
+            time.sleep(0.5 * 2**attempt)
+            continue
+        if status != 200:
+            raise RuntimeError(f"GET {url} returned {status}")
+        declared_length: int | None = None
+        raw_cl = resp.headers.get("Content-Length")
+        if raw_cl is not None:
+            with contextlib.suppress(ValueError):
+                declared_length = int(raw_cl)
+        try:
+            with part.open("wb") as fh:
+                for chunk in resp.iter_content(chunk_size=65536):
+                    fh.write(chunk)
+        except Exception as exc:
+            part.unlink(missing_ok=True)
+            raise RuntimeError(f"GET {url} stream error: {exc}") from exc
+        actual_length = part.stat().st_size
+        if declared_length is not None and actual_length != declared_length:
+            part.unlink(missing_ok=True)
+            raise RuntimeError(
+                f"GET {url} truncated: got {actual_length} bytes, expected {declared_length}"
+            )
+        os.replace(part, target)
+        return
+    raise RuntimeError(f"GET {url} failed after {retries} attempts: {last}")
+
+
+# ---------------------------------------------------------------------------
+# Per-region stripped offer fetch (m3a.4.2 OOM fix)
+# ---------------------------------------------------------------------------
+#
+# AmazonEC2 combined offer is 8.4 GB. Loading it in any form — DuckDB json_each
+# or Python json.load — overflows the 16 GB runner. AWS also publishes per-region
+# index.json files (~400 MB each) via `region_index.json`. We fetch each per-region
+# file, stream-parse it with ijson, and write a trimmed JSON containing only the
+# ~12 leaf fields our ingesters consume. Peak memory: one product dict at a time
+# (~KBs). Peak disk: ~400 MB raw + ~30 MB stripped; raw is deleted after strip.
+
+# Which AWS service codes support per-region offers (i.e. have a region_index.json).
+_PER_REGION_AWS_OFFERS: frozenset[str] = frozenset({"AmazonEC2"})
+
+# Product-family allowlist per shard — drives the ingesters' consumed rows.
+# Kept here (not per-ingester) so one stripped file can serve multiple ingesters
+# (aws_ec2 + aws_ebs both read the AmazonEC2 offer, one is Compute Instance,
+# the other is Storage). Extra families filtered at ingest time.
+_EC2_PRODUCT_FAMILIES: frozenset[str] = frozenset({"Compute Instance", "Storage"})
+
+# Leaf attributes any AWS ingester consumes under products.<sku>.attributes.
+# Superset across aws_ec2 (Compute Instance) + aws_ebs (Storage). Keeping the
+# superset means one stripped file per region works for both shards without
+# re-fetching upstream.
+_EC2_KEEP_ATTRS: frozenset[str] = frozenset(
+    {
+        "instanceType",
+        "regionCode",
+        "operatingSystem",
+        "tenancy",
+        "preInstalledSw",
+        "capacitystatus",
+        "vcpu",
+        "memory",
+        "physicalProcessor",
+        "networkPerformance",
+        "volumeApiName",
+    }
+)
+
+
+def fetch_offer_regions_stripped(
+    shard: str,
+    out_dir: Path,
+    *,
+    regions: Iterable[str],
+    session: requests.Session | None = None,
+    retries: int = 3,
+) -> list[Path]:
+    """Fetch per-region AWS offer files for `shard`, stream-strip to JSON.
+
+    For each region in `regions`, download that region's `index.json`, parse it
+    with ijson, write a trimmed JSON of the same shape (products/terms.OnDemand
+    with only the leaf fields we consume) to `out_dir/{shard}-{region}.json`.
+    Raw per-region downloads are deleted after stripping.
+
+    Skips regions not listed in the upstream `region_index.json` (e.g. new
+    AWS regions not yet in a shard's offer). Returns the list of stripped
+    output paths that were successfully produced.
+    """
+    service_code = _AWS_SERVICE_CODES[shard]
+    if service_code not in _PER_REGION_AWS_OFFERS:
+        raise ValueError(f"per-region offer not supported for shard {shard!r}")
+    if session is None:
+        session = requests.Session()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    region_index_url = f"{_AWS_OFFER_BASE}/{service_code}/current/region_index.json"
+    raw_index = out_dir / f"{shard}-region_index.json"
+    _stream_download(region_index_url, raw_index, session=session, retries=retries)
+    index_doc = json.loads(raw_index.read_text())
+    raw_index.unlink(missing_ok=True)
+
+    upstream_regions: dict[str, str] = {
+        code: entry["currentVersionUrl"]
+        for code, entry in (index_doc.get("regions") or {}).items()
+    }
+
+    produced: list[Path] = []
+    for region in regions:
+        rel_url = upstream_regions.get(region)
+        if rel_url is None:
+            continue
+        region_url = f"https://pricing.us-east-1.amazonaws.com{rel_url}"
+        raw_path = out_dir / f"{shard}-{region}.raw.json"
+        try:
+            _stream_download(region_url, raw_path, session=session, retries=retries)
+            stripped_path = out_dir / f"{shard}-{region}.json"
+            _strip_ec2_offer(raw_path, stripped_path)
+            produced.append(stripped_path)
+        finally:
+            raw_path.unlink(missing_ok=True)
+    return produced
+
+
+def _strip_ec2_offer(raw_path: Path, out_path: Path) -> None:
+    """Stream-parse an AWS EC2-shape offer JSON, emit a trimmed version.
+
+    Keeps:
+      - products.<sku>.productFamily + whitelisted attributes leaves
+        (filtered to families actually consumed — Compute Instance, Storage).
+      - terms.OnDemand.<sku>.<termKey>.priceDimensions.<pdKey>.{unit, pricePerUnit}
+      - top-level offerCode, version, publicationDate for traceability.
+
+    Drops: terms.Reserved (bulk of terms), product attrs we don't consume,
+    offerTermCode, rateCode, effectiveDate, termAttributes, appliesTo,
+    priceDimensions.description/beginRange/endRange, etc.
+    """
+    products_kept: dict[str, dict[str, Any]] = {}
+    with raw_path.open("rb") as fh:
+        for sku_id, product in ijson.kvitems(fh, "products", use_float=True):
+            family = product.get("productFamily")
+            if family not in _EC2_PRODUCT_FAMILIES:
+                continue
+            attrs_raw = product.get("attributes") or {}
+            products_kept[sku_id] = {
+                "productFamily": family,
+                "attributes": {k: attrs_raw[k] for k in _EC2_KEEP_ATTRS if k in attrs_raw},
+            }
+
+    terms_kept: dict[str, dict[str, Any]] = {}
+    with raw_path.open("rb") as fh:
+        for sku_id, term_data in ijson.kvitems(fh, "terms.OnDemand", use_float=True):
+            if sku_id not in products_kept:
+                continue
+            stripped_terms: dict[str, dict[str, Any]] = {}
+            for term_key, term_obj in (term_data or {}).items():
+                pds_in = (term_obj or {}).get("priceDimensions") or {}
+                stripped_pds = {
+                    pd_key: {
+                        "unit": pd_obj.get("unit"),
+                        "pricePerUnit": pd_obj.get("pricePerUnit") or {},
+                    }
+                    for pd_key, pd_obj in pds_in.items()
+                }
+                stripped_terms[term_key] = {"priceDimensions": stripped_pds}
+            terms_kept[sku_id] = stripped_terms
+
+    out_doc = {
+        "products": products_kept,
+        "terms": {"OnDemand": terms_kept},
+    }
+    part = out_path.with_suffix(out_path.suffix + ".part")
+    part.write_text(json.dumps(out_doc, separators=(",", ":")))
+    os.replace(part, out_path)
+
+
+def aws_regions_from_yaml() -> list[str]:
+    """Distinct AWS regions referenced by regions.yaml (sorted)."""
+    normalizer = load_region_normalizer()
+    return sorted({region for (provider, region) in normalizer.table if provider == "aws"})

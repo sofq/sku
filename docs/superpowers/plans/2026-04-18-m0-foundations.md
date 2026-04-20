@@ -44,27 +44,27 @@
 **Files:**
 - Create: `docs/ops/m0-name-availability.md`
 
-- [ ] **Step 1: Check PyPI**
+- [x] **Step 1: Check PyPI**
 
 Run: `curl -sS -o /dev/null -w "%{http_code}\n" https://pypi.org/pypi/sku/json`
 Expected: `404` (available) or `200` (taken — fall back to `sku-cli` as already named in §7).
 
-- [ ] **Step 2: Check npm**
+- [x] **Step 2: Check npm**
 
 Run: `curl -sS -o /dev/null -w "%{http_code}\n" https://registry.npmjs.org/@sofq/sku`
 Expected: `404`. Also verify the bare `sku` package is unneeded (§7 publishes `@sofq/sku`).
 
-- [ ] **Step 3: Check Homebrew tap namespace**
+- [x] **Step 3: Check Homebrew tap namespace**
 
 Run: `curl -sS -o /dev/null -w "%{http_code}\n" https://github.com/sofq/homebrew-tap`
 Expected: `404` (org repo not yet created — reserve it) or `200` (owned).
 
-- [ ] **Step 4: Check Scoop bucket namespace**
+- [x] **Step 4: Check Scoop bucket namespace**
 
 Run: `curl -sS -o /dev/null -w "%{http_code}\n" https://github.com/sofq/scoop-bucket`
 Expected: `404` or `200` (owned by `sofq`).
 
-- [ ] **Step 5: Record results**
+- [x] **Step 5: Record results**
 
 Write `docs/ops/m0-name-availability.md`:
 
@@ -85,7 +85,7 @@ Decision: proceed with binary name `sku` and module path `github.com/sofq/sku`.
 
 If any registry conflicts, STOP and escalate — a rename propagates through every downstream artifact URL.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add docs/ops/m0-name-availability.md
@@ -99,7 +99,7 @@ git commit -m "ops: record M0 binary-name availability check"
 **Files:**
 - Create: `LICENSE`, `NOTICE`, `README.md`, `.gitignore`
 
-- [ ] **Step 1: Write LICENSE**
+- [x] **Step 1: Write LICENSE**
 
 Fetch the canonical Apache-2.0 text:
 
@@ -109,7 +109,7 @@ curl -sSL https://www.apache.org/licenses/LICENSE-2.0.txt -o LICENSE
 
 Verify: `head -1 LICENSE` → `Apache License`.
 
-- [ ] **Step 2: Write NOTICE**
+- [x] **Step 2: Write NOTICE**
 
 ```
 sku
@@ -122,7 +122,7 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 ```
 
-- [ ] **Step 3: Write README.md** (placeholder; full README arrives in M7)
+- [x] **Step 3: Write README.md** (placeholder; full README arrives in M7)
 
 ```markdown
 # sku
@@ -138,7 +138,7 @@ See [`docs/superpowers/specs/2026-04-18-sku-design.md`](docs/superpowers/specs/2
 Apache-2.0 — see [LICENSE](LICENSE).
 ```
 
-- [ ] **Step 4: Write .gitignore**
+- [x] **Step 4: Write .gitignore**
 
 ```
 # Binaries
@@ -158,7 +158,7 @@ coverage.*
 *.swp
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add LICENSE NOTICE README.md .gitignore
@@ -172,22 +172,22 @@ git commit -m "chore: add LICENSE, NOTICE, README placeholder, .gitignore"
 **Files:**
 - Create: `go.mod`
 
-- [ ] **Step 1: Initialize module**
+- [x] **Step 1: Initialize module**
 
 Run: `go mod init github.com/sofq/sku`
 
 Expected output: `go: creating new go.mod: module github.com/sofq/sku`.
 
-- [ ] **Step 2: Pin Go directive to 1.25**
+- [x] **Step 2: Pin Go directive to 1.25**
 
 Edit `go.mod` so the second line reads `go 1.25` (the exact floor the spec §7 commits to). If `go mod init` emitted `1.26`, downgrade; if `1.24`, bump.
 
-- [ ] **Step 3: Verify `go version` satisfies the directive**
+- [x] **Step 3: Verify `go version` satisfies the directive**
 
 Run: `go version`
 Expected: `go version go1.25.x ...` or `go1.26.x`. If older, install via `gvm`/`brew` before proceeding.
 
-- [ ] **Step 4: Add cobra + testify**
+- [x] **Step 4: Add cobra + testify**
 
 Run:
 ```bash
@@ -197,7 +197,7 @@ go get github.com/stretchr/testify@latest
 
 Verify `go.sum` is created and `go.mod` has both modules in the `require` block.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add go.mod go.sum
@@ -214,7 +214,7 @@ Single source of truth for version metadata. `sku version` marshals this struct.
 - Create: `internal/version/version.go`
 - Test: `internal/version/version_test.go`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `internal/version/version_test.go`:
 
@@ -263,12 +263,12 @@ func TestInfo_OverrideViaLdflags(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `go test ./internal/version/...`
 Expected: FAIL — `package github.com/sofq/sku/internal/version is not in std`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `internal/version/version.go`:
 
@@ -309,12 +309,12 @@ func Get() Info {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `go test ./internal/version/... -v`
 Expected: all three tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/version/
@@ -328,7 +328,7 @@ git commit -m "feat(version): add internal/version with ldflags-injectable build
 **Files:**
 - Create: `cmd/sku/root.go`, `cmd/sku/execute.go`
 
-- [ ] **Step 1: Write `cmd/sku/root.go`**
+- [x] **Step 1: Write `cmd/sku/root.go`**
 
 ```go
 // Package sku wires the Cobra command tree for the sku CLI.
@@ -349,7 +349,7 @@ func newRootCmd() *cobra.Command {
 }
 ```
 
-- [ ] **Step 2: Write `cmd/sku/execute.go`**
+- [x] **Step 2: Write `cmd/sku/execute.go`**
 
 ```go
 package sku
@@ -370,12 +370,12 @@ func Execute() {
 }
 ```
 
-- [ ] **Step 3: Build to verify compilation** (version command added next task)
+- [x] **Step 3: Build to verify compilation** (version command added next task)
 
 Run: `go build ./cmd/sku/`
 Expected: error — `undefined: newVersionCmd`. That's fine; Task 5 defines it.
 
-- [ ] **Step 4: Do not commit yet** — commit lands at end of Task 5 so HEAD always builds.
+- [x] **Step 4: Do not commit yet** — commit lands at end of Task 5 so HEAD always builds.
 
 ---
 
@@ -385,7 +385,7 @@ Expected: error — `undefined: newVersionCmd`. That's fine; Task 5 defines it.
 - Create: `cmd/sku/version.go`
 - Test: `cmd/sku/version_test.go`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `cmd/sku/version_test.go`:
 
@@ -430,12 +430,12 @@ func TestVersionCmd_CompactByDefault(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `go test ./cmd/sku/...`
 Expected: FAIL — `undefined: newVersionCmd`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `cmd/sku/version.go`:
 
@@ -465,12 +465,12 @@ func newVersionCmd() *cobra.Command {
 
 (`json.Encoder.Encode` writes compact JSON followed by `\n`, matching the second test.)
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `go test ./cmd/sku/... -v`
 Expected: both tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/sku/
@@ -484,7 +484,7 @@ git commit -m "feat(cmd): add root Cobra command + JSON-emitting version subcomm
 **Files:**
 - Create: `main.go`
 
-- [ ] **Step 1: Write the shim**
+- [x] **Step 1: Write the shim**
 
 ```go
 // Binary sku is the agent-friendly cloud & LLM pricing CLI.
@@ -500,7 +500,7 @@ func main() {
 }
 ```
 
-- [ ] **Step 2: Smoke-test end-to-end**
+- [x] **Step 2: Smoke-test end-to-end**
 
 Run:
 ```bash
@@ -510,12 +510,12 @@ go build -o bin/sku .
 
 Expected: indented JSON with `version`, `commit`, `date`, `go_version`, `os`, `arch` keys and no error.
 
-- [ ] **Step 3: Confirm `go install` shape**
+- [x] **Step 3: Confirm `go install` shape**
 
 Run: `go install .`
 Expected: binary lands at `$(go env GOBIN || echo $(go env GOPATH)/bin)/sku` with no error.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add main.go
@@ -529,7 +529,7 @@ git commit -m "feat: add root main.go shim so \`go install github.com/sofq/sku@l
 **Files:**
 - Create: `Makefile`
 
-- [ ] **Step 1: Write the Makefile**
+- [x] **Step 1: Write the Makefile**
 
 ```make
 SHELL := bash
@@ -574,7 +574,7 @@ release-dry: ## Snapshot build via goreleaser; no publish
 	goreleaser release --snapshot --clean
 ```
 
-- [ ] **Step 2: Smoke-test each target**
+- [x] **Step 2: Smoke-test each target**
 
 Run:
 ```bash
@@ -586,7 +586,7 @@ make test
 
 Expected: `make build` produces `bin/sku`; `./bin/sku version | jq .version` prints a git-describe string (e.g. `f4b1dac-dirty` if there are uncommitted changes in other files).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Makefile
@@ -600,7 +600,7 @@ git commit -m "build: add Makefile with build, test, lint, clean, generate, rele
 **Files:**
 - Create: `.golangci.yml`
 
-- [ ] **Step 1: Write the config**
+- [x] **Step 1: Write the config**
 
 ```yaml
 version: "2"
@@ -630,17 +630,17 @@ issues:
   max-same-issues: 0
 ```
 
-- [ ] **Step 2: Install golangci-lint locally** (skip if already installed)
+- [x] **Step 2: Install golangci-lint locally** (skip if already installed)
 
 Run: `golangci-lint version`
 If absent: `brew install golangci-lint` (macOS) or the binary installer script from golangci-lint.run.
 
-- [ ] **Step 3: Run the linter**
+- [x] **Step 3: Run the linter**
 
 Run: `make lint`
 Expected: `0 issues.` (or a clean exit). Fix anything flagged before committing.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add .golangci.yml
@@ -654,7 +654,7 @@ git commit -m "build: add golangci-lint config (errcheck, gosec, staticcheck, re
 **Files:**
 - Create: `.goreleaser.yml`
 
-- [ ] **Step 1: Write the config**
+- [x] **Step 1: Write the config**
 
 ```yaml
 version: 2
@@ -708,22 +708,22 @@ release:
 
 (cosign + syft + Homebrew tap + Scoop + npm + PyPI + GHCR stanzas land in M6 alongside the distribution channels — §9 M6. Keeping the M0 config minimal so the dry-run is green without signing secrets.)
 
-- [ ] **Step 2: Install goreleaser locally** (skip if already installed)
+- [x] **Step 2: Install goreleaser locally** (skip if already installed)
 
 Run: `goreleaser --version`
 If absent: `brew install goreleaser`.
 
-- [ ] **Step 3: Dry-run**
+- [x] **Step 3: Dry-run**
 
 Run: `make release-dry`
 Expected: `dist/` populated with 6 archives (`sku_*_linux_amd64.tar.gz`, `sku_*_linux_arm64.tar.gz`, `sku_*_darwin_amd64.tar.gz`, `sku_*_darwin_arm64.tar.gz`, `sku_*_windows_amd64.zip`, `sku_*_windows_arm64.zip`) + `checksums.txt`.
 
-- [ ] **Step 4: Spot-check a cross-compiled binary**
+- [x] **Step 4: Spot-check a cross-compiled binary**
 
 Run: `tar -tzf dist/sku_*_linux_arm64.tar.gz`
 Expected: `sku`, `LICENSE`, `NOTICE`, `README.md` entries.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add .goreleaser.yml
@@ -737,7 +737,7 @@ git commit -m "build: add minimal goreleaser config (6 targets, no signing yet)"
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Write the workflow**
+- [x] **Step 1: Write the workflow**
 
 ```yaml
 name: ci
@@ -811,19 +811,19 @@ jobs:
 
 Matrix note (§7): covers the 5 supported targets — linux/amd64, linux/arm64, darwin/amd64, darwin/arm64, windows/amd64 — across the two most recent stable Go minors (1.25, 1.26).
 
-- [ ] **Step 2: Validate YAML locally**
+- [x] **Step 2: Validate YAML locally**
 
 Run: `python3 -c "import yaml, sys; yaml.safe_load(open('.github/workflows/ci.yml'))" && echo OK`
 Expected: `OK`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .github/workflows/ci.yml
 git commit -m "ci: add PR/push workflow (lint, 5-platform × 2-Go-minor test, release dry-run)"
 ```
 
-- [ ] **Step 4: Push branch and verify CI green before proceeding**
+- [x] **Step 4: Push branch and verify CI green before proceeding**
 
 Run: `git push -u origin <branch>` (or open a PR).
 Expected: all matrix cells green. Fix any platform-specific breakage before Task 11.
@@ -835,7 +835,7 @@ Expected: all matrix cells green. Fix any platform-specific breakage before Task
 **Files:**
 - Create: `.github/workflows/release.yml`
 
-- [ ] **Step 1: Write the workflow**
+- [x] **Step 1: Write the workflow**
 
 ```yaml
 name: release
@@ -870,12 +870,12 @@ jobs:
 
 (Cosign, syft, Homebrew, Scoop, npm, PyPI, GHCR secrets + stanzas are introduced in M6. M0 only proves the workflow shape + `goreleaser release --snapshot --clean` works on a real tag.)
 
-- [ ] **Step 2: Validate YAML**
+- [x] **Step 2: Validate YAML**
 
 Run: `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/release.yml'))" && echo OK`
 Expected: `OK`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .github/workflows/release.yml
@@ -889,7 +889,7 @@ git commit -m "ci: add release workflow template (tag-triggered goreleaser)"
 **Files:**
 - Create: `CLAUDE.md`
 
-- [ ] **Step 1: Write the guide**
+- [x] **Step 1: Write the guide**
 
 ```markdown
 # CLAUDE.md
@@ -932,7 +932,7 @@ Agent quick-start for the `sku` repo.
 M0 — foundations. See `docs/superpowers/plans/2026-04-18-m0-foundations.md`.
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add CLAUDE.md
@@ -945,9 +945,9 @@ git commit -m "docs: add CLAUDE.md agent quick-start"
 
 No code changes — a gate before declaring M0 done.
 
-- [ ] **Step 1: Confirm CI green** on the latest push/PR across the 5-platform × 2-Go-minor matrix + release-dry job.
+- [x] **Step 1: Confirm CI green** on the latest push/PR across the 5-platform × 2-Go-minor matrix + release-dry job.
 
-- [ ] **Step 2: Confirm `sku version` output locally**
+- [x] **Step 2: Confirm `sku version` output locally**
 
 Run:
 ```bash
@@ -956,17 +956,17 @@ make clean build
 ```
 Expected: one-line JSON with all six keys (`version`, `commit`, `date`, `go_version`, `os`, `arch`).
 
-- [ ] **Step 3: Confirm name-availability record is checked in**
+- [x] **Step 3: Confirm name-availability record is checked in**
 
 Run: `ls docs/ops/m0-name-availability.md`
 Expected: file present with the registry table filled in.
 
-- [ ] **Step 4: Confirm goreleaser snapshot produces 6 archives**
+- [x] **Step 4: Confirm goreleaser snapshot produces 6 archives**
 
 Run: `make release-dry && ls dist/*.tar.gz dist/*.zip | wc -l`
 Expected: `6`.
 
-- [ ] **Step 5: Tag M0 completion** (optional)
+- [x] **Step 5: Tag M0 completion** (optional)
 
 ```bash
 git tag -s m0-done -m "M0 foundations complete: scaffold + CI green + goreleaser dry-run"

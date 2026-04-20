@@ -1,41 +1,50 @@
 # Every enum the shard-build validator enforces (§5 Enum validation).
-# M1 ships the minimum set needed by OpenRouter; later milestones append.
+# M1 shipped LLM kinds; M3a.1 adds compute.vm + db.relational;
+# m3b.3 adds GCP Cloud SQL engine + deployment slots.
 version: 1
 
 kind:
-  # LLM kinds (seeded now because OpenRouter uses them)
   - llm.text
   - llm.multimodal
   - llm.embedding
   - llm.image
   - llm.audio
-  # Cloud kinds appended in M3a+
-  # - compute.vm
-  # - storage.object
-  # - db.relational
-  # ...
+  - compute.vm
+  - db.relational
+  - storage.object
+  - compute.function
+  - storage.block
+  - db.nosql
+  - network.cdn
 
 commitment:
   - on_demand
-  # - spot
-  # - reserved_1y
-  # - reserved_3y
-  # - savings_plan_1y
-  # - savings_plan_3y
-  # - cud_1y
-  # - cud_3y
 
 tenancy:
-  - ""            # non-applicable (LLMs, storage, etc.)
-  # - shared
-  # - dedicated
-  # - host
+  - ""
+  - shared
+  - dedicated
+  # RDS engines — we repurpose the tenancy slot for db.relational rows
+  # so engine participates in terms_hash.
+  - postgres
+  - mysql
+  - mariadb
+  - azure-sql
+  - cloud-sql-postgres
+  - cloud-sql-mysql
 
 os:
-  - ""            # non-applicable
-  # - linux
-  # - windows
-  # - rhel
+  - ""
+  - linux
+  - windows
+  - rhel
+  # RDS deployment options — same repurpose as tenancy above.
+  - single-az
+  - multi-az
+  - managed-instance
+  - elastic-pool
+  - zonal
+  - regional
 
 support_tier:
   - ""
