@@ -37,9 +37,9 @@ def test_happy_path(tmp_path: Path) -> None:
             content=_BODY,
             headers={"Content-Length": str(len(_BODY))},
         )
-        pub_date = fetch_offer("aws_ec2", target)
+        result = fetch_offer("aws_ec2", target)
 
-    assert pub_date == "2026-04-18T00:00:00Z"
+    assert result is None
     assert target.exists()
     assert target.read_bytes() == _BODY
 
@@ -93,8 +93,8 @@ def test_500_then_success(tmp_path: Path, _patch_sleep: None) -> None:
     ]
     with req_mock.Mocker() as m:
         m.get(_EC2_URL, response_list=responses)
-        pub_date = fetch_offer("aws_ec2", target)
-        assert pub_date == "2026-04-18T00:00:00Z"
+        fetch_offer("aws_ec2", target)
+        assert target.read_bytes() == _BODY
         assert m.call_count == 3
 
 

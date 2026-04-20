@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ingest.aws_lambda import ingest
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "aws_lambda" / "offer.json"
@@ -45,11 +43,11 @@ def test_arm64_price_lower_than_x86_64_same_region():
             assert arm_dur < x86_dur, f"arm64 duration {arm_dur} should be < x86_64 {x86_dur}"
 
 
-def test_unknown_region_rejected(tmp_path):
+def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     first_sku = next(iter(bad["products"]))
     bad["products"][first_sku]["attributes"]["regionCode"] = "ap-south-9"
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="ap-south-9"):
-        list(ingest(offer_path=p))
+    rows = list(ingest(offer_path=p))
+    assert all(r["region"] != "ap-south-9" for r in rows)

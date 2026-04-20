@@ -5,10 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from ingest.aws_cloudfront import ingest, LOCATION_MAP
+from ingest.aws_cloudfront import LOCATION_MAP, ingest
 
-FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "aws_cloudfront" / "offer.json"
-GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "aws_cloudfront_rows.jsonl"
+_DATA = Path(__file__).resolve().parent.parent / "testdata"
+FIXTURE = _DATA / "aws_cloudfront" / "offer.json"
+GOLDEN = _DATA / "golden" / "aws_cloudfront_rows.jsonl"
 
 
 def _canonical(rows):

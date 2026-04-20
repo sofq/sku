@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-import pytest
+import pytest  # used by test_unit_of_measure_divisor_applied
 
 from ingest.azure_sql import ingest
 
@@ -43,7 +43,7 @@ def test_business_critical_more_expensive_than_general_purpose():
 
 
 def test_unit_of_measure_divisor_applied():
-    """The one '100 Hours' row in the fixture must come out at the same per-hour rate as its '1 Hour' twin."""
+    """The one '100 Hours' row must match the per-hour rate of its '1 Hour' twin."""
     rows = list(ingest(prices_path=FIXTURE))
     # Group by (sku, region, deployment); we expect equal-or-very-close per-hour amounts
     # for the row priced as '100 Hours' and any sibling priced as '1 Hour'. Since the
@@ -57,8 +57,8 @@ def test_unit_of_measure_divisor_applied():
         assert west == pytest.approx(east * 1.05, rel=1e-9)
 
 
-def test_unknown_uom_rejected(tmp_path):
-    """A row with a non-time unitOfMeasure must fail the build."""
+def test_unknown_uom_skipped(tmp_path):
+    """A row with an unrecognised unitOfMeasure (monthly, per-million, etc.) is silently dropped."""
     bad = json.loads(FIXTURE.read_text())
     for it in bad["Items"]:
         if it["serviceName"] == "SQL Database" and it["currencyCode"] == "USD":
@@ -66,5 +66,5 @@ def test_unknown_uom_rejected(tmp_path):
             break
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(ValueError, match="GB/Month"):
-        list(ingest(prices_path=p))
+    rows = list(ingest(prices_path=p))
+    assert all(r["prices"][0]["unit"] != "gb-mo" for r in rows)

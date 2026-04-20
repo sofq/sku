@@ -1,149 +1,164 @@
-"""Normalize AWS EC2 offer JSON into sku row dicts via DuckDB.
+"""Normalize AWS EC2 offer JSON into sku row dicts (pure Python).
 
-Spec §3 (format stack): read the offer's `products` and `terms.OnDemand`
-as JSON columns and navigate them with json_extract — the nested shape
-uses SKU IDs as object keys, so DuckDB infers them as STRUCTs unless we
-force a JSON column type. One SQL pass joins each product with its
-on-demand term + priceDimension entry; Python then filters to the
-supported OS/tenancy surface and emits NDJSON rows.
+The AWS AmazonEC2 offer is ~8 GB combined. `aws_common.fetch_offer_regions_stripped`
+downloads per-region index files, stream-strips each via ijson, and hands us
+small JSON files (~30 MB). Here we iterate those files with `json.load` and
+emit NDJSON rows for our coverage surface (Compute Instance, Linux/Windows/RHEL,
+Shared/Dedicated, On-Demand).
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
-from ._duckdb import dumps, open_conn
-from .aws_common import load_region_normalizer
+from ._duckdb import dumps
+from .aws_common import aws_regions_from_yaml, fetch_offer_regions_stripped, load_region_normalizer
 
 _PROVIDER = "aws"
 _SERVICE = "ec2"
 _KIND = "compute.vm"
 
-# Keep the OS mapping narrow — only variants we ship in v1.
 _OS_MAP: dict[str, str] = {"Linux": "linux", "Windows": "windows", "RHEL": "rhel"}
-# Tenancy comes through as Shared / Dedicated / Host; we drop Host for m3a.1.
 _TENANCY_MAP: dict[str, str] = {"Shared": "shared", "Dedicated": "dedicated"}
-
-_SQL = """
-WITH prod_keys AS (
-  SELECT unnest(json_keys(products)) AS sku_id, products, terms FROM offer
-),
-products_flat AS (
-  SELECT
-    sku_id,
-    json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.instanceType') AS instance_type,
-    json_extract_string(products, '$."' || sku_id || '".attributes.regionCode') AS region,
-    json_extract_string(products, '$."' || sku_id || '".attributes.operatingSystem') AS os_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.tenancy') AS tenancy_raw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.preInstalledSw') AS pre_sw,
-    json_extract_string(products, '$."' || sku_id || '".attributes.capacitystatus') AS cap,
-    json_extract_string(products, '$."' || sku_id || '".attributes.vcpu') AS vcpu,
-    json_extract_string(products, '$."' || sku_id || '".attributes.memory') AS memory,
-    json_extract_string(products, '$."' || sku_id || '".attributes.physicalProcessor') AS cpu,
-    json_extract_string(products, '$."' || sku_id || '".attributes.networkPerformance') AS net,
-    terms
-  FROM prod_keys
-),
-term_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms, '$.OnDemand."' || sku_id || '"'))[1] AS term_key
-  FROM products_flat
-),
-pd_keys AS (
-  SELECT *,
-    json_keys(json_extract(terms,
-      '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions'))[1] AS pd_key
-  FROM term_keys
-)
-SELECT sku_id, instance_type, region, os_raw, tenancy_raw, vcpu, memory, cpu, net,
-  json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".unit') AS unit,
-  CAST(json_extract_string(terms,
-    '$.OnDemand."' || sku_id || '"."' || term_key || '".priceDimensions."' || pd_key || '".pricePerUnit.USD')
-    AS DOUBLE) AS usd
-FROM pd_keys
-WHERE family = 'Compute Instance' AND pre_sw = 'NA' AND cap = 'Used'
-"""
 
 
 def _parse_memory(raw: str) -> float:
     return float(raw.split()[0])
 
 
-def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
-    normalizer = load_region_normalizer()
-    con = open_conn()
-    path_literal = str(offer_path).replace("'", "''")
-    con.execute(
-        f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'})"
-    )
-    for sku_id, instance_type, region, os_raw, tenancy_raw, vcpu_raw, memory_raw, cpu, net, unit, usd in (
-        con.execute(_SQL).fetchall()
-    ):
-        if os_raw not in _OS_MAP or tenancy_raw not in _TENANCY_MAP:
+def _iter_product_prices(offer: dict[str, Any]) -> Iterable[tuple[str, dict, dict]]:
+    """Yield (sku_id, product, price_dimension) for every On-Demand priced product.
+
+    Works on both the full AWS EC2 offer shape and the stripped shape — both keep
+    `products.<sku>.{productFamily,attributes}` and
+    `terms.OnDemand.<sku>.<termKey>.priceDimensions.<pdKey>.{unit, pricePerUnit}`.
+    """
+    products = offer.get("products") or {}
+    terms_od = (offer.get("terms") or {}).get("OnDemand") or {}
+    for sku_id, product in products.items():
+        term_data = terms_od.get(sku_id)
+        if not term_data:
             continue
-        region_normalized = normalizer.normalize(_PROVIDER, region)
-        terms = apply_kind_defaults(_KIND, {
-            "commitment": "on_demand",
-            "tenancy": _TENANCY_MAP[tenancy_raw],
-            "os": _OS_MAP[os_raw],
-            "support_tier": "",
-            "upfront": "",
-            "payment_option": "",
-        })
-        yield {
-            "sku_id": sku_id,
-            "provider": _PROVIDER,
-            "service": _SERVICE,
-            "kind": _KIND,
-            "resource_name": instance_type,
-            "region": region,
-            "region_normalized": region_normalized,
-            "terms_hash": terms_hash(terms),
-            "resource_attrs": {
-                "vcpu": int(vcpu_raw),
-                "memory_gb": _parse_memory(memory_raw),
-                "architecture": "x86_64",
-                "extra": {
-                    "physical_processor": cpu,
-                    "network_performance": net,
+        term_obj = next(iter(term_data.values()), None) or {}
+        pd = next(iter((term_obj.get("priceDimensions") or {}).values()), None)
+        if pd is None:
+            continue
+        yield sku_id, product, pd
+
+
+def ingest(*, offer_paths: Iterable[Path]) -> Iterable[dict[str, Any]]:
+    normalizer = load_region_normalizer()
+    for offer_path in offer_paths:
+        with offer_path.open() as fh:
+            offer = json.load(fh)
+        for sku_id, product, pd in _iter_product_prices(offer):
+            if product.get("productFamily") != "Compute Instance":
+                continue
+            attrs = product.get("attributes") or {}
+            if attrs.get("preInstalledSw") != "NA":
+                continue
+            if attrs.get("capacitystatus") != "Used":
+                continue
+            os_raw = attrs.get("operatingSystem")
+            tenancy_raw = attrs.get("tenancy")
+            if os_raw not in _OS_MAP or tenancy_raw not in _TENANCY_MAP:
+                continue
+            region = attrs.get("regionCode", "")
+            region_normalized = normalizer.try_normalize(_PROVIDER, region)
+            if region_normalized is None:
+                continue
+
+            unit = pd.get("unit") or ""
+            usd_raw = (pd.get("pricePerUnit") or {}).get("USD")
+            if usd_raw is None:
+                continue
+            try:
+                usd = float(usd_raw)
+            except (TypeError, ValueError):
+                continue
+
+            terms = apply_kind_defaults(_KIND, {
+                "commitment": "on_demand",
+                "tenancy": _TENANCY_MAP[tenancy_raw],
+                "os": _OS_MAP[os_raw],
+                "support_tier": "",
+                "upfront": "",
+                "payment_option": "",
+            })
+            yield {
+                "sku_id": sku_id,
+                "provider": _PROVIDER,
+                "service": _SERVICE,
+                "kind": _KIND,
+                "resource_name": attrs.get("instanceType"),
+                "region": region,
+                "region_normalized": region_normalized,
+                "terms_hash": terms_hash(terms),
+                "resource_attrs": {
+                    "vcpu": int(attrs.get("vcpu")),
+                    "memory_gb": _parse_memory(attrs.get("memory", "0")),
+                    "architecture": "x86_64",
+                    "extra": {
+                        "physical_processor": attrs.get("physicalProcessor"),
+                        "network_performance": attrs.get("networkPerformance"),
+                    },
                 },
-            },
-            "terms": terms,
-            "prices": [
-                {"dimension": "compute", "tier": "", "amount": usd, "unit": unit.lower()},
-            ],
-        }
+                "terms": terms,
+                "prices": [
+                    {"dimension": "compute", "tier": "", "amount": usd, "unit": unit.lower()},
+                ],
+            }
+
+
+def _resolve_paths(args: argparse.Namespace) -> list[Path]:
+    """Resolve CLI args → a list of stripped offer-JSON paths ready to feed ingest."""
+    if args.offer_dir:
+        return sorted(p for p in args.offer_dir.glob("aws_ec2-*.json") if p.is_file())
+    if args.fixture:
+        p = args.fixture
+        return [p / "offer.json"] if p.is_dir() else [p]
+    if args.offer:
+        return [args.offer]
+    return []
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(prog="ingest.aws_ec2")
     ap.add_argument("--fixture", type=Path, help="path to a trimmed offer.json (tests)")
-    ap.add_argument("--offer", type=Path, help="path to live offer.json")
+    ap.add_argument("--offer", type=Path, help="single stripped offer.json")
+    ap.add_argument(
+        "--offer-dir",
+        type=Path,
+        help="directory to fetch stripped per-region offers into (if empty, fetches).",
+    )
     ap.add_argument("--out", type=Path, required=True)
     # --catalog-version is consumed by the packager; accept and ignore here.
     ap.add_argument("--catalog-version", default=None)
     args = ap.parse_args()
 
-    if args.fixture:
-        offer_path = args.fixture / "offer.json" if args.fixture.is_dir() else args.fixture
-    elif args.offer:
-        offer_path = args.offer
-    else:
-        print("either --fixture or --offer required", file=sys.stderr)
+    # If offer-dir is given but empty, drive the fetch ourselves.
+    if args.offer_dir is not None and not any(args.offer_dir.glob("aws_ec2-*.json")):
+        args.offer_dir.mkdir(parents=True, exist_ok=True)
+        fetch_offer_regions_stripped(
+            "aws_ec2", args.offer_dir, regions=aws_regions_from_yaml()
+        )
+
+    paths = _resolve_paths(args)
+    if not paths:
+        print("either --fixture, --offer, or --offer-dir required", file=sys.stderr)
         return 2
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("w") as fh:
-        for row in ingest(offer_path=offer_path):
+        for row in ingest(offer_paths=paths):
             fh.write(dumps(row) + "\n")
     return 0
 

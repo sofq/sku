@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
@@ -35,7 +36,7 @@ WITH items AS (
   FROM read_json_auto('{path}', maximum_object_size=33554432)
 )
 SELECT
-  meterId       AS sku_id,
+  CAST(meterId AS VARCHAR) AS sku_id,
   skuName       AS resource_name,
   armRegionName AS region,
   productName   AS product_name,
@@ -60,6 +61,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
     con = open_conn()
     path_literal = str(prices_path).replace("'", "''")
     sql = _SQL.replace("{path}", path_literal)
+    seen: set[str] = set()
     for (
         sku_id, sku_name, region, product, price, uom, currency, row_type, service_name,
     ) in con.execute(sql).fetchall():
@@ -72,8 +74,16 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         deployment = _classify_deployment(product)
         if deployment is None:
             continue
-        region_normalized = normalizer.normalize(_PROVIDER, region)
-        divisor, unit = parse_unit_of_measure(uom)
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
+        try:
+            divisor, unit = parse_unit_of_measure(uom)
+        except ValueError:
+            continue  # skip non-hourly meters (monthly, per-request, etc.)
+        if sku_id in seen:
+            continue
+        seen.add(sku_id)
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "azure-sql",

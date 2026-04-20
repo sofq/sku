@@ -1,0 +1,21 @@
+name: "setup-pipeline"
+description: "Install Python 3.11 and the sku-pipeline package, plus zstd/jq CLI tools used by data-daily."
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: pip
+        cache-dependency-path: pipeline/pyproject.toml
+    - name: Install pipeline package
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e 'pipeline[dev]'
+    - name: Install OS tooling (zstd, jq)
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends zstd jq

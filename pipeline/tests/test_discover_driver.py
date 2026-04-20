@@ -20,7 +20,7 @@ def _mock_all_providers(m: requests_mock.Mocker, *, aws_pub: str = "2026-04-18T0
 
     for service_code in set(_AWS_SERVICE_CODES.values()):
         m.get(
-            f"{_AWS_OFFER_BASE}/{service_code}/current/index.json",
+            f"{_AWS_OFFER_BASE}/{service_code}/index.json",
             json={"publicationDate": aws_pub},
         )
     m.get(_AZURE_RETAIL_BASE, json={"Items": []})
@@ -183,7 +183,7 @@ def test_one_shard_errors_others_still_succeed(tmp_path: Path) -> None:
         # Set up AWS discover to FAIL (the AWS group all errors as a unit),
         # but openrouter succeeds.
         for service_code in set(_AWS_SERVICE_CODES.values()):
-            m.get(f"{_AWS_OFFER_BASE}/{service_code}/current/index.json", status_code=500)
+            m.get(f"{_AWS_OFFER_BASE}/{service_code}/index.json", status_code=500)
         m.get("https://openrouter.ai/api/v1/models", json={"data": []})
         rc = run(
             state_path=state,
@@ -205,7 +205,7 @@ def test_all_shards_error_exits_2(tmp_path: Path) -> None:
 
     with requests_mock.Mocker() as m:
         for service_code in set(_AWS_SERVICE_CODES.values()):
-            m.get(f"{_AWS_OFFER_BASE}/{service_code}/current/index.json", status_code=500)
+            m.get(f"{_AWS_OFFER_BASE}/{service_code}/index.json", status_code=500)
         rc = run(
             state_path=state,
             out_path=out,

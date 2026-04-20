@@ -117,6 +117,15 @@ def fetch_prices(filter_str: str, target: Path, *, session=None, retries: int = 
             for attempt in range(retries):
                 try:
                     resp = sess.get(url, headers=headers, timeout=15.0)
+                    if resp.status_code == 429:
+                        retry_after = resp.headers.get("Retry-After")
+                        delay = float(retry_after) if retry_after else (0.5 * 2**attempt * 10)
+                        if attempt < retries - 1:
+                            time.sleep(delay)
+                            continue
+                        raise RuntimeError(
+                            f"GET {url} failed with status 429 after {retries} attempts"
+                        )
                     if resp.status_code in _RETRY_STATUSES:
                         if attempt < retries - 1:
                             time.sleep(0.5 * 2**attempt)

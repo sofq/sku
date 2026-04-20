@@ -68,7 +68,6 @@ def test_ingest_rejects_non_usd_endpoint():
 
 
 def test_synthetic_aggregated_row_present():
-    monkeypatch = None  # not needed for this test
     client = FixtureClient(FIX)
     models = client.get("/api/v1/models")
     models["data"] = [m for m in models["data"] if m["id"] == "openai/gpt-5"]
@@ -89,13 +88,25 @@ def test_synthetic_aggregated_row_present():
     assert agg[0]["health"] is None
 
 
-def _dup_model(top_pricing: dict[str, str], ep_pricings: list[dict[str, str]], uptimes: list[float]) -> dict:
+def _dup_model(
+    top_pricing: dict[str, str],
+    ep_pricings: list[dict[str, str]],
+    uptimes: list[float],
+) -> dict:
     model = {
         "id": "dup/model",
         "name": "Dup Model",
-        "architecture": {"modality": "text", "input_modalities": ["text"], "output_modalities": ["text"]},
+        "architecture": {
+            "modality": "text",
+            "input_modalities": ["text"],
+            "output_modalities": ["text"],
+        },
         "pricing": top_pricing,
-        "top_provider": {"context_length": 1000, "max_completion_tokens": 100, "is_moderated": False},
+        "top_provider": {
+            "context_length": 1000,
+            "max_completion_tokens": 100,
+            "is_moderated": False,
+        },
         "supported_parameters": [],
     }
     endpoints = []

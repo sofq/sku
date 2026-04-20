@@ -22,6 +22,8 @@ Agent quick-start for the `sku` repo.
 | Run discover (fixture / dry-run) | `make discover` |
 | Run discover against real upstreams | `DISCOVER_LIVE=1 GCP_BILLING_API_KEY=... make discover` |
 | Live-ingest a single shard | `make shard-live SHARD=aws_ec2 SRC=/path/to/offer.json` |
+| Dispatch daily data workflow (dry-run) | `gh workflow run data-daily.yml -F dry_run=true -F force_baseline=true` |
+| Dispatch daily data workflow (publish) | `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true` |
 
 ## Repo map
 
@@ -43,8 +45,17 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M7.2 — Guides, reference, agent skill: all docs/guides/*, docs/reference/*, and skill/using-sku/SKILL.md published. `make docs-verify` green.
-Next: M7.3 — Security, bench regression gate, v1.0.0 release.
+M3a.4.2 — `data-daily.yml` cron workflow publishes daily data releases:
+discover → ingest (matrix) → diff+package (matrix) → publish. Emits
+`data-YYYY.MM.DD` GitHub release with `<shard>.db.zst` baselines,
+`<shard>-<from>-to-<to>.sql.gz` deltas, and an authoritative `manifest.json`.
+Mirrors the manifest to the `data` branch for jsDelivr fallback; purges CDN
+on each publish. Dry-runs via `gh workflow run data-daily.yml -F dry_run=true`.
+Runbook: `docs/ops/data-daily-runbook.md`.
+
+Next: M3a.4.3 — `data-validate.yml` (OIDC cross-check vs upstream) +
+client-side `internal/updater` delta-chain walker + ETag + stable/daily
+channel split.
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
