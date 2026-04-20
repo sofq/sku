@@ -14,24 +14,24 @@ def _canonical(rows):
 
 
 def test_fixture_matches_golden():
-    rows = list(ingest(offer_path=FIXTURE))
+    rows = list(ingest(offer_paths=[FIXTURE]))
     expected = [json.loads(line) for line in GOLDEN.read_text().splitlines() if line.strip()]
     assert _canonical(rows) == _canonical(expected)
 
 
 def test_all_rows_are_storage_block_kind():
-    rows = list(ingest(offer_path=FIXTURE))
+    rows = list(ingest(offer_paths=[FIXTURE]))
     assert rows
     assert {r["kind"] for r in rows} == {"storage.block"}
 
 
 def test_every_volume_type_present():
-    rows = list(ingest(offer_path=FIXTURE))
+    rows = list(ingest(offer_paths=[FIXTURE]))
     assert {r["resource_name"] for r in rows} == {"gp3", "gp2", "io2", "st1", "sc1"}
 
 
 def test_each_row_has_only_storage_dim():
-    rows = list(ingest(offer_path=FIXTURE))
+    rows = list(ingest(offer_paths=[FIXTURE]))
     for r in rows:
         assert [p["dimension"] for p in r["prices"]] == ["storage"]
 
@@ -42,5 +42,5 @@ def test_unknown_region_skipped(tmp_path):
     bad["products"][first_sku]["attributes"]["regionCode"] = "ap-south-9"
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    rows = list(ingest(offer_path=p))
+    rows = list(ingest(offer_paths=[p]))
     assert all(r["region"] != "ap-south-9" for r in rows)

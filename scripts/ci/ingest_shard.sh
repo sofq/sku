@@ -20,6 +20,17 @@ mkdir -p "$RAW_DIR" "$OUT_DIR"
 public_shard=$(echo "$SHARD" | tr _ -)
 
 case "$SHARD" in
+  aws_ec2|aws_ebs)
+    # AmazonEC2 offer is 8+ GB combined. Drive per-region fetch + streaming
+    # strip inside the ingest module so we never materialize the full file.
+    stripped_dir="$RAW_DIR/${SHARD}-stripped"
+    mkdir -p "$stripped_dir"
+    python -m "ingest.${SHARD}" \
+      --offer-dir "$stripped_dir" \
+      --out "$OUT_DIR/$SHARD.rows.jsonl" \
+      --catalog-version "$CATALOG_VERSION"
+    ;;
+
   aws_*)
     offer="$RAW_DIR/${SHARD}-offer.json"
     python - <<PYEOF

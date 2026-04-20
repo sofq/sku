@@ -9,6 +9,7 @@ dependencies = [
   "zstandard>=0.22",
   "duckdb>=0.10,<2",
   "numpy>=1.26",
+  "ijson>=3.2",
 ]
 
 [project.optional-dependencies]

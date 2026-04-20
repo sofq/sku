@@ -17,9 +17,10 @@ coverage.*
 # Plan runner logs (scripts/run-plan.sh)
 /.planning/
 
-# Python build artifacts (M6 PyPI wrapper)
+# Python build artifacts (M6 PyPI wrapper, pipeline editable install)
 python/dist/
 python/build/
 python/*.egg-info/
 python/sku_cli/bin/
 python/sku_cli.egg-info/
+pipeline/*.egg-info/
