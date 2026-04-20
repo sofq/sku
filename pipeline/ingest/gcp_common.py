@@ -39,6 +39,7 @@ _USAGE_UNITS: dict[str, tuple[float, str]] = {
     "h": (1.0, "hrs"),
     "GiBy.h": (1.0, "gb-hr"),
     "GiBy.mo": (1.0, "gb-mo"),
+    "GiBy.d": (1.0 / 30.4375, "gb-mo"),  # gb-day → gb-month (avg Gregorian month)
     "By.mo": (1.0 / (1024**3), "gb-mo"),  # byte-month → gb-month
     "count": (1.0, "requests"),
     "s": (1.0, "s"),  # serverless CPU/request duration

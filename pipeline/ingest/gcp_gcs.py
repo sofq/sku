@@ -108,7 +108,10 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:
             continue
-        divisor, unit = parse_usage_unit(usage_unit)
+        try:
+            divisor, unit = parse_usage_unit(usage_unit)
+        except ValueError:
+            continue
         amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
         dim = _dimension(description)
         key = (storage_class, region)

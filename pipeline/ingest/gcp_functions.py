@@ -90,7 +90,10 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:
             continue
-        divisor, unit = parse_usage_unit(usage_unit)
+        try:
+            divisor, unit = parse_usage_unit(usage_unit)
+        except ValueError:
+            continue
         amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
         bucket = grouped.setdefault(region, {
             "region_normalized": region_normalized,
