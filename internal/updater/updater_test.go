@@ -415,6 +415,9 @@ func TestUpdate_DailyChainTooLong_FallsBackToBaseline(t *testing.T) {
 	if !result.Baseline {
 		t.Error("want Baseline=true after chain-too-long fallback")
 	}
+	if !result.FellBackToBaseline {
+		t.Error("want FellBackToBaseline=true after chain-too-long fallback")
+	}
 }
 
 func TestUpdate_ShardSchemaVersionTooNew(t *testing.T) {

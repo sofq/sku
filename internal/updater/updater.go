@@ -178,6 +178,9 @@ type Result struct {
 	Applied []Delta
 	// Baseline is true when the shard was installed from the full baseline.
 	Baseline bool
+	// FellBackToBaseline is true when the daily delta chain was attempted but
+	// fell back to baseline due to ErrChainTooLong or ErrChainStartsElsewhere.
+	FellBackToBaseline bool
 	// NewETag is the ETag returned by the manifest server for future caching.
 	NewETag string
 }
@@ -283,7 +286,9 @@ func Update(ctx context.Context, shard string, opts UpdateOptions) (Result, erro
 
 	// Fall back to baseline on recoverable chain errors.
 	if errors.Is(applyErr, ErrChainTooLong) || errors.Is(applyErr, ErrChainStartsElsewhere) {
-		return installBaseline(ctx, shard, localVersion, entry, opts, newETag)
+		r, err := installBaseline(ctx, shard, localVersion, entry, opts, newETag)
+		r.FellBackToBaseline = true
+		return r, err
 	}
 
 	return Result{}, applyErr

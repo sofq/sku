@@ -133,6 +133,11 @@ func newUpdateCmd() *cobra.Command {
 				}
 
 				if s.Verbose {
+					if result.FellBackToBaseline {
+						output.Log(cmd.ErrOrStderr(), "update.fallback-to-baseline", map[string]any{
+							"shard": shard, "from": result.From,
+						})
+					}
 					if result.Baseline {
 						output.Log(cmd.ErrOrStderr(), "update.baseline-installed", map[string]any{
 							"shard": shard, "version": result.To,
