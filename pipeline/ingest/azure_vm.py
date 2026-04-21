@@ -65,6 +65,12 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if any(hint in product for hint in _SPOT_HINTS):
             continue
+        # Azure occasionally publishes $0.00 preview SKUs (e.g. "… Preview"
+        # productName with retailPrice == 0.0). These aren't real on-demand
+        # prices — they mislead `sku azure vm price` and should never win
+        # a `sku compare` cost sort.
+        if not price or float(price) <= 0.0:
+            continue
         if sku_id in seen:
             continue
         seen.add(sku_id)

@@ -49,6 +49,18 @@ def test_non_usd_rows_rejected():
         assert r["prices"][0]["amount"] > 0  # smoke
 
 
+def test_zero_price_preview_rows_filtered():
+    """Preview SKUs publish with retailPrice=0; they must not appear in output."""
+    raw = json.loads(FIXTURE.read_text())
+    preview_ids = {
+        it["meterId"] for it in raw["Items"]
+        if it["type"] == "Consumption" and it["retailPrice"] == 0.0
+    }
+    assert preview_ids, "fixture should contain at least one zero-price preview row"
+    out_ids = {r["sku_id"] for r in ingest(prices_path=FIXTURE)}
+    assert preview_ids.isdisjoint(out_ids)
+
+
 def test_unknown_region_skipped(tmp_path):
     """An item in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())
