@@ -45,17 +45,24 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M3a.4.2 — `data-daily.yml` cron workflow publishes daily data releases:
-discover → ingest (matrix) → diff+package (matrix) → publish. Emits
-`data-YYYY.MM.DD` GitHub release with `<shard>.db.zst` baselines,
-`<shard>-<from>-to-<to>.sql.gz` deltas, and an authoritative `manifest.json`.
-Mirrors the manifest to the `data` branch for jsDelivr fallback; purges CDN
-on each publish. Dry-runs via `gh workflow run data-daily.yml -F dry_run=true`.
-Runbook: `docs/ops/data-daily-runbook.md`.
+M3a.4.3 — weekly validate workflow + client-side delta-chain updates:
+- `data-validate.yml` (Mondays 04:00 UTC + dispatch) stratified-samples
+  each on-demand shard, re-fetches SKUs via short-lived OIDC (AWS IAM
+  role; GCP Workload Identity Federation; Azure/OpenRouter anonymous),
+  fails on >1% drift, files `catalog-drift` issue automatically. EC2
+  runs an extra offline cross-check vs `vantage-sh/ec2instances.info`.
+  OIDC provisioning is maintainer-gated — first dispatch pending
+  `AWS_VALIDATE_ROLE_ARN`, `GCP_WIF_PROVIDER`, `GCP_VALIDATE_SA` repo
+  variables.
+- `sku update --channel daily` walks the manifest's delta chain:
+  ETag-cached manifest fetch; per-delta sha256 verification; single-
+  transaction apply with advisory flock; fallback to baseline on
+  chain-too-long (>MaxChain, default 20) or `from`-mismatch.
+- Runbook: `docs/ops/validation.md`.
 
-Next: M3a.4.3 — `data-validate.yml` (OIDC cross-check vs upstream) +
-client-side `internal/updater` delta-chain walker + ETag + stable/daily
-channel split.
+Next: M7.3 — security, bench regression gate, v1.0.0 release (cosign
+shard signing, `actions/attest-build-provenance`, property-based
+delta-chain tests).
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
@@ -151,6 +158,9 @@ echo '[
 ]' | ./bin/sku batch --pretty
 cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku schema --list-commands
+
+./bin/sku update openrouter --channel daily            # delta-chain walk
+./bin/sku update aws-ec2   --channel stable            # baseline-only
 ```
 
 ### Distribution smoke (M6)

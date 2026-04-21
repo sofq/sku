@@ -2,13 +2,14 @@
 //
 // M3a.3 scope: extract the one-shot baseline download flow from
 // cmd/sku/update.go so it can be unit-tested behind an http.RoundTripper
-// fake. Delta-chain + manifest walking + ETag arrive in m3a.4.
+// fake. M3a.4.3 adds delta-chain + manifest walking + ETag support.
 package updater
 
 import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -19,6 +20,10 @@ import (
 	"strings"
 
 	"github.com/klauspost/compress/zstd"
+
+	_ "modernc.org/sqlite" // register "sqlite" driver (idempotent; also in chain.go)
+
+	skuerrors "github.com/sofq/sku/internal/errors"
 )
 
 // ErrSHAMismatch is returned when the downloaded .zst's sha256 does not
@@ -135,6 +140,212 @@ func httpGet(ctx context.Context, client *http.Client, url string) ([]byte, erro
 		return nil, fmt.Errorf("updater: GET %s: HTTP %d", url, resp.StatusCode)
 	}
 	return io.ReadAll(resp.Body)
+}
+
+// MinSupportedShardSchema is the minimum shard schema version this binary
+// understands. Shards with a lower value are rejected as shard_too_old.
+const MinSupportedShardSchema = 1
+
+// MaxSupportedShardSchema is the maximum shard schema version this binary
+// understands. Shards with a higher value are rejected as shard_too_new.
+const MaxSupportedShardSchema = 1
+
+// UpdateOptions controls a single Update call.
+type UpdateOptions struct {
+	// Options embeds the base Install options (DestDir, HTTPClient, BaseURL).
+	Options
+	// Channel controls whether to walk deltas or always use the baseline.
+	Channel Channel
+	// Manifest is the source for the manifest.json.
+	Manifest ManifestSource
+	// ETag is the cached ETag from the previous manifest fetch.
+	// A 304 response causes Update to return a no-op Result.
+	ETag string
+	// MaxChain limits the number of deltas applied in one Update.
+	// Zero uses the default (20).
+	MaxChain int
+}
+
+// Result describes the outcome of a single Update call.
+type Result struct {
+	// From is the catalog_version the shard was at before Update ran.
+	// Empty when the shard file did not exist before (fresh install).
+	From string
+	// To is the catalog_version the shard is at after Update ran.
+	To string
+	// Applied contains the deltas that were successfully applied.
+	// Empty when the update used a baseline download or was a no-op.
+	Applied []Delta
+	// Baseline is true when the shard was installed from the full baseline.
+	Baseline bool
+	// FellBackToBaseline is true when the daily delta chain was attempted but
+	// fell back to baseline due to ErrChainTooLong or ErrChainStartsElsewhere.
+	FellBackToBaseline bool
+	// NewETag is the ETag returned by the manifest server for future caching.
+	NewETag string
+}
+
+// Update either applies a delta chain or re-downloads the full baseline for
+// shard, depending on opts.Channel, the local shard state, and the manifest.
+//
+// Flow:
+//  1. Read local catalog_version from <DestDir>/<shard>.db metadata table.
+//     If the file does not exist, treat it as "need baseline".
+//  2. Fetch the manifest. On 304, return a noop Result (nothing to do).
+//  3. Validate shard schema version — reject with CodeValidation on mismatch.
+//  4. If channel==Stable OR local is missing OR local < entry.BaselineVersion:
+//     call Install with the baseline URL.
+//  5. Else (Daily): filter deltas with d.From >= local; if empty → noop;
+//     else call Applier.Apply. On ErrChainTooLong / ErrChainStartsElsewhere /
+//     ErrLocked (actually just first two — locks propagate), fall back to Install.
+//  6. Return Result.
+func Update(ctx context.Context, shard string, opts UpdateOptions) (Result, error) {
+	dbPath := filepath.Join(opts.DestDir, shard+".db")
+
+	// Step 1: read local version.
+	localVersion, err := readLocalVersion(dbPath)
+	if err != nil {
+		return Result{}, fmt.Errorf("updater: read local version: %w", err)
+	}
+	hasShard := localVersion != ""
+
+	// Step 2: fetch manifest.
+	m, newETag, notModified, err := opts.Manifest.Fetch(ctx, opts.ETag)
+	if err != nil {
+		return Result{}, fmt.Errorf("updater: fetch manifest: %w", err)
+	}
+	if notModified {
+		return Result{From: localVersion, To: localVersion, NewETag: ""}, nil
+	}
+
+	// Step 3: validate shard entry.
+	entry, ok := m.Shards[shard]
+	if !ok {
+		return Result{}, fmt.Errorf("updater: shard %q not found in manifest", shard)
+	}
+	if entry.ShardSchemaVersion > MaxSupportedShardSchema {
+		return Result{}, skuerrors.Validation(
+			"shard_too_new", "shard", shard,
+			fmt.Sprintf("shard schema version %d exceeds max supported %d; upgrade sku binary",
+				entry.ShardSchemaVersion, MaxSupportedShardSchema),
+		)
+	}
+	if entry.ShardSchemaVersion < MinSupportedShardSchema {
+		return Result{}, skuerrors.Validation(
+			"shard_too_old", "shard", shard,
+			fmt.Sprintf("shard schema version %d below min supported %d",
+				entry.ShardSchemaVersion, MinSupportedShardSchema),
+		)
+	}
+
+	// Step 4: decide whether to use a baseline or delta chain.
+	useBaseline := opts.Channel == ChannelStable ||
+		!hasShard ||
+		localVersion < entry.BaselineVersion
+
+	if useBaseline {
+		return installBaseline(ctx, shard, localVersion, entry, opts, newETag)
+	}
+
+	// Step 5: daily channel — try delta chain.
+	var chain []Delta
+	for _, d := range entry.Deltas {
+		if d.From >= localVersion {
+			chain = append(chain, d)
+		}
+	}
+	if len(chain) == 0 {
+		// Already up to date.
+		return Result{From: localVersion, To: localVersion, NewETag: newETag}, nil
+	}
+
+	maxChain := opts.MaxChain
+	if maxChain == 0 {
+		maxChain = 20
+	}
+	applier := &Applier{
+		HTTPClient: opts.HTTPClient,
+		DBPath:     dbPath,
+		MaxChain:   maxChain,
+	}
+
+	var applied []Delta
+	applier.OnProgress = func(_ string, d Delta) {
+		applied = append(applied, d)
+	}
+
+	applyErr := applier.Apply(ctx, localVersion, entry.HeadVersion, chain)
+	if applyErr == nil {
+		return Result{
+			From:    localVersion,
+			To:      entry.HeadVersion,
+			Applied: applied,
+			NewETag: newETag,
+		}, nil
+	}
+
+	// Fall back to baseline on recoverable chain errors.
+	if errors.Is(applyErr, ErrChainTooLong) || errors.Is(applyErr, ErrChainStartsElsewhere) {
+		r, err := installBaseline(ctx, shard, localVersion, entry, opts, newETag)
+		r.FellBackToBaseline = true
+		return r, err
+	}
+
+	return Result{}, applyErr
+}
+
+// installBaseline downloads the full baseline for shard and returns a Result.
+func installBaseline(ctx context.Context, shard, localVersion string, entry ShardEntry, opts UpdateOptions, newETag string) (Result, error) {
+	// Build an Install Options from the entry.
+	baseURL := trimToDir(entry.BaselineURL)
+	installOpts := Options{
+		BaseURL:    baseURL,
+		HTTPClient: opts.HTTPClient,
+		DestDir:    opts.DestDir,
+	}
+	if err := Install(ctx, shard, installOpts); err != nil {
+		return Result{}, err
+	}
+	return Result{
+		From:     localVersion,
+		To:       entry.HeadVersion,
+		Baseline: true,
+		NewETag:  newETag,
+	}, nil
+}
+
+// trimToDir strips the filename component from a URL to produce a base URL
+// suitable for Install (which appends /<shard>.db.zst).
+// e.g. "https://example.com/data/aws-ec2.db.zst" → "https://example.com/data"
+func trimToDir(url string) string {
+	if i := strings.LastIndex(url, "/"); i > 0 {
+		return url[:i]
+	}
+	return url
+}
+
+// readLocalVersion reads the catalog_version from the metadata table of a
+// SQLite shard. Returns ("", nil) if the file does not exist.
+func readLocalVersion(dbPath string) (string, error) {
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		return "", nil
+	}
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = db.Close() }()
+
+	var v string
+	err = db.QueryRowContext(context.Background(),
+		"SELECT catalog_version FROM metadata LIMIT 1").Scan(&v)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
+	}
+	return v, nil
 }
 
 func decompressZstd(zstData []byte, destPath string) error {
