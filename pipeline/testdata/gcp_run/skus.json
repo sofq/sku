@@ -2,66 +2,59 @@
   "skus": [
     {
       "skuId": "RUN-USEAST1-CPU",
-      "description": "Cloud Run gen2 CPU Allocation Time us-east1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
+      "description": "Services CPU (Request-based billing) in us-east1",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["us-east1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 24000}}]}}]
     },
     {
       "skuId": "RUN-USEAST1-MEM",
-      "description": "Cloud Run gen2 Memory Allocation Time us-east1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
+      "description": "Services Memory (Request-based billing) in us-east1",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["us-east1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 2500}}]}}]
     },
     {
-      "skuId": "RUN-USEAST1-REQ",
-      "description": "Cloud Run gen2 Requests us-east1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
-      "serviceRegions": ["us-east1"],
+      "skuId": "RUN-GLOBAL-REQ",
+      "description": "Requests",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
+      "serviceRegions": ["global"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 400}}]}}]
     },
     {
       "skuId": "RUN-EUWEST1-CPU",
-      "description": "Cloud Run gen2 CPU Allocation Time europe-west1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
+      "description": "Services CPU (Request-based billing) in europe-west1",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["europe-west1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 26000}}]}}]
     },
     {
       "skuId": "RUN-EUWEST1-MEM",
-      "description": "Cloud Run gen2 Memory Allocation Time europe-west1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
+      "description": "Services Memory (Request-based billing) in europe-west1",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["europe-west1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 2700}}]}}]
     },
     {
-      "skuId": "RUN-EUWEST1-REQ",
-      "description": "Cloud Run gen2 Requests europe-west1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
-      "serviceRegions": ["europe-west1"],
-      "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 440}}]}}]
-    },
-    {
       "skuId": "RUN-USEAST1-CPU-GEN1",
-      "description": "Cloud Run gen1 CPU Allocation Time us-east1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRun", "usageType": "OnDemand"},
+      "description": "Cloud Run Functions (1st Gen) CPU Time us-east1",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["us-east1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 24000}}]}}]
     },
     {
       "skuId": "RUN-USEAST1-CPU-EUR",
-      "description": "Cloud Run gen2 CPU Allocation Time us-east1 (EUR)",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "OnDemand"},
+      "description": "Services CPU (Request-based billing) in us-east1 (EUR)",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["us-east1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "EUR", "units": "0", "nanos": 22000}}]}}]
     },
     {
       "skuId": "RUN-USEAST1-CPU-CUD",
-      "description": "Cloud Run gen2 CPU CUD us-east1",
-      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "CloudRunV2", "usageType": "Commitment"},
+      "description": "Commitment - dollar based v1: Cloud Run us-east1 for 1 year",
+      "category": {"serviceDisplayName": "Cloud Run", "resourceFamily": "ApplicationServices", "resourceGroup": "Compute", "usageType": "OnDemand"},
       "serviceRegions": ["us-east1"],
-      "pricingInfo": [{"pricingExpression": {"usageUnit": "s", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 18000}}]}}]
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 18000}}]}}]
     }
   ]
 }

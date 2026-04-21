@@ -34,9 +34,22 @@ _KIND = "network.cdn"
 # the test_location_map_exhaustiveness test enforces this. Additional
 # edge regions land when regions.yaml grows (spec §3 future regions).
 LOCATION_MAP: dict[str, str] = {
+    # Legacy fixture strings (kept for fixture compatibility).
     "United States, Mexico, & Canada":         "us-east-1",
     "Europe, Israel":                          "eu-west-1",
     "Asia Pacific (including Japan & Taiwan)": "ap-northeast-1",
+    # Current upstream fromLocation strings (as of 2025-Q4).
+    "United States":  "us-east-1",
+    "Canada":         "us-east-1",
+    "Europe":         "eu-west-1",
+    "Asia Pacific":   "ap-northeast-1",
+    "Japan":          "ap-northeast-1",
+    "Australia":      "ap-northeast-1",
+    "India":          "ap-northeast-1",
+    "South America":  "us-east-1",
+    "Middle East":    "eu-west-1",
+    "South Africa":   "eu-west-1",
+    "Any":            "us-east-1",
 }
 
 _SQL = """
@@ -47,7 +60,8 @@ products_flat AS (
   SELECT
     sku_id,
     json_extract_string(products, '$."' || sku_id || '".productFamily') AS family,
-    json_extract_string(products, '$."' || sku_id || '".attributes.location') AS location_raw,
+    coalesce(json_extract_string(products, '$."' || sku_id || '".attributes.fromLocation'),
+             json_extract_string(products, '$."' || sku_id || '".attributes.location')) AS location_raw,
     json_extract_string(products, '$."' || sku_id || '".attributes.transferType') AS transfer_type,
     terms
   FROM prod_keys
@@ -141,9 +155,14 @@ def main() -> int:
         print("either --fixture or --offer required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(offer_path=offer_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.aws_cloudfront: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

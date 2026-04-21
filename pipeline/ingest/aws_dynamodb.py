@@ -34,19 +34,33 @@ _CLASS_MAP: dict[str, str] = {
     "Standard - Infrequent Access": "standard-ia",
 }
 
-_GROUP_MAP: dict[str, str] = {
-    "DDB-StorageUsage": "storage",
-    "DDB-ReadUnits":    "read_request_units",
-    "DDB-WriteUnits":   "write_request_units",
+# Storage class derived from volumeType when storageClass attribute is absent (live shape).
+_VOLUME_TYPE_CLASS_MAP: dict[str, str] = {
+    "Amazon DynamoDB - Indexed DataStore":      "standard",
+    "Amazon DynamoDB - Indexed DataStore - IA": "standard-ia",
+}
+
+# On-demand read/write unit groups.
+# class_override=None means derive class from storageClass attribute (fixture shape);
+# if storageClass is also absent, fall back to "standard" (no-suffix group = standard class).
+# class_override set means the group itself encodes the class (live IA-suffix shape).
+_REQUEST_GROUP_MAP: dict[str, tuple[str, str | None]] = {
+    "DDB-ReadUnits":    ("read_request_units",  None),        # None → storageClass attr or "standard"
+    "DDB-WriteUnits":   ("write_request_units", None),
+    "DDB-ReadUnitsIA":  ("read_request_units",  "standard-ia"),
+    "DDB-WriteUnitsIA": ("write_request_units", "standard-ia"),
 }
 
 _SQL = """
 WITH products_flat AS (
   SELECT
     p.key AS sku_id,
+    json_extract_string(p.value, '$.productFamily') AS family,
     json_extract_string(p.value, '$.attributes.regionCode') AS region,
     json_extract_string(p.value, '$.attributes.storageClass') AS klass_raw,
-    json_extract_string(p.value, '$.attributes.group') AS group_raw
+    json_extract_string(p.value, '$.attributes.volumeType') AS volume_type,
+    json_extract_string(p.value, '$.attributes.group') AS group_raw,
+    json_extract_string(p.value, '$.attributes.operation') AS operation
   FROM offer, json_each(offer.products) AS p(key, value)
 ),
 terms_flat AS (
@@ -61,7 +75,7 @@ pd_keys AS (
     (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
   FROM terms_flat tf
 )
-SELECT pf.sku_id, pf.region, pf.klass_raw, pf.group_raw,
+SELECT pf.sku_id, pf.family, pf.region, pf.klass_raw, pf.volume_type, pf.group_raw, pf.operation,
   json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
   CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd,
   json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".beginRange') AS begin_range
@@ -81,17 +95,37 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
 
     grouped: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
 
-    for sku_id, region, klass_raw, group_raw, unit, usd, begin_range in (
+    for sku_id, family, region, klass_raw, volume_type, group_raw, operation, unit, usd, begin_range in (
         con.execute(_SQL).fetchall()
     ):
-        klass = _CLASS_MAP.get(klass_raw)
-        dim = _GROUP_MAP.get(group_raw)
-        if klass is None or dim is None:
-            continue
-        if dim == "storage" and begin_range not in (None, "0"):
-            continue
         if normalizer.try_normalize(_PROVIDER, region) is None:
             continue
+
+        if family == "Database Storage":
+            # Storage products: class from storageClass (fixture) or volumeType (live).
+            klass = _CLASS_MAP.get(klass_raw or "") or _VOLUME_TYPE_CLASS_MAP.get(volume_type or "")
+            if klass is None:
+                continue
+            if begin_range not in (None, "0"):
+                continue
+            dim = "storage"
+        elif family == "Amazon DynamoDB PayPerRequest Throughput" or (
+            group_raw in _REQUEST_GROUP_MAP and operation == "PayPerRequestThroughput"
+        ):
+            result = _REQUEST_GROUP_MAP.get(group_raw or "")
+            if result is None:
+                continue
+            dim, class_override = result
+            if class_override is not None:
+                # Group suffix encodes class (live IA-suffix shape).
+                klass = class_override
+            else:
+                # Fixture shape: use storageClass attribute.
+                # Live shape: storageClass absent; no-suffix group → standard.
+                klass = _CLASS_MAP.get(klass_raw or "") or "standard"
+        else:
+            continue
+
         key = (klass, region)
         grouped.setdefault(key, {})[dim] = {"sku": sku_id, "usd": usd, "unit": unit}
 
@@ -144,9 +178,14 @@ def main() -> int:
         print("either --fixture or --offer required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(offer_path=offer_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.aws_dynamodb: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

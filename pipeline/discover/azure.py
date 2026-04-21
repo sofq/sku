@@ -21,9 +21,9 @@ _UA = "sku-pipeline/0.0 (+https://github.com/sofq/sku)"
 _SHARD_FILTERS: dict[str, str] = {
     "azure_vm": "serviceName eq 'Virtual Machines'",
     "azure_sql": "serviceName eq 'SQL Database'",
-    "azure_blob": "serviceName eq 'Storage' and productName eq 'General Block Blob'",
+    "azure_blob": "serviceName eq 'Storage' and productName eq 'Blob Storage'",
     "azure_functions": "serviceName eq 'Functions'",
-    "azure_disks": "serviceName eq 'Storage' and productName eq 'Premium SSD Managed Disks'",
+    "azure_disks": "serviceName eq 'Storage' and (productName eq 'Standard HDD Managed Disks' or productName eq 'Standard SSD Managed Disks' or productName eq 'Premium SSD Managed Disks')",
 }
 
 
