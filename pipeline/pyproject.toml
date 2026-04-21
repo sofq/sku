@@ -40,3 +40,5 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # strings; ruff counts the string content as source lines. Splitting the SQL
 # to stay under 100 cols hurts readability more than it helps.
 "ingest/*.py" = ["E501"]
+# Validate tests embed inline fixture dicts; splitting them hurts readability.
+"tests/test_validate_*.py" = ["E501"]
