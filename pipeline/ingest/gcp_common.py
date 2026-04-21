@@ -23,6 +23,7 @@ __all__ = [
     "parse_unit_price",
     "parse_usage_unit",
     "fetch_skus",
+    "build_authenticated_session",
 ]
 
 _GCP_BILLING_BASE = "https://cloudbilling.googleapis.com/v1"
@@ -60,18 +61,41 @@ def parse_usage_unit(unit: str) -> tuple[float, str]:
         raise ValueError(f"unsupported usageUnit: {unit}") from exc
 
 
+def build_authenticated_session() -> requests.Session:
+    """Return a `requests.Session` pre-authenticated via Google ADC.
+
+    Uses `google.auth.default()` with the `cloud-billing.readonly` scope and
+    sets a static `Authorization: Bearer <token>` header. Under GitHub
+    Actions the token comes from Workload Identity Federation (see
+    `docs/ops/validation.md`); locally any ADC path works (user login,
+    service-account JSON, etc.).
+    """
+    import google.auth
+    import google.auth.transport.requests
+
+    creds, _ = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-billing.readonly"]
+    )
+    creds.refresh(google.auth.transport.requests.Request())
+    sess = requests.Session()
+    sess.headers["Authorization"] = f"Bearer {creds.token}"
+    return sess
+
+
 def fetch_skus(
     shard: str,
     target: Path,
     *,
-    api_key: str,
     session: requests.Session | None = None,
     retries: int = 3,
 ) -> str:
-    """Page through `/services/{service_id}/skus?pageSize=5000&key={api_key}` and
-    write `{"skus": [...]}` (sorted by skuId) to target. Returns SHA256 hex
-    digest over the sorted skus (same serialization used for the file body's
-    items).
+    """Page through `/services/{service_id}/skus?pageSize=5000` and write
+    `{"skus": [...]}` (sorted by skuId) to target. Returns SHA256 hex digest
+    over the sorted skus (same serialization used for the file body's items).
+
+    Auth: the caller-supplied `session` must carry an `Authorization: Bearer
+    <token>` header (see `build_authenticated_session`). Requests without
+    such a header will 401/403.
 
     Pagination via response `nextPageToken`; append `&pageToken=<token>` to
     each subsequent GET. Terminates when the response omits `nextPageToken`
@@ -102,7 +126,7 @@ def fetch_skus(
     page_token: str | None = None
 
     while True:
-        params: dict[str, str] = {"pageSize": "5000", "key": api_key}
+        params: dict[str, str] = {"pageSize": "5000"}
         if page_token:
             params["pageToken"] = page_token
 

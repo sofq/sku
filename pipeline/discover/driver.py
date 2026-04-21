@@ -96,7 +96,10 @@ def _write_output(out_path: Path, doc: Mapping[str, object]) -> None:
 
 
 def _run_live(
-    shards: list[str], *, gcp_api_key: str | None, session: requests.Session | None
+    shards: list[str],
+    *,
+    session: requests.Session | None,
+    gcp_session: requests.Session | None,
 ) -> tuple[dict[str, str], list[dict[str, str]]]:
     """Fetch indicators for every shard. Returns (indicators, errors).
 
@@ -126,13 +129,19 @@ def _run_live(
     _run_group("aws", lambda g: aws_disc.discover(g, session=session))
     _run_group("azure", lambda g: azure_disc.discover(g, session=session))
     if by_provider["gcp"]:
-        if not gcp_api_key:
-            for s in by_provider["gcp"]:
-                errors.append(
-                    {"shard": s, "reason": "gcp_missing_api_key", "detail": "api_key required"}
-                )
-        else:
-            _run_group("gcp", lambda g: gcp_disc.discover(g, api_key=gcp_api_key, session=session))
+        if gcp_session is None:
+            # Production path: build an ADC-authenticated session. Tests pass
+            # gcp_session explicitly so google.auth isn't invoked.
+            try:
+                from ingest.gcp_common import build_authenticated_session
+
+                gcp_session = build_authenticated_session()
+            except Exception as exc:
+                for s in by_provider["gcp"]:
+                    errors.append({"shard": s, "reason": "gcp_auth_error", "detail": str(exc)})
+                gcp_session = None
+        if gcp_session is not None:
+            _run_group("gcp", lambda g: gcp_disc.discover(g, session=gcp_session))
     _run_group("openrouter", lambda g: or_disc.discover(g, client=LiveClient()))
     return indicators, errors
 
@@ -144,8 +153,8 @@ def run(
     live: bool,
     baseline_rebuild: bool = False,
     shards: Iterable[str] | None = None,
-    gcp_api_key: str | None = None,
     session: requests.Session | None = None,
+    gcp_session: requests.Session | None = None,
 ) -> int:
     """Execute one discovery pass; write `out_path`; return exit code."""
     try:
@@ -181,7 +190,7 @@ def run(
         _write_output(out_path, doc)
         return 0
 
-    indicators, errors = _run_live(requested, gcp_api_key=gcp_api_key, session=session)
+    indicators, errors = _run_live(requested, session=session, gcp_session=gcp_session)
 
     errored_shards = {e["shard"] for e in errors}
     resolved = [s for s in requested if s in indicators]

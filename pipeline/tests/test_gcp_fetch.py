@@ -15,7 +15,6 @@ from ingest.gcp_common import fetch_skus
 
 _GCE_SERVICE_ID = "6F81-5844-456A"
 _GCE_BASE_URL = f"https://cloudbilling.googleapis.com/v1/services/{_GCE_SERVICE_ID}/skus"
-_API_KEY = "test-api-key-abc123"
 
 _SKU_A = {"skuId": "AAA-111", "description": "sku-a"}
 _SKU_B = {"skuId": "BBB-222", "description": "sku-b"}
@@ -42,7 +41,7 @@ def test_three_page_pagination(requests_mock, tmp_path):
         ],
     )
     target = tmp_path / "gcp_gce_raw.json"
-    fetch_skus("gcp_gce", target, api_key=_API_KEY)
+    fetch_skus("gcp_gce", target)
 
     assert target.exists()
     data = json.loads(target.read_text())
@@ -51,8 +50,8 @@ def test_three_page_pagination(requests_mock, tmp_path):
     assert requests_mock.call_count == 3
 
 
-def test_api_key_in_every_querystring(requests_mock, tmp_path):
-    """Every request (including paginated ones) carries key=<api_key>."""
+def test_no_api_key_in_querystring(requests_mock, tmp_path):
+    """fetch_skus must not send `?key=<...>` — auth goes via Bearer header."""
     requests_mock.get(
         _GCE_BASE_URL,
         [
@@ -61,20 +60,19 @@ def test_api_key_in_every_querystring(requests_mock, tmp_path):
         ],
     )
     target = tmp_path / "out.json"
-    fetch_skus("gcp_gce", target, api_key=_API_KEY)
+    fetch_skus("gcp_gce", target)
 
     assert requests_mock.call_count == 2
     for req in requests_mock.request_history:
         qs = parse_qs(urlparse(req.url).query)
-        assert "key" in qs, f"'key' missing from querystring: {req.url}"
-        assert qs["key"] == [_API_KEY], f"wrong api_key in {req.url}"
+        assert "key" not in qs, f"unexpected key= in querystring: {req.url}"
 
 
 def test_gcp_gce_service_id_in_url(requests_mock, tmp_path):
     """`fetch_skus('gcp_gce', ...)` hits a URL containing the correct service id."""
     requests_mock.get(_GCE_BASE_URL, json={"skus": [_SKU_A]})
     target = tmp_path / "out.json"
-    fetch_skus("gcp_gce", target, api_key=_API_KEY)
+    fetch_skus("gcp_gce", target)
 
     assert requests_mock.call_count == 1
     assert f"/services/{_GCE_SERVICE_ID}/skus" in requests_mock.request_history[0].url
@@ -86,7 +84,7 @@ def test_403_raises_gcp_forbidden_no_retry(requests_mock, tmp_path):
     target = tmp_path / "out.json"
 
     with pytest.raises(RuntimeError) as exc_info:
-        fetch_skus("gcp_gce", target, api_key=_API_KEY)
+        fetch_skus("gcp_gce", target)
 
     err_msg = str(exc_info.value)
     assert "gcp_forbidden" in err_msg
@@ -104,7 +102,7 @@ def test_500_then_200_succeeds_with_retry(requests_mock, tmp_path):
         ],
     )
     target = tmp_path / "out.json"
-    fetch_skus("gcp_gce", target, api_key=_API_KEY, retries=3)
+    fetch_skus("gcp_gce", target, retries=3)
 
     assert target.exists()
     data = json.loads(target.read_text())
@@ -119,8 +117,8 @@ def test_hash_stability(requests_mock, tmp_path):
     target1 = tmp_path / "out1.json"
     target2 = tmp_path / "out2.json"
 
-    digest1 = fetch_skus("gcp_gce", target1, api_key=_API_KEY)
-    digest2 = fetch_skus("gcp_gce", target2, api_key=_API_KEY)
+    digest1 = fetch_skus("gcp_gce", target1)
+    digest2 = fetch_skus("gcp_gce", target2)
 
     assert digest1 == digest2
     assert len(digest1) == 64  # SHA256 hex
@@ -130,7 +128,7 @@ def test_unknown_shard_raises_key_error(tmp_path):
     """Unknown shard propagates KeyError from the dict lookup (no request made)."""
     target = tmp_path / "out.json"
     with pytest.raises(KeyError):
-        fetch_skus("gcp_unknown", target, api_key=_API_KEY)
+        fetch_skus("gcp_unknown", target)
 
 
 def test_user_agent_on_every_request(requests_mock, tmp_path):
@@ -143,7 +141,7 @@ def test_user_agent_on_every_request(requests_mock, tmp_path):
         ],
     )
     target = tmp_path / "out.json"
-    fetch_skus("gcp_gce", target, api_key=_API_KEY)
+    fetch_skus("gcp_gce", target)
 
     assert requests_mock.call_count == 2
     for req in requests_mock.request_history:

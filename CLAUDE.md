@@ -20,7 +20,7 @@ Agent quick-start for the `sku` repo.
 | Run benchmarks | `make bench` |
 | Run Python pipeline tests | `make pipeline-test` |
 | Run discover (fixture / dry-run) | `make discover` |
-| Run discover against real upstreams | `DISCOVER_LIVE=1 GCP_BILLING_API_KEY=... make discover` |
+| Run discover against real upstreams | `DISCOVER_LIVE=1 make discover` (GCP uses ADC; run `gcloud auth application-default login` first) |
 | Live-ingest a single shard | `make shard-live SHARD=aws_ec2 SRC=/path/to/offer.json` |
 | Dispatch daily data workflow (dry-run) | `gh workflow run data-daily.yml -F dry_run=true -F force_baseline=true` |
 | Dispatch daily data workflow (publish) | `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true` |

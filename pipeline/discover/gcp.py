@@ -6,6 +6,9 @@ Cloud Billing Catalog API has no `services.get`, only `services.list` and
 publishes a new or changed SKU at the head of the page, triggering a
 rebuild. Weekly `--baseline-rebuild` covers any head-of-page
 reordering we miss.
+
+Auth: the caller's `session` must carry an `Authorization: Bearer <token>`
+header (see `ingest.gcp_common.build_authenticated_session`).
 """
 
 from __future__ import annotations
@@ -21,9 +24,7 @@ from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS
 _UA = "sku-pipeline/0.0 (+https://github.com/sofq/sku)"
 
 
-def discover(
-    shards: Iterable[str], *, api_key: str, session: requests.Session | None = None
-) -> dict[str, str]:
+def discover(shards: Iterable[str], *, session: requests.Session | None = None) -> dict[str, str]:
     """Return `{shard_id: indicator}` for the given GCP shard ids.
 
     Unknown shards raise KeyError. HTTP failures raise RuntimeError.
@@ -39,7 +40,7 @@ def discover(
             url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
             resp = session.get(
                 url,
-                params={"key": api_key, "pageSize": "1"},
+                params={"pageSize": "1"},
                 headers={"User-Agent": _UA},
                 timeout=30,
             )
