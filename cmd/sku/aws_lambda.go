@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -108,9 +107,7 @@ func runAWSLambda(cmd *cobra.Command, f *lambdaFlags, requireRegion bool) error 
 		Terms:        f.terms(),
 	})
 	if err != nil {
-		wrapped := fmt.Errorf("aws lambda %s: %w", cmd.Use, err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "aws lambda %s: %w", cmd.Use, err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound("aws", "lambda",

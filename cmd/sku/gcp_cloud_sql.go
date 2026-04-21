@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -123,9 +122,7 @@ func runGCPCloudSQL(cmd *cobra.Command, f *gcpCloudSQLFlags, requireRegion bool)
 		Terms:        f.terms(),
 	})
 	if err != nil {
-		wrapped := fmt.Errorf("gcp cloud-sql %s: %w", cmd.Use, err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "gcp cloud-sql %s: %w", cmd.Use, err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound("gcp", "cloud-sql",

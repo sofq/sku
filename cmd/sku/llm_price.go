@@ -162,9 +162,7 @@ func newLLMPriceCmd() *cobra.Command {
 					continue
 				}
 				if err != nil {
-					wrapped := fmt.Errorf("render: %w", err)
-					skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-					return wrapped
+					return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "render: %w", err)
 				}
 				if _, wErr := w.Write(b); wErr != nil {
 					return wErr

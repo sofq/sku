@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -110,9 +109,7 @@ func runAzureFunctions(cmd *cobra.Command, f *azureFunctionsFlags, requireRegion
 		Terms:        f.terms(),
 	})
 	if err != nil {
-		wrapped := fmt.Errorf("azure functions %s: %w", cmd.Use, err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "azure functions %s: %w", cmd.Use, err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound("azure", "functions",
