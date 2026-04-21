@@ -128,7 +128,7 @@ def test_gcp_discover_hashes_first_sku():
             f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
             json={"skus": [{"skuId": "one"}]},
         )
-        result = gcp_disc.discover(["gcp_gce"], api_key="k")
+        result = gcp_disc.discover(["gcp_gce"])
     assert result["gcp_gce"].startswith("sha256:")
     assert len(result["gcp_gce"]) == len("sha256:") + 64
 
@@ -140,8 +140,8 @@ def test_gcp_discover_hash_is_deterministic():
             f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
             json={"skus": [{"skuId": "one"}]},
         )
-        first = gcp_disc.discover(["gcp_gce"], api_key="k")
-        second = gcp_disc.discover(["gcp_gce"], api_key="k")
+        first = gcp_disc.discover(["gcp_gce"])
+        second = gcp_disc.discover(["gcp_gce"])
     assert first == second
 
 
@@ -152,27 +152,28 @@ def test_gcp_discover_hash_changes_when_first_sku_changes():
             f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
             json={"skus": [{"skuId": "one"}]},
         )
-        before = gcp_disc.discover(["gcp_gce"], api_key="k")
+        before = gcp_disc.discover(["gcp_gce"])
     with requests_mock.Mocker() as m:
         m.get(
             f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
             json={"skus": [{"skuId": "two"}]},
         )
-        after = gcp_disc.discover(["gcp_gce"], api_key="k")
+        after = gcp_disc.discover(["gcp_gce"])
     assert before["gcp_gce"] != after["gcp_gce"]
 
 
-def test_gcp_discover_sends_api_key_and_pagesize():
+def test_gcp_discover_sends_pagesize_and_no_api_key():
+    """pageSize=1 stays; `key=` must be absent (auth is Bearer-header only)."""
     service_id = _GCP_SERVICE_IDS["gcp_gce"]
     with requests_mock.Mocker() as m:
         m.get(
             f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
             json={"skus": []},
         )
-        gcp_disc.discover(["gcp_gce"], api_key="secret-key")
+        gcp_disc.discover(["gcp_gce"])
         qs = m.request_history[0].qs
-    assert qs.get("key") == ["secret-key"]
     assert qs.get("pagesize") == ["1"]
+    assert "key" not in qs
 
 
 def test_gcp_discover_http_failure_raises():
@@ -180,12 +181,12 @@ def test_gcp_discover_http_failure_raises():
     with requests_mock.Mocker() as m:
         m.get(f"{_GCP_BILLING_BASE}/services/{service_id}/skus", status_code=403)
         with pytest.raises(RuntimeError, match="gcp_discover_http_403"):
-            gcp_disc.discover(["gcp_gce"], api_key="k")
+            gcp_disc.discover(["gcp_gce"])
 
 
 def test_gcp_discover_unknown_shard_raises_keyerror():
     with pytest.raises(KeyError):
-        gcp_disc.discover(["gcp_nope"], api_key="k")
+        gcp_disc.discover(["gcp_nope"])
 
 
 # -----------------------------------------------------------------------------

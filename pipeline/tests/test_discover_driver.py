@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+import requests
 import requests_mock
 
 from discover.driver import ALL_SHARDS, run
@@ -64,7 +65,7 @@ def test_first_live_run_all_shards_appear(tmp_path: Path) -> None:
             state_path=state,
             out_path=out,
             live=True,
-            gcp_api_key="test-key",
+            gcp_session=requests.Session(),
         )
     assert rc == 0
     doc = json.loads(out.read_text())
@@ -81,11 +82,11 @@ def test_second_live_run_unchanged_upstream_empty_shards(tmp_path: Path) -> None
     out = tmp_path / "changed.json"
     with requests_mock.Mocker() as m:
         _mock_all_providers(m)
-        run(state_path=state, out_path=out, live=True, gcp_api_key="k")
+        run(state_path=state, out_path=out, live=True, gcp_session=requests.Session())
     # Second run with identical upstream → no changes.
     with requests_mock.Mocker() as m:
         _mock_all_providers(m)
-        rc = run(state_path=state, out_path=out, live=True, gcp_api_key="k")
+        rc = run(state_path=state, out_path=out, live=True, gcp_session=requests.Session())
     assert rc == 0
     doc = json.loads(out.read_text())
     assert doc["baseline_rebuild"] is False
@@ -98,11 +99,11 @@ def test_one_shard_changed(tmp_path: Path) -> None:
     out = tmp_path / "changed.json"
     with requests_mock.Mocker() as m:
         _mock_all_providers(m, aws_pub="2026-04-18T00:00:00Z")
-        run(state_path=state, out_path=out, live=True, gcp_api_key="k")
+        run(state_path=state, out_path=out, live=True, gcp_session=requests.Session())
     # Second run: AWS publicationDate changes.
     with requests_mock.Mocker() as m:
         _mock_all_providers(m, aws_pub="2026-04-19T00:00:00Z")
-        rc = run(state_path=state, out_path=out, live=True, gcp_api_key="k")
+        rc = run(state_path=state, out_path=out, live=True, gcp_session=requests.Session())
     assert rc == 0
     doc = json.loads(out.read_text())
     aws_shards = [s for s in ALL_SHARDS if s.startswith("aws_")]
@@ -115,11 +116,17 @@ def test_baseline_rebuild_flag_forces_all(tmp_path: Path) -> None:
     # Seed a live state so the "!prev_map" branch wouldn't already force all shards.
     with requests_mock.Mocker() as m:
         _mock_all_providers(m)
-        run(state_path=state, out_path=out, live=True, gcp_api_key="k")
+        run(state_path=state, out_path=out, live=True, gcp_session=requests.Session())
     # Now rerun with --baseline-rebuild even though upstream is identical.
     with requests_mock.Mocker() as m:
         _mock_all_providers(m)
-        rc = run(state_path=state, out_path=out, live=True, baseline_rebuild=True, gcp_api_key="k")
+        rc = run(
+            state_path=state,
+            out_path=out,
+            live=True,
+            baseline_rebuild=True,
+            gcp_session=requests.Session(),
+        )
     assert rc == 0
     doc = json.loads(out.read_text())
     assert doc["baseline_rebuild"] is True
@@ -136,7 +143,7 @@ def test_shards_allowlist_restricts_and_validates(tmp_path: Path) -> None:
             out_path=out,
             live=True,
             shards=["aws_ec2", "aws_rds"],
-            gcp_api_key="k",
+            gcp_session=requests.Session(),
         )
     assert rc == 0
     doc = json.loads(out.read_text())
@@ -154,7 +161,7 @@ def test_dashed_shard_alias_accepted(tmp_path: Path) -> None:
             out_path=out,
             live=True,
             shards=["aws-ec2"],
-            gcp_api_key="k",
+            gcp_session=requests.Session(),
         )
     assert rc == 0
 
@@ -167,7 +174,7 @@ def test_unknown_shard_exits_4(tmp_path: Path) -> None:
         out_path=out,
         live=True,
         shards=["made_up_shard"],
-        gcp_api_key="k",
+        gcp_session=requests.Session(),
     )
     assert rc == 4
     doc = json.loads(out.read_text())
@@ -190,7 +197,7 @@ def test_one_shard_errors_others_still_succeed(tmp_path: Path) -> None:
             out_path=out,
             live=True,
             shards=["aws_ec2", "openrouter"],
-            gcp_api_key="k",
+            gcp_session=requests.Session(),
         )
     assert rc == 0
     doc = json.loads(out.read_text())
@@ -211,7 +218,7 @@ def test_all_shards_error_exits_2(tmp_path: Path) -> None:
             out_path=out,
             live=True,
             shards=["aws_ec2", "aws_rds"],
-            gcp_api_key="k",
+            gcp_session=requests.Session(),
         )
     assert rc == 2
     doc = json.loads(out.read_text())
@@ -251,22 +258,32 @@ def test_dry_run_output_is_indented_and_sorted(tmp_path: Path) -> None:
     assert list(doc.keys()) == sorted(doc.keys())
 
 
-def test_gcp_live_without_api_key_records_error(tmp_path: Path) -> None:
+def test_gcp_auth_failure_records_auth_error(tmp_path: Path, monkeypatch) -> None:
+    """If ADC can't build a session (no credentials), GCP shards record
+    `gcp_auth_error` instead of silently succeeding. Simulate by stubbing the
+    helper to raise."""
     state = tmp_path / "state.json"
     out = tmp_path / "changed.json"
+
+    import ingest.gcp_common as gcp_common
+
+    def _boom() -> requests.Session:  # noqa: ARG001
+        raise RuntimeError("ADC not available")
+
+    monkeypatch.setattr(gcp_common, "build_authenticated_session", _boom)
+
     with requests_mock.Mocker() as m:
         _mock_all_providers(m)
+        # No gcp_session passed → driver tries ADC path, which raises.
         rc = run(
             state_path=state,
             out_path=out,
             live=True,
             shards=["gcp_gce"],
-            gcp_api_key=None,
         )
-    # Single-shard all-errored → exit 2.
     assert rc == 2
     doc = json.loads(out.read_text())
-    assert any(e["reason"] == "gcp_missing_api_key" for e in doc["errors"])
+    assert any(e["reason"] == "gcp_auth_error" for e in doc["errors"])
 
 
 if __name__ == "__main__":

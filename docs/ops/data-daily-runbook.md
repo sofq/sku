@@ -4,16 +4,18 @@ Maintainer guide for `.github/workflows/data-daily.yml` — the cron-driven
 daily release that publishes shard baselines, SQL deltas, and `manifest.json`
 under the `data-YYYY.MM.DD` tag.
 
-## Secrets required
+## Secrets + variables required
 
-| Secret | Purpose | How to create |
-|---|---|---|
-| `GCP_BILLING_API_KEY` | Anonymous GCP Cloud Billing Catalog API key, used by the `gcp_*` shards. | Google Cloud Console → APIs & Services → Credentials → Create API key → restrict to the **Cloud Billing API** → save to repo secrets as `GCP_BILLING_API_KEY`. |
-| `GITHUB_TOKEN` | Auto-injected by Actions; gives the workflow permission to create releases, push the `data` branch, and file incident issues. | No action — GitHub provides this. |
+| Name | Kind | Purpose | How to create |
+|---|---|---|---|
+| `GCP_WIF_PROVIDER` | Repo **variable** | Workload Identity Federation provider resource name (e.g. `projects/NNN/locations/global/workloadIdentityPools/github/providers/sofq-sku`). Consumed by `google-github-actions/auth@v2` to impersonate the SA via short-lived OIDC. | See `docs/ops/validation.md` — same variable as `data-validate.yml`; one-time provisioning. |
+| `GCP_VALIDATE_SA` | Repo **variable** | Service-account email impersonated by the workflow (`sku-validator@<project>.iam`; `roles/billing.viewer` on the billing account). | Same provisioning as above. |
+| `GITHUB_TOKEN` | Secret | Auto-injected by Actions; permits release creation, `data` branch push, incident issues. | No action — GitHub provides. |
 
-No OIDC / cloud-IAM roles are required by this workflow. AWS pricing, Azure
-retail-prices, and OpenRouter are anonymous; GCP uses the API key above. The
-`data-validate.yml` workflow (m3a.4.3) introduces AWS SigV4 + GCP WIF.
+AWS pricing, Azure retail-prices, and OpenRouter are anonymous. GCP Cloud
+Billing used to require a long-lived `GCP_BILLING_API_KEY` secret; it has
+been retired in favor of the short-lived OIDC → WIF → SA token path shared
+with `data-validate.yml`.
 
 ## First green run (bootstrap)
 

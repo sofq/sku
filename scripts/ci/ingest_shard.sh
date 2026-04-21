@@ -4,7 +4,10 @@
 # Inputs (env):
 #   SHARD              — underscored shard id (e.g. `aws_ec2`, `openrouter`)
 #   CATALOG_VERSION    — catalog tag for today's release (e.g. `2026.04.18`)
-#   GCP_BILLING_API_KEY — required for `gcp_*` shards
+#
+# GCP auth: `gcp_*` shards build an ADC-authenticated session at run time
+# (see `ingest.gcp_common.build_authenticated_session`). CI ADC is populated
+# by `google-github-actions/auth@v2`; no static API key required.
 #
 # Output: `dist/pipeline/<dashed-shard>.db` + `.rows.jsonl` (dashed names
 # match what the Go binary expects in SKU_DATA_DIR).
@@ -59,13 +62,12 @@ PYEOF
     ;;
 
   gcp_*)
-    : "${GCP_BILLING_API_KEY:?GCP_BILLING_API_KEY required for GCP shards}"
     skus="$RAW_DIR/${SHARD}-skus.json"
     python - <<PYEOF
-import os
 from pathlib import Path
-from ingest.gcp_common import fetch_skus
-fetch_skus("$SHARD", Path("$skus"), api_key=os.environ["GCP_BILLING_API_KEY"])
+from ingest.gcp_common import build_authenticated_session, fetch_skus
+with build_authenticated_session() as sess:
+    fetch_skus("$SHARD", Path("$skus"), session=sess)
 PYEOF
     python -m "ingest.${SHARD}" \
       --skus "$skus" \
