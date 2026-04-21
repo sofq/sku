@@ -209,6 +209,15 @@ def _uptime(row: dict[str, Any]) -> float:
     return float(v) if v is not None else -1.0
 
 
+def _price_sum(row: dict[str, Any]) -> float:
+    """Sum of published price amounts for a row — used to pick the cheapest
+    member of a divergent-price duplicate group. All LLM amounts are per-token
+    or per-request USD, so a plain sum is a conservative "lowest headline cost"
+    proxy for ranking; it never crosses units outside a single sku_id group.
+    """
+    return sum(float(p["amount"]) for p in row.get("prices") or [])
+
+
 def _dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Collapse rows sharing a sku_id.
 
@@ -216,10 +225,11 @@ def _dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     (model, serving_provider, quantization) tuple — Bedrock/Vertex
     regional splits, for one. When prices match (the common case), we
     keep the endpoint with the highest ``uptime_30d`` and log. When
-    prices diverge and upstream exposes no disambiguator we can put on
-    the sku_id, we drop all rows in that group rather than silently
-    publish a coin-flip price; the model's synthetic aggregated row
-    still ships from the top-level pricing.
+    prices diverge, we keep the cheapest member (lowest sum of price
+    amounts) and log a warning; dropping the whole group (prior
+    behaviour) made `sku llm price` return nothing for otherwise-valid
+    serving_providers. The model's synthetic aggregated row still ships
+    from the top-level pricing regardless.
     """
     grouped: dict[str, list[dict[str, Any]]] = {}
     order: list[str] = []
@@ -243,9 +253,16 @@ def _dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             )
             out.append(max(group, key=_uptime))
             continue
+        # Divergent prices: keep the cheapest (lowest total published
+        # amount) and warn. Tie-break on higher uptime so the chosen
+        # row is deterministic when two endpoints publish the same
+        # total cost.
+        chosen = min(group, key=lambda r: (_price_sum(r), -_uptime(r)))
         sys.stderr.write(
-            f"ingest.openrouter: dropped duplicate sku_id with divergent prices: {sid}\n"
+            f"ingest.openrouter: kept min-price duplicate for sku_id "
+            f"{sid} (dropped {len(group) - 1} divergent-price sibling(s))\n"
         )
+        out.append(chosen)
     return out
 
 
