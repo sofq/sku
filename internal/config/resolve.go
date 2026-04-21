@@ -25,6 +25,10 @@ type Settings struct {
 	NoColor           bool
 	Verbose           bool
 	DryRun            bool
+	// Channel is the update channel ("stable" | "daily") resolved from
+	// profile.channel. The --channel flag on `sku update` overrides this
+	// via updater.ResolveChannel.
+	Channel string
 }
 
 // FlagBag carries raw pflag values along with "was this flag explicitly
@@ -92,6 +96,9 @@ func Resolve(fb FlagBag, file File, env map[string]string) (Settings, error) {
 	s.Format = pickString(fb.FormatSet, fb.Format, env["SKU_FORMAT"], "", "json")
 	s.JQ = pickString(fb.JQSet, fb.JQ, env["SKU_JQ"], "", "")
 	s.Fields = pickString(fb.FieldsSet, fb.Fields, env["SKU_FIELDS"], "", "")
+	// Channel is not exposed as a global flag; the profile value is passed
+	// through so update.go can feed it to updater.ResolveChannel.
+	s.Channel = profile.Channel
 
 	// Bool fields from flag > env > profile > false.
 	s.Pretty = pickBool(fb.PrettySet, fb.Pretty, env["SKU_PRETTY"], nil, false)
