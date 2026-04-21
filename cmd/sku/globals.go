@@ -6,7 +6,17 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/sofq/sku/internal/config"
+	skuerrors "github.com/sofq/sku/internal/errors"
 )
+
+// validPresets enumerates the accepted --preset values (spec §3). Kept in
+// sync with the pf.String help text on root.
+var validPresets = map[string]struct{}{
+	"agent":   {},
+	"full":    {},
+	"price":   {},
+	"compare": {},
+}
 
 type settingsKeyT struct{}
 
@@ -53,7 +63,23 @@ func resolveSettings(cmd *cobra.Command) (config.Settings, error) {
 	if err != nil {
 		return config.Settings{}, err
 	}
-	return config.Resolve(fb, file, envMap())
+	s, err := config.Resolve(fb, file, envMap())
+	if err != nil {
+		return s, err
+	}
+	if _, ok := validPresets[s.Preset]; !ok {
+		return s, &skuerrors.E{
+			Code:       skuerrors.CodeValidation,
+			Message:    "invalid --preset: " + s.Preset,
+			Suggestion: "use one of: agent, full, price, compare",
+			Details: map[string]any{
+				"reason": "bad_preset",
+				"flag":   "preset",
+				"value":  s.Preset,
+			},
+		}
+	}
+	return s, nil
 }
 
 func readFlagBag(cmd *cobra.Command) config.FlagBag {
