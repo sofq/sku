@@ -1,8 +1,8 @@
 name: data-daily
 
 on:
-  # schedule:  # Re-enable in Task 12 after a green dry-run + publish-run.
-  #   - cron: "0 3 * * *"
+  schedule:
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
