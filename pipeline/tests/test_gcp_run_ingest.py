@@ -60,9 +60,10 @@ def test_unknown_region_skipped(tmp_path):
         cat = sku["category"]
         rate = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]
         if (
-            cat["resourceGroup"] == "CloudRunV2"
+            cat["resourceGroup"] == "Compute"
             and cat["usageType"] == "OnDemand"
             and rate["unitPrice"]["currencyCode"] == "USD"
+            and sku.get("serviceRegions", ["global"]) != ["global"]
         ):
             sku["serviceRegions"] = ["mars-1"]
     p = tmp_path / "bad.json"

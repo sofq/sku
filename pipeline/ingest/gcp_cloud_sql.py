@@ -35,8 +35,9 @@ _DEPLOYMENT_HINTS: tuple[tuple[str, str], ...] = (
     ("Zonal",    "zonal"),
 )
 
-# Extract the `db-custom-<vcpu>-<mb>` slug from the description.
-_TIER_RE = re.compile(r"\b(db-custom-\d+-\d+)\b")
+# Extract the vcpu and RAM from live-API descriptions like "2 vCPU + 7.5GB RAM".
+# Reconstructs the canonical tier slug: db-custom-{vcpu}-{ram_mb}
+_VCPU_RAM_RE = re.compile(r'(\d+)\s*vCPU\s*\+\s*(\d+(?:\.\d+)?)GB\s*RAM')
 
 _SQL = """
 WITH entries AS (
@@ -76,7 +77,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     ) in con.execute(sql).fetchall():
         if svc_name != "Cloud SQL":
             continue
-        if resource_family != "Compute":
+        if resource_family != "ApplicationServices":
             continue
         if usage_type != "OnDemand":
             continue
@@ -86,10 +87,12 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         deployment = _classify(description, _DEPLOYMENT_HINTS)
         if engine is None or deployment is None:
             continue
-        tier_match = _TIER_RE.search(description)
+        tier_match = _VCPU_RAM_RE.search(description)
         if tier_match is None:
             continue
-        tier = tier_match.group(1)
+        vcpu = int(tier_match.group(1))
+        ram_mb = int(float(tier_match.group(2)) * 1024)
+        tier = f"db-custom-{vcpu}-{ram_mb}"
         if not service_regions:
             continue
         region = service_regions[0]
@@ -147,9 +150,14 @@ def main() -> int:
         print("either --fixture or --skus required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(skus_path=skus_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.gcp_cloud_sql: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

@@ -48,7 +48,7 @@ def test_regions_cover_all_edge_locations_in_fixture():
 def test_unknown_location_rejected(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     first_sku = next(iter(bad["products"]))
-    bad["products"][first_sku]["attributes"]["location"] = "Antarctica"
+    bad["products"][first_sku]["attributes"]["fromLocation"] = "Antarctica"
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
     with pytest.raises(KeyError, match="Antarctica"):

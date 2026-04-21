@@ -37,11 +37,24 @@ _PROVIDER = "gcp"
 _SERVICE = "gcs"
 _KIND = "storage.object"
 
+# Storage SKU resourceGroup -> canonical storage-class slug.
+# Live API uses "RegionalStorage" for standard regional buckets
+# (historically documented as "StandardStorage" but renamed in the catalog).
 _CLASS_MAP: dict[str, str] = {
-    "StandardStorage": "standard",
+    "RegionalStorage": "standard",   # current live API name for standard
+    "StandardStorage": "standard",   # kept for backward-compat with old fixtures
     "NearlineStorage": "nearline",
     "ColdlineStorage": "coldline",
     "ArchiveStorage": "archive",
+}
+
+# Ops-group resourceGroup -> storage class slug.  Ops SKUs use serviceRegions=['global']
+# and are fanned out to every region that has a storage SKU of that class.
+_OPS_GROUP_MAP: dict[str, str] = {
+    "RegionalOps": "standard",   # "Regional Standard Class A/B Operations"
+    "NearlineOps": "nearline",   # "Regional Nearline Class A/B Operations"
+    "ColdlineOps": "coldline",   # "Regional Coldline Class A/B Operations"
+    "ArchiveOps":  "archive",    # "Regional Archive Class A/B Operations"
 }
 
 _CLASS_ATTRS: dict[str, dict[str, Any]] = {
@@ -87,8 +100,14 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     path_literal = str(skus_path).replace("'", "''")
     sql = _SQL.replace("{path}", path_literal)
 
-    # (class, region) -> {sku_id for storage meter, description, resource_group, region_normalized, prices:{dim: {...}}}
+    # (class, region) -> {sku_id for storage meter, description, resource_group,
+    #                      region_normalized, prices:{dim: {...}}}
     grouped: dict[tuple[str, str], dict[str, Any]] = {}
+    # Global ops prices per class: class_slug -> {dim: price_entry}.
+    # Ops SKUs have serviceRegions=['global']; they are fanned out into every
+    # region bucket that has a storage SKU of the same class.
+    global_ops: dict[str, dict[str, Any]] = {}
+
     for (
         sku_id, description, svc_name, _resource_family, resource_group, usage_type,
         service_regions, usage_unit, currency, price_units, price_nanos,
@@ -99,12 +118,40 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if currency != "USD":
             continue
+        if not service_regions:
+            continue
+
+        region = service_regions[0]
+
+        # --- Ops SKUs (global, one per class) ---
+        ops_class = _OPS_GROUP_MAP.get(resource_group)
+        if ops_class is not None and region == "global":
+            dim = _dimension(description)
+            if dim in ("read-ops", "write-ops"):
+                # Only keep "Regional <class> Class A/B" rows; skip Multi/Dual.
+                if "Regional" not in description:
+                    continue
+                try:
+                    divisor, unit = parse_usage_unit(usage_unit)
+                except ValueError:
+                    continue
+                amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
+                global_ops.setdefault(ops_class, {})[dim] = {
+                    "dimension": dim, "tier": "", "amount": amount, "unit": unit,
+                }
+            continue
+
+        # --- Storage SKUs (per region) ---
         storage_class = _CLASS_MAP.get(resource_group)
         if storage_class is None:
             continue  # drops MultiRegional, DualRegional, and any future class
-        if not service_regions:
-            continue
-        region = service_regions[0]
+        dim = _dimension(description)
+        if dim != "storage":
+            # In the old fixture format ops were co-located with storage SKUs;
+            # in the live API storage SKUs only carry the storage dimension.
+            # Still handle legacy co-located ops SKUs for fixture compatibility.
+            if dim not in ("read-ops", "write-ops"):
+                continue
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:
             continue
@@ -113,7 +160,6 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         except ValueError:
             continue
         amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
-        dim = _dimension(description)
         key = (storage_class, region)
         bucket = grouped.setdefault(key, {
             "region_normalized": region_normalized,
@@ -125,6 +171,11 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             bucket["description"] = description
             bucket["resource_group"] = resource_group
         bucket["prices"][dim] = {"dimension": dim, "tier": "", "amount": amount, "unit": unit}
+
+    # Fan out global ops prices into each per-region bucket.
+    for (storage_class, _region), bucket in grouped.items():
+        for dim, price_entry in global_ops.get(storage_class, {}).items():
+            bucket["prices"].setdefault(dim, price_entry)
 
     for (storage_class, region), bucket in grouped.items():
         if set(bucket["prices"].keys()) != {"storage", "read-ops", "write-ops"}:
@@ -179,9 +230,14 @@ def main() -> int:
         print("either --fixture or --skus required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(skus_path=skus_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.gcp_gcs: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

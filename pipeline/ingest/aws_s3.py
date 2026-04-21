@@ -2,13 +2,17 @@
 
 Spec §5 storage.object kind. S3 rows carry three price dimensions in m3a.2:
 - storage (GB-Mo) from productFamily=Storage
-- requests-put (requests) from productFamily=API Request, group=S3-API-Tier1
-- requests-get (requests) from productFamily=API Request, group=S3-API-Tier2
+- requests-put (requests) from productFamily=API Request, class-specific Tier1 group
+- requests-get (requests) from productFamily=API Request, class-specific Tier2 group
 
 We group by (storage_class, region) so each row has one entry per dimension.
-A row missing any of the three dimensions is dropped with a stderr warning;
-the fixture and the upstream AWS offer both publish all three for every
-storage class + region in m3a.2's scope.
+A row missing any of the three dimensions is dropped with a stderr warning.
+
+API Request products in the upstream offer do not carry a volumeType attribute;
+instead the storage class is encoded in the group name (S3-API-Tier1 for
+standard/intelligent-tiering, S3-API-SIA-Tier1 for standard-ia, etc.).
+The fixture uses volumeType on API Request rows for backward compatibility —
+both shapes are handled by checking volumeType first, falling back to group.
 """
 
 from __future__ import annotations
@@ -37,7 +41,9 @@ _CLASS_MAP: dict[str, str] = {
     "Standard - Infrequent Access": "standard-ia",
     "One Zone - Infrequent Access": "one-zone-ia",
     "Intelligent-Tiering Frequent Access": "intelligent-tiering",
+    # Old offer shape used "Amazon Glacier Instant Retrieval"; current uses "Glacier Instant Retrieval".
     "Amazon Glacier Instant Retrieval": "glacier-instant",
+    "Glacier Instant Retrieval": "glacier-instant",
 }
 
 # Durability + availability tier per class. Values from AWS public docs,
@@ -50,9 +56,28 @@ _CLASS_ATTRS: dict[str, dict[str, Any]] = {
     "glacier-instant":     {"durability_nines": 11, "availability_tier": "archive"},
 }
 
-# Tier1 = PUT/COPY/POST/LIST, Tier2 = GET/SELECT. Map the `group` attribute
-# to our price dimension slug.
-_REQUEST_GROUP_MAP: dict[str, str] = {
+# Map API Request group name -> (class_slug, dim).
+# Standard and Intelligent-Tiering share Tier1/Tier2; each other class has its own prefix.
+# These are used when the API Request product has no volumeType (live upstream shape).
+_REQUEST_GROUP_CLASS_DIM: dict[str, tuple[str, str]] = {
+    "S3-API-Tier1":     ("standard",            "requests-put"),
+    "S3-API-Tier2":     ("standard",            "requests-get"),
+    "S3-API-SIA-Tier1": ("standard-ia",         "requests-put"),
+    "S3-API-SIA-Tier2": ("standard-ia",         "requests-get"),
+    "S3-API-ZIA-Tier1": ("one-zone-ia",         "requests-put"),
+    "S3-API-ZIA-Tier2": ("one-zone-ia",         "requests-get"),
+    "S3-API-GIR-Tier1": ("glacier-instant",     "requests-put"),
+    "S3-API-GIR-Tier2": ("glacier-instant",     "requests-get"),
+    "S3-API-INT-Tier1": ("intelligent-tiering", "requests-put"),
+    "S3-API-INT-Tier2": ("intelligent-tiering", "requests-get"),
+}
+
+# Tier1/Tier2 groups are also used for intelligent-tiering in the live offer.
+# We record them separately so we can emit them for both standard AND intelligent-tiering.
+_TIER1_TIER2_ALSO_INT = {"S3-API-Tier1", "S3-API-Tier2"}
+
+# For the fixture shape: map the Tier1/Tier2 group to dimension when class comes from volumeType.
+_REQUEST_GROUP_DIM: dict[str, str] = {
     "S3-API-Tier1": "requests-put",
     "S3-API-Tier2": "requests-get",
 }
@@ -107,26 +132,43 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     for sku_id, family, region, volume_type, group_raw, unit, usd, begin_range in (
         con.execute(_SQL).fetchall()
     ):
-        klass = _CLASS_MAP.get(volume_type)
-        if klass is None:
-            continue
+        if normalizer.try_normalize(_PROVIDER, region) is None:
+            continue  # skip regions outside our coverage map
+
         if family == "Storage":
+            klass = _CLASS_MAP.get(volume_type)
+            if klass is None:
+                continue
             # Keep first tier only (beginRange = '0' or absent).
             if begin_range not in (None, "0"):
                 continue
-            dim = "storage"
+            key = (klass, region)
+            grouped.setdefault(key, {})["storage"] = {
+                "sku": sku_id, "usd": usd, "unit": unit, "volume_type": volume_type,
+            }
         elif family == "API Request":
-            dim = _REQUEST_GROUP_MAP.get(group_raw)
-            if dim is None:
-                continue
-        else:
-            continue
-        if normalizer.try_normalize(_PROVIDER, region) is None:
-            continue  # skip regions outside our coverage map
-        key = (klass, region)
-        grouped.setdefault(key, {})[dim] = {
-            "sku": sku_id, "usd": usd, "unit": unit, "volume_type": volume_type,
-        }
+            if volume_type is not None:
+                # Fixture shape: volumeType on API Request encodes the class directly.
+                klass = _CLASS_MAP.get(volume_type)
+                dim = _REQUEST_GROUP_DIM.get(group_raw)
+                if klass is None or dim is None:
+                    continue
+                key = (klass, region)
+                grouped.setdefault(key, {})[dim] = {
+                    "sku": sku_id, "usd": usd, "unit": unit, "volume_type": volume_type,
+                }
+            else:
+                # Live shape: no volumeType; class and dim encoded in group name.
+                result = _REQUEST_GROUP_CLASS_DIM.get(group_raw)
+                if result is None:
+                    continue
+                klass, dim = result
+                entry = {"sku": sku_id, "usd": usd, "unit": unit, "volume_type": None}
+                grouped.setdefault((klass, region), {})[dim] = entry
+                # S3-API-Tier1/Tier2 are shared by standard AND intelligent-tiering.
+                if group_raw in _TIER1_TIER2_ALSO_INT:
+                    int_dim = "requests-put" if group_raw == "S3-API-Tier1" else "requests-get"
+                    grouped.setdefault(("intelligent-tiering", region), {})[int_dim] = entry
 
     for (klass, region), dims in sorted(grouped.items()):
         required = {"storage", "requests-put", "requests-get"}
@@ -184,9 +226,14 @@ def main() -> int:
         print("either --fixture or --offer required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(offer_path=offer_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.aws_s3: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

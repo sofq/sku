@@ -1,14 +1,96 @@
 {
   "Items": [
-    {"meterId": "disk-std-hdd-eastus",  "armSkuName": "Standard_LRS",    "armRegionName": "eastus",     "productName": "Managed Disks", "skuName": "Standard HDD S10 LRS",      "meterName": "S10 LRS Disk",        "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 1.54, "currencyCode": "USD", "type": "Consumption"},
-    {"meterId": "disk-std-ssd-eastus",  "armSkuName": "StandardSSD_LRS", "armRegionName": "eastus",     "productName": "Managed Disks", "skuName": "Standard SSD E10 LRS",      "meterName": "E10 LRS Disk",        "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 4.80, "currencyCode": "USD", "type": "Consumption"},
-    {"meterId": "disk-prem-ssd-eastus", "armSkuName": "Premium_LRS",     "armRegionName": "eastus",     "productName": "Managed Disks", "skuName": "Premium SSD P10 LRS",       "meterName": "P10 LRS Disk",        "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 19.71, "currencyCode": "USD", "type": "Consumption"},
-
-    {"meterId": "disk-std-hdd-weu",     "armSkuName": "Standard_LRS",    "armRegionName": "westeurope", "productName": "Managed Disks", "skuName": "Standard HDD S10 LRS",      "meterName": "S10 LRS Disk",        "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 1.80, "currencyCode": "USD", "type": "Consumption"},
-    {"meterId": "disk-std-ssd-weu",     "armSkuName": "StandardSSD_LRS", "armRegionName": "westeurope", "productName": "Managed Disks", "skuName": "Standard SSD E10 LRS",      "meterName": "E10 LRS Disk",        "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 5.28, "currencyCode": "USD", "type": "Consumption"},
-    {"meterId": "disk-prem-ssd-weu",    "armSkuName": "Premium_LRS",     "armRegionName": "westeurope", "productName": "Managed Disks", "skuName": "Premium SSD P10 LRS",       "meterName": "P10 LRS Disk",        "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 21.68, "currencyCode": "USD", "type": "Consumption"},
-
-    {"meterId": "disk-ultra-eastus",    "armSkuName": "UltraSSD_LRS",    "armRegionName": "eastus",     "productName": "Managed Disks", "skuName": "Ultra LRS Provisioned Capacity","meterName":"Ultra LRS Disk",   "serviceName": "Storage", "unitOfMeasure": "1/Month", "retailPrice": 0.12, "currencyCode": "USD", "type": "Consumption"}
+    {
+      "meterId": "disk-std-hdd-eastus",
+      "armSkuName": "Standard_LRS",
+      "armRegionName": "eastus",
+      "productName": "Standard HDD Managed Disks",
+      "skuName": "Standard HDD S10 LRS",
+      "meterName": "S10 LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 1.54,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    },
+    {
+      "meterId": "disk-std-ssd-eastus",
+      "armSkuName": "StandardSSD_LRS",
+      "armRegionName": "eastus",
+      "productName": "Standard SSD Managed Disks",
+      "skuName": "Standard SSD E10 LRS",
+      "meterName": "E10 LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 4.8,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    },
+    {
+      "meterId": "disk-prem-ssd-eastus",
+      "armSkuName": "Premium_LRS",
+      "armRegionName": "eastus",
+      "productName": "Premium SSD Managed Disks",
+      "skuName": "Premium SSD P10 LRS",
+      "meterName": "P10 LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 19.71,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    },
+    {
+      "meterId": "disk-std-hdd-weu",
+      "armSkuName": "Standard_LRS",
+      "armRegionName": "westeurope",
+      "productName": "Standard HDD Managed Disks",
+      "skuName": "Standard HDD S10 LRS",
+      "meterName": "S10 LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 1.8,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    },
+    {
+      "meterId": "disk-std-ssd-weu",
+      "armSkuName": "StandardSSD_LRS",
+      "armRegionName": "westeurope",
+      "productName": "Standard SSD Managed Disks",
+      "skuName": "Standard SSD E10 LRS",
+      "meterName": "E10 LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 5.28,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    },
+    {
+      "meterId": "disk-prem-ssd-weu",
+      "armSkuName": "Premium_LRS",
+      "armRegionName": "westeurope",
+      "productName": "Premium SSD Managed Disks",
+      "skuName": "Premium SSD P10 LRS",
+      "meterName": "P10 LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 21.68,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    },
+    {
+      "meterId": "disk-ultra-eastus",
+      "armSkuName": "UltraSSD_LRS",
+      "armRegionName": "eastus",
+      "productName": "Ultra Disks",
+      "skuName": "Ultra LRS Provisioned Capacity",
+      "meterName": "Ultra LRS Disk",
+      "serviceName": "Storage",
+      "unitOfMeasure": "1/Month",
+      "retailPrice": 0.12,
+      "currencyCode": "USD",
+      "type": "Consumption"
+    }
   ],
   "NextPageLink": null
 }

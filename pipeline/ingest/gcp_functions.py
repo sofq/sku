@@ -27,8 +27,11 @@ _PROVIDER = "gcp"
 _SERVICE = "functions"
 _KIND = "compute.function"
 _ARCHITECTURE = "x86_64"
-_SERVICE_DISPLAY = "Cloud Functions"
-_RESOURCE_GROUP_GEN2 = "CloudFunctionsV2"
+# Live API uses serviceDisplayName="Cloud Run Functions" (previously "Cloud Functions").
+_SERVICE_DISPLAY = "Cloud Run Functions"
+# Live API uses resourceGroup="Compute" for all Cloud Functions SKUs.
+# Gen1 rows are identified by "(1st Gen)" in the description.
+_RESOURCE_GROUP = "Compute"
 
 _SQL = """
 WITH entries AS (
@@ -53,9 +56,14 @@ FROM entries
 
 def _dimension(description: str, usage_unit: str) -> str | None:
     d = description.lower()
-    if usage_unit == "count" or "invocation" in d or "request" in d:
+    if usage_unit == "count" or "invocation" in d:
         return "requests"
-    if "cpu" in d:
+    # Skip min-instance, tier-2, commitment, and gen1 variants to avoid duplicate
+    # CPU/memory entries per region; only ingest canonical request-billed SKUs.
+    # Note: live API uses "Min-Instance" (hyphenated).
+    if any(kw in description for kw in ("Min-Instance", "Min Instance", "Tier 2", "Commitment", "(1st Gen)")):
+        return None
+    if "cpu" in d or "core" in d:
         return "cpu-second"
     if "memory" in d:
         return "memory-gb-second"
@@ -69,6 +77,9 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     sql = _SQL.replace("{path}", path_literal)
 
     grouped: dict[str, dict[str, Any]] = {}
+    # Global Invocations SKU (region='global') is shared across all regions.
+    global_requests: dict[str, Any] | None = None
+
     for (
         sku_id, description, svc_name, _resource_family, resource_group, usage_type,
         service_regions, usage_unit, currency, price_units, price_nanos,
@@ -79,22 +90,29 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if currency != "USD":
             continue
-        if resource_group != _RESOURCE_GROUP_GEN2:
-            continue  # drops gen1 CloudFunctions
+        if resource_group != _RESOURCE_GROUP:
+            continue
         dim = _dimension(description, usage_unit)
         if dim is None:
             continue
         if not service_regions:
-            continue
-        region = service_regions[0]
-        region_normalized = normalizer.try_normalize(_PROVIDER, region)
-        if region_normalized is None:
             continue
         try:
             divisor, unit = parse_usage_unit(usage_unit)
         except ValueError:
             continue
         amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
+        price_entry = {"dimension": dim, "tier": "", "amount": amount, "unit": unit}
+
+        region = service_regions[0]
+        if region == "global" and dim == "requests":
+            # Cloud Run Functions Invocations SKU is region='global'.
+            global_requests = price_entry
+            continue
+
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
         bucket = grouped.setdefault(region, {
             "region_normalized": region_normalized,
             "prices": {},
@@ -102,9 +120,12 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         if dim == "cpu-second":
             bucket["sku_id"] = sku_id
             bucket["description"] = description
-        bucket["prices"][dim] = {"dimension": dim, "tier": "", "amount": amount, "unit": unit}
+        bucket["prices"][dim] = price_entry
 
     for region, bucket in grouped.items():
+        # Fan out the global Invocations price into every region bucket.
+        if global_requests is not None and "requests" not in bucket["prices"]:
+            bucket["prices"]["requests"] = global_requests
         if set(bucket["prices"].keys()) != {"cpu-second", "memory-gb-second", "requests"}:
             continue
         if "sku_id" not in bucket:
@@ -130,7 +151,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
                 "architecture": _ARCHITECTURE,
                 "extra": {
                     "description": bucket["description"],
-                    "resource_group": _RESOURCE_GROUP_GEN2,
+                    "resource_group": _RESOURCE_GROUP,
                 },
             },
             "terms": terms,
@@ -157,9 +178,14 @@ def main() -> int:
         print("either --fixture or --skus required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(skus_path=skus_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.gcp_functions: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

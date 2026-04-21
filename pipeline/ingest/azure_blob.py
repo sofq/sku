@@ -52,15 +52,15 @@ WITH items AS (
   FROM read_json_auto('{path}', maximum_object_size=33554432)
 )
 SELECT
-  meterId       AS sku_id,
-  armSkuName    AS sku_name,
-  armRegionName AS region,
-  meterName     AS meter_name,
-  retailPrice   AS price,
-  unitOfMeasure AS uom,
-  currencyCode  AS currency,
-  type          AS row_type,
-  serviceName   AS service_name
+  meterId::VARCHAR AS sku_id,
+  skuName          AS sku_name,
+  armRegionName    AS region,
+  meterName        AS meter_name,
+  retailPrice      AS price,
+  unitOfMeasure    AS uom,
+  currencyCode     AS currency,
+  type             AS row_type,
+  serviceName      AS service_name
 FROM items
 """
 
@@ -159,9 +159,14 @@ def main() -> int:
         print("either --fixture or --prices required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(prices_path=prices_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.azure_blob: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

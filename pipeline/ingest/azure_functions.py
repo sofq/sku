@@ -25,8 +25,8 @@ _SERVICE = "functions"
 _KIND = "compute.function"
 
 _DIM_MAP: dict[str, str] = {
-    "Total Executions": "executions",
-    "Execution Time":   "duration",
+    "Standard Total Executions": "executions",
+    "Standard Execution Time":   "duration",
 }
 
 _DURATION_UNIT = "gb-seconds"
@@ -37,15 +37,15 @@ WITH items AS (
   FROM read_json_auto('{path}', maximum_object_size=33554432)
 )
 SELECT
-  meterId       AS sku_id,
-  armSkuName    AS sku_name,
-  armRegionName AS region,
-  meterName     AS meter_name,
-  retailPrice   AS price,
-  unitOfMeasure AS uom,
-  currencyCode  AS currency,
-  type          AS row_type,
-  serviceName   AS service_name
+  meterId::VARCHAR AS sku_id,
+  skuName          AS sku_name,
+  armRegionName    AS region,
+  meterName        AS meter_name,
+  retailPrice      AS price,
+  unitOfMeasure    AS uom,
+  currencyCode     AS currency,
+  type             AS row_type,
+  serviceName      AS service_name
 FROM items
 """
 
@@ -66,7 +66,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if currency != "USD":
             continue
-        if sku_name != "Consumption":  # m3b.2: exclude Premium / Dedicated plans
+        if sku_name != "Standard":  # m3b.2: exclude Premium / Flex Consumption / Dedicated plans
             continue
         dim = _DIM_MAP.get(meter_name)
         if dim is None:
@@ -74,11 +74,16 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         if normalizer.try_normalize(_PROVIDER, region) is None:
             continue  # skip regions outside our coverage map
         if dim == "executions":
-            divisor, unit = parse_request_uom(uom)
+            try:
+                divisor, unit = parse_request_uom(uom)
+            except ValueError:
+                # Live API uses uom='10' (per 10 executions) rather than '1000000'
+                divisor = float(uom) if uom.isdigit() else 1.0
+                unit = "requests"
             amount = price / divisor
         else:
             # Duration meter publishes retailPrice in USD per GB-second already;
-            # unitOfMeasure = "1" (per gb-second). We keep the raw price and label.
+            # unitOfMeasure = "1" or "1 GB Second". We keep the raw price and label.
             amount = price
             unit = _DURATION_UNIT
         key = ("x86_64", region)
@@ -135,9 +140,14 @@ def main() -> int:
         print("either --fixture or --prices required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(prices_path=prices_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.azure_functions: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

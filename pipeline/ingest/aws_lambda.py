@@ -28,9 +28,13 @@ _SERVICE = "lambda"
 _KIND = "compute.function"
 
 _ARCH_MAP: dict[str, str] = {"x86": "x86_64", "arm": "arm64"}
-_GROUP_MAP: dict[str, str] = {
-    "AWS-Lambda-Requests": "requests",
-    "AWS-Lambda-Duration": "duration",
+# Map group name -> (dim, arch). Handles both old offer shape (archSupport attribute)
+# and current upstream shape where arch is encoded in the group suffix (-ARM = arm64).
+_GROUP_DIM_ARCH: dict[str, tuple[str, str]] = {
+    "AWS-Lambda-Requests":     ("requests", "x86_64"),
+    "AWS-Lambda-Requests-ARM": ("requests", "arm64"),
+    "AWS-Lambda-Duration":     ("duration", "x86_64"),
+    "AWS-Lambda-Duration-ARM": ("duration", "arm64"),
 }
 
 
@@ -54,9 +58,15 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             continue
         attrs = product.get("attributes", {})
         region = attrs.get("regionCode", "")
-        arch = _ARCH_MAP.get(attrs.get("archSupport", ""))
-        dim = _GROUP_MAP.get(attrs.get("group", ""))
-        if arch is None or dim is None:
+        group = attrs.get("group", "")
+        arch_attr = attrs.get("archSupport", "") or ""
+        da = _GROUP_DIM_ARCH.get(group)
+        if da is None:
+            continue
+        dim, arch_from_group = da
+        # Prefer archSupport attribute (old offer shape); fall back to group-derived arch.
+        arch = _ARCH_MAP.get(arch_attr, arch_from_group)
+        if arch is None:
             continue
         if normalizer.try_normalize(_PROVIDER, region) is None:
             continue
@@ -117,9 +127,14 @@ def main() -> int:
         print("either --fixture or --offer required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(offer_path=offer_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.aws_lambda: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

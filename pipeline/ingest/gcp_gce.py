@@ -1,9 +1,12 @@
 """Normalize GCP Cloud Billing Catalog JSON for Compute Engine into sku row dicts.
 
-Spec §5 kind=compute.vm. For m3b.3 we ingest "whole-machine-type" SKUs —
-`category.resourceGroup` values like `N1Standard2Linux` that bundle vCPU+RAM
-into one SKU per region. True core+RAM decomposition for custom shapes is
-deferred past v1.0.
+Spec §5 kind=compute.vm. The live Cloud Billing Catalog API exposes per-component
+pricing — one SKU per vCPU-hour and one per GiB-hour — rather than whole-machine-
+type bundles. This module composes them into per-(machine_type, region) rows by
+multiplying component prices by the machine spec (vcpu count and RAM GiB).
+
+Machine types are enumerated in _MACHINE_SPECS below; the CPU/RAM description
+prefix identifies which component SKU belongs to which machine family.
 """
 
 from __future__ import annotations
@@ -24,13 +27,13 @@ _PROVIDER = "gcp"
 _SERVICE = "gce"
 _KIND = "compute.vm"
 
-# resourceGroup -> canonical machine-type. Enumerated here (not regex-parsed)
-# because the real Catalog API uses PascalCase-digit-SuffixOS strings with no
-# documented grammar; keeping the mapping explicit prevents silent drift.
-_RESOURCE_GROUP_TO_MACHINE: dict[str, str] = {
-    "N1Standard2Linux": "n1-standard-2",
-    "N1Standard4Linux": "n1-standard-4",
-    "E2Standard2Linux": "e2-standard-2",
+# (vcpu, ram_gib, cpu_desc_prefix, ram_desc_prefix)
+# cpu/ram_desc_prefix must match the start of the description field in the
+# Cloud Billing SKU so we can identify the right component SKU.
+_MACHINE_SPECS: dict[str, tuple[int, float, str, str]] = {
+    "n1-standard-2": (2, 7.5,  "N1 Predefined Instance Core", "N1 Predefined Instance Ram"),
+    "n1-standard-4": (4, 15.0, "N1 Predefined Instance Core", "N1 Predefined Instance Ram"),
+    "e2-standard-2": (2, 8.0,  "E2 Instance Core",            "E2 Instance Ram"),
 }
 
 _SQL = """
@@ -53,14 +56,27 @@ SELECT
 FROM entries
 """
 
+# Build reverse-lookup: cpu_prefix -> [machine_type], ram_prefix -> [machine_type]
+_CPU_PREFIX_TO_MACHINES: dict[str, list[str]] = {}
+_RAM_PREFIX_TO_MACHINES: dict[str, list[str]] = {}
+for _mt, (_vcpu, _ram, _cpu_pfx, _ram_pfx) in _MACHINE_SPECS.items():
+    _CPU_PREFIX_TO_MACHINES.setdefault(_cpu_pfx, []).append(_mt)
+    _RAM_PREFIX_TO_MACHINES.setdefault(_ram_pfx, []).append(_mt)
+
 
 def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     normalizer = load_region_normalizer()
     con = open_conn()
     path_literal = str(skus_path).replace("'", "''")
     sql = _SQL.replace("{path}", path_literal)
+
+    # region -> cpu_prefix -> (sku_id, price_per_vcpu_hr)
+    cpu_prices: dict[str, dict[str, tuple[str, float]]] = {}
+    # region -> ram_prefix -> price_per_gib_hr
+    ram_prices: dict[str, dict[str, float]] = {}
+
     for (
-        sku_id, description, svc_name, resource_family, resource_group, usage_type,
+        sku_id, description, svc_name, resource_family, _resource_group, usage_type,
         service_regions, usage_unit, currency, price_units, price_nanos,
     ) in con.execute(sql).fetchall():
         if svc_name != "Compute Engine":
@@ -71,49 +87,71 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             continue
         if currency != "USD":
             continue
-        machine_type = _RESOURCE_GROUP_TO_MACHINE.get(resource_group)
-        if machine_type is None:
-            continue
         if not service_regions:
             continue
         region = service_regions[0]
-        region_normalized = normalizer.try_normalize(_PROVIDER, region)
-        if region_normalized is None:
-            continue
         try:
             divisor, unit = parse_usage_unit(usage_unit)
         except ValueError:
             continue
-        amount = parse_unit_price(units=price_units, nanos=int(price_nanos)) / divisor
-        terms = apply_kind_defaults(_KIND, {
-            "commitment": "on_demand",
-            "tenancy": "shared",
-            "os": "linux",
-            "support_tier": "",
-            "upfront": "",
-            "payment_option": "",
-        })
-        yield {
-            "sku_id": sku_id,
-            "provider": _PROVIDER,
-            "service": _SERVICE,
-            "kind": _KIND,
-            "resource_name": machine_type,
-            "region": region,
-            "region_normalized": region_normalized,
-            "terms_hash": terms_hash(terms),
-            "resource_attrs": {
-                "architecture": "x86_64",
-                "extra": {
-                    "description": description,
-                    "resource_group": resource_group,
+        price = parse_unit_price(units=price_units, nanos=int(price_nanos)) / divisor
+
+        # Match CPU component SKUs.
+        for cpu_pfx in _CPU_PREFIX_TO_MACHINES:
+            if description.startswith(cpu_pfx) and unit == "hrs":
+                cpu_prices.setdefault(region, {})[cpu_pfx] = (sku_id, price)
+                break
+        # Match RAM component SKUs.
+        for ram_pfx in _RAM_PREFIX_TO_MACHINES:
+            if description.startswith(ram_pfx) and unit == "gb-hr":
+                ram_prices.setdefault(region, {})[ram_pfx] = price
+                break
+
+    # Compose per-machine-type rows.
+    terms = apply_kind_defaults(_KIND, {
+        "commitment": "on_demand",
+        "tenancy": "shared",
+        "os": "linux",
+        "support_tier": "",
+        "upfront": "",
+        "payment_option": "",
+    })
+    for machine_type, (vcpu, ram_gib, cpu_pfx, ram_pfx) in _MACHINE_SPECS.items():
+        for region in sorted(set(cpu_prices) | set(ram_prices)):
+            region_cpu = cpu_prices.get(region, {})
+            region_ram = ram_prices.get(region, {})
+            if cpu_pfx not in region_cpu or ram_pfx not in region_ram:
+                continue
+            sku_id, cpu_price = region_cpu[cpu_pfx]
+            ram_price = region_ram[ram_pfx]
+            region_normalized = normalizer.try_normalize(_PROVIDER, region)
+            if region_normalized is None:
+                continue
+            amount = vcpu * cpu_price + ram_gib * ram_price
+            yield {
+                # Compose a unique sku_id since multiple machine types share
+                # the same CPU component SKU per region.
+                "sku_id": f"{sku_id}:{machine_type}",
+                "provider": _PROVIDER,
+                "service": _SERVICE,
+                "kind": _KIND,
+                "resource_name": machine_type,
+                "region": region,
+                "region_normalized": region_normalized,
+                "terms_hash": terms_hash(terms),
+                "resource_attrs": {
+                    "architecture": "x86_64",
+                    "extra": {
+                        "vcpu": vcpu,
+                        "ram_gib": ram_gib,
+                        "cpu_desc_prefix": cpu_pfx,
+                    },
                 },
-            },
-            "terms": terms,
-            "prices": [
-                {"dimension": "compute", "tier": "", "amount": amount, "unit": unit},
-            ],
-        }
+                "terms": terms,
+                "prices": [
+                    {"dimension": "compute", "tier": "", "amount": amount, "unit": "hrs"},
+                ],
+            }
 
 
 def main() -> int:
@@ -131,9 +169,14 @@ def main() -> int:
         print("either --fixture or --skus required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(skus_path=skus_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.gcp_gce: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 
