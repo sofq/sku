@@ -95,7 +95,10 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             print(f"warn: dropping incomplete functions row {arch}/{region}", file=sys.stderr)
             continue
         region_normalized = normalizer.normalize(_PROVIDER, region)
-        sku_id = "::".join(sorted(dims[d]["sku"] for d in required))
+        # Azure Functions Consumption meters use one meterId per dimension
+        # globally (same UUID across every region), so include region in the
+        # synthetic sku_id to avoid duplicates across the shard.
+        sku_id = "::".join(sorted(dims[d]["sku"] for d in required)) + "::" + region
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "",
