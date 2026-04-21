@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-20T12:00:00Z",
+  "catalog_version": "2026.04.20",
+  "shards": {
+    "openrouter": {
+      "baseline_version": "2026.04.20",
+      "baseline_url": "https://cdn.example.com/data-2026.04.20/openrouter.db.zst",
+      "baseline_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "baseline_size": 1048576,
+      "head_version": "2026.04.20",
+      "min_binary_version": "0.1.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 500,
+      "last_updated": "2026-04-20T12:00:00Z"
+    },
+    "azure-vm": {
+      "baseline_version": "2026.04.18",
+      "baseline_url": "https://cdn.example.com/data-2026.04.18/azure-vm.db.zst",
+      "baseline_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "baseline_size": 2097152,
+      "head_version": "2026.04.19",
+      "min_binary_version": "0.1.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.04.18",
+          "to": "2026.04.19",
+          "url": "https://cdn.example.com/deltas/azure-vm-2026.04.18-to-2026.04.19.sql.gz",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "size": 4096
+        }
+      ],
+      "row_count": 1200,
+      "last_updated": "2026-04-19T12:00:00Z"
+    },
+    "aws-ec2": {
+      "baseline_version": "2026.04.18",
+      "baseline_url": "https://cdn.example.com/data-2026.04.18/aws-ec2.db.zst",
+      "baseline_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "baseline_size": 5242880,
+      "head_version": "2026.04.20",
+      "min_binary_version": "0.1.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.04.18",
+          "to": "2026.04.19",
+          "url": "https://cdn.example.com/deltas/aws-ec2-2026.04.18-to-2026.04.19.sql.gz",
+          "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "size": 8192
+        },
+        {
+          "from": "2026.04.19",
+          "to": "2026.04.20",
+          "url": "https://cdn.example.com/deltas/aws-ec2-2026.04.19-to-2026.04.20.sql.gz",
+          "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "size": 6144
+        }
+      ],
+      "row_count": 3000,
+      "last_updated": "2026-04-20T12:00:00Z"
+    }
+  }
+}
