@@ -191,8 +191,9 @@ func seedShardDB(t *testing.T, path, version string) {
 	}
 	defer func() { _ = db.Close() }()
 	_, err = db.ExecContext(context.Background(), `
-		CREATE TABLE metadata (catalog_version TEXT NOT NULL, generated_at TEXT NOT NULL);
-		INSERT INTO metadata VALUES (?, ?);
+		CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT);
+		INSERT INTO metadata(key, value) VALUES ('catalog_version', ?);
+		INSERT INTO metadata(key, value) VALUES ('generated_at',    ?);
 		CREATE TABLE rows (id INTEGER PRIMARY KEY, val TEXT);
 	`, version, "2026-04-18T00:00:00Z")
 	if err != nil {

@@ -338,7 +338,7 @@ func readLocalVersion(dbPath string) (string, error) {
 
 	var v string
 	err = db.QueryRowContext(context.Background(),
-		"SELECT catalog_version FROM metadata LIMIT 1").Scan(&v)
+		"SELECT value FROM metadata WHERE key = 'catalog_version' LIMIT 1").Scan(&v)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", nil

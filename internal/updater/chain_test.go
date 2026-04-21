@@ -36,10 +36,11 @@ func buildChainDB(t *testing.T, dir, version string, n int) string {
 	ctx := context.Background()
 	_, err = db.ExecContext(ctx, `
 		CREATE TABLE IF NOT EXISTS metadata (
-			catalog_version TEXT NOT NULL,
-			generated_at    TEXT NOT NULL
+			key   TEXT PRIMARY KEY,
+			value TEXT
 		);
-		INSERT INTO metadata VALUES (?, ?);
+		INSERT INTO metadata(key, value) VALUES ('catalog_version', ?);
+		INSERT INTO metadata(key, value) VALUES ('generated_at',    ?);
 		CREATE TABLE IF NOT EXISTS rows (id INTEGER PRIMARY KEY, val TEXT);
 	`, version, "2026-04-18T00:00:00Z")
 	if err != nil {
@@ -103,7 +104,7 @@ func getVersion(t *testing.T, dbPath string) string {
 	}
 	defer func() { _ = db.Close() }()
 	var v string
-	if err := db.QueryRowContext(context.Background(), "SELECT catalog_version FROM metadata LIMIT 1").Scan(&v); err != nil {
+	if err := db.QueryRowContext(context.Background(), "SELECT value FROM metadata WHERE key = 'catalog_version' LIMIT 1").Scan(&v); err != nil {
 		t.Fatal(err)
 	}
 	return v
