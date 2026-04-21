@@ -20,7 +20,12 @@ from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
 from ._duckdb import dumps
-from .aws_common import aws_regions_from_yaml, fetch_offer_regions_stripped, load_region_normalizer
+from .aws_common import (
+    aws_regions_from_yaml,
+    fetch_offer_regions_stripped,
+    load_region_normalizer,
+    shared_offer_basename,
+)
 
 _PROVIDER = "aws"
 _SERVICE = "ec2"
@@ -121,7 +126,12 @@ def ingest(*, offer_paths: Iterable[Path]) -> Iterable[dict[str, Any]]:
 def _resolve_paths(args: argparse.Namespace) -> list[Path]:
     """Resolve CLI args → a list of stripped offer-JSON paths ready to feed ingest."""
     if args.offer_dir:
-        return sorted(p for p in args.offer_dir.glob("aws_ec2-*.json") if p.is_file())
+        base = shared_offer_basename("aws_ec2")
+        return sorted(
+            p
+            for p in args.offer_dir.glob(f"{base}-*.json")
+            if p.is_file() and not p.name.endswith("-region_index.json")
+        )
     if args.fixture:
         p = args.fixture
         return [p / "offer.json"] if p.is_dir() else [p]
@@ -144,12 +154,21 @@ def main() -> int:
     ap.add_argument("--catalog-version", default=None)
     args = ap.parse_args()
 
-    # If offer-dir is given but empty, drive the fetch ourselves.
-    if args.offer_dir is not None and not any(args.offer_dir.glob("aws_ec2-*.json")):
-        args.offer_dir.mkdir(parents=True, exist_ok=True)
-        fetch_offer_regions_stripped(
-            "aws_ec2", args.offer_dir, regions=aws_regions_from_yaml()
+    # If offer-dir is given but empty of shared-basename stripped files,
+    # drive the fetch ourselves. fetch_offer_regions_stripped short-circuits
+    # per-region on an already-stripped file so a sibling `aws_ebs` run can
+    # skip the download+strip entirely.
+    if args.offer_dir is not None:
+        base = shared_offer_basename("aws_ec2")
+        have = any(
+            p.is_file() and not p.name.endswith("-region_index.json")
+            for p in args.offer_dir.glob(f"{base}-*.json")
         )
+        if not have:
+            args.offer_dir.mkdir(parents=True, exist_ok=True)
+            fetch_offer_regions_stripped(
+                "aws_ec2", args.offer_dir, regions=aws_regions_from_yaml()
+            )
 
     paths = _resolve_paths(args)
     if not paths:

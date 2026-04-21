@@ -64,6 +64,27 @@ _AWS_SERVICE_CODES: dict[str, str] = {
     "aws_cloudfront": "AmazonCloudFront",
 }
 
+# Multiple shards share an upstream offer — aws_ec2 + aws_ebs both consume
+# AmazonEC2. The stripped offer (filtered to Compute Instance + Storage
+# families via _EC2_PRODUCT_FAMILIES) is identical for both shards, so we
+# key the on-disk filename on this shared basename instead of the shard
+# name. That way a `--offer-dir` reused across `ingest.aws_ec2` and
+# `ingest.aws_ebs` reads the same `aws_ec2-<region>.json` file once
+# rather than downloading + stripping the 400 MB per-region offer twice.
+_OFFER_BASENAME: dict[str, str] = {
+    "aws_ec2": "aws_ec2",
+    "aws_ebs": "aws_ec2",
+}
+
+
+def shared_offer_basename(shard: str) -> str:
+    """Return the filename prefix used for a shard's stripped per-region offer
+    files. Shards that consume the same upstream offer (aws_ec2, aws_ebs both
+    read AmazonEC2) share a basename so only one stripped copy sits on disk.
+    Falls back to the shard name for shards with no overlap.
+    """
+    return _OFFER_BASENAME.get(shard, shard)
+
 _RETRY_STATUSES = {500, 502, 503, 504}
 
 
@@ -197,8 +218,22 @@ def fetch_offer_regions_stripped(
         session = requests.Session()
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    basename = shared_offer_basename(shard)
+
+    # Pre-emptively collect any stripped files already present (e.g. a sibling
+    # shard — aws_ebs when aws_ec2 ran first — produced them). We still fetch
+    # the region_index to discover which regions upstream actually has, but
+    # we skip redownload + restrip for regions already on disk.
+    existing: dict[str, Path] = {}
+    for p in out_dir.glob(f"{basename}-*.json"):
+        # Strip the basename prefix and .json suffix to recover the region.
+        name = p.name
+        region = name[len(basename) + 1 : -len(".json")]
+        if region and region != "region_index":
+            existing[region] = p
+
     region_index_url = f"{_AWS_OFFER_BASE}/{service_code}/current/region_index.json"
-    raw_index = out_dir / f"{shard}-region_index.json"
+    raw_index = out_dir / f"{basename}-region_index.json"
     _stream_download(region_index_url, raw_index, session=session, retries=retries)
     index_doc = json.loads(raw_index.read_text())
     raw_index.unlink(missing_ok=True)
@@ -213,11 +248,14 @@ def fetch_offer_regions_stripped(
         rel_url = upstream_regions.get(region)
         if rel_url is None:
             continue
+        stripped_path = out_dir / f"{basename}-{region}.json"
+        if region in existing and stripped_path.exists():
+            produced.append(stripped_path)
+            continue
         region_url = f"https://pricing.us-east-1.amazonaws.com{rel_url}"
-        raw_path = out_dir / f"{shard}-{region}.raw.json"
+        raw_path = out_dir / f"{basename}-{region}.raw.json"
         try:
             _stream_download(region_url, raw_path, session=session, retries=retries)
-            stripped_path = out_dir / f"{shard}-{region}.json"
             _strip_ec2_offer(raw_path, stripped_path)
             produced.append(stripped_path)
         finally:

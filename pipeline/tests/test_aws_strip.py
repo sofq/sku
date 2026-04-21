@@ -12,6 +12,7 @@ from ingest.aws_common import (
     _strip_ec2_offer,
     aws_regions_from_yaml,
     fetch_offer_regions_stripped,
+    shared_offer_basename,
 )
 
 
@@ -212,3 +213,55 @@ def test_fetch_offer_regions_stripped(tmp_path: Path) -> None:
 def test_fetch_unsupported_shard_raises(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="per-region offer not supported"):
         fetch_offer_regions_stripped("aws_s3", tmp_path, regions=["us-east-1"])
+
+
+def test_aws_ebs_shares_aws_ec2_stripped_offer() -> None:
+    """aws_ebs and aws_ec2 both consume AmazonEC2 — the stripped on-disk
+    file uses one shared basename so a single fetch serves both ingesters.
+    """
+    assert shared_offer_basename("aws_ec2") == "aws_ec2"
+    assert shared_offer_basename("aws_ebs") == "aws_ec2"
+
+
+def test_fetch_reuses_existing_stripped_file(tmp_path: Path) -> None:
+    """If aws_ec2 already produced aws_ec2-<region>.json, a subsequent
+    aws_ebs fetch skips re-downloading and re-stripping that region.
+    """
+    region_index_url = (
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json"
+    )
+    region_a_url = (
+        "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20260418/us-east-1/index.json"
+    )
+    region_index = {
+        "regions": {
+            "us-east-1": {
+                "regionCode": "us-east-1",
+                "currentVersionUrl": "/offers/v1.0/aws/AmazonEC2/20260418/us-east-1/index.json",
+            },
+        }
+    }
+    body_index = json.dumps(region_index).encode()
+    idx_hdr = {"Content-Length": str(len(body_index))}
+
+    out_dir = tmp_path / "stripped"
+    out_dir.mkdir()
+    # Pretend aws_ec2 already produced a stripped offer for us-east-1.
+    preexisting = out_dir / "aws_ec2-us-east-1.json"
+    sentinel_body = {"products": {}, "terms": {"OnDemand": {}}, "sentinel": "preserved"}
+    preexisting.write_text(json.dumps(sentinel_body))
+
+    # Only the region_index.json endpoint should be hit; the per-region URL
+    # must NOT be fetched because the stripped file already exists.
+    with req_mock.Mocker() as m:
+        m.get(region_index_url, content=body_index, headers=idx_hdr)
+        # Register a failing matcher for the per-region URL so any reach
+        # for it surfaces as a test failure.
+        m.get(region_a_url, status_code=500)
+
+        paths = fetch_offer_regions_stripped(
+            "aws_ebs", out_dir, regions=["us-east-1"]
+        )
+
+    assert paths == [preexisting]
+    assert json.loads(preexisting.read_text())["sentinel"] == "preserved"
