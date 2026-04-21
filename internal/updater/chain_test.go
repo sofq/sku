@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -296,6 +297,10 @@ func TestApplier_NetworkFailureMidChain_Rollback(t *testing.T) {
 }
 
 func TestApplier_ConcurrentCallGetsLockConflict(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("advisory flock is a no-op on Windows (sqliteutil/flock_windows.go); " +
+			"concurrent-apply protection is unix-only for now")
+	}
 	dir := t.TempDir()
 	dbPath := buildChainDB(t, dir, "2026.04.18", 5)
 
