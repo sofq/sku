@@ -62,6 +62,74 @@
       "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "N1Standard", "usageType": "OnDemand"},
       "serviceRegions": ["europe-west1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "EUR", "units": "0", "nanos": 29000000}}]}}]
+    },
+    {
+      "skuId": "N2CORE-USEAST1",
+      "description": "N2 Instance Core running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "N2RAM-USEAST1",
+      "description": "N2 Instance Ram running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy.h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "C2CORE-USEAST1",
+      "description": "Compute optimized Core running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "C2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 35210000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "C2RAM-USEAST1",
+      "description": "Compute optimized Ram running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "C2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy.h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4714000}}]
+        }
+      }]
     }
   ]
 }
