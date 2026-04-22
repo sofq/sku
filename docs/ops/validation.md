@@ -224,3 +224,17 @@ For `aws-ec2`, the workflow additionally downloads
 against the shard on `(instance_type, region, os=linux, tenancy=shared)`.
 Drift >1% flags a record under `vantage_drift` in the report. This is a
 zero-credential cross-check — useful even when the OIDC path is down.
+
+## Shard size budgets
+
+Every shard has a compressed-byte budget in
+`pipeline/package/budgets.py`. When a daily rebuild produces a shard
+larger than its budget, `make package` fails with:
+
+    shard 'aws_ec2' exceeds budget: 22,500,000 bytes (budget 20,000,000).
+    Either raise the budget in pipeline/package/budgets.py, split the
+    shard, or narrow scope.
+
+This is deliberate — silent truncation masks coverage regressions. Raise
+the budget in a PR with a one-line justification; the reviewer compares
+delta rows vs. delta bytes to sanity-check.
