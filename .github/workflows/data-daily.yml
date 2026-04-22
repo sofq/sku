@@ -222,6 +222,22 @@ jobs:
             --notes "Automated daily data release. See manifest.json for shard inventory." \
             dist/pipeline/release/*
 
+      - name: Update data-latest floating release
+        env:
+          CATALOG_VERSION: ${{ needs.discover.outputs.catalog_version }}
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # data-latest is a lightweight floating release that only carries manifest.json.
+          # Shard downloads resolve through the BaselineURL embedded in the manifest itself.
+          gh release delete data-latest --yes 2>/dev/null || true
+          gh api --method DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/data-latest" 2>/dev/null || true
+          gh release create "data-latest" \
+            --target "$(git rev-parse HEAD)" \
+            --title "Latest data release (${CATALOG_VERSION})" \
+            --notes "Floating tag — always the latest data release. Full release: data-${CATALOG_VERSION}." \
+            dist/pipeline/release/manifest.json
+
       - name: Mirror manifest to `data` branch
         env:
           GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}

@@ -17,6 +17,14 @@ func newBatchCmd() *cobra.Command {
 		Short: "Run multiple sku ops from stdin (NDJSON or JSON array)",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			g := globalSettings(cmd)
+
+			if g.Format != "json" {
+				e := skuerrors.Validation("flag_invalid", "--"+g.Format, g.Format,
+					"batch output is always JSON; --yaml and --toml are not supported")
+				skuerrors.Write(cmd.ErrOrStderr(), e)
+				return e
+			}
+
 			settings := ToBatchSettings(g)
 
 			ops, format, err := batch.Parse(cmd.InOrStdin())

@@ -202,4 +202,48 @@ func TestManifestStructure(t *testing.T) {
 	if m.CatalogVersion != "2026.04.20" {
 		t.Errorf("CatalogVersion: got %q", m.CatalogVersion)
 	}
+
+	// last_updated is a catalog version string (YYYY.MM.DD), not RFC3339.
+	// Asserting the exact value here catches any future regression where the
+	// field is re-typed as time.Time and the fixture is "helpfully" updated
+	// to RFC3339 — masking the real pipeline format.
+	if got := m.Shards["openrouter"].LastUpdated; got != "2026.04.20" {
+		t.Errorf("openrouter LastUpdated: got %q, want catalog-version string", got)
+	}
+	if got := m.Shards["azure-vm"].LastUpdated; got != "2026.04.19" {
+		t.Errorf("azure-vm LastUpdated: got %q, want %q", got, "2026.04.19")
+	}
+}
+
+// TestManifest_LastUpdatedCatalogVersionFormat verifies that a manifest using
+// the real pipeline's catalog-version string format ("2026.04.22") for
+// last_updated parses without error. If LastUpdated were typed as time.Time,
+// this test would fail with a parse error — exactly the bug it guards against.
+func TestManifest_LastUpdatedCatalogVersionFormat(t *testing.T) {
+	raw := `{
+		"schema_version": 1,
+		"generated_at": "2026-04-22T04:22:27Z",
+		"catalog_version": "2026.04.22",
+		"shards": {
+			"aws-ec2": {
+				"baseline_version": "2026.04.22",
+				"baseline_url": "https://example.com/aws-ec2.db.zst",
+				"baseline_sha256": "aaaa",
+				"baseline_size": 1,
+				"head_version": "2026.04.22",
+				"min_binary_version": "1.0.0",
+				"shard_schema_version": 1,
+				"deltas": [],
+				"row_count": 35098,
+				"last_updated": "2026.04.22"
+			}
+		}
+	}`
+	var m updater.Manifest
+	if err := json.Unmarshal([]byte(raw), &m); err != nil {
+		t.Fatalf("unmarshal with catalog-version last_updated failed: %v", err)
+	}
+	if got := m.Shards["aws-ec2"].LastUpdated; got != "2026.04.22" {
+		t.Errorf("LastUpdated: got %q, want %q", got, "2026.04.22")
+	}
 }
