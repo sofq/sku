@@ -4,7 +4,7 @@ Agent quick-start for the `sku` repo.
 
 ## What this is
 
-`sku` is an agent-friendly CLI for querying cloud + LLM pricing. Offline-only client, daily data pipeline, pure-Go binary. See `docs/superpowers/specs/2026-04-18-sku-design.md` for the full design.
+`sku` is an agent-friendly CLI for querying cloud + LLM pricing. Offline-only client, daily data pipeline, pure-Go binary.
 
 ## Dev commands
 
@@ -31,8 +31,6 @@ Agent quick-start for the `sku` repo.
 - `internal/` — all logic lives here; packages are added per milestone
 - `internal/version/` — single source of truth for build metadata
 - `pipeline/` — CI-only data pipeline (arrives in M1+)
-- `docs/superpowers/specs/` — design spec (rev 4 dated 2026-04-18)
-- `docs/superpowers/plans/` — per-milestone implementation plans
 - `.github/workflows/` — `ci.yml` (PR/push), `release.yml` (tag), and data workflows from M3a
 
 ## Patterns
@@ -41,7 +39,6 @@ Agent quick-start for the `sku` repo.
 - **`cmd/` stays thin.** Flag parsing + calls into `internal/`. No business logic.
 - **TDD.** Write failing test, implement, commit.
 - **Exit codes are contract** (spec §4). Full taxonomy is live as of M2; `sku schema --errors` emits the machine-readable catalog.
-- **Plans are session-sized.** One plan file = one `claude -p` session via `scripts/run-plan.sh`. Target ≤ ~25 tasks / ~100 checkboxes per plan. Split large milestones by sub-scope (e.g. M3a → `m3a.1-ec2-rds`, `m3a.2-s3-lambda-ebs`, `m3a.3-dynamodb-cloudfront-updater`). File names must lex-sort into build order; `scripts/run-spec.sh` picks plans up in that order.
 
 ## Current milestone
 

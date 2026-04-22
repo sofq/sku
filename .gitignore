@@ -14,7 +14,8 @@ coverage.*
 .vscode/
 *.swp
 
-# Plan runner logs (scripts/run-plan.sh)
+# Agent/superpowers scaffolding (local only)
+docs/superpowers/
 /.planning/
 
 # Python build artifacts (M6 PyPI wrapper, pipeline editable install)
