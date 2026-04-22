@@ -201,7 +201,7 @@ def _fetch_one_region_stripped(
     target_dir: Path,
     *,
     rel_url: str,
-    session: requests.Session,
+    session: requests.Session | None,
     retries: int,
 ) -> Path:
     """Fetch and strip the AWS offer JSON for a single region.
@@ -300,7 +300,7 @@ def fetch_offer_regions_stripped(
             pool.submit(
                 _fetch_one_region_stripped, shard, region, out_dir,
                 rel_url=upstream_regions[region],
-                session=session, retries=retries,
+                session=None, retries=retries,
             ): region
             for region in todo_regions
         }
@@ -309,6 +309,7 @@ def fetch_offer_regions_stripped(
             try:
                 produced.append(fut.result())
             except Exception as exc:
+                pool.shutdown(wait=False, cancel_futures=True)
                 raise RuntimeError(f"fetch failed for region={region}") from exc
 
     return sorted(produced)
