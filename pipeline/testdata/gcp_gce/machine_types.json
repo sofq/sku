@@ -1,0 +1,18 @@
+{
+  "items": {
+    "zones/us-east1-b": {
+      "machineTypes": [
+        {"name": "n1-standard-2", "guestCpus": 2,  "memoryMb": 7680,   "zone": "us-east1-b"},
+        {"name": "n1-standard-4", "guestCpus": 4,  "memoryMb": 15360,  "zone": "us-east1-b"},
+        {"name": "n2-standard-2", "guestCpus": 2,  "memoryMb": 8192,   "zone": "us-east1-b"},
+        {"name": "n2-standard-4", "guestCpus": 4,  "memoryMb": 16384,  "zone": "us-east1-b"},
+        {"name": "e2-standard-2", "guestCpus": 2,  "memoryMb": 8192,   "zone": "us-east1-b"},
+        {"name": "e2-standard-4", "guestCpus": 4,  "memoryMb": 16384,  "zone": "us-east1-b"},
+        {"name": "c2-standard-4", "guestCpus": 4,  "memoryMb": 16384,  "zone": "us-east1-b"},
+        {"name": "c2d-standard-4","guestCpus": 4,  "memoryMb": 16384,  "zone": "us-east1-b"},
+        {"name": "a2-highgpu-1g", "guestCpus": 12, "memoryMb": 87040,  "zone": "us-east1-b",
+         "accelerators": [{"guestAcceleratorType": "nvidia-tesla-a100", "guestAcceleratorCount": 1}]}
+      ]
+    }
+  }
+}
