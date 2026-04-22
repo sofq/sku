@@ -25,6 +25,9 @@ concurrency:
   group: data-daily
   cancel-in-progress: false
 
+# Per-step timeouts cap the blast radius of a stuck upstream fetch.
+# Per-shard ceiling: 30 min (matrix; parallel). Manifest build: 10 min.
+# GitHub's default (360 min) is too slack to catch realistic regressions.
 jobs:
   discover:
     runs-on: ubuntu-latest
@@ -116,6 +119,7 @@ jobs:
           service_account:            ${{ vars.GCP_VALIDATE_SA }}
 
       - name: Fetch upstream + ingest + package
+        timeout-minutes: 30
         env:
           SHARD:             ${{ matrix.shard }}
           CATALOG_VERSION:   ${{ needs.discover.outputs.catalog_version }}
@@ -201,6 +205,7 @@ jobs:
           path: dist/pipeline/discover/
 
       - name: Build manifest.json
+        timeout-minutes: 10
         env:
           CATALOG_VERSION:  ${{ needs.discover.outputs.catalog_version }}
           PREVIOUS_VERSION: ${{ needs.discover.outputs.previous_version }}
