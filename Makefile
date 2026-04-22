@@ -253,6 +253,18 @@ _SHARD_LIVE_FLAG = $(if $(filter aws_%,$(SHARD)),--offer,\
                     $(if $(filter azure_%,$(SHARD)),--prices,\
                     $(if $(filter gcp_%,$(SHARD)),--skus,)))
 
+.PHONY: gcp-machine-types-refresh
+gcp-machine-types-refresh: ## Re-fetch GCE machineTypes fixture from the live aggregatedList API (requires ADC + GCP_PROJECT=<id>)
+	@if [ -z "$$GCP_PROJECT" ]; then echo "GCP_PROJECT=<project-id> required" >&2; exit 2; fi
+	$(MAKE) -C pipeline setup
+	cd pipeline && .venv/bin/python -c "\
+import json, pathlib; \
+from ingest.gcp_machine_types import _fetch_live, load_specs; \
+p = pathlib.Path('testdata/gcp_gce/machine_types.json'); \
+p.write_text(json.dumps(_fetch_live(project_id='$$GCP_PROJECT'), indent=2, sort_keys=True) + '\n'); \
+load_specs(fixture_path=p)"
+	@echo "wrote pipeline/testdata/gcp_gce/machine_types.json — commit if it changed"
+
 .PHONY: shard-live
 shard-live: ## Ingest + package SHARD=<name> using SRC=<local-offer-path>
 	@test -n "$(SHARD)" || (echo "SHARD=<name> required" && exit 2)
