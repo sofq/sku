@@ -310,8 +310,30 @@
       "type": "Consumption",
       "isPrimaryMeterRegion": true,
       "armSkuName": "Standard_D2_v3"
+    },
+    {
+      "currencyCode": "USD",
+      "tierMinimumUnits": 0.0,
+      "retailPrice": 0.0,
+      "unitPrice": 0.0,
+      "armRegionName": "eastus",
+      "location": "US East",
+      "effectiveStartDate": "2026-01-01T00:00:00Z",
+      "meterId": "azure-vm-dcads-v5-preview-eastus-linux",
+      "meterName": "DC2ads v5",
+      "productId": "DZH318Z0BPVW",
+      "skuId": "DZH318Z0BPVW/DC2ads_v5-preview-linux",
+      "productName": "Virtual Machines DCads v5 Preview",
+      "skuName": "DC2ads v5",
+      "serviceName": "Virtual Machines",
+      "serviceId": "DZH313Z7MMC8",
+      "serviceFamily": "Compute",
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "isPrimaryMeterRegion": true,
+      "armSkuName": "Standard_DC2ads_v5"
     }
   ],
   "NextPageLink": null,
-  "Count": 14
+  "Count": 15
 }

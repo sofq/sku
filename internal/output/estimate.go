@@ -3,9 +3,24 @@ package output
 import (
 	"fmt"
 	"io"
+	"math"
 
 	"github.com/sofq/sku/internal/estimate"
 )
+
+// roundSig rounds x to `digits` significant figures. Used to tame spurious
+// trailing precision in `sku estimate` dollar amounts — raw arithmetic on
+// per-token / per-gb-second rates produces long decimals that look like
+// fake precision and break golden-file diffs across architectures.
+// Mirrors Python's Decimal(..).quantize style without the import cost.
+func roundSig(x float64, digits int) float64 {
+	if x == 0 || math.IsNaN(x) || math.IsInf(x, 0) {
+		return x
+	}
+	mag := math.Floor(math.Log10(math.Abs(x)))
+	factor := math.Pow(10, float64(digits-1)-mag)
+	return math.Round(x*factor) / factor
+}
 
 // EstimateMonthlyTotal is the monthly-total block carried in the envelope.
 type EstimateMonthlyTotal struct {
@@ -40,15 +55,15 @@ type EstimateItem struct {
 func EmitEstimate(w io.Writer, r estimate.Result, opts Options) error {
 	opts = opts.WithDefaults()
 	env := EstimateEnvelope{Items: make([]EstimateItem, 0, len(r.Items))}
-	env.MonthlyTotal.Amount = r.MonthlyTotalUSD
+	env.MonthlyTotal.Amount = roundSig(r.MonthlyTotalUSD, 6)
 	env.MonthlyTotal.Currency = r.Currency
 	for _, li := range r.Items {
 		env.Items = append(env.Items, EstimateItem{
 			Item: li.Item.Raw, Kind: li.Kind, SKUID: li.SKUID,
 			Provider: li.Provider, Service: li.Service, Resource: li.Resource,
-			Region: li.Region, HourlyUSD: li.HourlyUSD,
+			Region: li.Region, HourlyUSD: roundSig(li.HourlyUSD, 6),
 			Quantity: li.Quantity, QuantityUnit: li.QuantityUnit,
-			MonthlyUSD: li.MonthlyUSD,
+			MonthlyUSD: roundSig(li.MonthlyUSD, 6),
 		})
 	}
 

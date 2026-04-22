@@ -54,6 +54,33 @@ def test_architecture_attr():
         assert row["resource_name"] == "x86_64"
 
 
+def test_zero_priced_requests_dimension_dropped(tmp_path):
+    """A free-tier Invocations SKU (units=0, nanos=0) must not surface as a
+    $0 dimension. Rows still emit with cpu + memory dimensions only."""
+    bad = json.loads(FIXTURE.read_text())
+    zeroed_any = False
+    for sku in bad["skus"]:
+        desc = sku.get("description", "")
+        cat = sku.get("category") or {}
+        if (
+            cat.get("resourceGroup") == "Compute"
+            and (sku["pricingInfo"][0]["pricingExpression"]["usageUnit"] == "count"
+                 or "invocation" in desc.lower())
+        ):
+            rate = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"][0]
+            rate["unitPrice"]["units"] = "0"
+            rate["unitPrice"]["nanos"] = 0
+            zeroed_any = True
+    assert zeroed_any, "fixture should have at least one Invocations SKU"
+    p = tmp_path / "bad.json"
+    p.write_text(json.dumps(bad))
+    rows = list(ingest(skus_path=p))
+    assert rows, "rows should still emit without a Requests dimension"
+    for row in rows:
+        dims = [pr["dimension"] for pr in row["prices"]]
+        assert "requests" not in dims, row
+
+
 def test_unknown_region_skipped(tmp_path):
     bad = json.loads(FIXTURE.read_text())
     for sku in bad["skus"]:

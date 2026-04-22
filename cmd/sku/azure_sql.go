@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -116,9 +115,7 @@ func runAzureSQL(cmd *cobra.Command, f *azureSQLFlags, requireRegion bool) error
 		Terms:        f.terms(),
 	})
 	if err != nil {
-		wrapped := fmt.Errorf("azure sql %s: %w", cmd.Use, err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "azure sql %s: %w", cmd.Use, err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound("azure", "sql",

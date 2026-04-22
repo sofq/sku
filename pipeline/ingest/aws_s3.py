@@ -18,15 +18,16 @@ both shapes are handled by checking volumeType first, falling back to group.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
-from ._duckdb import dumps, open_conn
+from ._duckdb import dumps
 from .aws_common import load_region_normalizer
 
 _PROVIDER = "aws"
@@ -82,56 +83,79 @@ _REQUEST_GROUP_DIM: dict[str, str] = {
     "S3-API-Tier2": "requests-get",
 }
 
-# Pulls every SKU's attributes + its single on-demand priceDimension. S3's
-# on-demand term has one non-tiered priceDimension per SKU for the m3a.2
-# scope (first tier only for storage); we take the first pd_key.
-_SQL = """
-WITH products_flat AS (
-  SELECT
-    p.key AS sku_id,
-    json_extract_string(p.value, '$.productFamily') AS family,
-    json_extract_string(p.value, '$.attributes.regionCode') AS region,
-    json_extract_string(p.value, '$.attributes.volumeType') AS volume_type,
-    json_extract_string(p.value, '$.attributes.group') AS group_raw
-  FROM offer, json_each(offer.products) AS p(key, value)
-  WHERE json_extract_string(p.value, '$.productFamily') IN ('Storage', 'API Request')
-),
-terms_flat AS (
-  SELECT
-    t.key AS sku_id,
-    (json_keys(t.value))[1] AS term_key,
-    t.value AS term_obj
-  FROM offer, json_each(json_extract(offer.terms, '$.OnDemand')) AS t(key, value)
-),
-pd_keys AS (
-  SELECT tf.sku_id, tf.term_key, tf.term_obj,
-    (json_keys(json_extract(tf.term_obj, '$."' || tf.term_key || '".priceDimensions')))[1] AS pd_key
-  FROM terms_flat tf
-)
-SELECT pf.sku_id, pf.family, pf.region, pf.volume_type, pf.group_raw,
-  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".unit') AS unit,
-  CAST(json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".pricePerUnit.USD') AS DOUBLE) AS usd,
-  json_extract_string(pk.term_obj, '$."' || pk.term_key || '".priceDimensions."' || pk.pd_key || '".beginRange') AS begin_range
-FROM products_flat pf
-JOIN pd_keys pk ON pf.sku_id = pk.sku_id
-"""
+# Iterate the offer in Python rather than DuckDB. The AmazonS3 offer
+# is ~12 MB and fits comfortably in memory; expanding it through
+# `json_each` + `json_extract` in DuckDB once the WHERE clause admits
+# more than ~1 200 products fans-out the terms CTE hard enough to
+# blow the 8 GiB cap set in `_duckdb.py`. Python's dict lookup path
+# is O(n) over products and stays well under 100 MB resident.
+
+
+def _rows_from_offer(offer: dict[str, Any]) -> Iterator[
+    tuple[str, str | None, str | None, str | None, str | None, str | None, float | None, str | None]
+]:
+    """Yield one tuple per (product, first on-demand priceDimension) pair.
+
+    Tuple shape mirrors the previous DuckDB result set:
+        (sku_id, family, region, volume_type, group_raw, unit, usd, begin_range).
+
+    `family` may be None — the caller treats a product with a missing
+    productFamily whose group starts with 'S3-API-' as API Request.
+    Products with no matching OnDemand term are skipped silently; those
+    without a pricePerUnit.USD are yielded with usd=None and dropped at
+    the dim-completeness check.
+    """
+    products = offer.get("products") or {}
+    on_demand = ((offer.get("terms") or {}).get("OnDemand") or {})
+    for sku_id, prod in products.items():
+        family = prod.get("productFamily")
+        attrs = prod.get("attributes") or {}
+        group_raw = attrs.get("group")
+        if family not in ("Storage", "API Request"):
+            # Backfill for the live-offer shape where productFamily is
+            # missing on API Request SKUs (~78 % of products as of
+            # 2026-04); unambiguous when the group prefix matches.
+            if family is None and group_raw and group_raw.startswith("S3-API-"):
+                family = "API Request"
+            else:
+                continue
+        region = attrs.get("regionCode")
+        volume_type = attrs.get("volumeType")
+
+        term_bucket = on_demand.get(sku_id) or {}
+        if not term_bucket:
+            continue
+        # Stable first key — the S3 offer's on-demand terms have one
+        # termKey per SKU in practice, so ordering doesn't matter.
+        term_key = next(iter(term_bucket))
+        term_obj = term_bucket[term_key] or {}
+        price_dims = term_obj.get("priceDimensions") or {}
+        if not price_dims:
+            continue
+        pd_key = next(iter(price_dims))
+        pd = price_dims[pd_key] or {}
+        unit = pd.get("unit")
+        price_per_unit = pd.get("pricePerUnit") or {}
+        usd_raw = price_per_unit.get("USD")
+        try:
+            usd = float(usd_raw) if usd_raw is not None else None
+        except (TypeError, ValueError):
+            usd = None
+        begin_range = pd.get("beginRange")
+        yield sku_id, family, region, volume_type, group_raw, unit, usd, begin_range
 
 
 def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     normalizer = load_region_normalizer()
-    con = open_conn()
-    path_literal = str(offer_path).replace("'", "''")
-    con.execute(
-        f"CREATE VIEW offer AS SELECT * FROM read_json('{path_literal}', "
-        "columns={products: 'JSON', terms: 'JSON'}, maximum_object_size=134217728)"
-    )
+    with offer_path.open() as f:
+        offer = json.load(f)
 
     # Collect: (storage_class, region) -> {"storage": {sku,usd,unit,volume_type}, ...}
     grouped: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
 
-    for sku_id, family, region, volume_type, group_raw, unit, usd, begin_range in (
-        con.execute(_SQL).fetchall()
-    ):
+    for sku_id, family, region, volume_type, group_raw, unit, usd, begin_range in _rows_from_offer(offer):
+        if region is None or usd is None:
+            continue
         if normalizer.try_normalize(_PROVIDER, region) is None:
             continue  # skip regions outside our coverage map
 

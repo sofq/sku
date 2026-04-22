@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -111,9 +110,7 @@ func runAzureBlob(cmd *cobra.Command, f *azureBlobFlags, requireRegion bool) err
 		Terms:        f.terms(),
 	})
 	if err != nil {
-		wrapped := fmt.Errorf("azure blob %s: %w", cmd.Use, err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "azure blob %s: %w", cmd.Use, err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound("azure", "blob",

@@ -121,9 +121,13 @@ func (a *Applier) Apply(ctx context.Context, from, to string, chain []Delta) err
 		}
 	}
 
-	// Update metadata to reflect the applied head version.
+	// Reassert metadata head version. Delta bodies already replay the
+	// metadata table in full (pipeline build_delta.py), but we still
+	// pin catalog_version/generated_at here so the applied state is
+	// correct even if a delta body is ever produced without a metadata
+	// replay. Schema is key/value, matching pipeline/package/schema.sql.
 	_, err = conn.ExecContext(ctx,
-		"UPDATE metadata SET catalog_version=?, generated_at=datetime('now')",
+		"INSERT OR REPLACE INTO metadata(key, value) VALUES ('catalog_version', ?), ('generated_at', datetime('now'))",
 		to,
 	)
 	if err != nil {

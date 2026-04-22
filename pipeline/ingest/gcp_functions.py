@@ -102,6 +102,11 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         except ValueError:
             continue
         amount = parse_unit_price(units=price_units, nanos=int(price_nanos or 0)) / divisor
+        # Zero-priced requests dimension has no information (it's a free-tier
+        # Invocations SKU). Keeping a {"amount": 0.0} entry misleads
+        # `sku gcp functions price` and `sku estimate`.
+        if dim == "requests" and amount == 0.0:
+            continue
         price_entry = {"dimension": dim, "tier": "", "amount": amount, "unit": unit}
 
         region = service_regions[0]
@@ -123,10 +128,11 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         bucket["prices"][dim] = price_entry
 
     for region, bucket in grouped.items():
-        # Fan out the global Invocations price into every region bucket.
+        # Fan out the global Invocations price into every region bucket —
+        # only if it's non-zero (zero was already filtered above).
         if global_requests is not None and "requests" not in bucket["prices"]:
             bucket["prices"]["requests"] = global_requests
-        if set(bucket["prices"].keys()) != {"cpu-second", "memory-gb-second", "requests"}:
+        if not {"cpu-second", "memory-gb-second"} <= bucket["prices"].keys():
             continue
         if "sku_id" not in bucket:
             continue
@@ -138,6 +144,12 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             "upfront": "",
             "payment_option": "",
         })
+        prices_out = [
+            bucket["prices"]["cpu-second"],
+            bucket["prices"]["memory-gb-second"],
+        ]
+        if "requests" in bucket["prices"]:
+            prices_out.append(bucket["prices"]["requests"])
         yield {
             "sku_id": bucket["sku_id"],
             "provider": _PROVIDER,
@@ -155,11 +167,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
                 },
             },
             "terms": terms,
-            "prices": [
-                bucket["prices"]["cpu-second"],
-                bucket["prices"]["memory-gb-second"],
-                bucket["prices"]["requests"],
-            ],
+            "prices": prices_out,
         }
 
 

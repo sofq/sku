@@ -123,9 +123,7 @@ func runEstimate(cmd *cobra.Command, f *estimateFlags) error {
 
 	res, rerr := estimate.Run(context.Background(), estimate.Config{Items: items})
 	if rerr != nil {
-		wrapped := fmt.Errorf("estimate: %w", rerr)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "estimate: %w", rerr)
 	}
 	return output.EmitEstimate(cmd.OutOrStdout(), res, output.Options{
 		Preset: output.Preset(s.Preset),

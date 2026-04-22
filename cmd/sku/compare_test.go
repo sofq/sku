@@ -115,6 +115,28 @@ func TestCompareCmd_dbRelationalNoRowsExitsNotFound(t *testing.T) {
 	err := cmd.Execute()
 	require.Error(t, err)
 	require.Contains(t, stderr.String(), `"not_found"`)
+	// B11: --max-price was not passed, so it must NOT be echoed back as
+	// an applied filter (shipping `max_price: 0` would claim the comparator
+	// filtered on "free only", which is a lie).
+	require.NotContains(t, stderr.String(), `"max_price":0`)
+	require.NotContains(t, stderr.String(), `"max_price": 0`)
+}
+
+func TestCompareCmd_maxPriceEchoedWhenSet(t *testing.T) {
+	dir := testutilSeededDBRelationalCatalog(t)
+	t.Setenv("SKU_DATA_DIR", dir)
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	// Passing --max-price 0.0001 with huge --vcpu forces NotFound; the
+	// applied-filters echo should then include max_price.
+	cmd.SetArgs([]string{"compare", "--kind", "db.relational",
+		"--vcpu", "128", "--max-price", "0.0001",
+		"--engine", "postgres", "--deployment-option", "single-az"})
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, stderr.String(), `"max_price":0.0001`)
 }
 
 func TestCompareCmd_dryRunDBRelational(t *testing.T) {

@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -112,9 +111,7 @@ func runGCPGCS(cmd *cobra.Command, f *gcpGCSFlags, requireRegion bool) error {
 		Terms:        f.terms(),
 	})
 	if err != nil {
-		wrapped := fmt.Errorf("gcp gcs %s: %w", cmd.Use, err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "gcp gcs %s: %w", cmd.Use, err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound("gcp", "gcs",

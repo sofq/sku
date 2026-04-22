@@ -19,7 +19,12 @@ from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
 from ._duckdb import dumps
-from .aws_common import aws_regions_from_yaml, fetch_offer_regions_stripped, load_region_normalizer
+from .aws_common import (
+    aws_regions_from_yaml,
+    fetch_offer_regions_stripped,
+    load_region_normalizer,
+    shared_offer_basename,
+)
 from .aws_ec2 import _iter_product_prices
 
 _PROVIDER = "aws"
@@ -84,7 +89,12 @@ def ingest(*, offer_paths: Iterable[Path]) -> Iterable[dict[str, Any]]:
 
 def _resolve_paths(args: argparse.Namespace) -> list[Path]:
     if args.offer_dir:
-        return sorted(p for p in args.offer_dir.glob("aws_ebs-*.json") if p.is_file())
+        base = shared_offer_basename("aws_ebs")
+        return sorted(
+            p
+            for p in args.offer_dir.glob(f"{base}-*.json")
+            if p.is_file() and not p.name.endswith("-region_index.json")
+        )
     if args.fixture:
         p = args.fixture
         return [p / "offer.json"] if p.is_dir() else [p]
@@ -106,11 +116,17 @@ def main() -> int:
     ap.add_argument("--catalog-version", default=None)
     args = ap.parse_args()
 
-    if args.offer_dir is not None and not any(args.offer_dir.glob("aws_ebs-*.json")):
-        args.offer_dir.mkdir(parents=True, exist_ok=True)
-        fetch_offer_regions_stripped(
-            "aws_ebs", args.offer_dir, regions=aws_regions_from_yaml()
+    if args.offer_dir is not None:
+        base = shared_offer_basename("aws_ebs")
+        have = any(
+            p.is_file() and not p.name.endswith("-region_index.json")
+            for p in args.offer_dir.glob(f"{base}-*.json")
         )
+        if not have:
+            args.offer_dir.mkdir(parents=True, exist_ok=True)
+            fetch_offer_regions_stripped(
+                "aws_ebs", args.offer_dir, regions=aws_regions_from_yaml()
+            )
 
     paths = _resolve_paths(args)
     if not paths:

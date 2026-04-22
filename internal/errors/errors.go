@@ -8,6 +8,7 @@ package errors
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -59,6 +60,12 @@ type E struct {
 	Message    string         `json:"message"`
 	Suggestion string         `json:"suggestion,omitempty"`
 	Details    map[string]any `json:"details,omitempty"`
+
+	// written tracks whether this *E has already been rendered to stderr
+	// by Write. Commands typically call Write inside RunE and then return
+	// the error; the top-level Execute wrapper also calls Write. The flag
+	// makes the second call a no-op so the envelope isn't printed twice.
+	written bool
 }
 
 // Error implements error.
@@ -72,6 +79,12 @@ type envelope struct {
 // Write marshals err to the §4 JSON envelope on w and returns the exit code
 // the process should use. A nil err writes nothing and returns 0. Any non-*E
 // error is boxed as CodeGeneric.
+//
+// Write is idempotent per *E instance: when called a second time on an *E it
+// has already rendered, it returns the exit code without writing again. This
+// lets a command's RunE call Write and then return the same *E while the
+// top-level Execute wrapper safely calls Write again on the propagated err
+// without producing a duplicate envelope on stderr.
 func Write(w io.Writer, err error) int {
 	if err == nil {
 		return 0
@@ -81,6 +94,10 @@ func Write(w io.Writer, err error) int {
 	if !errors.As(err, &e) {
 		e = &E{Code: CodeGeneric, Message: err.Error()}
 	}
+	if e.written {
+		return e.Code.ExitCode()
+	}
+	e.written = true
 	enc := json.NewEncoder(w)
 	// json.Encoder writes compact JSON + trailing \n, matching §4 stderr shape.
 	if marshalErr := enc.Encode(envelope{Error: e}); marshalErr != nil {
@@ -91,6 +108,18 @@ func Write(w io.Writer, err error) int {
 		)
 	}
 	return e.Code.ExitCode()
+}
+
+// WriteWrap builds an *E with the given code and a formatted message
+// (supports fmt.Errorf's %w verb), writes the §4 envelope to w, and returns
+// the *E so the caller can `return skuerrors.WriteWrap(...)`. The returned
+// *E is marked as already-written, so a subsequent Write at the top-level
+// Execute wrapper is a no-op — avoiding the double-print.
+func WriteWrap(w io.Writer, code Code, format string, args ...any) *E {
+	// fmt.Errorf handles %w properly; .Error() flattens the chain to text.
+	e := &E{Code: code, Message: fmt.Errorf(format, args...).Error()}
+	Write(w, e)
+	return e
 }
 
 // NotFound builds an E with CodeNotFound and the common details shape (§4).

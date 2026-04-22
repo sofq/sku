@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
@@ -145,9 +144,7 @@ func runSearch(cmd *cobra.Command, f *searchFlags) error {
 			skuerrors.Write(cmd.ErrOrStderr(), e)
 			return e
 		}
-		wrapped := fmt.Errorf("search: %w", err)
-		skuerrors.Write(cmd.ErrOrStderr(), wrapped)
-		return wrapped
+		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "search: %w", err)
 	}
 	if len(rows) == 0 {
 		e := skuerrors.NotFound(f.provider, f.service,

@@ -212,11 +212,18 @@ func compareLookup(ctx context.Context, f compareFlags, s *batch.Settings) ([]ca
 		return nil, fmt.Errorf("compare: %w", err)
 	}
 	if len(rows) == 0 {
-		return nil, skuerrors.NotFound("compare", f.kind,
-			map[string]any{
-				"vcpu": f.vcpu, "memory_gb": f.memoryGB, "gpu_count": f.gpuCount,
-				"regions": regionLiterals, "max_price": f.maxPrice,
-			},
+		applied := map[string]any{
+			"vcpu": f.vcpu, "memory_gb": f.memoryGB, "gpu_count": f.gpuCount,
+			"regions": regionLiterals,
+		}
+		// Only echo --max-price when the user actually set a ceiling; a
+		// zero value here means "unset", not "free only", so shipping
+		// `max_price: 0` in applied_filters would be a lie about what
+		// the comparator actually filtered on.
+		if f.maxPrice > 0 {
+			applied["max_price"] = f.maxPrice
+		}
+		return nil, skuerrors.NotFound("compare", f.kind, applied,
 			"Try relaxing --vcpu / --memory or widening --regions")
 	}
 	return rows, nil
@@ -286,11 +293,14 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 
 	if s.DryRun {
 		args := map[string]any{
-			"kind":      f.kind,
-			"regions":   regionLiterals,
-			"sort":      f.sort,
-			"limit":     f.limit,
-			"max_price": f.maxPrice,
+			"kind":    f.kind,
+			"regions": regionLiterals,
+			"sort":    f.sort,
+			"limit":   f.limit,
+		}
+		// Mirror the applied-filters echo: only include max_price when set.
+		if f.maxPrice > 0 {
+			args["max_price"] = f.maxPrice
 		}
 		switch f.kind {
 		case "compute.vm":
