@@ -70,9 +70,9 @@ func TestEmitEstimate_RoundsFloatAmounts(t *testing.T) {
 		Currency:        "USD",
 		MonthlyTotalUSD: 0.09600000000000001 * 730, // 70.08000000000001
 		Items: []estimate.LineItem{{
-			Item:      estimate.Item{Raw: "aws/ec2:m5.large:region=us-east-1"},
-			Kind:      "compute.vm",
-			Provider:  "aws", Service: "ec2", Resource: "m5.large", Region: "us-east-1",
+			Item:     estimate.Item{Raw: "aws/ec2:m5.large:region=us-east-1"},
+			Kind:     "compute.vm",
+			Provider: "aws", Service: "ec2", Resource: "m5.large", Region: "us-east-1",
 			HourlyUSD:  0.09600000000000001,
 			MonthlyUSD: 0.09600000000000001 * 730,
 		}},
