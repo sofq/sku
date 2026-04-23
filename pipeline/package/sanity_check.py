@@ -32,6 +32,22 @@ def _count_rows(con: sqlite3.Connection, table: str) -> int:
     return con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
 
 
+def _compute_vm_families(con: sqlite3.Connection) -> set[str]:
+    """Return the set of compute.vm family tokens (prefix before first '-' or '.')."""
+    rows = con.execute(
+        "SELECT DISTINCT resource_name FROM skus WHERE kind = 'compute.vm'"
+    ).fetchall()
+    families: set[str] = set()
+    for (name,) in rows:
+        sep = len(name)
+        if "-" in name:
+            sep = min(sep, name.index("-"))
+        if "." in name:
+            sep = min(sep, name.index("."))
+        families.add(name[:sep] if sep < len(name) else name)
+    return families
+
+
 def _schema_ddl(con: sqlite3.Connection) -> dict[str, str]:
     rows = con.execute(
         "SELECT name, sql FROM sqlite_master "
@@ -92,32 +108,40 @@ def sanity_check(
         try:
             prev_skus = _count_rows(prev, "skus")
             prev_schema = _schema_ddl(prev)
-        finally:
-            prev.close()
 
-        if curr_schema != prev_schema:
-            added = sorted(curr_schema.keys() - prev_schema.keys())
-            removed = sorted(prev_schema.keys() - curr_schema.keys())
-            changed = sorted(
-                k
-                for k in curr_schema.keys() & prev_schema.keys()
-                if curr_schema[k] != prev_schema[k]
-            )
-            raise SanityError(
-                shard,
-                "schema_drift",
-                f"added={added} removed={removed} changed={changed}",
-            )
-
-        if prev_skus > 0:
-            drift_pct = 100.0 * abs(curr_skus - prev_skus) / prev_skus
-            if drift_pct > tolerance_pct:
+            if curr_schema != prev_schema:
+                added = sorted(curr_schema.keys() - prev_schema.keys())
+                removed = sorted(prev_schema.keys() - curr_schema.keys())
+                changed = sorted(
+                    k
+                    for k in curr_schema.keys() & prev_schema.keys()
+                    if curr_schema[k] != prev_schema[k]
+                )
                 raise SanityError(
                     shard,
-                    "row_count_drift",
-                    f"prev={prev_skus} curr={curr_skus} drift={drift_pct:.2f}% "
-                    f"exceeds tolerance {tolerance_pct:.2f}%",
+                    "schema_drift",
+                    f"added={added} removed={removed} changed={changed}",
                 )
+
+            if prev_skus > 0:
+                drift_pct = 100.0 * abs(curr_skus - prev_skus) / prev_skus
+                if drift_pct > tolerance_pct:
+                    raise SanityError(
+                        shard,
+                        "row_count_drift",
+                        f"prev={prev_skus} curr={curr_skus} drift={drift_pct:.2f}% "
+                        f"exceeds tolerance {tolerance_pct:.2f}%",
+                    )
+
+            dropped_families = _compute_vm_families(prev) - _compute_vm_families(con)
+            if dropped_families:
+                raise SanityError(
+                    shard,
+                    "family_coverage_drop",
+                    f"compute.vm families with zero rows: {sorted(dropped_families)}",
+                )
+        finally:
+            prev.close()
     finally:
         con.close()
 
