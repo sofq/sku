@@ -59,11 +59,11 @@ SELECT
   armRegionName AS region,
   productName   AS product_name,
   retailPrice   AS price,
-  unitOfMeasure AS uom,
-  currencyCode  AS currency,
-  type          AS row_type,
-  serviceName   AS service_name
+  unitOfMeasure AS uom
 FROM items
+WHERE serviceName = '{service_name}'
+  AND type        = 'Consumption'
+  AND currencyCode = 'USD'
 """
 
 
@@ -78,17 +78,12 @@ def ingest_hosted_db(
     normalizer = load_region_normalizer()
     con = open_conn()
     path_literal = str(prices_path).replace("'", "''")
-    sql = _SQL.replace("{path}", path_literal)
+    service_name_literal = service_name.replace("'", "''")
+    sql = _SQL.replace("{path}", path_literal).replace("{service_name}", service_name_literal)
     seen: set[str] = set()
     for (
-        sku_id, sku_name, region, product, price, uom, currency, row_type, svc_name,
+        sku_id, sku_name, region, product, price, uom,
     ) in con.execute(sql).fetchall():
-        if svc_name != service_name:
-            continue
-        if row_type != "Consumption":
-            continue
-        if currency != "USD":
-            continue
         deployment = _classify_deployment(product)
         if deployment is None:
             continue

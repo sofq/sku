@@ -70,6 +70,20 @@ func TestQueryDBRelational_requiresEngineAndDeploymentOption(t *testing.T) {
 	require.Contains(t, err.Error(), "engine")
 }
 
+func TestTenanciesForEngine(t *testing.T) {
+	tests := []struct {
+		engine string
+		want   []string
+	}{
+		{"oracle",     []string{"oracle"}},
+		{"exotic-db",  []string{"exotic-db"}},
+	}
+	for _, tc := range tests {
+		got := tenanciesForEngine(tc.engine)
+		require.Equal(t, tc.want, got, "engine=%s", tc.engine)
+	}
+}
+
 func TestQueryDBRelational_postgresMatchesAzureHostedDBTenancy(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "shard.db")

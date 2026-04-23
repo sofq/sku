@@ -44,11 +44,7 @@ func (f *gcpCloudSQLFlags) terms() catalog.Terms {
 		"mysql":     "cloud-sql-mysql",
 		"sqlserver": "cloud-sql-sqlserver",
 	}
-	t, ok := tenancy[f.engine]
-	if !ok {
-		t = "cloud-sql-postgres"
-	}
-	return catalog.Terms{Commitment: f.commitment, Tenancy: t, OS: f.deploymentOption}
+	return catalog.Terms{Commitment: f.commitment, Tenancy: tenancy[f.engine], OS: f.deploymentOption}
 }
 
 func newGCPCloudSQLPriceCmd() *cobra.Command {
@@ -84,6 +80,13 @@ func runGCPCloudSQL(cmd *cobra.Command, f *gcpCloudSQLFlags, requireRegion bool)
 	if requireRegion && f.region == "" {
 		e := skuerrors.Validation("flag_invalid", "region", "",
 			"pass --region <gcp-region>")
+		skuerrors.Write(cmd.ErrOrStderr(), e)
+		return e
+	}
+	validEngines := map[string]bool{"postgres": true, "mysql": true, "sqlserver": true}
+	if !validEngines[f.engine] {
+		e := skuerrors.Validation("flag_invalid", "engine", f.engine,
+			"must be one of: postgres | mysql | sqlserver")
 		skuerrors.Write(cmd.ErrOrStderr(), e)
 		return e
 	}

@@ -11,14 +11,23 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: cd pipeline && uv sync
-      # Fetch fresh raw pricing feeds from public endpoints into the paths
-      # that `make profile` expects. AWS and Azure pricing endpoints are
-      # unauthenticated; GCP requires a project quota but no credentials.
+      - name: Authenticate to Google Cloud (WIF)
+        id: gcp-auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_VALIDATE_SA }}
+          token_format: access_token
+      # Fetch fresh raw pricing feeds. AWS and Azure are unauthenticated.
+      # GCP Cloud Billing Catalog requires a bearer token — provided via WIF above.
       - name: Fetch raw feeds
+        env:
+          GCP_ACCESS_TOKEN: ${{ steps.gcp-auth.outputs.access_token }}
         run: |
           set -euo pipefail
           mkdir -p dist/pipeline/raw/aws dist/pipeline/raw/azure dist/pipeline/raw/gcp
@@ -38,17 +47,20 @@ jobs:
           # Azure — retail prices (public, paginated; first page sufficient for profiling)
           curl -fsSL "https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview" \
             -o dist/pipeline/raw/azure/prices.json
-          # GCP — Cloud Billing Catalog (public, requires a service API URL per service)
-          curl -fsSL "https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus?key=" \
-            -o dist/pipeline/raw/gcp/compute-engine.json || echo "warn: GCP fetch failed (quota?); skipping"
+          # GCP — Cloud Billing Catalog (bearer token from WIF above)
+          curl -fsSL \
+            -H "Authorization: Bearer ${GCP_ACCESS_TOKEN}" \
+            "https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus" \
+            -o dist/pipeline/raw/gcp/compute-engine.json \
+            || echo "warn: GCP fetch failed; skipping"
       - run: make profile
       - name: Open PR on diff
         run: |
           set -euo pipefail
           if [ -n "$(git status --porcelain docs/coverage/)" ]; then
             branch="bot/coverage-$(date -u +%Y%m%d)"
-            git config user.name  "sku-bot"
-            git config user.email "sku-bot@users.noreply.github.com"
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
             git checkout -b "$branch"
             git add docs/coverage/
             git commit -m "docs(coverage): weekly profiler refresh"

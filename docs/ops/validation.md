@@ -12,7 +12,7 @@ back a published release, it just alerts.
 | Provider | Auth path | Why not anonymous |
 |---|---|---|
 | AWS | Short-lived OIDC → IAM role `sku-validator` → SigV4 `pricing:GetProducts` | Query API requires SigV4. Bulk JSON is anonymous but the daily ingest already reads it — cross-checking against the same source catches fewer parser bugs. |
-| GCP | Short-lived OIDC → Workload Identity Federation → service account `sku-validator@<project>.iam` → `cloudbilling.googleapis.com/v1/services/{sid}/skus` | Cloud Billing Catalog API requires a bearer token. WIF avoids the long-lived `GCP_BILLING_API_KEY` that `data-daily.yml` uses. |
+| GCP | Short-lived OIDC → Workload Identity Federation → service account `sku-validator@<project>.iam` → `cloudbilling.googleapis.com/v1/services/{sid}/skus` | Cloud Billing Catalog API requires a bearer token. `data-daily.yml` and `data-weekly.yml` use the same WIF path. |
 | Azure | Anonymous `prices.azure.com/api/retail/prices` | Azure retail prices are public. |
 | OpenRouter | Anonymous `openrouter.ai/api/v1/models/{id}/endpoints` | Public. |
 
