@@ -274,3 +274,9 @@ shard-live: ## Ingest + package SHARD=<name> using SRC=<local-offer-path>
 	mkdir -p dist/pipeline
 	$(MAKE) -C pipeline shard SHARD=$(SHARD) \
 	  INGEST_EXTRA='$(_SHARD_LIVE_FLAG) $(SRC) $(INGEST_EXTRA)'
+
+.PHONY: profile
+profile:  ## Generate catalog coverage reports under docs/coverage/ from raw feeds.
+	cd pipeline && uv run python -m catalog_profiler aws   --offer-dir   ../dist/pipeline/raw/aws    --out ../docs/coverage/aws.md
+	cd pipeline && uv run python -m catalog_profiler azure --prices      ../dist/pipeline/raw/azure/prices.json --out ../docs/coverage/azure.md
+	cd pipeline && uv run python -m catalog_profiler gcp   --catalog-paths ../dist/pipeline/raw/gcp/*.json      --out ../docs/coverage/gcp.md
