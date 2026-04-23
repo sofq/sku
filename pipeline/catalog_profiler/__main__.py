@@ -49,8 +49,13 @@ def _cmd_gcp(args: argparse.Namespace) -> int:
     from .gcp import scan_catalog
     from .report import render_markdown
 
+    catalog_paths = [p for p in args.catalog_paths if p.is_file()]
+    if not catalog_paths:
+        print("error: no GCP catalog JSON files found", file=sys.stderr)
+        return 2
+
     all_rows = []
-    for skus_path in args.catalog_paths:
+    for skus_path in catalog_paths:
         all_rows.extend(scan_catalog(skus_path=skus_path))
     md = render_markdown(cloud="gcp", rows=all_rows, as_of=args.as_of)
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -58,7 +63,7 @@ def _cmd_gcp(args: argparse.Namespace) -> int:
     return 0
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="catalog_profiler")
     ap.add_argument("--as-of", default=_dt.date.today().isoformat())
     sub = ap.add_subparsers(dest="cloud", required=True)
@@ -78,7 +83,7 @@ def main() -> int:
     gcp.add_argument("--out", type=Path, required=True)
     gcp.set_defaults(func=_cmd_gcp)
 
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
     return int(args.func(args) or 0)
 
 

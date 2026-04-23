@@ -48,11 +48,20 @@ jobs:
           curl -fsSL "https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview" \
             -o dist/pipeline/raw/azure/prices.json
           # GCP — Cloud Billing Catalog (bearer token from WIF above)
-          curl -fsSL \
-            -H "Authorization: Bearer ${GCP_ACCESS_TOKEN}" \
-            "https://cloudbilling.googleapis.com/v1/services/6F81-5844-456A/skus" \
-            -o dist/pipeline/raw/gcp/compute-engine.json \
-            || echo "warn: GCP fetch failed; skipping"
+          cd pipeline
+          uv run python - <<'PY'
+          import os
+          from pathlib import Path
+          import requests
+
+          from ingest.gcp_common import fetch_skus
+
+          out_dir = Path("../dist/pipeline/raw/gcp")
+          sess = requests.Session()
+          sess.headers["Authorization"] = f"Bearer {os.environ['GCP_ACCESS_TOKEN']}"
+          for shard in ("gcp_gce", "gcp_cloud_sql", "gcp_gcs", "gcp_run", "gcp_functions"):
+              fetch_skus(shard, out_dir / f"{shard}.json", session=sess)
+          PY
       - run: make profile
       - name: Open PR on diff
         run: |
