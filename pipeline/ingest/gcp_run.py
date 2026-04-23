@@ -30,6 +30,10 @@ from .gcp_common import load_region_normalizer, parse_unit_price, parse_usage_un
 _PROVIDER = "gcp"
 _SERVICE = "run"
 _KIND = "compute.function"
+# x86_64 is the only architecture exposed by Cloud Run as of the last
+# catalog verification (see docs/coverage/gcp-arm-verification.md).
+# Re-verify quarterly; if arm SKUs appear, implement per-SKU architecture
+# detection keyed on " (Arm)" in the SKU description.
 _ARCHITECTURE = "x86_64"
 _SERVICE_DISPLAY = "Cloud Run"
 # Live API uses resourceGroup="Compute" for all Cloud Run SKUs (gen1 and gen2).
