@@ -241,6 +241,66 @@
       },
       "productFamily": "Database Instance",
       "sku": "SKU-DBT3MEDIUM-USEAST1-PO-SAZ"
+    },
+    "FAKEORACLE1": {
+      "attributes": {
+        "databaseEngine": "Oracle",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "Bring your own license",
+        "memory": "8 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "FAKEORACLE1"
+    },
+    "FAKESQLSRV1": {
+      "attributes": {
+        "databaseEngine": "SQL Server",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.m5.large",
+        "licenseModel": "License Included",
+        "memory": "8 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "FAKESQLSRV1"
+    },
+    "FAKEAURAPG1": {
+      "attributes": {
+        "databaseEngine": "Aurora PostgreSQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.r5.large",
+        "licenseModel": "No license required",
+        "memory": "16 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "FAKEAURAPG1"
+    },
+    "FAKEAURAMY1": {
+      "attributes": {
+        "databaseEngine": "Aurora MySQL",
+        "deploymentOption": "Single-AZ",
+        "instanceType": "db.r5.large",
+        "licenseModel": "No license required",
+        "memory": "16 GiB",
+        "regionCode": "us-east-1",
+        "servicecode": "AmazonRDS",
+        "storage": "General Purpose (SSD)",
+        "vcpu": "2"
+      },
+      "productFamily": "Database Instance",
+      "sku": "FAKEAURAMY1"
     }
   },
   "publicationDate": "2026-04-15T00:00:00Z",
@@ -484,6 +544,66 @@
             }
           },
           "sku": "SKU-DBT3MEDIUM-USEAST1-PO-SAZ"
+        }
+      },
+      "FAKEORACLE1": {
+        "FAKEORACLE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "FAKEORACLE1.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.48 per RDS Oracle db.m5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.4800000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "FAKEORACLE1"
+        }
+      },
+      "FAKESQLSRV1": {
+        "FAKESQLSRV1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "FAKESQLSRV1.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.35 per RDS SQL Server db.m5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.3500000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "FAKESQLSRV1"
+        }
+      },
+      "FAKEAURAPG1": {
+        "FAKEAURAPG1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "FAKEAURAPG1.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.29 per RDS Aurora PostgreSQL db.r5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2900000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "FAKEAURAPG1"
+        }
+      },
+      "FAKEAURAMY1": {
+        "FAKEAURAMY1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "priceDimensions": {
+            "FAKEAURAMY1.JRTCKXETXF.6YS6EN2CT7": {
+              "description": "$0.27 per RDS Aurora MySQL db.r5.large Single-AZ Instance Hour",
+              "pricePerUnit": {
+                "USD": "0.2700000000"
+              },
+              "unit": "Hrs"
+            }
+          },
+          "sku": "FAKEAURAMY1"
         }
       }
     }

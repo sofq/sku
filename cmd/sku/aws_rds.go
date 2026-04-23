@@ -31,7 +31,8 @@ type rdsFlags struct {
 func (f *rdsFlags) bind(c *cobra.Command) {
 	c.Flags().StringVar(&f.instanceType, "instance-type", "", "RDS instance type, e.g. db.m5.large")
 	c.Flags().StringVar(&f.region, "region", "", "AWS region")
-	c.Flags().StringVar(&f.engine, "engine", "mysql", "postgres | mysql | mariadb")
+	c.Flags().StringVar(&f.engine, "engine", "mysql",
+		"postgres | mysql | mariadb | oracle | sqlserver | aurora-postgres | aurora-mysql")
 	c.Flags().StringVar(&f.deploymentOption, "deployment-option", "single-az", "single-az | multi-az")
 	c.Flags().StringVar(&f.commitment, "commitment", "on_demand", "on_demand (only on-demand shipped in m3a.1)")
 }

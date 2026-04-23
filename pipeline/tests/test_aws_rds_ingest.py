@@ -24,10 +24,32 @@ def test_fixture_matches_golden():
 def test_engine_and_deployment_encoded_in_terms():
     """RDS reuses terms.tenancy for engine and terms.os for deployment-option."""
     rows = list(ingest(offer_path=FIXTURE))
+    valid_engines = {"postgres", "mysql", "mariadb", "oracle", "sqlserver",
+                     "aurora-postgres", "aurora-mysql"}
+    valid_deployments = {"single-az", "multi-az", "multi-az-cluster"}
     for r in rows:
         assert r["kind"] == "db.relational"
-        assert r["terms"]["tenancy"] in {"postgres", "mysql", "mariadb"}
-        assert r["terms"]["os"] in {"single-az", "multi-az"}
+        assert r["terms"]["tenancy"] in valid_engines
+        assert r["terms"]["os"] in valid_deployments
+
+
+def test_ingest_admits_oracle_sqlserver_aurora_engines():
+    """Scope-expansion guard: new engines must appear in shard output."""
+    rows = list(ingest(offer_path=FIXTURE))
+    engines_seen = {r["terms"]["tenancy"] for r in rows}
+    assert "oracle" in engines_seen
+    assert "sqlserver" in engines_seen
+    assert "aurora-postgres" in engines_seen
+    assert "aurora-mysql" in engines_seen
+
+
+def test_license_model_stored_in_extra():
+    """license_model must survive into resource_attrs — not filtered away."""
+    rows = list(ingest(offer_path=FIXTURE))
+    oracle_rows = [r for r in rows if r["terms"]["tenancy"] == "oracle"]
+    assert oracle_rows, "expected at least one oracle row"
+    for r in oracle_rows:
+        assert "license_model" in r["resource_attrs"]["extra"]
 
 
 def test_multi_az_price_doubles_single_az():
