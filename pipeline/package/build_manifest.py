@@ -31,6 +31,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from .budgets import check_shard_size
+
 _SCHEMA_VERSION = 1
 
 
@@ -148,6 +150,9 @@ def build_manifest(
                     f"{shard} sidecar says has_baseline=true but {baseline_path} missing"
                 )
             baseline_entry = _file_entry(baseline_path, release_base_url)
+            # Sidecar shard names are dashed (public/release form, e.g. aws-ec2);
+            # normalize to underscored canonical form for budget lookup.
+            check_shard_size(shard=shard.replace("-", "_"), compressed_bytes=baseline_entry["size"])
             entry: dict[str, Any] = {
                 "baseline_version": delta_to,
                 "baseline_url": baseline_entry["url"],

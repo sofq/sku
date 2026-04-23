@@ -1,0 +1,26 @@
+{
+  "Items": [
+    {
+      "meterId": "33333333-0000-0000-0000-000000000001",
+      "skuName": "Gen5 2 vCore",
+      "armRegionName": "eastus",
+      "productName": "Azure Database for MariaDB Single Server General Purpose - Compute Gen5",
+      "retailPrice": 0.10,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "type": "Consumption",
+      "serviceName": "Azure Database for MariaDB"
+    },
+    {
+      "meterId": "33333333-0000-0000-0000-000000000002",
+      "skuName": "Gen5 4 vCore",
+      "armRegionName": "westeurope",
+      "productName": "Azure Database for MariaDB Single Server General Purpose - Compute Gen5",
+      "retailPrice": 0.20,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "type": "Consumption",
+      "serviceName": "Azure Database for MariaDB"
+    }
+  ]
+}

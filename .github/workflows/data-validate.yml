@@ -27,14 +27,19 @@ jobs:
       shards: ${{ steps.resolve.outputs.shards }}
       catalog_version: ${{ steps.resolve.outputs.catalog_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Resolve latest data release + shard list
         id: resolve
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REQUESTED: ${{ github.event.inputs.shards }}
         run: |
-          tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          version=$(scripts/ci/previous_release_version.sh)
+          if [ -z "$version" ]; then
+            echo "no versioned data release found" >&2
+            exit 2
+          fi
+          tag="data-${version}"
           mkdir -p dist/pipeline/validate
           gh release download "$tag" --pattern manifest.json --dir dist/pipeline/validate/
           if [ -n "$REQUESTED" ]; then
@@ -43,7 +48,7 @@ jobs:
             shards=$(jq -c '.shards | keys' dist/pipeline/validate/manifest.json)
           fi
           echo "shards=$shards" >> "$GITHUB_OUTPUT"
-          echo "catalog_version=${tag#data-}" >> "$GITHUB_OUTPUT"
+          echo "catalog_version=$version" >> "$GITHUB_OUTPUT"
 
   validate:
     needs: resolve
@@ -53,7 +58,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.resolve.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
       - name: Install validate extras
         run: python -m pip install -e 'pipeline[validate]'
@@ -111,3 +116,55 @@ jobs:
             --title "Catalog drift in ${SHARD} (catalog ${CV})" \
             --label "pipeline,catalog-drift" \
             --body "See workflow run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} and the attached validate-${SHARD} artifact."
+
+  gcp-machine-types-refresh:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Skip unless first scheduled run of the month
+        id: cadence
+        run: |
+          if [ "$(date -u +%d)" -gt 07 ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.cadence.outputs.run == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_VALIDATE_SA }}
+      - if: steps.cadence.outputs.run == 'true'
+        uses: ./.github/actions/setup-pipeline
+      - if: steps.cadence.outputs.run == 'true'
+        name: Refresh fixture
+        run: make gcp-machine-types-refresh
+        env:
+          GCP_PROJECT: ${{ vars.GCP_VALIDATE_PROJECT }}
+      - if: steps.cadence.outputs.run == 'true'
+        name: Commit + push + open PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain pipeline/testdata/gcp_gce/machine_types.json)" ]; then
+            echo "no changes — skipping PR"
+            exit 0
+          fi
+          branch="bot/gcp-machine-types-$(date -u +%Y%m)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add pipeline/testdata/gcp_gce/machine_types.json
+          git commit -m "chore(gcp-gce): refresh machine-types fixture"
+          git push -u origin "$branch"
+          gh pr create \
+            --title "chore(gcp-gce): refresh machine-types fixture" \
+            --body  "Automated monthly refresh from aggregatedList API. Makefile target re-loads specs after fetch, so unknown families fail before this PR opens." \
+            --base  main \
+            --head  "$branch"

@@ -31,13 +31,20 @@ func QueryDBRelational(ctx context.Context, c *catalog.Catalog, spec DBRelationa
 	if spec.Engine == "" || spec.DeploymentOption == "" {
 		return nil, fmt.Errorf("compare: db.relational requires engine + deployment option")
 	}
+	tenancies := tenanciesForEngine(spec.Engine)
 	where := []string{
 		"s.kind = 'db.relational'",
 		"t.commitment = 'on_demand'",
-		"t.tenancy = ?",
-		"t.os = ?",
 	}
-	args := []any{spec.Engine, spec.DeploymentOption}
+	args := []any{}
+	tenancyPlaceholders := strings.Repeat("?,", len(tenancies))
+	tenancyPlaceholders = tenancyPlaceholders[:len(tenancyPlaceholders)-1]
+	where = append(where, "t.tenancy IN ("+tenancyPlaceholders+")")
+	for _, tenancy := range tenancies {
+		args = append(args, tenancy)
+	}
+	where = append(where, "t.os = ?")
+	args = append(args, spec.DeploymentOption)
 	if spec.VCPU > 0 {
 		where = append(where, "ra.vcpu >= ?")
 		args = append(args, spec.VCPU)
@@ -96,4 +103,19 @@ ORDER BY COALESCE(mp.min_price, 1e308) ASC, s.provider, s.resource_name, s.sku_i
 		out = append(out, r)
 	}
 	return out, rs.Err()
+}
+
+func tenanciesForEngine(engine string) []string {
+	switch engine {
+	case "postgres":
+		return []string{"postgres", "aurora-postgres", "azure-postgres", "cloud-sql-postgres"}
+	case "mysql":
+		return []string{"mysql", "aurora-mysql", "azure-mysql", "cloud-sql-mysql"}
+	case "mariadb":
+		return []string{"mariadb", "azure-mariadb"}
+	case "sqlserver":
+		return []string{"sqlserver", "azure-sql", "cloud-sql-sqlserver"}
+	default:
+		return []string{engine}
+	}
 }

@@ -28,6 +28,7 @@ _KIND = "db.relational"
 _ENGINE_HINTS: tuple[tuple[str, str], ...] = (
     ("PostgreSQL", "cloud-sql-postgres"),
     ("MySQL",      "cloud-sql-mysql"),
+    ("SQL Server", "cloud-sql-sqlserver"),
 )
 
 _DEPLOYMENT_HINTS: tuple[tuple[str, str], ...] = (

@@ -22,16 +22,16 @@ type Manifest struct {
 
 // ShardEntry describes a single shard's current state in the manifest.
 type ShardEntry struct {
-	BaselineVersion    string    `json:"baseline_version"`
-	BaselineURL        string    `json:"baseline_url"`
-	BaselineSHA256     string    `json:"baseline_sha256"`
-	BaselineSize       int64     `json:"baseline_size"`
-	HeadVersion        string    `json:"head_version"`
-	MinBinaryVersion   string    `json:"min_binary_version"`
-	ShardSchemaVersion int       `json:"shard_schema_version"`
-	Deltas             []Delta   `json:"deltas"`
-	RowCount           int64     `json:"row_count"`
-	LastUpdated        time.Time `json:"last_updated"`
+	BaselineVersion    string  `json:"baseline_version"`
+	BaselineURL        string  `json:"baseline_url"`
+	BaselineSHA256     string  `json:"baseline_sha256"`
+	BaselineSize       int64   `json:"baseline_size"`
+	HeadVersion        string  `json:"head_version"`
+	MinBinaryVersion   string  `json:"min_binary_version"`
+	ShardSchemaVersion int     `json:"shard_schema_version"`
+	Deltas             []Delta `json:"deltas"`
+	RowCount           int64   `json:"row_count"`
+	LastUpdated        string  `json:"last_updated"`
 }
 
 // Delta describes one incremental SQL patch between two catalog versions.

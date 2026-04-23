@@ -13,7 +13,7 @@
       "shard_schema_version": 1,
       "deltas": [],
       "row_count": 500,
-      "last_updated": "2026-04-20T12:00:00Z"
+      "last_updated": "2026.04.20"
     },
     "azure-vm": {
       "baseline_version": "2026.04.18",
@@ -33,7 +33,7 @@
         }
       ],
       "row_count": 1200,
-      "last_updated": "2026-04-19T12:00:00Z"
+      "last_updated": "2026.04.19"
     },
     "aws-ec2": {
       "baseline_version": "2026.04.18",
@@ -60,7 +60,7 @@
         }
       ],
       "row_count": 3000,
-      "last_updated": "2026-04-20T12:00:00Z"
+      "last_updated": "2026.04.20"
     }
   }
 }

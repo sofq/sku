@@ -1,0 +1,82 @@
+name: data-weekly
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"  # Mondays 04:00 UTC
+  workflow_dispatch:
+
+jobs:
+  profile-coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v6
+      - run: cd pipeline && uv sync
+      - name: Authenticate to Google Cloud (WIF)
+        id: gcp-auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_VALIDATE_SA }}
+          token_format: access_token
+      # Fetch fresh raw pricing feeds. AWS and Azure are unauthenticated.
+      # GCP Cloud Billing Catalog requires a bearer token — provided via WIF above.
+      - name: Fetch raw feeds
+        env:
+          GCP_ACCESS_TOKEN: ${{ steps.gcp-auth.outputs.access_token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pipeline/raw/aws dist/pipeline/raw/azure dist/pipeline/raw/gcp
+          # AWS — per-region offer index (us-east-1, much smaller than the global index)
+          curl -fsSL "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.json" \
+            -o dist/pipeline/raw/aws/aws_ec2-us-east-1.json
+          curl -fsSL "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonRDS/current/us-east-1/index.json" \
+            -o dist/pipeline/raw/aws/aws_rds-us-east-1.json
+          curl -fsSL "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonS3/current/us-east-1/index.json" \
+            -o dist/pipeline/raw/aws/aws_s3-us-east-1.json
+          curl -fsSL "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AWSLambda/current/us-east-1/index.json" \
+            -o dist/pipeline/raw/aws/aws_lambda-us-east-1.json
+          curl -fsSL "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonDynamoDB/current/us-east-1/index.json" \
+            -o dist/pipeline/raw/aws/aws_dynamodb-us-east-1.json
+          curl -fsSL "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonCloudFront/current/index.json" \
+            -o dist/pipeline/raw/aws/aws_cloudfront-global.json
+          # Azure — retail prices (public, paginated; first page sufficient for profiling)
+          curl -fsSL "https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview" \
+            -o dist/pipeline/raw/azure/prices.json
+          # GCP — Cloud Billing Catalog (bearer token from WIF above)
+          cd pipeline
+          uv run python - <<'PY'
+          import os
+          from pathlib import Path
+          import requests
+
+          from ingest.gcp_common import fetch_skus
+
+          out_dir = Path("../dist/pipeline/raw/gcp")
+          sess = requests.Session()
+          sess.headers["Authorization"] = f"Bearer {os.environ['GCP_ACCESS_TOKEN']}"
+          for shard in ("gcp_gce", "gcp_cloud_sql", "gcp_gcs", "gcp_run", "gcp_functions"):
+              fetch_skus(shard, out_dir / f"{shard}.json", session=sess)
+          PY
+      - run: make profile
+      - name: Open PR on diff
+        run: |
+          set -euo pipefail
+          if [ -n "$(git status --porcelain docs/coverage/)" ]; then
+            branch="bot/coverage-$(date -u +%Y%m%d)"
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git checkout -b "$branch"
+            git add docs/coverage/
+            git commit -m "docs(coverage): weekly profiler refresh"
+            git push origin "$branch"
+            gh pr create --title "docs(coverage): weekly profiler refresh" \
+              --body "Automated — see diff for upstream feed changes." \
+              --base main --head "$branch"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -39,7 +39,7 @@ type compareFlags struct {
 var (
 	compareVMShards            = []string{"aws-ec2", "azure-vm", "gcp-gce"}
 	compareStorageObjectShards = []string{"aws-s3", "azure-blob", "gcp-gcs"}
-	compareDBRelationalShards  = []string{"aws-rds", "azure-sql", "gcp-cloud-sql"}
+	compareDBRelationalShards  = []string{"aws-rds", "azure-sql", "azure-postgres", "azure-mysql", "azure-mariadb", "gcp-cloud-sql"}
 )
 
 func shardsForKind(kind string) []string {

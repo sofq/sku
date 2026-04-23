@@ -131,3 +131,56 @@ def test_missing_generated_at_raises(tmp_path: Path):
     with pytest.raises(SanityError) as exc:
         sanity_check(shard="test", shard_db=curr, previous_db=None)
     assert exc.value.reason == "missing_generated_at"
+
+
+def _vm_row(resource_name: str) -> dict:
+    return {
+        "sku_id": f"sku-{resource_name}",
+        "provider": "gcp",
+        "service": "gce",
+        "kind": "compute.vm",
+        "resource_name": resource_name,
+        "region": "us-east1",
+        "region_normalized": "us-east",
+        "terms": {"commitment": "on_demand", "tenancy": "shared", "os": "linux"},
+        "terms_hash": "h",
+        "resource_attrs": {},
+        "prices": [{"dimension": "compute", "tier": "", "amount": 0.1, "unit": "hrs"}],
+    }
+
+
+def test_family_coverage_drop_raises(tmp_path: Path):
+    prev = _make_shard(tmp_path, "prev", [
+        _vm_row("n1-standard-2"), _vm_row("n2-standard-2"), _vm_row("n4-standard-2"),
+    ])
+    curr = _make_shard(tmp_path, "curr", [
+        _vm_row("n1-standard-2"), _vm_row("n2-standard-2"),
+        # n4 family entirely gone
+    ])
+    with pytest.raises(SanityError) as exc:
+        sanity_check(shard="gcp-gce", shard_db=curr, previous_db=prev, tolerance_pct=100.0)
+    assert exc.value.reason == "family_coverage_drop"
+    assert "n4" in str(exc.value)
+
+
+def test_family_coverage_new_family_ok(tmp_path: Path):
+    prev = _make_shard(tmp_path, "prev", [_vm_row("n1-standard-2")])
+    curr = _make_shard(tmp_path, "curr", [_vm_row("n1-standard-2"), _vm_row("n4-standard-2")])
+    sanity_check(shard="gcp-gce", shard_db=curr, previous_db=prev, tolerance_pct=100.0)
+
+
+def test_family_coverage_dot_separator(tmp_path: Path):
+    """AWS-style 'm5.large' resource names — family token is before the dot."""
+    prev = _make_shard(tmp_path, "prev", [_vm_row("m5.large"), _vm_row("c5.xlarge")])
+    curr = _make_shard(tmp_path, "curr", [_vm_row("m5.large")])  # c5 gone
+    with pytest.raises(SanityError) as exc:
+        sanity_check(shard="aws-ec2", shard_db=curr, previous_db=prev, tolerance_pct=100.0)
+    assert exc.value.reason == "family_coverage_drop"
+    assert "c5" in str(exc.value)
+
+
+def test_family_coverage_non_vm_kinds_ignored(tmp_path: Path):
+    """Dropping an llm.text resource must not trigger the compute.vm family check."""
+    prev = _make_shard(tmp_path, "prev", [_row("claude-3"), _vm_row("n1-standard-2")])
+    curr = _make_shard(tmp_path, "curr", [_vm_row("n1-standard-2")])  # llm row gone, vm intact
+    sanity_check(shard="test", shard_db=curr, previous_db=prev, tolerance_pct=100.0)

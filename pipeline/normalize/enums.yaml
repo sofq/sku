@@ -29,9 +29,17 @@ tenancy:
   - postgres
   - mysql
   - mariadb
+  - oracle
+  - sqlserver
+  - aurora-postgres
+  - aurora-mysql
   - azure-sql
+  - azure-postgres
+  - azure-mysql
+  - azure-mariadb
   - cloud-sql-postgres
   - cloud-sql-mysql
+  - cloud-sql-sqlserver
 
 os:
   - ""
@@ -41,8 +49,10 @@ os:
   # RDS deployment options — same repurpose as tenancy above.
   - single-az
   - multi-az
+  - multi-az-cluster
   - managed-instance
   - elastic-pool
+  - flexible-server
   - zonal
   - regional
 

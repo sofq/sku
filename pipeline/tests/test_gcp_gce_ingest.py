@@ -46,6 +46,32 @@ def test_non_usd_filtered():
     assert "SKU-N1S2-EUW1-EUR" not in out_ids
 
 
+def test_ingest_emits_rows_for_n2_and_c2_families():
+    """Regression test: the hand-maintained 3-entry allowlist has been replaced
+    by the metadata-API loader, so families beyond n1/e2 must now emit rows.
+    """
+    rows = list(ingest(skus_path=FIXTURE))
+    resource_names = {r["resource_name"] for r in rows}
+    assert "n2-standard-2" in resource_names
+    assert "c2-standard-4" in resource_names
+
+
+def test_ingest_emits_rows_for_all_fifteen_families():
+    """Every family in _FAMILY_PREFIX_MAP must produce at least one output row.
+
+    Catches the case where a prefix string is wrong or a fixture entry is
+    missing — both cause silent zero-row output for that family.
+    """
+    from ingest.gcp_machine_types import _FAMILY_PREFIX_MAP
+
+    rows = list(ingest(skus_path=FIXTURE))
+    families_with_rows = {r["resource_name"].split("-")[0] for r in rows}
+    for family in _FAMILY_PREFIX_MAP:
+        assert family in families_with_rows, (
+            f"family {family!r} produced zero rows — wrong prefix string or missing fixture SKU"
+        )
+
+
 def test_unknown_region_skipped(tmp_path):
     """A SKU in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())

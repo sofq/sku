@@ -23,8 +23,20 @@ _PROVIDER = "aws"
 _SERVICE = "rds"
 _KIND = "db.relational"
 
-_ENGINE_MAP = {"PostgreSQL": "postgres", "MySQL": "mysql", "MariaDB": "mariadb"}
-_DEPL_MAP = {"Single-AZ": "single-az", "Multi-AZ": "multi-az"}
+_ENGINE_MAP = {
+    "PostgreSQL":        "postgres",
+    "MySQL":             "mysql",
+    "MariaDB":           "mariadb",
+    "Oracle":            "oracle",
+    "SQL Server":        "sqlserver",
+    "Aurora PostgreSQL": "aurora-postgres",
+    "Aurora MySQL":      "aurora-mysql",
+}
+_DEPL_MAP = {
+    "Single-AZ":                    "single-az",
+    "Multi-AZ":                     "multi-az",
+    "Multi-AZ (readable standbys)": "multi-az-cluster",
+}
 
 
 def _parse_memory(raw: str) -> float:
@@ -57,8 +69,6 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         vcpu_raw = attrs.get("vcpu", "")
         memory_raw = attrs.get("memory", "")
 
-        if license_model and license_model != "No license required":
-            continue
         if engine_raw not in _ENGINE_MAP or depl_raw not in _DEPL_MAP:
             continue
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
@@ -93,6 +103,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
                 "extra": {
                     "engine": _ENGINE_MAP[engine_raw],
                     "deployment_option": _DEPL_MAP[depl_raw],
+                    "license_model": license_model,
                 },
             },
             "terms": terms,

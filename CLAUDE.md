@@ -4,7 +4,7 @@ Agent quick-start for the `sku` repo.
 
 ## What this is
 
-`sku` is an agent-friendly CLI for querying cloud + LLM pricing. Offline-only client, daily data pipeline, pure-Go binary. See `docs/superpowers/specs/2026-04-18-sku-design.md` for the full design.
+`sku` is an agent-friendly CLI for querying cloud + LLM pricing. Offline-only client, daily data pipeline, pure-Go binary.
 
 ## Dev commands
 
@@ -31,8 +31,6 @@ Agent quick-start for the `sku` repo.
 - `internal/` — all logic lives here; packages are added per milestone
 - `internal/version/` — single source of truth for build metadata
 - `pipeline/` — CI-only data pipeline (arrives in M1+)
-- `docs/superpowers/specs/` — design spec (rev 4 dated 2026-04-18)
-- `docs/superpowers/plans/` — per-milestone implementation plans
 - `.github/workflows/` — `ci.yml` (PR/push), `release.yml` (tag), and data workflows from M3a
 
 ## Patterns
@@ -41,7 +39,6 @@ Agent quick-start for the `sku` repo.
 - **`cmd/` stays thin.** Flag parsing + calls into `internal/`. No business logic.
 - **TDD.** Write failing test, implement, commit.
 - **Exit codes are contract** (spec §4). Full taxonomy is live as of M2; `sku schema --errors` emits the machine-readable catalog.
-- **Plans are session-sized.** One plan file = one `claude -p` session via `scripts/run-plan.sh`. Target ≤ ~25 tasks / ~100 checkboxes per plan. Split large milestones by sub-scope (e.g. M3a → `m3a.1-ec2-rds`, `m3a.2-s3-lambda-ebs`, `m3a.3-dynamodb-cloudfront-updater`). File names must lex-sort into build order; `scripts/run-spec.sh` picks plans up in that order.
 
 ## Current milestone
 
@@ -83,9 +80,13 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku schema --list-serving-providers
 
 ./bin/sku aws ec2 price --instance-type m5.large --region us-east-1 --preset agent
+./bin/sku aws ec2 price --instance-type m5.large --region ap-south-1 --preset agent    # P1: India
+./bin/sku aws ec2 price --instance-type m5.large --region sa-east-1 --preset agent     # P1: São Paulo
 ./bin/sku aws ec2 list  --instance-type m5.large
 ./bin/sku aws rds price --instance-type db.m5.large --region us-east-1 \
   --engine postgres --deployment-option single-az
+./bin/sku aws rds price --instance-type db.m5.large --region ap-southeast-2 \
+  --engine postgres --deployment-option single-az                           # P1: Sydney
 ./bin/sku aws rds list  --instance-type db.m5.large --engine postgres
 
 ./bin/sku aws s3     price --storage-class standard --region us-east-1 --preset agent
@@ -101,6 +102,7 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku aws cloudfront list
 
 ./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region eastus --os linux --preset agent
+./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region centralindia --os linux --preset agent  # P1: India
 ./bin/sku azure vm  list  --arm-sku-name Standard_D2_v3
 ./bin/sku azure sql price --sku-name GP_Gen5_2 --region eastus \
   --deployment-option single-az --preset agent
@@ -114,6 +116,7 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 ./bin/sku azure disks     list  --disk-type standard-ssd
 
 ./bin/sku gcp gce       price --machine-type n1-standard-2  --region us-east1 --preset agent
+./bin/sku gcp gce       price --machine-type n1-standard-2  --region asia-south1 --preset agent  # P1: Mumbai
 ./bin/sku gcp gce       list  --machine-type n1-standard-2
 ./bin/sku gcp cloud-sql price --tier db-custom-2-7680 --region us-east1 \
                               --engine postgres --deployment-option zonal --preset agent
@@ -132,6 +135,8 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 
 ./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind compute.vm --vcpu 8 --memory 32 --regions us-east,eu-west --sort price
+./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions asia-south --limit 5 --preset compare  # P1: India
+./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions oceania --limit 5 --preset compare    # P1: AU/NZ
 ./bin/sku compare --kind storage.object --storage-class standard --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind db.relational --vcpu 2 --memory 8 \
                    --engine postgres --deployment-option single-az --regions us-east --limit 5 --preset compare

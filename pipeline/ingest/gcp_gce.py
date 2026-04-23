@@ -27,14 +27,24 @@ _PROVIDER = "gcp"
 _SERVICE = "gce"
 _KIND = "compute.vm"
 
-# (vcpu, ram_gib, cpu_desc_prefix, ram_desc_prefix)
-# cpu/ram_desc_prefix must match the start of the description field in the
-# Cloud Billing SKU so we can identify the right component SKU.
-_MACHINE_SPECS: dict[str, tuple[int, float, str, str]] = {
-    "n1-standard-2": (2, 7.5,  "N1 Predefined Instance Core", "N1 Predefined Instance Ram"),
-    "n1-standard-4": (4, 15.0, "N1 Predefined Instance Core", "N1 Predefined Instance Ram"),
-    "e2-standard-2": (2, 8.0,  "E2 Instance Core",            "E2 Instance Ram"),
-}
+from pathlib import Path as _Path
+from .gcp_machine_types import load_specs as _load_specs
+
+# Fixture snapshot checked in beside this module; refreshed monthly by the
+# gcp-machine-types-refresh make target. Keeping a snapshot means offline
+# tests stay deterministic and the hot path makes zero network calls.
+_MACHINE_TYPES_FIXTURE = (
+    _Path(__file__).resolve().parent.parent / "testdata" / "gcp_gce" / "machine_types.json"
+)
+
+
+def _load_machine_specs() -> dict[str, tuple[int, float, str, str]]:
+    return _load_specs(fixture_path=_MACHINE_TYPES_FIXTURE)
+
+
+# Populated at import time; loader is cheap (JSON parse of a small file)
+# and module-level placement preserves the reverse-lookup build below.
+_MACHINE_SPECS: dict[str, tuple[int, float, str, str]] = _load_machine_specs()
 
 _SQL = """
 WITH entries AS (

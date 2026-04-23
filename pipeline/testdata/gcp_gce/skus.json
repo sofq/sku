@@ -62,6 +62,228 @@
       "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "N1Standard", "usageType": "OnDemand"},
       "serviceRegions": ["europe-west1"],
       "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "EUR", "units": "0", "nanos": 29000000}}]}}]
+    },
+    {
+      "skuId": "N2CORE-USEAST1",
+      "description": "N2 Instance Core running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "N2RAM-USEAST1",
+      "description": "N2 Instance Ram running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "N2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy.h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "C2CORE-USEAST1",
+      "description": "Compute optimized Core running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "C2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 35210000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "C2RAM-USEAST1",
+      "description": "Compute optimized Ram running in Americas",
+      "category": {
+        "serviceDisplayName": "Compute Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "C2Standard",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy.h",
+          "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4714000}}]
+        }
+      }]
+    },
+    {
+      "skuId": "C2D-CPU-USEAST1",
+      "description": "C2D AMD Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C2DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "C2D-RAM-USEAST1",
+      "description": "C2D AMD Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C2DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "N2D-CPU-USEAST1",
+      "description": "N2D AMD Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "N2DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "N2D-RAM-USEAST1",
+      "description": "N2D AMD Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "N2DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "N4-CPU-USEAST1",
+      "description": "N4 Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "N4Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "N4-RAM-USEAST1",
+      "description": "N4 Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "N4Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "C3-CPU-USEAST1",
+      "description": "C3 Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C3Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "C3-RAM-USEAST1",
+      "description": "C3 Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C3Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "C3D-CPU-USEAST1",
+      "description": "C3D AMD Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C3DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "C3D-RAM-USEAST1",
+      "description": "C3D AMD Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C3DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "C4-CPU-USEAST1",
+      "description": "C4 Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C4Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "C4-RAM-USEAST1",
+      "description": "C4 Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "C4Standard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "T2A-CPU-USEAST1",
+      "description": "T2A Arm Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "T2AStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "T2A-RAM-USEAST1",
+      "description": "T2A Arm Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "T2AStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "T2D-CPU-USEAST1",
+      "description": "T2D AMD Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "T2DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "T2D-RAM-USEAST1",
+      "description": "T2D AMD Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "T2DStandard", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "M1-CPU-USEAST1",
+      "description": "Memory-optimized Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "M1MegaMem", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "M1-RAM-USEAST1",
+      "description": "Memory-optimized Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "M1MegaMem", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "M2-CPU-USEAST1",
+      "description": "M2 Memory-optimized Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "M2MegaMem", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "M2-RAM-USEAST1",
+      "description": "M2 Memory-optimized Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "M2MegaMem", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
+    },
+    {
+      "skuId": "M3-CPU-USEAST1",
+      "description": "M3 Memory-optimized Instance Core running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "M3MegaMem", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 31611000}}]}}]
+    },
+    {
+      "skuId": "M3-RAM-USEAST1",
+      "description": "M3 Memory-optimized Instance Ram running in Americas",
+      "category": {"serviceDisplayName": "Compute Engine", "resourceFamily": "Compute", "resourceGroup": "M3MegaMem", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4237000}}]}}]
     }
   ]
 }

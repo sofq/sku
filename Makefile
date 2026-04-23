@@ -128,8 +128,29 @@ azure-disks-shard: ## Build azure-disks shard from fixtures
 	@mv dist/pipeline/azure_disks.db dist/pipeline/azure-disks.db
 	@mv dist/pipeline/azure_disks.rows.jsonl dist/pipeline/azure-disks.rows.jsonl
 
+.PHONY: azure-postgres-shard
+azure-postgres-shard: ## Build azure-postgres shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_postgres FIXTURE=testdata/azure_postgres \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_postgres.db dist/pipeline/azure-postgres.db
+	@mv dist/pipeline/azure_postgres.rows.jsonl dist/pipeline/azure-postgres.rows.jsonl
+
+.PHONY: azure-mysql-shard
+azure-mysql-shard: ## Build azure-mysql shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_mysql FIXTURE=testdata/azure_mysql \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_mysql.db dist/pipeline/azure-mysql.db
+	@mv dist/pipeline/azure_mysql.rows.jsonl dist/pipeline/azure-mysql.rows.jsonl
+
+.PHONY: azure-mariadb-shard
+azure-mariadb-shard: ## Build azure-mariadb shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_mariadb FIXTURE=testdata/azure_mariadb \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_mariadb.db dist/pipeline/azure-mariadb.db
+	@mv dist/pipeline/azure_mariadb.rows.jsonl dist/pipeline/azure-mariadb.rows.jsonl
+
 .PHONY: azure-shards
-azure-shards: azure-vm-shard azure-sql-shard azure-blob-shard azure-functions-shard azure-disks-shard ## Build azure shards (m3b.1+m3b.2)
+azure-shards: azure-vm-shard azure-sql-shard azure-blob-shard azure-functions-shard azure-disks-shard azure-postgres-shard azure-mysql-shard azure-mariadb-shard ## Build azure shards
 
 .PHONY: gcp-gce-shard
 gcp-gce-shard: ## Build gcp-gce shard from fixtures
@@ -194,6 +215,9 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/azure-blob.db      || (echo "run 'make azure-blob-shard' first"      && exit 2)
 	@test -f dist/pipeline/azure-functions.db || (echo "run 'make azure-functions-shard' first" && exit 2)
 	@test -f dist/pipeline/azure-disks.db     || (echo "run 'make azure-disks-shard' first"     && exit 2)
+	@test -f dist/pipeline/azure-postgres.db  || (echo "run 'make azure-postgres-shard' first"  && exit 2)
+	@test -f dist/pipeline/azure-mysql.db     || (echo "run 'make azure-mysql-shard' first"     && exit 2)
+	@test -f dist/pipeline/azure-mariadb.db   || (echo "run 'make azure-mariadb-shard' first"   && exit 2)
 	@test -f dist/pipeline/gcp-gce.db         || (echo "run 'make gcp-gce-shard' first"         && exit 2)
 	@test -f dist/pipeline/gcp-cloud-sql.db   || (echo "run 'make gcp-cloud-sql-shard' first"   && exit 2)
 	@test -f dist/pipeline/gcp-gcs.db         || (echo "run 'make gcp-gcs-shard' first"         && exit 2)
@@ -253,6 +277,26 @@ _SHARD_LIVE_FLAG = $(if $(filter aws_%,$(SHARD)),--offer,\
                     $(if $(filter azure_%,$(SHARD)),--prices,\
                     $(if $(filter gcp_%,$(SHARD)),--skus,)))
 
+.PHONY: gcp-machine-types-refresh
+gcp-machine-types-refresh: ## Re-fetch GCE machineTypes fixture and verify all prefix strings against live billing SKUs (requires ADC + GCP_PROJECT=<id>)
+	@if [ -z "$$GCP_PROJECT" ]; then echo "GCP_PROJECT=<project-id> required" >&2; exit 2; fi
+	$(MAKE) -C pipeline setup
+	cd pipeline && .venv/bin/python -c "\
+import json, pathlib, sys, tempfile; \
+from ingest.gcp_machine_types import _fetch_live, load_specs, verify_prefix_map, _FAMILY_PREFIX_MAP; \
+from ingest.gcp_common import build_authenticated_session, fetch_skus; \
+p = pathlib.Path('testdata/gcp_gce/machine_types.json'); \
+p.write_text(json.dumps(_fetch_live(project_id='$$GCP_PROJECT'), indent=2, sort_keys=True) + '\n'); \
+load_specs(fixture_path=p); \
+print('fetching GCE billing SKUs for prefix verification...', file=sys.stderr); \
+tmp = pathlib.Path(tempfile.mktemp(suffix='.json')); \
+fetch_skus('gcp_gce', tmp, session=build_authenticated_session()); \
+missing = verify_prefix_map(json.loads(tmp.read_text()), _FAMILY_PREFIX_MAP); \
+tmp.unlink(missing_ok=True); \
+(sys.exit(print(f'ERROR: _FAMILY_PREFIX_MAP has wrong/missing prefixes for: {missing}', file=sys.stderr) or 1) if missing \
+ else print(f'prefix_map OK — all {len(_FAMILY_PREFIX_MAP)} families verified against live billing catalog', file=sys.stderr))"
+	@echo "wrote pipeline/testdata/gcp_gce/machine_types.json — commit if it changed"
+
 .PHONY: shard-live
 shard-live: ## Ingest + package SHARD=<name> using SRC=<local-offer-path>
 	@test -n "$(SHARD)" || (echo "SHARD=<name> required" && exit 2)
@@ -262,3 +306,9 @@ shard-live: ## Ingest + package SHARD=<name> using SRC=<local-offer-path>
 	mkdir -p dist/pipeline
 	$(MAKE) -C pipeline shard SHARD=$(SHARD) \
 	  INGEST_EXTRA='$(_SHARD_LIVE_FLAG) $(SRC) $(INGEST_EXTRA)'
+
+.PHONY: profile
+profile:  ## Generate catalog coverage reports under docs/coverage/ from raw feeds.
+	cd pipeline && uv run python -m catalog_profiler aws   --offer-dir   ../dist/pipeline/raw/aws    --out ../docs/coverage/aws.md
+	cd pipeline && uv run python -m catalog_profiler azure --prices      ../dist/pipeline/raw/azure/prices.json --out ../docs/coverage/azure.md
+	cd pipeline && uv run python -m catalog_profiler gcp   --catalog-paths ../dist/pipeline/raw/gcp/*.json      --out ../docs/coverage/gcp.md

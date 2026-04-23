@@ -24,6 +24,9 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_blob": "serviceName eq 'Storage' and productName eq 'Blob Storage'",
     "azure_functions": "serviceName eq 'Functions'",
     "azure_disks": "serviceName eq 'Storage' and (productName eq 'Standard HDD Managed Disks' or productName eq 'Standard SSD Managed Disks' or productName eq 'Premium SSD Managed Disks')",
+    "azure_postgres": "serviceName eq 'Azure Database for PostgreSQL'",
+    "azure_mysql": "serviceName eq 'Azure Database for MySQL'",
+    "azure_mariadb": "serviceName eq 'Azure Database for MariaDB'",
 }
 
 

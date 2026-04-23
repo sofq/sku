@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sofq/sku/internal/catalog"
+	"github.com/sofq/sku/internal/updater"
 )
 
 // buildTestZst returns a minimal valid .zst file wrapping a copy of an
@@ -177,4 +178,106 @@ func TestUpdate_HTTPError(t *testing.T) {
 	_, stderr, err := runUpdate(t, "openrouter")
 	require.Error(t, err)
 	require.Contains(t, stderr, "502")
+}
+
+// TestResolveManifestPrimaryURL verifies that the hardcoded primary manifest
+// URL contains "data-latest" and is an HTTPS GitHub releases URL.
+// Catches regressions where the URL is accidentally changed to something
+// that doesn't follow the data-latest floating tag convention.
+func TestResolveManifestPrimaryURL(t *testing.T) {
+	// No env override — must return the hardcoded default.
+	t.Setenv("SKU_UPDATE_BASE_URL", "")
+	url := resolveManifestPrimaryURL()
+	if !strings.Contains(url, "data-latest") {
+		t.Errorf("primary manifest URL should reference data-latest tag, got: %q", url)
+	}
+	if !strings.HasPrefix(url, "https://github.com/") {
+		t.Errorf("primary manifest URL should be a GitHub HTTPS URL, got: %q", url)
+	}
+	if !strings.HasSuffix(url, "/manifest.json") {
+		t.Errorf("primary manifest URL should end with /manifest.json, got: %q", url)
+	}
+}
+
+func TestShouldUseManifestUpdateForFreshAzureHostedDBShards(t *testing.T) {
+	for _, shard := range []string{"azure-postgres", "azure-mysql", "azure-mariadb"} {
+		t.Run(shard, func(t *testing.T) {
+			if !shouldUseManifestUpdate(shard, updater.ChannelStable, false) {
+				t.Fatalf("fresh stable install for %s must use manifest-backed data release", shard)
+			}
+		})
+	}
+}
+
+func TestShouldUseManifestUpdateKeepsExistingBootstrapPathForOldFreshStableShards(t *testing.T) {
+	if shouldUseManifestUpdate("aws-ec2", updater.ChannelStable, false) {
+		t.Fatal("fresh stable install for existing bootstrap shard should keep bootstrap path")
+	}
+}
+
+// TestUpdate_DailyChannel_ManifestParsed verifies that --channel daily fetches
+// and parses a real manifest JSON (including last_updated as a catalog-version
+// string like "2026.04.22", not RFC3339) and completes the install.
+func TestUpdate_DailyChannel_ManifestParsed(t *testing.T) {
+	zstData, hexSum := buildTestZst(t)
+
+	const shard = "openrouter"
+	baselineURL := "/" + shard + ".db.zst"
+	shaURL := "/" + shard + ".db.zst.sha256"
+
+	// Build a manifest that uses the real pipeline's catalog-version string
+	// format for last_updated. If the Go struct uses time.Time, this will
+	// fail to parse and the test will catch it before any fix is needed.
+	manifest := `{
+		"schema_version": 1,
+		"generated_at": "2026-04-22T04:22:27Z",
+		"catalog_version": "2026.04.22",
+		"shards": {
+			"openrouter": {
+				"baseline_version": "2026.04.22",
+				"baseline_url": "SRVURL/openrouter.db.zst",
+				"baseline_sha256": "HEXSUM",
+				"baseline_size": 1,
+				"head_version": "2026.04.22",
+				"min_binary_version": "1.0.0",
+				"shard_schema_version": 1,
+				"deltas": [],
+				"row_count": 1116,
+				"last_updated": "2026.04.22"
+			}
+		}
+	}`
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/manifest.json":
+			body := strings.ReplaceAll(manifest, "HEXSUM", hexSum)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(body))
+		case baselineURL:
+			w.Header().Set("Content-Type", "application/octet-stream")
+			_, _ = w.Write(zstData)
+		case shaURL:
+			_, _ = w.Write([]byte(hexSum + "  " + shard + ".db.zst\n"))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer srv.Close()
+
+	// Replace SRVURL placeholder with the actual test server URL.
+	manifest = strings.ReplaceAll(manifest, "SRVURL", srv.URL)
+
+	dataDir := t.TempDir()
+	t.Setenv("SKU_DATA_DIR", dataDir)
+	// SKU_UPDATE_BASE_URL overrides both the shard base URL and the manifest URL.
+	t.Setenv("SKU_UPDATE_BASE_URL", srv.URL)
+
+	_, stderr, err := runUpdate(t, shard, "--channel", "daily")
+	require.NoError(t, err, "stderr: %s", stderr)
+	require.Contains(t, stderr, "installed "+shard)
+
+	fi, statErr := os.Stat(filepath.Join(dataDir, shard+".db"))
+	require.NoError(t, statErr)
+	require.Greater(t, fi.Size(), int64(0))
 }

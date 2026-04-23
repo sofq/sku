@@ -12,9 +12,9 @@ sku update <shard> [--channel stable|daily] [global flags]
 
 | Argument | Description |
 |----------|-------------|
-| `<shard>` | Shard name, e.g. `aws-ec2`, `openrouter`, `azure-vm` |
+| `<shard>` | Shard name, e.g. `aws-ec2`, `openrouter`, `azure-postgres` |
 
-Supported shards: `openrouter`, `aws-ec2`, `aws-rds`, `aws-s3`, `aws-lambda`, `aws-ebs`, `aws-dynamodb`, `aws-cloudfront`, `azure-vm`, `azure-sql`, `azure-blob`, `azure-functions`, `azure-disks`, `gcp-gce`, `gcp-cloud-sql`, `gcp-gcs`, `gcp-run`, `gcp-functions`.
+Supported shards: `openrouter`, `aws-ec2`, `aws-rds`, `aws-s3`, `aws-lambda`, `aws-ebs`, `aws-dynamodb`, `aws-cloudfront`, `azure-vm`, `azure-sql`, `azure-blob`, `azure-functions`, `azure-disks`, `azure-postgres`, `azure-mysql`, `azure-mariadb`, `gcp-gce`, `gcp-cloud-sql`, `gcp-gcs`, `gcp-run`, `gcp-functions`.
 
 ## Flags
 
@@ -26,7 +26,7 @@ Supported shards: `openrouter`, `aws-ec2`, `aws-rds`, `aws-s3`, `aws-lambda`, `a
 
 ### `stable` (default)
 
-Always downloads the latest full baseline shard (`.db.zst`) from the release asset URL. Safe for automated pipelines that need a complete, known-good snapshot.
+Always downloads the latest full baseline shard (`.db.zst`). Most established shards use their bootstrap release URL for fresh installs; newer shards may resolve the same baseline through the manifest-backed data release.
 
 ### `daily`
 

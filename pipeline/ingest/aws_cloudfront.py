@@ -40,15 +40,15 @@ LOCATION_MAP: dict[str, str] = {
     "Asia Pacific (including Japan & Taiwan)": "ap-northeast-1",
     # Current upstream fromLocation strings (as of 2025-Q4).
     "United States":  "us-east-1",
-    "Canada":         "us-east-1",
+    "Canada":         "ca-central-1",
     "Europe":         "eu-west-1",
     "Asia Pacific":   "ap-northeast-1",
     "Japan":          "ap-northeast-1",
-    "Australia":      "ap-northeast-1",
-    "India":          "ap-northeast-1",
-    "South America":  "us-east-1",
-    "Middle East":    "eu-west-1",
-    "South Africa":   "eu-west-1",
+    "Australia":      "ap-southeast-2",
+    "India":          "ap-south-1",
+    "South America":  "sa-east-1",
+    "Middle East":    "eu-west-1",   # no ME region in P1; revisit in P2
+    "South Africa":   "eu-west-1",   # no AF region in P1
     "Any":            "us-east-1",
 }
 

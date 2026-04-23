@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 import contextlib
 import json
 import os
@@ -75,6 +76,8 @@ _OFFER_BASENAME: dict[str, str] = {
     "aws_ec2": "aws_ec2",
     "aws_ebs": "aws_ec2",
 }
+
+_PARALLEL_AWS_FETCH_WORKERS = int(os.environ.get("SKU_AWS_FETCH_WORKERS", "8"))
 
 
 def shared_offer_basename(shard: str) -> str:
@@ -192,6 +195,36 @@ _EC2_KEEP_ATTRS: frozenset[str] = frozenset(
 )
 
 
+def _fetch_one_region_stripped(
+    shard: str,
+    region: str,
+    target_dir: Path,
+    *,
+    rel_url: str,
+    session: requests.Session | None,
+    retries: int,
+) -> Path:
+    """Fetch and strip the AWS offer JSON for a single region.
+
+    `rel_url` is the `currentVersionUrl` path from `region_index.json` (e.g.
+    ``/offers/v1.0/aws/AmazonEC2/20260418/us-east-1/index.json``).  Using the
+    version-pinned URL ensures all regions in one pipeline run are drawn from
+    the same published snapshot.  Downloads the per-region offer, stream-strips
+    it via `_strip_ec2_offer`, deletes the raw file, and returns the stripped
+    output path.
+    """
+    basename = shared_offer_basename(shard)
+    region_url = f"https://pricing.us-east-1.amazonaws.com{rel_url}"
+    raw_path = target_dir / f"{basename}-{region}.raw.json"
+    stripped_path = target_dir / f"{basename}-{region}.json"
+    try:
+        _stream_download(region_url, raw_path, session=session, retries=retries)
+        _strip_ec2_offer(raw_path, stripped_path)
+    finally:
+        raw_path.unlink(missing_ok=True)
+    return stripped_path
+
+
 def fetch_offer_regions_stripped(
     shard: str,
     out_dir: Path,
@@ -199,6 +232,7 @@ def fetch_offer_regions_stripped(
     regions: Iterable[str],
     session: requests.Session | None = None,
     retries: int = 3,
+    max_workers: int = _PARALLEL_AWS_FETCH_WORKERS,
 ) -> list[Path]:
     """Fetch per-region AWS offer files for `shard`, stream-strip to JSON.
 
@@ -207,9 +241,14 @@ def fetch_offer_regions_stripped(
     with only the leaf fields we consume) to `out_dir/{shard}-{region}.json`.
     Raw per-region downloads are deleted after stripping.
 
+    Concurrency is capped at `max_workers` (default 8, tunable via
+    ``SKU_AWS_FETCH_WORKERS`` env).  This is pure I/O-bound work — 8
+    concurrent streams saturate a GitHub runner's bandwidth without
+    tripping AWS rate-limits on the public pricing endpoint.
+
     Skips regions not listed in the upstream `region_index.json` (e.g. new
     AWS regions not yet in a shard's offer). Returns the list of stripped
-    output paths that were successfully produced.
+    output paths that were successfully produced (sorted).
     """
     service_code = _AWS_SERVICE_CODES[shard]
     if service_code not in _PER_REGION_AWS_OFFERS:
@@ -243,24 +282,37 @@ def fetch_offer_regions_stripped(
         for code, entry in (index_doc.get("regions") or {}).items()
     }
 
+    # Regions already on disk go straight to produced; only fetch the rest.
+    regions_list = list(regions)
     produced: list[Path] = []
-    for region in regions:
-        rel_url = upstream_regions.get(region)
-        if rel_url is None:
+    todo_regions: list[str] = []
+    for region in regions_list:
+        if upstream_regions.get(region) is None:
             continue
         stripped_path = out_dir / f"{basename}-{region}.json"
         if region in existing and stripped_path.exists():
             produced.append(stripped_path)
-            continue
-        region_url = f"https://pricing.us-east-1.amazonaws.com{rel_url}"
-        raw_path = out_dir / f"{basename}-{region}.raw.json"
-        try:
-            _stream_download(region_url, raw_path, session=session, retries=retries)
-            _strip_ec2_offer(raw_path, stripped_path)
-            produced.append(stripped_path)
-        finally:
-            raw_path.unlink(missing_ok=True)
-    return produced
+        else:
+            todo_regions.append(region)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {
+            pool.submit(
+                _fetch_one_region_stripped, shard, region, out_dir,
+                rel_url=upstream_regions[region],
+                session=None, retries=retries,
+            ): region
+            for region in todo_regions
+        }
+        for fut in concurrent.futures.as_completed(futures):
+            region = futures[fut]
+            try:
+                produced.append(fut.result())
+            except Exception as exc:
+                pool.shutdown(wait=False, cancel_futures=True)
+                raise RuntimeError(f"fetch failed for region={region}") from exc
+
+    return sorted(produced)
 
 
 def _strip_ec2_offer(raw_path: Path, out_path: Path) -> None:

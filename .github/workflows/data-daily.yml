@@ -25,6 +25,9 @@ concurrency:
   group: data-daily
   cancel-in-progress: false
 
+# Per-step timeouts cap the blast radius of a stuck upstream fetch.
+# Per-shard ceiling: 30 min (matrix; parallel). Manifest build: 10 min.
+# GitHub's default (360 min) is too slack to catch realistic regressions.
 jobs:
   discover:
     runs-on: ubuntu-latest
@@ -34,7 +37,7 @@ jobs:
       catalog_version:   ${{ steps.discover.outputs.catalog_version }}
       previous_version:  ${{ steps.previous.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - name: Authenticate to GCP via Workload Identity Federation
@@ -105,7 +108,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.discover.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - name: Authenticate to GCP via Workload Identity Federation
@@ -116,6 +119,7 @@ jobs:
           service_account:            ${{ vars.GCP_VALIDATE_SA }}
 
       - name: Fetch upstream + ingest + package
+        timeout-minutes: 30
         env:
           SHARD:             ${{ matrix.shard }}
           CATALOG_VERSION:   ${{ needs.discover.outputs.catalog_version }}
@@ -139,7 +143,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.discover.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - name: Download today's shard
@@ -186,7 +190,7 @@ jobs:
       && needs.discover.outputs.shards != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - uses: actions/download-artifact@v4
@@ -201,6 +205,7 @@ jobs:
           path: dist/pipeline/discover/
 
       - name: Build manifest.json
+        timeout-minutes: 10
         env:
           CATALOG_VERSION:  ${{ needs.discover.outputs.catalog_version }}
           PREVIOUS_VERSION: ${{ needs.discover.outputs.previous_version }}
@@ -221,6 +226,22 @@ jobs:
             --title "Data release ${CATALOG_VERSION}" \
             --notes "Automated daily data release. See manifest.json for shard inventory." \
             dist/pipeline/release/*
+
+      - name: Update data-latest floating release
+        env:
+          CATALOG_VERSION: ${{ needs.discover.outputs.catalog_version }}
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # data-latest is a lightweight floating release that only carries manifest.json.
+          # Shard downloads resolve through the BaselineURL embedded in the manifest itself.
+          gh release delete data-latest --yes 2>/dev/null || true
+          gh api --method DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/data-latest" 2>/dev/null || true
+          gh release create "data-latest" \
+            --target "$(git rev-parse HEAD)" \
+            --title "Latest data release (${CATALOG_VERSION})" \
+            --notes "Floating tag — always the latest data release. Full release: data-${CATALOG_VERSION}." \
+            dist/pipeline/release/manifest.json
 
       - name: Mirror manifest to `data` branch
         env:
