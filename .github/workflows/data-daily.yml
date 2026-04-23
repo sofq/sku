@@ -92,7 +92,7 @@ jobs:
           echo "catalog_version=$today"   >> "$GITHUB_OUTPUT"
           echo "shards=$shards baseline_rebuild=$brl catalog_version=$today"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: discover
           path: dist/pipeline/discover/
@@ -125,7 +125,7 @@ jobs:
           CATALOG_VERSION:   ${{ needs.discover.outputs.catalog_version }}
         run: bash scripts/ci/ingest_shard.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: shard-${{ matrix.shard }}
           path: |
@@ -147,7 +147,7 @@ jobs:
       - uses: ./.github/actions/setup-pipeline
 
       - name: Download today's shard
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: shard-${{ matrix.shard }}
           path: dist/pipeline/today/
@@ -176,7 +176,7 @@ jobs:
           BASELINE_REBUILD: ${{ needs.discover.outputs.baseline_rebuild }}
         run: bash scripts/ci/diff_package_shard.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-${{ matrix.shard }}
           path: dist/pipeline/release/
@@ -193,13 +193,13 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           pattern: release-*
           merge-multiple: true
           path: dist/pipeline/release/
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: discover
           path: dist/pipeline/discover/

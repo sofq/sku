@@ -21,7 +21,7 @@ jobs:
         with:
           go-version: "1.25"
           cache: true
-      - uses: golangci/golangci-lint-action@v7
+      - uses: golangci/golangci-lint-action@v9
         with:
           version: v2.11.3
 
@@ -61,7 +61,7 @@ jobs:
         with:
           go-version: "1.25"
           cache: true
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"
           args: release --snapshot --clean --skip=sign,publish,sbom,docker
@@ -100,7 +100,7 @@ jobs:
           ./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region eastus --os linux --jq '.price[0].amount'
           ./bin/sku gcp gce   price --machine-type n1-standard-2 --region us-east1 --jq '.price[0].amount'
       - name: Upload fixture shards as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: fixture-shards
           path: dist/pipeline/*.db
