@@ -28,9 +28,8 @@ _SERVICE = "functions"
 _KIND = "compute.function"
 # x86_64 is the only architecture exposed by Cloud Run Functions as of the
 # last catalog verification (see docs/coverage/gcp-arm-verification.md).
-# Re-verify quarterly; if arm SKUs appear, switch to per-SKU architecture
-# detection per docs/superpowers/plans/2026-04-22-gcp-arm64-serverless.md
-# Phase B branch 1.
+# Re-verify quarterly; if arm SKUs appear, implement per-SKU architecture
+# detection keyed on " (Arm)" in the SKU description.
 _ARCHITECTURE = "x86_64"
 # Live API uses serviceDisplayName="Cloud Run Functions" (previously "Cloud Functions").
 _SERVICE_DISPLAY = "Cloud Run Functions"
