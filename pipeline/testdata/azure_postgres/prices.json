@@ -1,0 +1,37 @@
+{
+  "Items": [
+    {
+      "meterId": "11111111-0000-0000-0000-000000000001",
+      "skuName": "Gen5 2 vCore",
+      "armRegionName": "eastus",
+      "productName": "Azure Database for PostgreSQL Flexible Server Compute Gen5",
+      "retailPrice": 0.12,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "type": "Consumption",
+      "serviceName": "Azure Database for PostgreSQL"
+    },
+    {
+      "meterId": "11111111-0000-0000-0000-000000000002",
+      "skuName": "Gen5 4 vCore",
+      "armRegionName": "westeurope",
+      "productName": "Azure Database for PostgreSQL Flexible Server Compute Gen5",
+      "retailPrice": 0.24,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "type": "Consumption",
+      "serviceName": "Azure Database for PostgreSQL"
+    },
+    {
+      "meterId": "11111111-0000-0000-0000-000000000003",
+      "skuName": "Gen5 2 vCore",
+      "armRegionName": "eastus",
+      "productName": "Azure Database for PostgreSQL Single Server General Purpose - Compute Gen5",
+      "retailPrice": 0.10,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "type": "Consumption",
+      "serviceName": "Azure Database for PostgreSQL"
+    }
+  ]
+}
