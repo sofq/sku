@@ -75,8 +75,8 @@ func TestTenanciesForEngine(t *testing.T) {
 		engine string
 		want   []string
 	}{
-		{"oracle",     []string{"oracle"}},
-		{"exotic-db",  []string{"exotic-db"}},
+		{"oracle", []string{"oracle"}},
+		{"exotic-db", []string{"exotic-db"}},
 	}
 	for _, tc := range tests {
 		got := tenanciesForEngine(tc.engine)
