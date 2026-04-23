@@ -101,7 +101,7 @@ jobs:
             --shard-db "dist/pipeline/${SHARD}.db" \
             --report "dist/pipeline/${SHARD}.report.json" \
             "${extra[@]}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: validate-${{ matrix.shard }}
           path: dist/pipeline/*.report.json

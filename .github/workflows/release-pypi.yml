@@ -66,7 +66,7 @@ jobs:
           python -m wheel tags --platform-tag "${{ matrix.wheelPlat }}" --remove "$w"
           mv dist/*"${{ matrix.wheelPlat }}"*.whl dist-tagged/
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wheel-${{ matrix.wheelPlat }}
           path: python/dist-tagged/*.whl
@@ -79,7 +79,7 @@ jobs:
       id-token: write
     environment: pypi-publish
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: dist
           merge-multiple: true
