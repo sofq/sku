@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from ingest.gcp_machine_types import load_specs, _family_of
+from ingest.gcp_machine_types import load_specs, verify_prefix_map, _family_of, _FAMILY_PREFIX_MAP
 
 _FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_gce" / "machine_types.json"
 
@@ -55,3 +55,37 @@ def test_load_specs_raises_for_unknown_family():
     with pytest.raises(KeyError, match="unknown machine family"):
         from ingest.gcp_machine_types import _specs_for
         _specs_for({"name": "z9-standard-2", "guestCpus": 2, "memoryMb": 8192})
+
+
+_SKUS_FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "gcp_gce" / "skus.json"
+
+
+def test_verify_prefix_map_all_present():
+    import json
+    skus_doc = json.loads(_SKUS_FIXTURE.read_text())
+    missing = verify_prefix_map(skus_doc, _FAMILY_PREFIX_MAP)
+    assert missing == [], f"prefix map has unverified families: {missing}"
+
+
+def test_verify_prefix_map_detects_wrong_cpu_prefix():
+    import json
+    skus_doc = json.loads(_SKUS_FIXTURE.read_text())
+    bad_map = {**_FAMILY_PREFIX_MAP, "n2": ("N2 Instance WRONG", "N2 Instance Ram")}
+    missing = verify_prefix_map(skus_doc, bad_map)
+    assert "n2" in missing
+
+
+def test_verify_prefix_map_detects_wrong_ram_prefix():
+    import json
+    skus_doc = json.loads(_SKUS_FIXTURE.read_text())
+    bad_map = {**_FAMILY_PREFIX_MAP, "e2": ("E2 Instance Core", "E2 Instance WRONG")}
+    missing = verify_prefix_map(skus_doc, bad_map)
+    assert "e2" in missing
+
+
+def test_load_specs_fixture_covers_all_mapped_families():
+    """Every family in _FAMILY_PREFIX_MAP must have at least one machine type in the fixture."""
+    specs = load_specs(fixture_path=_FIXTURE)
+    families_in_fixture = {f.split("-")[0] for f in specs}
+    for family in _FAMILY_PREFIX_MAP:
+        assert family in families_in_fixture, f"no fixture entry for family {family!r}"

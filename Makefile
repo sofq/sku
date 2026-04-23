@@ -278,15 +278,23 @@ _SHARD_LIVE_FLAG = $(if $(filter aws_%,$(SHARD)),--offer,\
                     $(if $(filter gcp_%,$(SHARD)),--skus,)))
 
 .PHONY: gcp-machine-types-refresh
-gcp-machine-types-refresh: ## Re-fetch GCE machineTypes fixture from the live aggregatedList API (requires ADC + GCP_PROJECT=<id>)
+gcp-machine-types-refresh: ## Re-fetch GCE machineTypes fixture and verify all prefix strings against live billing SKUs (requires ADC + GCP_PROJECT=<id>)
 	@if [ -z "$$GCP_PROJECT" ]; then echo "GCP_PROJECT=<project-id> required" >&2; exit 2; fi
 	$(MAKE) -C pipeline setup
 	cd pipeline && .venv/bin/python -c "\
-import json, pathlib; \
-from ingest.gcp_machine_types import _fetch_live, load_specs; \
+import json, pathlib, sys, tempfile; \
+from ingest.gcp_machine_types import _fetch_live, load_specs, verify_prefix_map, _FAMILY_PREFIX_MAP; \
+from ingest.gcp_common import build_authenticated_session, fetch_skus; \
 p = pathlib.Path('testdata/gcp_gce/machine_types.json'); \
 p.write_text(json.dumps(_fetch_live(project_id='$$GCP_PROJECT'), indent=2, sort_keys=True) + '\n'); \
-load_specs(fixture_path=p)"
+load_specs(fixture_path=p); \
+print('fetching GCE billing SKUs for prefix verification...', file=sys.stderr); \
+tmp = pathlib.Path(tempfile.mktemp(suffix='.json')); \
+fetch_skus('gcp_gce', tmp, session=build_authenticated_session()); \
+missing = verify_prefix_map(json.loads(tmp.read_text()), _FAMILY_PREFIX_MAP); \
+tmp.unlink(missing_ok=True); \
+(sys.exit(print(f'ERROR: _FAMILY_PREFIX_MAP has wrong/missing prefixes for: {missing}', file=sys.stderr) or 1) if missing \
+ else print(f'prefix_map OK — all {len(_FAMILY_PREFIX_MAP)} families verified against live billing catalog', file=sys.stderr))"
 	@echo "wrote pipeline/testdata/gcp_gce/machine_types.json — commit if it changed"
 
 .PHONY: shard-live

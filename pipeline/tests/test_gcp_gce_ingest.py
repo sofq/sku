@@ -56,6 +56,22 @@ def test_ingest_emits_rows_for_n2_and_c2_families():
     assert "c2-standard-4" in resource_names
 
 
+def test_ingest_emits_rows_for_all_fifteen_families():
+    """Every family in _FAMILY_PREFIX_MAP must produce at least one output row.
+
+    Catches the case where a prefix string is wrong or a fixture entry is
+    missing — both cause silent zero-row output for that family.
+    """
+    from ingest.gcp_machine_types import _FAMILY_PREFIX_MAP
+
+    rows = list(ingest(skus_path=FIXTURE))
+    families_with_rows = {r["resource_name"].split("-")[0] for r in rows}
+    for family in _FAMILY_PREFIX_MAP:
+        assert family in families_with_rows, (
+            f"family {family!r} produced zero rows — wrong prefix string or missing fixture SKU"
+        )
+
+
 def test_unknown_region_skipped(tmp_path):
     """A SKU in a region outside regions.yaml is silently dropped."""
     bad = json.loads(FIXTURE.read_text())

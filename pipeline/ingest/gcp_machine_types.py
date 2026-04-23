@@ -17,6 +17,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+__all__ = ["load_specs", "verify_prefix_map"]
+
 # Family token -> (cpu_prefix, ram_prefix) as they appear in the SKU description.
 # Strings are matched with str.startswith() by gcp_gce.ingest().
 #
@@ -103,6 +105,41 @@ def load_specs(
                 continue  # same type repeats per zone; keep first
             out[name] = _specs_for(entry)
     return out
+
+
+def verify_prefix_map(
+    skus_doc: dict[str, Any],
+    prefix_map: dict[str, tuple[str, str]] | None = None,
+) -> list[str]:
+    """Return family names whose cpu_prefix or ram_prefix is absent from skus_doc.
+
+    Scans all Compute Engine OnDemand SKU descriptions in the Cloud Billing
+    Catalog document (same format as gcp_common.fetch_skus output). A non-empty
+    return value means those families have wrong or stale prefix strings in
+    _FAMILY_PREFIX_MAP — callers should treat this as an error.
+
+    Strips the " running in <region>" suffix before comparing so that the same
+    base string matches every regional variant of the SKU.
+    """
+    if prefix_map is None:
+        prefix_map = _FAMILY_PREFIX_MAP
+
+    seen: set[str] = set()
+    for sku in skus_doc.get("skus", []):
+        cat = sku.get("category", {})
+        if cat.get("resourceFamily") != "Compute":
+            continue
+        if cat.get("usageType") != "OnDemand":
+            continue
+        desc: str = sku.get("description", "")
+        base = desc.split(" running in ")[0].strip()
+        seen.add(base)
+
+    missing: list[str] = []
+    for family, (cpu_pfx, ram_pfx) in prefix_map.items():
+        if cpu_pfx not in seen or ram_pfx not in seen:
+            missing.append(family)
+    return sorted(missing)
 
 
 def _fetch_live(*, project_id: str) -> dict[str, Any]:
