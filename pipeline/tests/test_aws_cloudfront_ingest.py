@@ -55,6 +55,14 @@ def test_unknown_location_rejected(tmp_path):
         list(ingest(offer_path=p))
 
 
+def test_location_map_fans_out_to_p1_regions():
+    values = set(LOCATION_MAP.values())
+    assert "sa-east-1" in values, "South America must fan out to sa-east-1"
+    assert "ap-southeast-2" in values, "Australia must fan out to ap-southeast-2"
+    assert "ap-south-1" in values, "India must fan out to ap-south-1"
+    assert "ca-central-1" in values, "Canada must fan out to ca-central-1"
+
+
 def test_location_map_exhaustiveness():
     # Any edge-location string we know about must map to a region that
     # regions.yaml would accept. Guards against silent drift if someone
