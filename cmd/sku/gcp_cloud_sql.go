@@ -32,18 +32,23 @@ func (f *gcpCloudSQLFlags) bind(c *cobra.Command) {
 	c.Flags().StringVar(&f.tier, "tier", "",
 		"Cloud SQL machine tier, e.g. db-custom-2-7680")
 	c.Flags().StringVar(&f.region, "region", "", "GCP region (e.g. us-east1)")
-	c.Flags().StringVar(&f.engine, "engine", "postgres", "postgres | mysql")
+	c.Flags().StringVar(&f.engine, "engine", "postgres", "postgres | mysql | sqlserver")
 	c.Flags().StringVar(&f.deploymentOption, "deployment-option", "zonal", "zonal | regional")
 	c.Flags().StringVar(&f.commitment, "commitment", "on_demand",
 		"on_demand (only on-demand shipped in m3b.3)")
 }
 
 func (f *gcpCloudSQLFlags) terms() catalog.Terms {
-	tenancy := "cloud-sql-postgres"
-	if f.engine == "mysql" {
-		tenancy = "cloud-sql-mysql"
+	tenancy := map[string]string{
+		"postgres":  "cloud-sql-postgres",
+		"mysql":     "cloud-sql-mysql",
+		"sqlserver": "cloud-sql-sqlserver",
 	}
-	return catalog.Terms{Commitment: f.commitment, Tenancy: tenancy, OS: f.deploymentOption}
+	t, ok := tenancy[f.engine]
+	if !ok {
+		t = "cloud-sql-postgres"
+	}
+	return catalog.Terms{Commitment: f.commitment, Tenancy: t, OS: f.deploymentOption}
 }
 
 func newGCPCloudSQLPriceCmd() *cobra.Command {
