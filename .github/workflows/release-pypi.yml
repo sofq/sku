@@ -13,6 +13,8 @@ on:
 jobs:
   wheels:
     if: ${{ !inputs.prerelease }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
