@@ -29,7 +29,13 @@ def test_tenancy_matches_engine():
     """tenancy slot encodes the engine, like azure-sql / aws-rds do."""
     rows = list(ingest(skus_path=FIXTURE))
     engines = {r["terms"]["tenancy"] for r in rows}
-    assert engines == {"cloud-sql-postgres", "cloud-sql-mysql"}
+    assert engines == {"cloud-sql-postgres", "cloud-sql-mysql", "cloud-sql-sqlserver"}
+
+
+def test_ingest_admits_sqlserver_engine():
+    rows = list(ingest(skus_path=FIXTURE))
+    engines = {r["terms"]["tenancy"] for r in rows}
+    assert "cloud-sql-sqlserver" in engines
 
 
 def test_os_slot_encodes_deployment():

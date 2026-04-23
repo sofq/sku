@@ -113,6 +113,20 @@
       "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 453200000}}]}}]
     },
     {
+      "skuId": "SQL-SQLSERVER-C2-USE1-ZONAL",
+      "description": "SQL Server: Zonal - 2 vCPU + 8GB RAM running in South Carolina",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "ApplicationServices", "resourceGroup": "SQLGen2InstancesSQLServer", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 210000000}}]}}]
+    },
+    {
+      "skuId": "SQL-SQLSERVER-C2-USE1-REGIONAL",
+      "description": "SQL Server: Regional - 2 vCPU + 8GB RAM running in South Carolina",
+      "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "ApplicationServices", "resourceGroup": "SQLGen2InstancesSQLServer", "usageType": "OnDemand"},
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{"pricingExpression": {"usageUnit": "h", "tieredRates": [{"unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 420000000}}]}}]
+    },
+    {
       "skuId": "SQL-STORAGE-SSD-USE1",
       "description": "Cloud SQL: SSD storage in South Carolina",
       "category": {"serviceDisplayName": "Cloud SQL", "resourceFamily": "Network", "resourceGroup": "SSD", "usageType": "OnDemand"},
