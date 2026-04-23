@@ -13,13 +13,19 @@ import (
 // covers every region_normalized value that today's aws-ec2 / azure-vm /
 // gcp-gce shards emit. Keep this list in sync with the YAML until m5 wires
 // codegen; drift is caught by the cross-shard compare tests.
+// Expanded to P1 popular-path set on 2026-04-22.
 var groupMap = map[string][]string{
-	"us-east":    {"us-east-1", "us-east-2", "eastus", "eastus2", "us-east1", "us-east4"},
-	"us-west":    {"us-west-1", "us-west-2", "westus", "westus2", "westus3", "us-west1", "us-west2"},
-	"eu-west":    {"eu-west-1", "eu-west-2", "eu-west-3", "westeurope", "europe-west1", "europe-west2"},
-	"eu-central": {"eu-central-1", "northeurope", "europe-west3", "europe-west4"},
-	"asia-se":    {"ap-southeast-1", "ap-southeast-2", "southeastasia", "asia-southeast1"},
-	"asia-ne":    {"ap-northeast-1", "ap-northeast-2", "japaneast", "asia-northeast1"},
+	"us-east":    {"us-east-1", "us-east-2", "ca-central-1", "eastus", "eastus2", "canadacentral", "us-east1", "us-east4", "northamerica-northeast1"},
+	"us-central": {"centralus", "southcentralus", "us-central1"},
+	"us-west":    {"us-west-1", "us-west-2", "westus2", "westus3", "us-west1"},
+	"eu-west":    {"eu-west-1", "eu-west-2", "eu-west-3", "westeurope", "uksouth", "francecentral", "europe-west1", "europe-west2", "europe-west4"},
+	"eu-central": {"eu-central-1", "germanywestcentral", "europe-west3"},
+	"eu-north":   {"eu-north-1", "northeurope"},
+	"asia-ne":    {"ap-northeast-1", "ap-northeast-2", "japaneast", "koreacentral", "asia-northeast1"},
+	"asia-se":    {"ap-southeast-1", "southeastasia", "asia-southeast1"},
+	"asia-south": {"ap-south-1", "centralindia", "asia-south1"},
+	"oceania":    {"ap-southeast-2", "australiaeast", "australia-southeast1"},
+	"sa":         {"sa-east-1", "brazilsouth", "southamerica-east1"},
 }
 
 var literalSet = func() map[string]struct{} {
@@ -54,7 +60,7 @@ func Expand(inputs []string) ([]string, []string, error) {
 			litSet[in] = struct{}{}
 			continue
 		}
-		return nil, nil, fmt.Errorf("compare: unknown region or group %q; pass a known group (us-east, us-west, eu-west, eu-central, asia-se, asia-ne) or a provider region literal", in)
+		return nil, nil, fmt.Errorf("compare: unknown region or group %q; pass a known group (us-east, us-central, us-west, eu-west, eu-central, eu-north, asia-ne, asia-se, asia-south, oceania, sa) or a provider region literal", in)
 	}
 	lits := make([]string, 0, len(litSet))
 	for r := range litSet {
