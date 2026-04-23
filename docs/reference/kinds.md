@@ -31,7 +31,7 @@ sku schema --list-kinds   # planned — binary support lands as a follow-up in v
 | `compute.function` | `aws-lambda`, `azure-functions`, `gcp-run`, `gcp-functions` |
 | `storage.object` | `aws-s3`, `azure-blob`, `gcp-gcs` |
 | `storage.block` | `aws-ebs`, `azure-disks` |
-| `db.relational` | `aws-rds`, `azure-sql`, `gcp-cloud-sql` |
+| `db.relational` | `aws-rds`, `azure-sql`, `azure-postgres`, `azure-mysql`, `azure-mariadb`, `gcp-cloud-sql` |
 | `db.nosql` | `aws-dynamodb` |
 | `network.cdn` | `aws-cloudfront` |
 | `llm.text` | `openrouter` (70+ serving providers) |
@@ -61,8 +61,8 @@ sku schema --list-kinds   # planned — binary support lands as a follow-up in v
 | Field | Source |
 |---|---|
 | `resource.vcpu`, `resource.memory_gb`, `resource.storage_gb` | numeric |
-| `resource.engine` | `postgres`, `mysql`, `mssql`, … |
-| `resource.deployment_option` | `single-az`, `multi-az`, `zonal`, `regional` |
+| `resource.engine` | `postgres`, `mysql`, `mariadb`, `sqlserver`, … |
+| `resource.deployment_option` | `single-az`, `multi-az`, `flexible-server`, `zonal`, `regional` |
 
 ### `llm.text`
 

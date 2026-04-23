@@ -7,6 +7,21 @@
 # Exit 0 on success (including "no release yet"); non-zero only when the
 # GitHub API is unreachable or auth is broken.
 set -euo pipefail
-tag=$(gh release list --limit 50 --json tagName --jq \
-  '[.[] | select(.tagName | startswith("data-"))] | .[0].tagName // ""')
+tag=$(gh release list --limit 50 --json tagName | python3 -c '
+import json
+import re
+import sys
+
+try:
+    releases = json.load(sys.stdin)
+except json.JSONDecodeError:
+    releases = []
+
+versioned = re.compile(r"^data-[0-9]{4}\.[0-9]{2}\.[0-9]{2}$")
+for release in releases:
+    tag = release.get("tagName", "")
+    if versioned.match(tag):
+        print(tag)
+        break
+')
 echo "${tag#data-}"

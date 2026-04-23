@@ -15,11 +15,14 @@ from ingest._duckdb import open_conn
 
 _SHARD_BY_BUCKET: dict[tuple[str, str], str] = {
     ("Virtual Machines", "Virtual Machines"): "azure_vm",
-    ("SQL Database",     "SQL Database"):     "azure_sql",
-    ("Storage",          "Storage"):          "azure_blob",
+    ("SQL Database", "SQL Database"): "azure_sql",
+    ("Azure Database for PostgreSQL", "Azure Database for PostgreSQL"): "azure_postgres",
+    ("Azure Database for MySQL", "Azure Database for MySQL"): "azure_mysql",
+    ("Azure Database for MariaDB", "Azure Database for MariaDB"): "azure_mariadb",
+    ("Storage", "Storage"): "azure_blob",
     ("Azure App Service", "Azure App Service"): "azure_functions",
-    ("Functions",        "Azure Functions"):  "azure_functions",
-    ("Storage",          "Managed Disks"):    "azure_disks",
+    ("Functions", "Azure Functions"): "azure_functions",
+    ("Storage", "Managed Disks"): "azure_disks",
 }
 
 
@@ -48,6 +51,10 @@ def scan_prices(*, prices_path: Path) -> list:
     """).description
     avail_cols = {d[0] for d in (col_rows or [])}
     meter_cat_expr = "meterCategory" if "meterCategory" in avail_cols else "serviceName"
+    sku_example_expr = "armSkuName" if "armSkuName" in avail_cols else "skuName"
+    sku_examples_sql = (
+        f"ARRAY_AGG(DISTINCT {sku_example_expr}) FILTER (WHERE {sku_example_expr} IS NOT NULL)"
+    )
 
     rows = con.execute(f"""
         WITH items AS (
@@ -58,7 +65,7 @@ def scan_prices(*, prices_path: Path) -> list:
           serviceName,
           COALESCE({meter_cat_expr}, serviceName)        AS meter_category,
           COUNT(*)                                       AS sku_count,
-          ARRAY_AGG(DISTINCT armSkuName) FILTER (WHERE armSkuName IS NOT NULL) AS sku_examples
+          {sku_examples_sql}                             AS sku_examples
         FROM items
         GROUP BY serviceName, COALESCE({meter_cat_expr}, serviceName)
     """).fetchall()
@@ -67,13 +74,15 @@ def scan_prices(*, prices_path: Path) -> list:
     for service_name, meter_category, sku_count, examples in rows:
         key = (service_name or "", meter_category or "")
         shard = _SHARD_BY_BUCKET.get(key)
-        out.append(CoverageRow(
-            bucket_key=f"{service_name}/{meter_category}",
-            bucket_label=f"{service_name} / {meter_category}",
-            sku_count=int(sku_count),
-            attribute_keys=feed_attrs,
-            sample_sku_ids=tuple((examples or [])[:3]),
-            covered_by_shard=shard,
-            coverage_ratio=1.0 if shard else 0.0,
-        ))
+        out.append(
+            CoverageRow(
+                bucket_key=f"{service_name}/{meter_category}",
+                bucket_label=f"{service_name} / {meter_category}",
+                sku_count=int(sku_count),
+                attribute_keys=feed_attrs,
+                sample_sku_ids=tuple((examples or [])[:3]),
+                covered_by_shard=shard,
+                coverage_ratio=1.0 if shard else 0.0,
+            )
+        )
     return out

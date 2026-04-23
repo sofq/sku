@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/sofq/sku/internal/catalog"
+	"github.com/sofq/sku/internal/updater"
 )
 
 // buildTestZst returns a minimal valid .zst file wrapping a copy of an
@@ -195,6 +196,22 @@ func TestResolveManifestPrimaryURL(t *testing.T) {
 	}
 	if !strings.HasSuffix(url, "/manifest.json") {
 		t.Errorf("primary manifest URL should end with /manifest.json, got: %q", url)
+	}
+}
+
+func TestShouldUseManifestUpdateForFreshAzureHostedDBShards(t *testing.T) {
+	for _, shard := range []string{"azure-postgres", "azure-mysql", "azure-mariadb"} {
+		t.Run(shard, func(t *testing.T) {
+			if !shouldUseManifestUpdate(shard, updater.ChannelStable, false) {
+				t.Fatalf("fresh stable install for %s must use manifest-backed data release", shard)
+			}
+		})
+	}
+}
+
+func TestShouldUseManifestUpdateKeepsExistingBootstrapPathForOldFreshStableShards(t *testing.T) {
+	if shouldUseManifestUpdate("aws-ec2", updater.ChannelStable, false) {
+		t.Fatal("fresh stable install for existing bootstrap shard should keep bootstrap path")
 	}
 }
 

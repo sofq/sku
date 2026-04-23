@@ -34,7 +34,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REQUESTED: ${{ github.event.inputs.shards }}
         run: |
-          tag=$(gh release list --limit 1 --json tagName --jq '.[0].tagName')
+          version=$(scripts/ci/previous_release_version.sh)
+          if [ -z "$version" ]; then
+            echo "no versioned data release found" >&2
+            exit 2
+          fi
+          tag="data-${version}"
           mkdir -p dist/pipeline/validate
           gh release download "$tag" --pattern manifest.json --dir dist/pipeline/validate/
           if [ -n "$REQUESTED" ]; then
@@ -43,7 +48,7 @@ jobs:
             shards=$(jq -c '.shards | keys' dist/pipeline/validate/manifest.json)
           fi
           echo "shards=$shards" >> "$GITHUB_OUTPUT"
-          echo "catalog_version=${tag#data-}" >> "$GITHUB_OUTPUT"
+          echo "catalog_version=$version" >> "$GITHUB_OUTPUT"
 
   validate:
     needs: resolve

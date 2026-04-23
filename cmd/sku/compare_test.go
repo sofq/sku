@@ -154,6 +154,18 @@ func TestCompareCmd_dryRunDBRelational(t *testing.T) {
 	require.Contains(t, stdout.String(), `"aws-rds"`)
 }
 
+func TestCompareCmd_dryRunDBRelationalIncludesAzureHostedDBShards(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "db.relational", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"azure-postgres"`)
+	require.Contains(t, stdout.String(), `"azure-mysql"`)
+	require.Contains(t, stdout.String(), `"azure-mariadb"`)
+}
+
 func TestCompare_dryRun(t *testing.T) {
 	testutilSeededComputeVMCatalog(t)
 	var stdout bytes.Buffer

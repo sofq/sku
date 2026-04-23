@@ -49,12 +49,22 @@ func resolveManifestPrimaryURL() string {
 
 func shardNames() []string { return updater.ShardNames() }
 
+var manifestOnlyFreshStableShards = map[string]bool{
+	"azure-postgres": true,
+	"azure-mysql":    true,
+	"azure-mariadb":  true,
+}
+
+func shouldUseManifestUpdate(shard string, channel updater.Channel, shardExists bool) bool {
+	return channel == updater.ChannelDaily || shardExists || manifestOnlyFreshStableShards[shard]
+}
+
 func newUpdateCmd() *cobra.Command {
 	var channelFlag string
 
 	cmd := &cobra.Command{
 		Use:   "update <shard>",
-		Short: "Download and install a pricing shard (openrouter | aws-ec2 | aws-rds | aws-s3 | aws-lambda | aws-ebs | aws-dynamodb | aws-cloudfront | azure-vm | azure-sql | azure-blob | azure-functions | azure-disks)",
+		Short: "Download and install a pricing shard (openrouter | aws-* | azure-* | gcp-*)",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			s := globalSettings(cmd)
@@ -91,7 +101,7 @@ func newUpdateCmd() *cobra.Command {
 			//   - the shard .db exists (Update handles stable channel too, even for
 			//     existing shards, by re-downloading the baseline).
 			// Fresh installs on stable still go through Install for simplicity.
-			useUpdate := channel == updater.ChannelDaily || shardExists(dbPath)
+			useUpdate := shouldUseManifestUpdate(shard, channel, shardExists(dbPath))
 
 			if s.Verbose {
 				output.Log(cmd.ErrOrStderr(), "update.fetch", map[string]any{
