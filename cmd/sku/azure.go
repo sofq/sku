@@ -14,5 +14,8 @@ func newAzureCmd() *cobra.Command {
 	c.AddCommand(newAzureBlobCmd())
 	c.AddCommand(newAzureFunctionsCmd())
 	c.AddCommand(newAzureDisksCmd())
+	c.AddCommand(newAzurePostgresCmd())
+	c.AddCommand(newAzureMySQLCmd())
+	c.AddCommand(newAzureMariaDBCmd())
 	return c
 }
