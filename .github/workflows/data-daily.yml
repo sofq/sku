@@ -37,7 +37,7 @@ jobs:
       catalog_version:   ${{ steps.discover.outputs.catalog_version }}
       previous_version:  ${{ steps.previous.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - name: Authenticate to GCP via Workload Identity Federation
@@ -108,7 +108,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.discover.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - name: Authenticate to GCP via Workload Identity Federation
@@ -143,7 +143,7 @@ jobs:
       matrix:
         shard: ${{ fromJSON(needs.discover.outputs.shards) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - name: Download today's shard
@@ -190,7 +190,7 @@ jobs:
       && needs.discover.outputs.shards != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
       - uses: actions/download-artifact@v4
