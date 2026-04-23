@@ -128,8 +128,29 @@ azure-disks-shard: ## Build azure-disks shard from fixtures
 	@mv dist/pipeline/azure_disks.db dist/pipeline/azure-disks.db
 	@mv dist/pipeline/azure_disks.rows.jsonl dist/pipeline/azure-disks.rows.jsonl
 
+.PHONY: azure-postgres-shard
+azure-postgres-shard: ## Build azure-postgres shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_postgres FIXTURE=testdata/azure_postgres \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_postgres.db dist/pipeline/azure-postgres.db
+	@mv dist/pipeline/azure_postgres.rows.jsonl dist/pipeline/azure-postgres.rows.jsonl
+
+.PHONY: azure-mysql-shard
+azure-mysql-shard: ## Build azure-mysql shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_mysql FIXTURE=testdata/azure_mysql \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_mysql.db dist/pipeline/azure-mysql.db
+	@mv dist/pipeline/azure_mysql.rows.jsonl dist/pipeline/azure-mysql.rows.jsonl
+
+.PHONY: azure-mariadb-shard
+azure-mariadb-shard: ## Build azure-mariadb shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=azure_mariadb FIXTURE=testdata/azure_mariadb \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/azure_mariadb.db dist/pipeline/azure-mariadb.db
+	@mv dist/pipeline/azure_mariadb.rows.jsonl dist/pipeline/azure-mariadb.rows.jsonl
+
 .PHONY: azure-shards
-azure-shards: azure-vm-shard azure-sql-shard azure-blob-shard azure-functions-shard azure-disks-shard ## Build azure shards (m3b.1+m3b.2)
+azure-shards: azure-vm-shard azure-sql-shard azure-blob-shard azure-functions-shard azure-disks-shard azure-postgres-shard azure-mysql-shard azure-mariadb-shard ## Build azure shards
 
 .PHONY: gcp-gce-shard
 gcp-gce-shard: ## Build gcp-gce shard from fixtures
@@ -194,6 +215,9 @@ test-integration: ## Run Go integration tests (requires built shards)
 	@test -f dist/pipeline/azure-blob.db      || (echo "run 'make azure-blob-shard' first"      && exit 2)
 	@test -f dist/pipeline/azure-functions.db || (echo "run 'make azure-functions-shard' first" && exit 2)
 	@test -f dist/pipeline/azure-disks.db     || (echo "run 'make azure-disks-shard' first"     && exit 2)
+	@test -f dist/pipeline/azure-postgres.db  || (echo "run 'make azure-postgres-shard' first"  && exit 2)
+	@test -f dist/pipeline/azure-mysql.db     || (echo "run 'make azure-mysql-shard' first"     && exit 2)
+	@test -f dist/pipeline/azure-mariadb.db   || (echo "run 'make azure-mariadb-shard' first"   && exit 2)
 	@test -f dist/pipeline/gcp-gce.db         || (echo "run 'make gcp-gce-shard' first"         && exit 2)
 	@test -f dist/pipeline/gcp-cloud-sql.db   || (echo "run 'make gcp-cloud-sql-shard' first"   && exit 2)
 	@test -f dist/pipeline/gcp-gcs.db         || (echo "run 'make gcp-gcs-shard' first"         && exit 2)

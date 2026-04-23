@@ -19,6 +19,9 @@ SHARD_BUDGETS: dict[str, int] = {
     "aws_rds":           5_000_000,
     "azure_vm":         20_000_000,
     "azure_sql":         1_000_000,
+    "azure_postgres":    1_000_000,
+    "azure_mysql":       1_000_000,
+    "azure_mariadb":       500_000,  # service is deprecated by Azure; lower ceiling
     "azure_disks":       1_000_000,
     "gcp_cloud_sql":     1_000_000,
     "openrouter":        1_000_000,
