@@ -112,3 +112,18 @@ jobs:
           name: fixture-shards
           path: dist/pipeline/*.db
           retention-days: 7
+
+  test-codegen-clean:
+    name: codegen clean
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pipeline
+      - name: Regenerate codegen outputs
+        run: make generate
+      - name: Assert working tree clean
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::codegen output is stale — run 'make generate' and commit" >&2
+            exit 1
+          fi
