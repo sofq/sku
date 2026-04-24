@@ -56,11 +56,11 @@ func ec2Lookup(ctx context.Context, f ec2Flags, requireRegion bool, s *batch.Set
 			"pass --region <aws-region>, e.g. --region us-east-1")
 	}
 
-	shardPath := catalog.ShardPath(shardAWSEC2)
-	if _, err := os.Stat(shardPath); err != nil {
-		return nil, shardMissingErr(shardAWSEC2)
+	autoFetch := s != nil && s.AutoFetch
+	if err := ensureShard(ctx, shardAWSEC2, autoFetch, nil); err != nil {
+		return nil, err
 	}
-	cat, err := catalog.Open(shardPath)
+	cat, err := catalog.Open(catalog.ShardPath(shardAWSEC2))
 	if err != nil {
 		return nil, &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
 	}

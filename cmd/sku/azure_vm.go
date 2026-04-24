@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -87,13 +86,11 @@ func runAzureVM(cmd *cobra.Command, f *azureVMFlags, requireRegion bool) error {
 			Preset: s.Preset,
 		})
 	}
-	shardPath := catalog.ShardPath(shardAzureVM)
-	if _, err := os.Stat(shardPath); err != nil {
-		e := shardMissingErr(shardAzureVM)
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+	if err := ensureShard(cmd.Context(), shardAzureVM, s.AutoFetch, cmd.ErrOrStderr()); err != nil {
+		skuerrors.Write(cmd.ErrOrStderr(), err)
+		return err
 	}
-	cat, err := catalog.Open(shardPath)
+	cat, err := catalog.Open(catalog.ShardPath(shardAzureVM))
 	if err != nil {
 		e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
 		skuerrors.Write(cmd.ErrOrStderr(), e)

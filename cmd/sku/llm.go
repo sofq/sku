@@ -8,5 +8,6 @@ func newLLMCmd() *cobra.Command {
 		Short: "Cross-provider LLM pricing (OpenRouter-backed)",
 	}
 	c.AddCommand(newLLMPriceCmd())
+	c.AddCommand(newLLMCompareCmd())
 	return c
 }

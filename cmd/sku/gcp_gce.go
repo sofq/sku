@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -89,13 +88,11 @@ func runGCPGCE(cmd *cobra.Command, f *gcpGCEFlags, requireRegion bool) error {
 			Preset: s.Preset,
 		})
 	}
-	shardPath := catalog.ShardPath(shardGCPGCE)
-	if _, err := os.Stat(shardPath); err != nil {
-		e := shardMissingErr(shardGCPGCE)
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+	if err := ensureShard(cmd.Context(), shardGCPGCE, s.AutoFetch, cmd.ErrOrStderr()); err != nil {
+		skuerrors.Write(cmd.ErrOrStderr(), err)
+		return err
 	}
-	cat, err := catalog.Open(shardPath)
+	cat, err := catalog.Open(catalog.ShardPath(shardGCPGCE))
 	if err != nil {
 		e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
 		skuerrors.Write(cmd.ErrOrStderr(), e)

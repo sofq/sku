@@ -1,8 +1,12 @@
 package sku
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -11,6 +15,7 @@ import (
 	"github.com/sofq/sku/internal/config"
 	skuerrors "github.com/sofq/sku/internal/errors"
 	"github.com/sofq/sku/internal/output"
+	"github.com/sofq/sku/internal/updater"
 )
 
 func shardMissingErr(shard string) *skuerrors.E {
@@ -47,6 +52,46 @@ func applyStaleGate(cmd *cobra.Command, cat *catalog.Catalog, shard string, s co
 			age, s.StaleWarningDays, shard)
 	}
 	return nil
+}
+
+// autoFetchShard downloads shard using the manifest-based updater.
+func autoFetchShard(ctx context.Context, shard string, stderr io.Writer) error {
+	if stderr != nil {
+		_, _ = fmt.Fprintf(stderr, "auto-fetch: downloading %s shard...\n", shard)
+	}
+	// No fallback: SKU_UPDATE_BASE_URL fully controls the manifest URL in tests;
+	// production uses the default GitHub URL directly.
+	manifestSrc := updater.NewHTTPSource(resolveManifestPrimaryURL(), "", nil)
+	_, err := updater.Update(ctx, shard, updater.UpdateOptions{
+		Options:  updater.Options{DestDir: catalog.DataDir()},
+		Channel:  updater.ChannelStable,
+		Manifest: manifestSrc,
+		MaxChain: 20,
+	})
+	if err != nil {
+		msg := err.Error()
+		if idx := strings.Index(msg, ": "); idx >= 0 {
+			msg = msg[idx+2:]
+		}
+		return &skuerrors.E{
+			Code:       skuerrors.CodeServer,
+			Message:    fmt.Sprintf("auto-fetch %s: %s", shard, msg),
+			Suggestion: fmt.Sprintf("Run: sku update %s", shard),
+		}
+	}
+	return nil
+}
+
+// ensureShard returns nil if the shard DB exists. If not and autoFetch is true
+// it downloads via updater.Update; otherwise returns shardMissingErr.
+func ensureShard(ctx context.Context, shard string, autoFetch bool, stderr io.Writer) error {
+	if _, err := os.Stat(catalog.ShardPath(shard)); err == nil {
+		return nil
+	}
+	if !autoFetch {
+		return shardMissingErr(shard)
+	}
+	return autoFetchShard(ctx, shard, stderr)
 }
 
 func renderRows(cmd *cobra.Command, rows []catalog.Row, s config.Settings) error {

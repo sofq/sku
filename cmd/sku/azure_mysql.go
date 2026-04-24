@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -88,13 +87,11 @@ func runAzureMySQL(cmd *cobra.Command, f *azureMySQLFlags, requireRegion bool) e
 			Preset: s.Preset,
 		})
 	}
-	shardPath := catalog.ShardPath(shardAzureMySQL)
-	if _, err := os.Stat(shardPath); err != nil {
-		e := shardMissingErr(shardAzureMySQL)
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+	if err := ensureShard(cmd.Context(), shardAzureMySQL, s.AutoFetch, cmd.ErrOrStderr()); err != nil {
+		skuerrors.Write(cmd.ErrOrStderr(), err)
+		return err
 	}
-	cat, err := catalog.Open(shardPath)
+	cat, err := catalog.Open(catalog.ShardPath(shardAzureMySQL))
 	if err != nil {
 		e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
 		skuerrors.Write(cmd.ErrOrStderr(), e)

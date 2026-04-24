@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -84,13 +83,11 @@ func runAzureDisks(cmd *cobra.Command, f *azureDisksFlags, requireRegion bool) e
 			Preset: s.Preset,
 		})
 	}
-	shardPath := catalog.ShardPath(shardAzureDisks)
-	if _, err := os.Stat(shardPath); err != nil {
-		e := shardMissingErr(shardAzureDisks)
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+	if err := ensureShard(cmd.Context(), shardAzureDisks, s.AutoFetch, cmd.ErrOrStderr()); err != nil {
+		skuerrors.Write(cmd.ErrOrStderr(), err)
+		return err
 	}
-	cat, err := catalog.Open(shardPath)
+	cat, err := catalog.Open(catalog.ShardPath(shardAzureDisks))
 	if err != nil {
 		e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
 		skuerrors.Write(cmd.ErrOrStderr(), e)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -199,6 +200,63 @@ func TestUpdate_AllShards(t *testing.T) {
 			require.Greater(t, fi.Size(), int64(0))
 		})
 	}
+}
+
+func TestUpdate_Status_EmptyDir(t *testing.T) {
+	t.Setenv("SKU_DATA_DIR", t.TempDir())
+	stdout, _, err := runUpdate(t, "--status")
+	require.NoError(t, err)
+
+	var result struct {
+		Shards []struct {
+			Name      string `json:"name"`
+			Installed bool   `json:"installed"`
+		} `json:"shards"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(strings.TrimSpace(stdout)), &result))
+	require.Greater(t, len(result.Shards), 0, "should list all known shards")
+	for _, s := range result.Shards {
+		require.False(t, s.Installed, "no shards installed in empty dir")
+	}
+}
+
+func TestUpdate_Status_WithShard(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("SKU_DATA_DIR", dir)
+
+	ddl, err := os.ReadFile(filepath.Join("..", "..", "internal", "catalog", "testdata", "seed.sql"))
+	require.NoError(t, err)
+	require.NoError(t, catalog.BuildFromSQL(filepath.Join(dir, "openrouter.db"), string(ddl)))
+
+	stdout, _, err := runUpdate(t, "--status")
+	require.NoError(t, err)
+
+	var result struct {
+		Shards []struct {
+			Name      string `json:"name"`
+			Installed bool   `json:"installed"`
+			Version   string `json:"version,omitempty"`
+			Path      string `json:"path,omitempty"`
+		} `json:"shards"`
+	}
+	require.NoError(t, json.Unmarshal([]byte(strings.TrimSpace(stdout)), &result))
+
+	var found bool
+	for _, s := range result.Shards {
+		if s.Name == "openrouter" {
+			found = true
+			require.True(t, s.Installed)
+			require.NotEmpty(t, s.Version)
+			require.NotEmpty(t, s.Path)
+		}
+	}
+	require.True(t, found, "openrouter should appear in status output")
+}
+
+func TestUpdate_NoArgs_NoShards(t *testing.T) {
+	t.Setenv("SKU_DATA_DIR", t.TempDir())
+	_, _, err := runUpdate(t)
+	require.NoError(t, err)
 }
 
 func TestUpdate_UnsupportedShard(t *testing.T) {
