@@ -16,6 +16,37 @@ import ijson
 import requests
 import yaml
 
+
+class NotModified(Exception):
+    """Raised when an upstream HEAD/GET returns 304."""
+
+
+def fetch_with_etag(
+    url: str,
+    *,
+    etag_cache,
+    session: requests.Session | None = None,
+    timeout: float = 30.0,
+) -> bytes:
+    """HEAD with If-None-Match; on 304 raise NotModified. Else GET body and
+    update the cache with the response's ETag (if any)."""
+    sess = session or requests
+    known = etag_cache.get(url)
+    headers: dict[str, str] = {}
+    if known:
+        headers["If-None-Match"] = known
+    head = sess.head(url, headers=headers, timeout=timeout, allow_redirects=True)
+    if head.status_code == 304:
+        raise NotModified(url)
+    if head.status_code != 200:
+        raise RuntimeError(f"unexpected HEAD status {head.status_code} for {url}")
+    resp = sess.get(url, timeout=timeout)
+    resp.raise_for_status()
+    new_etag = resp.headers.get("ETag")
+    if new_etag:
+        etag_cache.set(url, new_etag)
+    return resp.content
+
 _REGIONS_YAML = Path(__file__).resolve().parent.parent / "normalize" / "regions.yaml"
 
 
@@ -92,15 +123,31 @@ _RETRY_STATUSES = {500, 502, 503, 504}
 
 
 def fetch_offer(
-    shard: str, target: Path, *, session: requests.Session | None = None, retries: int = 3
+    shard: str,
+    target: Path,
+    *,
+    session: requests.Session | None = None,
+    retries: int = 3,
+    etag_cache=None,
 ) -> None:
     """Download an AWS offer index.json for `shard` into `target`.
 
     Streams to disk in 64 KiB chunks — we never hold the file in memory because
     some offers (AmazonEC2 = 8+ GB) would OOM a 16 GiB runner.
+
+    When `etag_cache` is provided, sends `If-None-Match` on the HEAD before
+    streaming. Raises `NotModified` if the server returns 304.
     """
     service_code = _AWS_SERVICE_CODES[shard]
     url = f"{_AWS_OFFER_BASE}/{service_code}/current/index.json"
+    if etag_cache is not None:
+        known = etag_cache.get(url)
+        if known:
+            sess = session or requests.Session()
+            head = sess.head(url, headers={"If-None-Match": known},
+                             timeout=30.0, allow_redirects=True)
+            if head.status_code == 304:
+                raise NotModified(url)
     _stream_download(url, target, session=session, retries=retries)
 
 
