@@ -1,0 +1,12 @@
+shard: aws_ebs
+provider: aws
+service: ebs
+kind: storage.block
+cli:
+  group: aws
+  command: ebs
+  resource_flag: volume-type
+ingest:
+  module: aws_ebs
+  discover: aws.publication_date
+budget_bytes: 500000

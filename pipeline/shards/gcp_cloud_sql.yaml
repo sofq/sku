@@ -1,0 +1,12 @@
+shard: gcp_cloud_sql
+provider: gcp
+service: cloud-sql
+kind: db.relational
+cli:
+  group: gcp
+  command: cloud-sql
+  resource_flag: tier
+ingest:
+  module: gcp_cloud_sql
+  discover: gcp.api_version
+budget_bytes: 1000000

@@ -1,0 +1,12 @@
+shard: gcp_gce
+provider: gcp
+service: gce
+kind: compute.vm
+cli:
+  group: gcp
+  command: gce
+  resource_flag: machine-type
+ingest:
+  module: gcp_gce
+  discover: gcp.api_version
+budget_bytes: 2000000

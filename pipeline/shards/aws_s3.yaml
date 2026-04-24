@@ -1,0 +1,12 @@
+shard: aws_s3
+provider: aws
+service: s3
+kind: storage.object
+cli:
+  group: aws
+  command: s3
+  resource_flag: storage-class
+ingest:
+  module: aws_s3
+  discover: aws.publication_date
+budget_bytes: 500000

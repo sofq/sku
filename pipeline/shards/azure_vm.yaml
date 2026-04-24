@@ -1,0 +1,12 @@
+shard: azure_vm
+provider: azure
+service: vm
+kind: compute.vm
+cli:
+  group: azure
+  command: vm
+  resource_flag: arm-sku-name
+ingest:
+  module: azure_vm
+  discover: azure.api_version
+budget_bytes: 20000000

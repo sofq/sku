@@ -1,0 +1,12 @@
+shard: azure_disks
+provider: azure
+service: disks
+kind: storage.block
+cli:
+  group: azure
+  command: disks
+  resource_flag: disk-type
+ingest:
+  module: azure_disks
+  discover: azure.api_version
+budget_bytes: 1000000

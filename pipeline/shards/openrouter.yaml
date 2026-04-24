@@ -1,0 +1,12 @@
+shard: openrouter
+provider: openrouter
+service: llm
+kind: llm.text
+cli:
+  group: llm
+  command: price
+  resource_flag: model
+ingest:
+  module: openrouter
+  discover: openrouter.catalog_hash
+budget_bytes: 1000000

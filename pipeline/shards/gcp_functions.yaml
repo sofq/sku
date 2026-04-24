@@ -1,0 +1,12 @@
+shard: gcp_functions
+provider: gcp
+service: functions
+kind: compute.serverless
+cli:
+  group: gcp
+  command: functions
+  resource_flag: architecture
+ingest:
+  module: gcp_functions
+  discover: gcp.api_version
+budget_bytes: 500000

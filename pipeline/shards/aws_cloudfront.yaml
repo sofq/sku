@@ -1,0 +1,12 @@
+shard: aws_cloudfront
+provider: aws
+service: cloudfront
+kind: network.cdn
+cli:
+  group: aws
+  command: cloudfront
+  resource_flag: resource-name
+ingest:
+  module: aws_cloudfront
+  discover: aws.publication_date
+budget_bytes: 500000

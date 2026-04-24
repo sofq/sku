@@ -1,0 +1,12 @@
+shard: azure_blob
+provider: azure
+service: blob
+kind: storage.object
+cli:
+  group: azure
+  command: blob
+  resource_flag: tier
+ingest:
+  module: azure_blob
+  discover: azure.api_version
+budget_bytes: 500000
