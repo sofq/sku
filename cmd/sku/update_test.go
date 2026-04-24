@@ -46,6 +46,16 @@ func buildTestZst(t *testing.T) (zstData []byte, hexSum string) {
 	return
 }
 
+// singleShardManifest builds a minimal manifest JSON for one shard whose
+// baseline lives at srvURL/<shard>.db.zst. hexSum is used for baseline_sha256
+// (informational only — the actual SHA check happens via the .sha256 file).
+func singleShardManifest(shard, srvURL, hexSum string) string {
+	return `{"schema_version":1,"generated_at":"2026-04-22T04:00:00Z","catalog_version":"2026.04.22","shards":{"` +
+		shard + `":{"baseline_version":"2026.04.22","baseline_url":"` + srvURL + `/` + shard + `.db.zst",` +
+		`"baseline_sha256":"` + hexSum + `","baseline_size":1,"head_version":"2026.04.22",` +
+		`"min_binary_version":"0.0.1","shard_schema_version":1,"deltas":[],"row_count":1,"last_updated":"2026.04.22"}}}`
+}
+
 // runUpdate invokes `sku update <args...>` against a captured root command.
 func runUpdate(t *testing.T, args ...string) (stdout, stderr string, exitErr error) {
 	t.Helper()
@@ -63,8 +73,12 @@ func runUpdate(t *testing.T, args ...string) (stdout, stderr string, exitErr err
 func TestUpdate_HappyPath(t *testing.T) {
 	zstData, hexSum := buildTestZst(t)
 
+	var manifest string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case "/manifest.json":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(manifest))
 		case "/openrouter.db.zst":
 			w.Header().Set("Content-Type", "application/octet-stream")
 			_, _ = w.Write(zstData)
@@ -75,6 +89,7 @@ func TestUpdate_HappyPath(t *testing.T) {
 		}
 	}))
 	defer srv.Close()
+	manifest = singleShardManifest("openrouter", srv.URL, hexSum)
 
 	dataDir := t.TempDir()
 	t.Setenv("SKU_DATA_DIR", dataDir)
@@ -93,21 +108,25 @@ func TestUpdate_HappyPath(t *testing.T) {
 // TestUpdate_SHA256Mismatch returns CodeConflict (exit 6) when the digest does
 // not match.
 func TestUpdate_SHA256Mismatch(t *testing.T) {
-	zstData, _ := buildTestZst(t)
+	zstData, hexSum := buildTestZst(t)
 
 	const wrongHex = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+	var manifest string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case "/manifest.json":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(manifest))
 		case "/openrouter.db.zst":
 			_, _ = w.Write(zstData)
 		case "/openrouter.db.zst.sha256":
-			// wrong digest
 			_, _ = w.Write([]byte(wrongHex + "  openrouter.db.zst\n"))
 		default:
 			http.NotFound(w, r)
 		}
 	}))
 	defer srv.Close()
+	manifest = singleShardManifest("openrouter", srv.URL, hexSum)
 
 	dataDir := t.TempDir()
 	t.Setenv("SKU_DATA_DIR", dataDir)
@@ -121,14 +140,39 @@ func TestUpdate_SHA256Mismatch(t *testing.T) {
 }
 
 // TestUpdate_AllShards runs update against each shard the CLI knows about,
-// served from a single httptest that answers every shard's URLs.
+// served from a single httptest that answers manifest + shard URLs.
 func TestUpdate_AllShards(t *testing.T) {
 	zstData, hexSum := buildTestZst(t)
 
+	shards := []string{"openrouter", "aws-ec2", "aws-rds", "aws-s3", "aws-lambda", "aws-ebs", "aws-dynamodb", "aws-cloudfront"}
+
+	// Build a manifest with an entry for every shard under test.
+	shardEntries := make([]string, 0, len(shards))
+	for _, s := range shards {
+		shardEntries = append(shardEntries, `"`+s+`": {
+			"baseline_version": "2026.04.22",
+			"baseline_url": "SRVURL/`+s+`.db.zst",
+			"baseline_sha256": "HEXSUM",
+			"baseline_size": 1,
+			"head_version": "2026.04.22",
+			"min_binary_version": "0.0.1",
+			"shard_schema_version": 1,
+			"deltas": [],
+			"row_count": 1,
+			"last_updated": "2026.04.22"
+		}`)
+	}
+	manifest := `{"schema_version":1,"generated_at":"2026-04-22T04:00:00Z","catalog_version":"2026.04.22","shards":{` +
+		strings.Join(shardEntries, ",") + `}}`
+
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
+		case r.URL.Path == "/manifest.json":
+			body := strings.ReplaceAll(manifest, "HEXSUM", hexSum)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(body))
 		case strings.HasSuffix(r.URL.Path, ".db.zst.sha256"):
-			_, _ = w.Write([]byte(hexSum + "  " + filepath.Base(r.URL.Path) + "\n")) //nolint:gosec // G705: test server, content is controlled
+			_, _ = w.Write([]byte(hexSum + "  " + filepath.Base(r.URL.Path) + "\n"))
 		case strings.HasSuffix(r.URL.Path, ".db.zst"):
 			w.Header().Set("Content-Type", "application/octet-stream")
 			_, _ = w.Write(zstData)
@@ -138,7 +182,9 @@ func TestUpdate_AllShards(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	for _, shard := range []string{"openrouter", "aws-ec2", "aws-rds", "aws-s3", "aws-lambda", "aws-ebs", "aws-dynamodb", "aws-cloudfront"} {
+	manifest = strings.ReplaceAll(manifest, "SRVURL", srv.URL)
+
+	for _, shard := range shards {
 		t.Run(shard, func(t *testing.T) {
 			dataDir := t.TempDir()
 			t.Setenv("SKU_DATA_DIR", dataDir)
@@ -199,19 +245,13 @@ func TestResolveManifestPrimaryURL(t *testing.T) {
 	}
 }
 
-func TestShouldUseManifestUpdateForFreshAzureHostedDBShards(t *testing.T) {
-	for _, shard := range []string{"azure-postgres", "azure-mysql", "azure-mariadb"} {
-		t.Run(shard, func(t *testing.T) {
-			if !shouldUseManifestUpdate(shard, updater.ChannelStable, false) {
-				t.Fatalf("fresh stable install for %s must use manifest-backed data release", shard)
+func TestShouldUseManifestUpdateAlwaysTrue(t *testing.T) {
+	for _, shard := range []string{"openrouter", "aws-ec2", "azure-postgres", "gcp-gce"} {
+		for _, exists := range []bool{true, false} {
+			if !shouldUseManifestUpdate(shard, updater.ChannelStable, exists) {
+				t.Fatalf("shouldUseManifestUpdate(%s, stable, %v) = false, want true", shard, exists)
 			}
-		})
-	}
-}
-
-func TestShouldUseManifestUpdateKeepsExistingBootstrapPathForOldFreshStableShards(t *testing.T) {
-	if shouldUseManifestUpdate("aws-ec2", updater.ChannelStable, false) {
-		t.Fatal("fresh stable install for existing bootstrap shard should keep bootstrap path")
+		}
 	}
 }
 

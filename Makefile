@@ -6,7 +6,7 @@ BIN_DIR       := bin
 BINARY        := $(BIN_DIR)/sku
 PKG           := ./...
 GO_LDFLAGS    := -s -w \
-                 -X github.com/sofq/sku/internal/version.version=$(shell git describe --tags --always --dirty 2>/dev/null || echo dev) \
+                 -X github.com/sofq/sku/internal/version.version=$(shell git describe --tags --always --dirty --match "v*" 2>/dev/null || echo dev) \
                  -X github.com/sofq/sku/internal/version.commit=$(shell git rev-parse HEAD 2>/dev/null || echo unknown) \
                  -X github.com/sofq/sku/internal/version.date=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
