@@ -147,7 +147,7 @@ jobs:
       - uses: ./.github/actions/setup-pipeline
 
       - name: Download today's shard
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: shard-${{ matrix.shard }}
           path: dist/pipeline/today/
@@ -193,13 +193,13 @@ jobs:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           pattern: release-*
           merge-multiple: true
           path: dist/pipeline/release/
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: discover
           path: dist/pipeline/discover/
