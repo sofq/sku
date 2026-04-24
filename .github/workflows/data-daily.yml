@@ -1,255 +1,106 @@
+# .github/workflows/data-daily.yml
+# Thin dispatcher preserved for the existing `gh workflow run data-daily.yml`
+# entry point. Real work happens in the four child workflows. This workflow
+# fans out to the three providers, waits for them to finish, then triggers
+# publish — matching today's single-command end-to-end maintainer UX.
 name: data-daily
 
 on:
-  schedule:
-    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Stop before publish step; upload artifacts only"
+        description: "Forward to child workflows (publish step honors dry_run too)"
         required: false
         default: "false"
       force_baseline:
-        description: "Force a baseline rebuild regardless of day-of-month"
+        description: "Forward to child workflows"
+        required: false
+        default: "false"
+      force_full_ingest:
+        description: "Forward to data-aws.yml only (bypass ETag cache)"
         required: false
         default: "false"
 
 permissions:
-  contents:  write   # gh release create + data branch force-push
-  issues:    write   # cdn-purge-failed auto-issue
-  actions:   read
-  id-token:  write   # Workload Identity Federation for GCP Cloud Billing API
+  actions: write
+  contents: read
 
-concurrency:
-  # Never cancel a release mid-publish; queue follow-ups instead.
-  group: data-daily
-  cancel-in-progress: false
-
-# Per-step timeouts cap the blast radius of a stuck upstream fetch.
-# Per-shard ceiling: 30 min (matrix; parallel). Manifest build: 10 min.
-# GitHub's default (360 min) is too slack to catch realistic regressions.
 jobs:
-  discover:
+  fan_out:
     runs-on: ubuntu-latest
-    outputs:
-      shards:            ${{ steps.discover.outputs.shards }}
-      baseline_rebuild:  ${{ steps.discover.outputs.baseline_rebuild }}
-      catalog_version:   ${{ steps.discover.outputs.catalog_version }}
-      previous_version:  ${{ steps.previous.outputs.version }}
+    timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-pipeline
-
-      - name: Authenticate to GCP via Workload Identity Federation
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account:            ${{ vars.GCP_VALIDATE_SA }}
-
-      - name: Resolve previous release version
-        id: previous
+      - name: Dispatch provider workflows
+        id: dispatch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          version=$(scripts/ci/previous_release_version.sh)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "previous_version=$version"
-
-      - name: Restore prior discover state
-        if: steps.previous.outputs.version != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p dist/pipeline/discover
-          gh release download "data-${{ steps.previous.outputs.version }}" \
-            --pattern 'state.json' \
-            --dir dist/pipeline/discover || echo "no state.json on previous release (allowed)"
-          ls -la dist/pipeline/discover/ || true
-
-      - name: Discover changed shards
-        id: discover
-        env:
-          FORCE_BASELINE: ${{ github.event.inputs.force_baseline }}
+          GH_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN:           ${{ github.event.inputs.dry_run }}
+          FORCE_BASELINE:    ${{ github.event.inputs.force_baseline }}
+          FORCE_FULL_INGEST: ${{ github.event.inputs.force_full_ingest }}
         run: |
           set -euo pipefail
-          mkdir -p dist/pipeline/discover
-          today=$(date -u +%Y.%m.%d)
-          dom=$(date -u +%d)
+          # Dispatch each child; capture the new run id by diffing `gh run list`
+          # before and after. `gh workflow run` does not return the run id it
+          # creates, so we poll for the newest run of each workflow.
+          # Output keys are sanitized (aws/azure/gcp) — GitHub Actions step
+          # outputs must match `[a-zA-Z_][a-zA-Z0-9_-]*`, so using the raw
+          # workflow filename (which contains `.yml`) would not round-trip.
+          dispatch_and_wait() {
+            local wf="$1" key="$2"; shift 2
+            local before after
+            before=$(gh run list --workflow "$wf" --limit 1 --json databaseId --jq '.[0].databaseId // "0"')
+            gh workflow run "$wf" "$@"
+            # Poll up to 60 s for the new run to appear.
+            for _ in $(seq 1 30); do
+              after=$(gh run list --workflow "$wf" --limit 1 --json databaseId --jq '.[0].databaseId // "0"')
+              if [ "$after" != "$before" ]; then
+                echo "$wf run: $after"
+                echo "${key}_run_id=$after" >> "$GITHUB_OUTPUT"
+                return 0
+              fi
+              sleep 2
+            done
+            echo "::error::$wf did not produce a new run within 60s" >&2
+            return 1
+          }
 
-          flag=""
-          if [ "${FORCE_BASELINE:-false}" = "true" ]; then flag="--baseline-rebuild"; fi
-          if [ "$dom" = "01" ] || [ "$dom" = "15" ]; then flag="--baseline-rebuild"; fi
+          dispatch_and_wait data-aws.yml aws \
+            -f dry_run="$DRY_RUN" \
+            -f force_baseline="$FORCE_BASELINE" \
+            -f force_full_ingest="$FORCE_FULL_INGEST"
+          dispatch_and_wait data-azure.yml azure \
+            -f dry_run="$DRY_RUN" \
+            -f force_baseline="$FORCE_BASELINE"
+          dispatch_and_wait data-gcp.yml gcp \
+            -f dry_run="$DRY_RUN" \
+            -f force_baseline="$FORCE_BASELINE"
 
-          python -m discover \
-            --state dist/pipeline/discover/state.json \
-            --out   dist/pipeline/discover/changed.json \
-            --live  $flag
-
-          shards=$(jq -c '.shards' dist/pipeline/discover/changed.json)
-          brl=$(jq -r '.baseline_rebuild' dist/pipeline/discover/changed.json)
-          echo "shards=$shards"           >> "$GITHUB_OUTPUT"
-          echo "baseline_rebuild=$brl"    >> "$GITHUB_OUTPUT"
-          echo "catalog_version=$today"   >> "$GITHUB_OUTPUT"
-          echo "shards=$shards baseline_rebuild=$brl catalog_version=$today"
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: discover
-          path: dist/pipeline/discover/
-          retention-days: 14
-
-  ingest:
-    needs: discover
-    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 8
-      matrix:
-        shard: ${{ fromJSON(needs.discover.outputs.shards) }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-pipeline
-
-      - name: Authenticate to GCP via Workload Identity Federation
-        if: startsWith(matrix.shard, 'gcp_')
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account:            ${{ vars.GCP_VALIDATE_SA }}
-
-      - name: Fetch upstream + ingest + package
-        timeout-minutes: 30
+      - name: Wait for provider workflows
         env:
-          SHARD:             ${{ matrix.shard }}
-          CATALOG_VERSION:   ${{ needs.discover.outputs.catalog_version }}
-        run: bash scripts/ci/ingest_shard.sh
+          GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+          AWS_RUN:     ${{ steps.dispatch.outputs.aws_run_id }}
+          AZURE_RUN:   ${{ steps.dispatch.outputs.azure_run_id }}
+          GCP_RUN:     ${{ steps.dispatch.outputs.gcp_run_id }}
+        run: |
+          set -euo pipefail
+          # `gh run watch --exit-status` blocks until the run finishes and
+          # exits non-zero on failure. We want all three to complete but a
+          # single provider failure should NOT block publish — the manifest
+          # will just carry that provider's shards at yesterday's versions
+          # (intentional failure isolation). So we watch each independently
+          # and tolerate non-zero exits.
+          for run in "$AWS_RUN" "$AZURE_RUN" "$GCP_RUN"; do
+            [ -z "$run" ] && continue
+            gh run watch "$run" --interval 30 || \
+              echo "::warning::run $run did not succeed — publish will skip this provider's shards"
+          done
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: shard-${{ matrix.shard }}
-          path: |
-            dist/pipeline/*.db
-            dist/pipeline/*.rows.jsonl
-          retention-days: 14
-
-  diff_package:
-    needs: [discover, ingest]
-    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 8
-      matrix:
-        shard: ${{ fromJSON(needs.discover.outputs.shards) }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-pipeline
-
-      - name: Download today's shard
-        uses: actions/download-artifact@v6
-        with:
-          name: shard-${{ matrix.shard }}
-          path: dist/pipeline/today/
-
-      - name: Download previous shard baseline (if any)
-        if: needs.discover.outputs.previous_version != ''
+      - name: Dispatch publish
+        if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN:  ${{ github.event.inputs.dry_run }}
         run: |
           set -euo pipefail
-          mkdir -p dist/pipeline/prev
-          # Filenames on the release use dashed shard names (see ingest_shard.sh).
-          public_shard=$(echo "${{ matrix.shard }}" | tr _ -)
-          gh release download "data-${{ needs.discover.outputs.previous_version }}" \
-            --pattern "${public_shard}.db.zst" \
-            --dir dist/pipeline/prev/ || echo "no previous shard — first release for this shard"
-          if [ -f "dist/pipeline/prev/${public_shard}.db.zst" ]; then
-            zstd -df "dist/pipeline/prev/${public_shard}.db.zst"
-          fi
-
-      - name: Sanity check + build delta + optional baseline
-        env:
-          SHARD:            ${{ matrix.shard }}
-          CATALOG_VERSION:  ${{ needs.discover.outputs.catalog_version }}
-          PREVIOUS_VERSION: ${{ needs.discover.outputs.previous_version }}
-          BASELINE_REBUILD: ${{ needs.discover.outputs.baseline_rebuild }}
-        run: bash scripts/ci/diff_package_shard.sh
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: release-${{ matrix.shard }}
-          path: dist/pipeline/release/
-          retention-days: 14
-
-  publish:
-    needs: [discover, diff_package]
-    if: >-
-      github.event.inputs.dry_run != 'true'
-      && needs.discover.outputs.shards != '[]'
-      && needs.discover.outputs.shards != ''
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-pipeline
-
-      - uses: actions/download-artifact@v6
-        with:
-          pattern: release-*
-          merge-multiple: true
-          path: dist/pipeline/release/
-
-      - uses: actions/download-artifact@v6
-        with:
-          name: discover
-          path: dist/pipeline/discover/
-
-      - name: Build manifest.json
-        timeout-minutes: 10
-        env:
-          CATALOG_VERSION:  ${{ needs.discover.outputs.catalog_version }}
-          PREVIOUS_VERSION: ${{ needs.discover.outputs.previous_version }}
-          MIN_BINARY:       "1.0.0"
-          GH_TOKEN:         ${{ secrets.GITHUB_TOKEN }}
-        run: bash scripts/ci/build_manifest.sh
-
-      - name: Create GitHub release
-        env:
-          CATALOG_VERSION: ${{ needs.discover.outputs.catalog_version }}
-          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # Upload every artifact (baselines, deltas, manifest) plus the
-          # discover state so tomorrow's run can diff against it.
-          cp dist/pipeline/discover/state.json dist/pipeline/release/state.json
-          gh release create "data-${CATALOG_VERSION}" \
-            --title "Data release ${CATALOG_VERSION}" \
-            --notes "Automated daily data release. See manifest.json for shard inventory." \
-            dist/pipeline/release/*
-
-      - name: Update data-latest floating release
-        env:
-          CATALOG_VERSION: ${{ needs.discover.outputs.catalog_version }}
-          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          # data-latest is a lightweight floating release that only carries manifest.json.
-          # Shard downloads resolve through the BaselineURL embedded in the manifest itself.
-          gh release delete data-latest --yes 2>/dev/null || true
-          gh api --method DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/data-latest" 2>/dev/null || true
-          gh release create "data-latest" \
-            --target "$(git rev-parse HEAD)" \
-            --title "Latest data release (${CATALOG_VERSION})" \
-            --notes "Floating tag — always the latest data release. Full release: data-${CATALOG_VERSION}." \
-            dist/pipeline/release/manifest.json
-
-      - name: Mirror manifest to `data` branch
-        env:
-          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
-          CATALOG_VERSION: ${{ needs.discover.outputs.catalog_version }}
-        run: bash scripts/ci/push_data_branch.sh
-
-      - name: Purge jsDelivr cache
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash scripts/ci/purge_jsdelivr.sh
+          gh workflow run data-publish.yml -f dry_run="$DRY_RUN"
+          echo "publish dispatched — watch via: gh run list --workflow data-publish.yml --limit 1"
