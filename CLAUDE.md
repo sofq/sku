@@ -42,24 +42,21 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M3a.4.3 — weekly validate workflow + client-side delta-chain updates:
-- `data-validate.yml` (Mondays 04:00 UTC + dispatch) stratified-samples
-  each on-demand shard, re-fetches SKUs via short-lived OIDC (AWS IAM
-  role; GCP Workload Identity Federation; Azure/OpenRouter anonymous),
-  fails on >1% drift, files `catalog-drift` issue automatically. EC2
-  runs an extra offline cross-check vs `vantage-sh/ec2instances.info`.
-  OIDC provisioning is maintainer-gated — first dispatch pending
-  `AWS_VALIDATE_ROLE_ARN`, `GCP_WIF_PROVIDER`, `GCP_VALIDATE_SA` repo
-  variables.
-- `sku update --channel daily` walks the manifest's delta chain:
-  ETag-cached manifest fetch; per-delta sha256 verification; single-
-  transaction apply with advisory flock; fallback to baseline on
-  chain-too-long (>MaxChain, default 20) or `from`-mismatch.
-- Runbook: `docs/ops/validation.md`.
+M-α — pipeline architecture for coverage expansion:
+- Monolithic `data-daily.yml` split into three per-provider workflows
+  (`data-aws.yml` 03:00, `data-azure.yml` 03:15, `data-gcp.yml` 03:30 UTC)
+  plus `data-publish.yml` (04:30 UTC fallback); `data-daily.yml` kept as a
+  thin manual-dispatch dispatcher. See
+  `docs/superpowers/specs/2026-04-24-m-alpha-pipeline-architecture-design.md`
+  for the full design (note: Feature D dedup and Go-side codegen were cut —
+  see the plan file).
+- `pipeline/shards/*.yaml` is now the single source of truth; `make generate`
+  regenerates `package/budgets.py` and `discover/_shards_gen.py`.
+- ETag fast path wired for AWS non-streaming shards; controlled by
+  `SKU_ETAG_MODE` env var.
 
-Next: M7.3 — security, bench regression gate, v1.0.0 release (cosign
-shard signing, `actions/attest-build-provenance`, property-based
-delta-chain tests).
+Next: M-β (R1 regions), then M-γ (S1 services) (dedup respec pending; will
+ride with M-γ's schema bump).
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
