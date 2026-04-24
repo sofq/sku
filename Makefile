@@ -33,7 +33,8 @@ clean: ## Remove build artifacts
 
 .PHONY: generate-python
 generate-python: ## Regenerate Python sources from pipeline/shards/*.yaml
-	cd pipeline && uv run python -m tools.gen_python
+	$(MAKE) -C pipeline setup
+	pipeline/.venv/bin/python -m tools.gen_python
 
 .PHONY: generate
 generate: generate-python ## Regenerate all codegen outputs
