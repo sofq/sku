@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 import requests_mock as req_mock
 
+from ingest._etag_cache import EtagCache
 from ingest.aws_common import fetch_offer
 
 _EC2_URL = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/index.json"
@@ -151,3 +152,22 @@ def test_user_agent(tmp_path: Path) -> None:
 
     assert ua.startswith("sku-pipeline/")
     assert "https://github.com/sofq/sku" in ua
+
+
+def test_fetch_offer_persists_response_etag(tmp_path: Path) -> None:
+    target = tmp_path / "offer.json"
+    cache = EtagCache(tmp_path / "etags.json")
+
+    with req_mock.Mocker() as m:
+        m.head(_EC2_URL, headers={"ETag": '"offer-v1"'})
+        m.get(
+            _EC2_URL,
+            content=_BODY,
+            headers={
+                "Content-Length": str(len(_BODY)),
+                "ETag": '"offer-v1"',
+            },
+        )
+        fetch_offer("aws_ec2", target, etag_cache=cache)
+
+    assert cache.get(_EC2_URL) == '"offer-v1"'

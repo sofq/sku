@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Forward to child workflows (publish step honors dry_run too)"
+        description: "Forward to provider workflows and stop before publish"
         required: false
         default: "false"
       force_baseline:
@@ -96,7 +96,7 @@ jobs:
           done
 
       - name: Dispatch publish
-        if: always()
+        if: always() && github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRY_RUN:  ${{ github.event.inputs.dry_run }}
@@ -104,3 +104,7 @@ jobs:
           set -euo pipefail
           gh workflow run data-publish.yml -f dry_run="$DRY_RUN"
           echo "publish dispatched — watch via: gh run list --workflow data-publish.yml --limit 1"
+
+      - name: Skip publish for dry run
+        if: always() && github.event.inputs.dry_run == 'true'
+        run: echo "dry_run=true — provider workflows stopped before artifact upload; publish not dispatched"

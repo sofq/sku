@@ -47,9 +47,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/pipeline/release
-          bash scripts/ci/download_provider_artifacts.sh aws
-          bash scripts/ci/download_provider_artifacts.sh azure
-          bash scripts/ci/download_provider_artifacts.sh gcp
+          bash scripts/ci/download_provider_artifacts.sh aws   "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh azure "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh gcp   "${{ steps.version.outputs.catalog_version }}"
 
       - name: Merge per-provider discover state.json
         run: |

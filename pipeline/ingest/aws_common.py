@@ -142,12 +142,16 @@ def fetch_offer(
     url = f"{_AWS_OFFER_BASE}/{service_code}/current/index.json"
     if etag_cache is not None:
         known = etag_cache.get(url)
-        if known:
-            sess = session or requests.Session()
-            head = sess.head(url, headers={"If-None-Match": known},
-                             timeout=30.0, allow_redirects=True)
-            if head.status_code == 304:
-                raise NotModified(url)
+        headers = {"If-None-Match": known} if known else {}
+        sess = session or requests.Session()
+        head = sess.head(url, headers=headers, timeout=30.0, allow_redirects=True)
+        if head.status_code == 304:
+            raise NotModified(url)
+        if head.status_code != 200:
+            raise RuntimeError(f"unexpected HEAD status {head.status_code} for {url}")
+        new_etag = head.headers.get("ETag")
+        if new_etag:
+            etag_cache.set(url, new_etag)
     _stream_download(url, target, session=session, retries=retries)
 
 

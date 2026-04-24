@@ -85,6 +85,7 @@ jobs:
           echo "catalog_version=$today"   >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v7
+        if: github.event.inputs.dry_run != 'true'
         with:
           name: discover-aws
           path: dist/pipeline/discover/
@@ -110,6 +111,7 @@ jobs:
           SKU_ETAG_MODE:       ${{ github.event.inputs.force_full_ingest == 'true' && 'off' || 'strict' }}
         run: bash scripts/ci/ingest_shard.sh
       - uses: actions/upload-artifact@v7
+        if: github.event.inputs.dry_run != 'true'
         with:
           name: shard-${{ matrix.shard }}
           path: |
@@ -119,7 +121,7 @@ jobs:
 
   diff_package:
     needs: [discover, ingest]
-    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
+    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != '' && github.event.inputs.dry_run != 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -165,7 +167,7 @@ jobs:
   # `shards-aws-<date>` artifact that data-publish.yml downloads.
   bundle:
     needs: [discover, diff_package]
-    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
+    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != '' && github.event.inputs.dry_run != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v6

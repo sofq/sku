@@ -37,6 +37,7 @@ case "$SHARD" in
   aws_*)
     offer="$RAW_DIR/${SHARD}-offer.json"
     if [ "${SKU_ETAG_MODE:-off}" = "strict" ]; then
+      set +e
       python - <<PYEOF
 import sys
 from pathlib import Path
@@ -49,22 +50,28 @@ try:
 except NotModified:
     sys.exit(7)
 PYEOF
+      rc=$?
+      set -e
     else
       python - <<PYEOF
 from pathlib import Path
 from ingest.aws_common import fetch_offer
 fetch_offer("$SHARD", Path("$offer"))
 PYEOF
+      rc=$?
     fi
-    rc=$?
     if [ "$rc" = "7" ]; then
-      echo "ETag 304: upstream unchanged for $SHARD — reusing prior artifact"
+      echo "ETag 304: upstream unchanged for $SHARD — reusing prior shard"
       public_shard=$(echo "$SHARD" | tr _ -)
       gh release download \
         "data-${PREVIOUS_VERSION:-$(scripts/ci/previous_release_version.sh)}" \
-        --pattern "${public_shard}.rows.jsonl" \
-        --dir "$OUT_DIR/" || echo "no prior artifact (first run)"
+        --pattern "${public_shard}.db.zst" \
+        --dir "$OUT_DIR/"
+      zstd -df "$OUT_DIR/${public_shard}.db.zst"
       exit 0
+    fi
+    if [ "$rc" != "0" ]; then
+      exit "$rc"
     fi
     python -m "ingest.${SHARD}" \
       --offer "$offer" \
