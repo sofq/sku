@@ -52,6 +52,11 @@ func handleLLMPrice(ctx context.Context, args map[string]any, env batch.Env) (an
 			Details:    map[string]any{"shard": shardOpenRouter, "age_days": age, "threshold_days": s.StaleErrorDays},
 		}
 	}
+	if s != nil && env.Stderr != nil && s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
+		_, _ = fmt.Fprintf(env.Stderr,
+			"warning: catalog is %d days old (warn threshold %d); run `sku update %s`\n",
+			age, s.StaleWarningDays, shardOpenRouter)
+	}
 
 	includeAggregated := false
 	if s != nil {
@@ -123,18 +128,6 @@ func newLLMPriceCmd() *cobra.Command {
 			if s.Verbose {
 				output.Log(cmd.ErrOrStderr(), "catalog.open",
 					map[string]any{"shard": shardOpenRouter, "path": catalog.ShardPath(shardOpenRouter)})
-			}
-
-			// Stale warning (not fatal) still emitted from the Cobra path; batch
-			// callers don't get stderr warnings in v1.
-			if cat, openErr := catalog.Open(catalog.ShardPath(shardOpenRouter)); openErr == nil {
-				age := cat.Age(time.Now().UTC())
-				if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
-					_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
-						"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
-						age, s.StaleWarningDays)
-				}
-				_ = cat.Close()
 			}
 
 			opts := output.Options{
