@@ -1,0 +1,180 @@
+# .github/workflows/data-azure.yml
+name: data-azure
+
+on:
+  schedule:
+    - cron: "15 3 * * *"          # 03:15 UTC — Azure wave
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Stop before artifact upload"
+        required: false
+        default: "false"
+      force_baseline:
+        description: "Force baseline rebuild regardless of day-of-month"
+        required: false
+        default: "false"
+
+permissions:
+  contents:  read
+  actions:   read
+  # Azure Retail Prices is anonymous — no OIDC needed.
+
+concurrency:
+  group: data-azure
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      shards:           ${{ steps.discover.outputs.shards }}
+      baseline_rebuild: ${{ steps.discover.outputs.baseline_rebuild }}
+      catalog_version:  ${{ steps.discover.outputs.catalog_version }}
+      previous_version: ${{ steps.previous.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pipeline
+
+      - name: Resolve previous release version
+        id: previous
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(scripts/ci/previous_release_version.sh)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore prior discover state
+        if: steps.previous.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p dist/pipeline/discover
+          gh release download "data-${{ steps.previous.outputs.version }}" \
+            --pattern 'state.json' \
+            --dir dist/pipeline/discover || echo "no state.json (allowed)"
+
+      - name: Discover changed Azure shards
+        id: discover
+        env:
+          FORCE_BASELINE: ${{ github.event.inputs.force_baseline }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pipeline/discover
+          today=$(date -u +%Y.%m.%d)
+          dom=$(date -u +%d)
+
+          flag=""
+          if [ "${FORCE_BASELINE:-false}" = "true" ]; then flag="--baseline-rebuild"; fi
+          if [ "$dom" = "01" ] || [ "$dom" = "15" ]; then flag="--baseline-rebuild"; fi
+
+          python -m discover \
+            --state dist/pipeline/discover/state.json \
+            --out   dist/pipeline/discover/changed.json \
+            --shards azure_vm,azure_sql,azure_blob,azure_functions,azure_disks,azure_postgres,azure_mysql,azure_mariadb \
+            --live  $flag
+
+          shards=$(jq -c '.shards' dist/pipeline/discover/changed.json)
+          brl=$(jq -r '.baseline_rebuild' dist/pipeline/discover/changed.json)
+          echo "shards=$shards"           >> "$GITHUB_OUTPUT"
+          echo "baseline_rebuild=$brl"    >> "$GITHUB_OUTPUT"
+          echo "catalog_version=$today"   >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: discover-azure
+          path: dist/pipeline/discover/
+          retention-days: 14
+
+  ingest:
+    needs: discover
+    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: ${{ fromJSON(needs.discover.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pipeline
+      - name: Fetch upstream + ingest + package
+        timeout-minutes: 30
+        env:
+          SHARD:             ${{ matrix.shard }}
+          CATALOG_VERSION:   ${{ needs.discover.outputs.catalog_version }}
+          SKU_ETAG_MODE:     "off"    # Retail Prices API has no ETag contract
+        run: bash scripts/ci/ingest_shard.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shard-${{ matrix.shard }}
+          path: |
+            dist/pipeline/*.db
+            dist/pipeline/*.rows.jsonl
+          retention-days: 14
+
+  diff_package:
+    needs: [discover, ingest]
+    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: ${{ fromJSON(needs.discover.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pipeline
+      - name: Download today's shard
+        uses: actions/download-artifact@v6
+        with:
+          name: shard-${{ matrix.shard }}
+          path: dist/pipeline/today/
+      - name: Download previous shard baseline (if any)
+        if: needs.discover.outputs.previous_version != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pipeline/prev
+          public_shard=$(echo "${{ matrix.shard }}" | tr _ -)
+          gh release download "data-${{ needs.discover.outputs.previous_version }}" \
+            --pattern "${public_shard}.db.zst" \
+            --dir dist/pipeline/prev/ || echo "no previous shard (first release)"
+          if [ -f "dist/pipeline/prev/${public_shard}.db.zst" ]; then
+            zstd -df "dist/pipeline/prev/${public_shard}.db.zst"
+          fi
+      - name: Sanity check + build delta + optional baseline
+        env:
+          SHARD:            ${{ matrix.shard }}
+          CATALOG_VERSION:  ${{ needs.discover.outputs.catalog_version }}
+          PREVIOUS_VERSION: ${{ needs.discover.outputs.previous_version }}
+          BASELINE_REBUILD: ${{ needs.discover.outputs.baseline_rebuild }}
+        run: bash scripts/ci/diff_package_shard.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.shard }}
+          path: dist/pipeline/release/
+          retention-days: 14
+
+  bundle:
+    needs: [discover, diff_package]
+    if: needs.discover.outputs.shards != '[]' && needs.discover.outputs.shards != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist/pipeline/release/
+      - uses: actions/download-artifact@v6
+        with:
+          name: discover-azure
+          path: dist/pipeline/discover-azure/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: shards-azure-${{ needs.discover.outputs.catalog_version }}
+          path: |
+            dist/pipeline/release/
+            dist/pipeline/discover-azure/
+          retention-days: 14
