@@ -172,7 +172,7 @@ func TestUpdate_AllShards(t *testing.T) {
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(body))
 		case strings.HasSuffix(r.URL.Path, ".db.zst.sha256"):
-			_, _ = w.Write([]byte(hexSum + "  " + filepath.Base(r.URL.Path) + "\n"))
+			_, _ = w.Write([]byte(hexSum + "  " + filepath.Base(r.URL.Path) + "\n")) //nolint:gosec // G705: test server, content is controlled
 		case strings.HasSuffix(r.URL.Path, ".db.zst"):
 			w.Header().Set("Content-Type", "application/octet-stream")
 			_, _ = w.Write(zstData)
