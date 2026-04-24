@@ -1,0 +1,12 @@
+shard: azure_sql
+provider: azure
+service: sql
+kind: db.relational
+cli:
+  group: azure
+  command: sql
+  resource_flag: sku-name
+ingest:
+  module: azure_sql
+  discover: azure.api_version
+budget_bytes: 1000000

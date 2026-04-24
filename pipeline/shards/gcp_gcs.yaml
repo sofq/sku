@@ -1,0 +1,12 @@
+shard: gcp_gcs
+provider: gcp
+service: gcs
+kind: storage.object
+cli:
+  group: gcp
+  command: gcs
+  resource_flag: storage-class
+ingest:
+  module: gcp_gcs
+  discover: gcp.api_version
+budget_bytes: 500000

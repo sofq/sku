@@ -1,5 +1,11 @@
 # Data-daily workflow runbook
 
+> **M-α note:** As of M-α, the daily pipeline is four workflows (three
+> provider + one publish), fronted by the `data-daily.yml` dispatcher which
+> preserves the existing end-to-end entry point. See
+> [`data-workflows.md`](data-workflows.md) for the topology. This runbook
+> still covers legacy operational concerns shared across them.
+
 Maintainer guide for `.github/workflows/data-daily.yml` — the cron-driven
 daily release that publishes shard baselines, SQL deltas, and `manifest.json`
 under the `data-YYYY.MM.DD` tag.

@@ -11,6 +11,7 @@ dependencies = [
   "numpy>=1.26",
   "ijson>=3.2",
   "google-auth>=2.30",
+  "jinja2>=3.1,<4",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +27,7 @@ validate = [
 ]
 
 [tool.setuptools]
-packages = ["ingest", "normalize", "package", "discover", "validate", "catalog_profiler"]
+packages = ["ingest", "normalize", "package", "discover", "validate", "catalog_profiler", "shards", "tools"]
 
 [tool.ruff]
 line-length = 100

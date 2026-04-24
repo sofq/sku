@@ -1,0 +1,12 @@
+shard: aws_rds
+provider: aws
+service: rds
+kind: db.relational
+cli:
+  group: aws
+  command: rds
+  resource_flag: instance-type
+ingest:
+  module: aws_rds
+  discover: aws.publication_date
+budget_bytes: 5000000

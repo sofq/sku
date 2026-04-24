@@ -1,0 +1,12 @@
+shard: aws_dynamodb
+provider: aws
+service: dynamodb
+kind: db.nosql
+cli:
+  group: aws
+  command: dynamodb
+  resource_flag: table-class
+ingest:
+  module: aws_dynamodb
+  discover: aws.publication_date
+budget_bytes: 500000

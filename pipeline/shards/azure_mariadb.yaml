@@ -1,0 +1,12 @@
+shard: azure_mariadb
+provider: azure
+service: mariadb
+kind: db.relational
+cli:
+  group: azure
+  command: mariadb
+  resource_flag: sku-name
+ingest:
+  module: azure_mariadb
+  discover: azure.api_version
+budget_bytes: 500000

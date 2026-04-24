@@ -1,0 +1,12 @@
+shard: gcp_run
+provider: gcp
+service: run
+kind: compute.serverless
+cli:
+  group: gcp
+  command: run
+  resource_flag: architecture
+ingest:
+  module: gcp_run
+  discover: gcp.api_version
+budget_bytes: 500000

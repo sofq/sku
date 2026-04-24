@@ -52,6 +52,11 @@ func handleLLMCompare(ctx context.Context, args map[string]any, env batch.Env) (
 			Details:    map[string]any{"shard": shardOpenRouter, "age_days": age, "threshold_days": s.StaleErrorDays},
 		}
 	}
+	if s != nil && env.Stderr != nil && s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
+		_, _ = fmt.Fprintf(env.Stderr,
+			"warning: catalog is %d days old (warn threshold %d); run `sku update %s`\n",
+			age, s.StaleWarningDays, shardOpenRouter)
+	}
 
 	includeAggregated := s != nil && s.IncludeAggregated
 	rows, err := cat.LookupLLM(ctx, catalog.LLMFilter{
@@ -136,17 +141,6 @@ func newLLMCompareCmd() *cobra.Command {
 				return err
 			}
 			rows := result.([]catalog.Row)
-
-			// Stale warning (not fatal).
-			if cat2, openErr := catalog.Open(catalog.ShardPath(shardOpenRouter)); openErr == nil {
-				age := cat2.Age(time.Now().UTC())
-				if s.StaleWarningDays > 0 && age >= s.StaleWarningDays && !s.StaleOK {
-					_, _ = fmt.Fprintf(cmd.ErrOrStderr(),
-						"warning: catalog is %d days old (warn threshold %d); run `sku update openrouter`\n",
-						age, s.StaleWarningDays)
-				}
-				_ = cat2.Close()
-			}
 
 			opts := output.Options{
 				Preset:            output.Preset(s.Preset),

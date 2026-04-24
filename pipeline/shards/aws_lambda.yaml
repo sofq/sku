@@ -1,0 +1,12 @@
+shard: aws_lambda
+provider: aws
+service: lambda
+kind: compute.serverless
+cli:
+  group: aws
+  command: lambda
+  resource_flag: architecture
+ingest:
+  module: aws_lambda
+  discover: aws.publication_date
+budget_bytes: 500000

@@ -1,0 +1,125 @@
+# .github/workflows/data-publish.yml
+name: data-publish
+
+on:
+  schedule:
+    - cron: "30 4 * * *"          # 04:30 UTC — after all three provider waves
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Build manifest but skip release creation"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+  issues:   write
+  actions:  read
+
+concurrency:
+  group: data-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pipeline
+
+      - name: Resolve catalog version
+        id: version
+        run: |
+          today=$(date -u +%Y.%m.%d)
+          echo "catalog_version=$today" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve previous release version
+        id: previous
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(scripts/ci/previous_release_version.sh)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Download provider artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pipeline/release
+          bash scripts/ci/download_provider_artifacts.sh aws   "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh azure "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh gcp   "${{ steps.version.outputs.catalog_version }}"
+
+      - name: Merge per-provider discover state.json
+        run: |
+          set -euo pipefail
+          # Locate each provider's state.json inside its downloaded bundle.
+          # If a provider's workflow didn't produce an artifact today (run
+          # skipped or failed), its state.json is absent — the merge simply
+          # keeps yesterday's values via the other providers.
+          mapfile -t inputs < <(find dist/pipeline/aws-in dist/pipeline/azure-in dist/pipeline/gcp-in \
+            -maxdepth 5 -name 'state.json' -type f 2>/dev/null | sort)
+          if [ "${#inputs[@]}" -eq 0 ]; then
+            echo "no state.json files to merge — provider workflows produced none" >&2
+            exit 2
+          fi
+          python scripts/ci/merge_discover_state.py "${inputs[@]}"
+
+      - name: Require at least one provider produced artifacts
+        run: |
+          count=$(find dist/pipeline/release -name '*.db.zst' -o -name '*.sql.gz' | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "no provider produced artifacts today — abort publish" >&2
+            exit 2
+          fi
+          echo "$count artifacts ready for publish"
+
+      - name: Build manifest.json
+        timeout-minutes: 10
+        env:
+          CATALOG_VERSION:  ${{ steps.version.outputs.catalog_version }}
+          PREVIOUS_VERSION: ${{ steps.previous.outputs.version }}
+          MIN_BINARY:       "1.0.0"
+          GH_TOKEN:         ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/ci/build_manifest.sh
+
+      - name: Create GitHub release
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          CATALOG_VERSION: ${{ steps.version.outputs.catalog_version }}
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release create "data-${CATALOG_VERSION}" \
+            --title "Data release ${CATALOG_VERSION}" \
+            --notes "Automated daily data release. See manifest.json for shard inventory." \
+            dist/pipeline/release/*
+
+      - name: Update data-latest floating release
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          CATALOG_VERSION: ${{ steps.version.outputs.catalog_version }}
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release delete data-latest --yes 2>/dev/null || true
+          gh api --method DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/data-latest" 2>/dev/null || true
+          gh release create "data-latest" \
+            --target "$(git rev-parse HEAD)" \
+            --title "Latest data release (${CATALOG_VERSION})" \
+            --notes "Floating tag — always the latest data release." \
+            dist/pipeline/release/manifest.json
+
+      - name: Mirror manifest to data branch
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN:        ${{ secrets.GITHUB_TOKEN }}
+          CATALOG_VERSION: ${{ steps.version.outputs.catalog_version }}
+        run: bash scripts/ci/push_data_branch.sh
+
+      - name: Purge jsDelivr cache
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/ci/purge_jsdelivr.sh

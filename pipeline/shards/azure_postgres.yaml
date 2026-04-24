@@ -1,0 +1,12 @@
+shard: azure_postgres
+provider: azure
+service: postgres
+kind: db.relational
+cli:
+  group: azure
+  command: postgres
+  resource_flag: sku-name
+ingest:
+  module: azure_postgres
+  discover: azure.api_version
+budget_bytes: 1000000

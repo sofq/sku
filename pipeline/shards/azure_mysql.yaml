@@ -1,0 +1,12 @@
+shard: azure_mysql
+provider: azure
+service: mysql
+kind: db.relational
+cli:
+  group: azure
+  command: mysql
+  resource_flag: sku-name
+ingest:
+  module: azure_mysql
+  discover: azure.api_version
+budget_bytes: 1000000

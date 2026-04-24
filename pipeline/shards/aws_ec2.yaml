@@ -1,0 +1,12 @@
+shard: aws_ec2
+provider: aws
+service: ec2
+kind: compute.vm
+cli:
+  group: aws
+  command: ec2
+  resource_flag: instance-type
+ingest:
+  module: aws_ec2
+  discover: aws.publication_date
+budget_bytes: 20000000

@@ -32,46 +32,11 @@ from discover import aws as aws_disc
 from discover import azure as azure_disc
 from discover import gcp as gcp_disc
 from discover import openrouter as or_disc
+from discover._shards_gen import ALL_SHARDS, provider_of as _provider_of
 from discover.state import State, load, save
 from ingest.http import LiveClient
 
 _OUTPUT_SCHEMA_VERSION = 1
-
-ALL_SHARDS: tuple[str, ...] = (
-    "aws_ec2",
-    "aws_rds",
-    "aws_s3",
-    "aws_lambda",
-    "aws_ebs",
-    "aws_dynamodb",
-    "aws_cloudfront",
-    "azure_vm",
-    "azure_sql",
-    "azure_blob",
-    "azure_functions",
-    "azure_disks",
-    "azure_postgres",
-    "azure_mysql",
-    "azure_mariadb",
-    "gcp_gce",
-    "gcp_cloud_sql",
-    "gcp_gcs",
-    "gcp_run",
-    "gcp_functions",
-    "openrouter",
-)
-
-
-def _provider_of(shard: str) -> str:
-    if shard.startswith("aws_"):
-        return "aws"
-    if shard.startswith("azure_"):
-        return "azure"
-    if shard.startswith("gcp_"):
-        return "gcp"
-    if shard == "openrouter":
-        return "openrouter"
-    raise KeyError(shard)
 
 
 def _validate_shards(shards: Iterable[str]) -> list[str]:
