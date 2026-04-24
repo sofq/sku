@@ -2,7 +2,6 @@ package sku
 
 import (
 	"context"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -82,13 +81,11 @@ func runAWSCloudFront(cmd *cobra.Command, f *cfFlags, requireRegion bool) error 
 			Preset: s.Preset,
 		})
 	}
-	shardPath := catalog.ShardPath(shardAWSCloudFront)
-	if _, err := os.Stat(shardPath); err != nil {
-		e := shardMissingErr(shardAWSCloudFront)
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
+	if err := ensureShard(cmd.Context(), shardAWSCloudFront, s.AutoFetch, cmd.ErrOrStderr()); err != nil {
+		skuerrors.Write(cmd.ErrOrStderr(), err)
+		return err
 	}
-	cat, err := catalog.Open(shardPath)
+	cat, err := catalog.Open(catalog.ShardPath(shardAWSCloudFront))
 	if err != nil {
 		e := &skuerrors.E{Code: skuerrors.CodeServer, Message: err.Error()}
 		skuerrors.Write(cmd.ErrOrStderr(), e)

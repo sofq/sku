@@ -25,6 +25,7 @@ type Settings struct {
 	Fields            string
 	IncludeRaw        bool
 	IncludeAggregated bool
+	AutoFetch         bool
 	StaleOK           bool
 	StaleWarningDays  int
 	StaleErrorDays    int

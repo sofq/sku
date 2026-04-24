@@ -17,6 +17,7 @@ func ToBatchSettings(g config.Settings) batch.Settings {
 		Fields:            g.Fields,
 		IncludeRaw:        g.IncludeRaw,
 		IncludeAggregated: g.IncludeAggregated,
+		AutoFetch:         g.AutoFetch,
 		StaleOK:           g.StaleOK,
 		StaleWarningDays:  g.StaleWarningDays,
 		StaleErrorDays:    g.StaleErrorDays,

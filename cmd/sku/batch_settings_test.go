@@ -11,14 +11,14 @@ func TestToBatchSettings_copiesAllFields(t *testing.T) {
 	g := config.Settings{
 		Preset: "compare", Profile: "default", Format: "json", Pretty: true,
 		JQ: ".x", Fields: "a,b", IncludeRaw: true, IncludeAggregated: true,
-		StaleOK: true, StaleWarningDays: 14, StaleErrorDays: 30, DryRun: false,
-		Verbose: true, NoColor: true,
+		AutoFetch: true, StaleOK: true, StaleWarningDays: 14, StaleErrorDays: 30,
+		DryRun: false, Verbose: true, NoColor: true,
 	}
 	s := ToBatchSettings(g)
 	want := batch.Settings{
 		Preset: "compare", Profile: "default", Format: "json", Pretty: true,
 		JQ: ".x", Fields: "a,b", IncludeRaw: true, IncludeAggregated: true,
-		StaleOK: true, StaleWarningDays: 14, StaleErrorDays: 30,
+		AutoFetch: true, StaleOK: true, StaleWarningDays: 14, StaleErrorDays: 30,
 		Verbose: true, NoColor: true,
 	}
 	if s != want {
