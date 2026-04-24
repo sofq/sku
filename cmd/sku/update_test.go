@@ -210,12 +210,29 @@ func TestUpdate_UnsupportedShard(t *testing.T) {
 	require.Contains(t, stderr, "unsupported_shard")
 }
 
-// TestUpdate_HTTPError returns CodeServer when the server replies 502.
+// TestUpdate_HTTPError returns CodeServer when the shard asset download
+// replies 502. The manifest itself must succeed; otherwise the updater may
+// legitimately fall back to its secondary manifest URL and make this test
+// environment-dependent.
 func TestUpdate_HTTPError(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		http.Error(w, "bad gateway", http.StatusBadGateway)
+	_, hexSum := buildTestZst(t)
+
+	var manifest string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/manifest.json":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(manifest))
+		case "/openrouter.db.zst":
+			http.Error(w, "bad gateway", http.StatusBadGateway)
+		case "/openrouter.db.zst.sha256":
+			_, _ = w.Write([]byte(hexSum + "  openrouter.db.zst\n"))
+		default:
+			http.NotFound(w, r)
+		}
 	}))
 	defer srv.Close()
+	manifest = singleShardManifest("openrouter", srv.URL, hexSum)
 
 	dataDir := t.TempDir()
 	t.Setenv("SKU_DATA_DIR", dataDir)
