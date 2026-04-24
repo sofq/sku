@@ -31,9 +31,12 @@ lint: ## Run golangci-lint
 clean: ## Remove build artifacts
 	rm -rf $(BIN_DIR) dist
 
+.PHONY: generate-python
+generate-python: ## Regenerate Python sources from pipeline/shards/*.yaml
+	cd pipeline && uv run python -m tools.gen_python
+
 .PHONY: generate
-generate: ## Run go generate across the module (placeholder; used from M4)
-	$(GO) generate $(PKG)
+generate: generate-python ## Regenerate all codegen outputs
 
 .PHONY: openrouter-shard
 openrouter-shard: ## Build OpenRouter shard from fixtures into dist/pipeline/openrouter.db
