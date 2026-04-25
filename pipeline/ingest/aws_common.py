@@ -89,11 +89,13 @@ _AWS_OFFER_BASE = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws"
 _AWS_SERVICE_CODES: dict[str, str] = {
     "aws_ec2": "AmazonEC2",
     "aws_rds": "AmazonRDS",
+    "aws_aurora": "AmazonRDS",
     "aws_s3": "AmazonS3",
     "aws_lambda": "AWSLambda",
     "aws_ebs": "AmazonEC2",
     "aws_dynamodb": "AmazonDynamoDB",
     "aws_cloudfront": "AmazonCloudFront",
+    "aws_elasticache": "AmazonElastiCache",
 }
 
 # Multiple shards share an upstream offer — aws_ec2 + aws_ebs both consume

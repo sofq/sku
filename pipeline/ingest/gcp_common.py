@@ -35,6 +35,7 @@ _GCP_SERVICE_IDS: dict[str, str] = {
     "gcp_run": "152E-C115-5142",  # Cloud Run
     "gcp_functions": "29E7-DA93-CA13",  # Cloud Functions
     "gcp_spanner": "CCD8-5226-9C81",  # Cloud Spanner
+    "gcp_memorystore": "E5D3-7316-6E41",  # Cloud Memorystore
 }
 
 _USAGE_UNITS: dict[str, tuple[float, str]] = {
