@@ -21,7 +21,15 @@ _SERVICE = "memorystore"
 _KIND = "cache.kv"
 
 _MEMORY_RE = re.compile(r"(\d+(?:\.\d+)?)\s*GB", re.IGNORECASE)
+_M_TIER_RE = re.compile(r"\bM([1-5])\b", re.IGNORECASE)
 _TIER_PAT = re.compile(r"\b(basic|standard)\b", re.IGNORECASE)
+_M_TIER_MEMORY_GB = {
+    "1": 5.0,
+    "2": 10.0,
+    "3": 16.0,
+    "4": 64.0,
+    "5": 128.0,
+}
 
 
 def _engine_of(sku: dict) -> str | None:
@@ -45,7 +53,16 @@ def _hourly_usd(sku: dict) -> float:
 
 def _memory_gb(description: str) -> float | None:
     m = _MEMORY_RE.search(description)
-    return float(m.group(1)) if m else None
+    if m:
+        return float(m.group(1))
+    if re.search(r"\bCustom\s+Core\b", description, re.IGNORECASE):
+        return None
+    if re.search(r"\bCustom\s+RAM\b", description, re.IGNORECASE):
+        return 1.0
+    m_tier = _M_TIER_RE.search(description)
+    if m_tier:
+        return _M_TIER_MEMORY_GB[m_tier.group(1)]
+    return None
 
 
 def _tier(description: str) -> str | None:

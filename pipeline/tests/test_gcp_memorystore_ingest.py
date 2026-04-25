@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from ingest.gcp_memorystore import ingest
@@ -28,3 +29,95 @@ def test_ingest_resource_name_includes_engine():
     for r in rows:
         engine = r["resource_attrs"]["extra"]["engine"]
         assert r["resource_name"].startswith(f"memorystore-{engine}")
+
+
+def _sku(
+    *,
+    sku_id: str,
+    description: str,
+    service: str,
+    nanos: int = 1000000,
+    usage_unit: str = "h",
+) -> dict:
+    return {
+        "skuId": sku_id,
+        "description": description,
+        "serviceRegions": ["us-east1"],
+        "category": {
+            "serviceDisplayName": service,
+            "usageType": "OnDemand",
+        },
+        "pricingInfo": [
+            {
+                "pricingExpression": {
+                    "usageUnit": usage_unit,
+                    "tieredRates": [
+                        {
+                            "unitPrice": {
+                                "currencyCode": "USD",
+                                "units": "0",
+                                "nanos": nanos,
+                            }
+                        }
+                    ],
+                }
+            }
+        ],
+    }
+
+
+def test_ingest_handles_live_redis_capacity_tiers_without_gb(tmp_path):
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(
+        json.dumps(
+            {
+                "skus": [
+                    _sku(
+                        sku_id="redis-basic-m1-us-east1",
+                        description="Redis Capacity Basic M1 Iowa",
+                        service="Cloud Memorystore for Redis",
+                    )
+                ]
+            }
+        )
+    )
+
+    rows = list(ingest(skus_path=skus_path))
+
+    assert len(rows) == 1
+    assert rows[0]["resource_attrs"]["extra"] == {"engine": "redis", "tier": "basic"}
+    assert rows[0]["resource_attrs"]["memory_gb"] == 5
+
+
+def test_ingest_handles_live_memcached_ram_and_skips_core(tmp_path):
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(
+        json.dumps(
+            {
+                "skus": [
+                    _sku(
+                        sku_id="memcached-ram-m1-us-east1",
+                        description="Memorystore for Memcached Custom RAM M1 Iowa",
+                        service="Cloud Memorystore for Memcached",
+                        usage_unit="GiBy.h",
+                    ),
+                    _sku(
+                        sku_id="memcached-core-m1-us-east1",
+                        description="Memorystore for Memcached Custom Core M1 Iowa",
+                        service="Cloud Memorystore for Memcached",
+                        usage_unit="h",
+                    ),
+                ]
+            }
+        )
+    )
+
+    rows = list(ingest(skus_path=skus_path))
+
+    assert len(rows) == 1
+    assert rows[0]["sku_id"] == "memcached-ram-m1-us-east1"
+    assert rows[0]["resource_attrs"]["extra"] == {
+        "engine": "memcached",
+        "tier": "standard",
+    }
+    assert rows[0]["resource_attrs"]["memory_gb"] == 1
