@@ -34,13 +34,18 @@ type compareFlags struct {
 	engine           string
 	deploymentOption string
 	storageGB        float64
+
+	// container.orchestration
+	tier string
+	mode string
 }
 
 var (
-	compareVMShards            = []string{"aws-ec2", "azure-vm", "gcp-gce"}
-	compareStorageObjectShards = []string{"aws-s3", "azure-blob", "gcp-gcs"}
-	compareDBRelationalShards  = []string{"aws-rds", "aws-aurora", "azure-sql", "azure-postgres", "azure-mysql", "azure-mariadb", "gcp-cloud-sql", "gcp-spanner"}
-	compareCacheKVShards       = []string{"aws-elasticache", "azure-redis", "gcp-memorystore"}
+	compareVMShards                      = []string{"aws-ec2", "azure-vm", "gcp-gce"}
+	compareStorageObjectShards           = []string{"aws-s3", "azure-blob", "gcp-gcs"}
+	compareDBRelationalShards            = []string{"aws-rds", "aws-aurora", "azure-sql", "azure-postgres", "azure-mysql", "azure-mariadb", "gcp-cloud-sql", "gcp-spanner"}
+	compareCacheKVShards                 = []string{"aws-elasticache", "azure-redis", "gcp-memorystore"}
+	compareContainerOrchestrationShards  = []string{"aws-eks", "azure-aks", "gcp-gke"}
 )
 
 func shardsForKind(kind string) []string {
@@ -53,6 +58,8 @@ func shardsForKind(kind string) []string {
 		return compareDBRelationalShards
 	case "cache.kv":
 		return compareCacheKVShards
+	case "container.orchestration":
+		return compareContainerOrchestrationShards
 	}
 	return nil
 }
@@ -64,7 +71,7 @@ func newCompareCmd() *cobra.Command {
 		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, cache.kv)",
 		RunE:  func(cmd *cobra.Command, _ []string) error { return runCompare(cmd, &f) },
 	}
-	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (compute.vm | storage.object | db.relational | cache.kv)")
+	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (compute.vm | storage.object | db.relational | cache.kv | container.orchestration)")
 	c.Flags().Int64Var(&f.vcpu, "vcpu", 0, "minimum vCPU count")
 	c.Flags().Float64Var(&f.memoryGB, "memory", 0, "minimum memory in GB")
 	c.Flags().Int64Var(&f.gpuCount, "gpu-count", 0, "minimum GPU count (0 excludes GPU SKUs)")
@@ -78,6 +85,8 @@ func newCompareCmd() *cobra.Command {
 	c.Flags().StringVar(&f.engine, "engine", "", "db.relational engine (postgres | mysql | ...) or cache.kv engine (redis | memcached)")
 	c.Flags().StringVar(&f.deploymentOption, "deployment-option", "", "db.relational deployment option (single-az | multi-az | zonal | regional)")
 	c.Flags().Float64Var(&f.storageGB, "storage-gb", 0, "db.relational minimum storage (GB)")
+	c.Flags().StringVar(&f.tier, "tier", "", "container.orchestration tier (free|standard|premium|extended-support|autopilot — container.orchestration only)")
+	c.Flags().StringVar(&f.mode, "mode", "", "container.orchestration mode (control-plane|fargate|autopilot|virtual-nodes — container.orchestration only)")
 	return c
 }
 
@@ -86,39 +95,47 @@ func newCompareCmd() *cobra.Command {
 func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E) {
 	if f.kind == "" {
 		return nil, skuerrors.Validation("flag_invalid", "kind", "",
-			"pass --kind compute.vm | storage.object | db.relational | cache.kv")
+			"pass --kind compute.vm | storage.object | db.relational | cache.kv | container.orchestration")
 	}
 	supportedKinds := map[string]bool{
-		"compute.vm":     true,
-		"storage.object": true,
-		"db.relational":  true,
-		"cache.kv":       true,
+		"compute.vm":              true,
+		"storage.object":          true,
+		"db.relational":           true,
+		"cache.kv":                true,
+		"container.orchestration": true,
 	}
 	if !supportedKinds[f.kind] {
 		return nil, skuerrors.Validation("flag_invalid", "kind", f.kind,
-			"supported kinds: compute.vm, storage.object, db.relational, cache.kv")
+			"supported kinds: compute.vm, storage.object, db.relational, cache.kv, container.orchestration")
 	}
 	switch f.kind {
 	case "compute.vm":
-		if f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 {
+		if f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 || f.tier != "" || f.mode != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				"compute.vm does not accept --storage-class / --durability-nines / --availability-tier / --storage-gb")
+				"compute.vm does not accept --storage-class / --durability-nines / --availability-tier / --storage-gb / --tier / --mode")
 		}
 	case "storage.object":
-		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageGB != 0 {
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageGB != 0 || f.tier != "" || f.mode != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				"storage.object does not accept --vcpu / --memory / --gpu-count / --storage-gb")
+				"storage.object does not accept --vcpu / --memory / --gpu-count / --storage-gb / --tier / --mode")
 		}
 	case "db.relational":
-		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" {
+		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" || f.tier != "" || f.mode != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				"db.relational does not accept --gpu-count / --storage-class / --durability-nines / --availability-tier")
+				"db.relational does not accept --gpu-count / --storage-class / --durability-nines / --availability-tier / --tier / --mode")
 		}
 	case "cache.kv":
 		if f.vcpu != 0 || f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
-			f.availabilityTier != "" || f.storageGB != 0 || f.deploymentOption != "" {
+			f.availabilityTier != "" || f.storageGB != 0 || f.deploymentOption != "" || f.tier != "" || f.mode != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"cache.kv accepts --memory / --engine / --max-price / --regions")
+		}
+	case "container.orchestration":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"container.orchestration accepts --tier / --mode / --regions / --max-price")
 		}
 	}
 	switch f.sort {
@@ -212,6 +229,8 @@ func compareLookup(ctx context.Context, f compareFlags, s *batch.Settings) ([]ca
 		StorageGB:        f.storageGB,
 		Engine:           f.engine,
 		DeploymentOption: f.deploymentOption,
+		Tier:             f.tier,
+		Mode:             f.mode,
 		Regions:          regionLiterals,
 		Sort:             f.sort,
 		Limit:            f.limit,
@@ -283,6 +302,8 @@ func compareFlagsFromArgs(args map[string]any) compareFlags {
 		engine:           engine,
 		deploymentOption: deployment,
 		storageGB:        storageGB,
+		tier:             argString(args, "tier"),
+		mode:             argString(args, "mode"),
 	}
 }
 
@@ -338,6 +359,9 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		case "cache.kv":
 			args["memory_gb"] = f.memoryGB
 			args["engine"] = f.engine
+		case "container.orchestration":
+			args["tier"] = f.tier
+			args["mode"] = f.mode
 		}
 		return output.EmitDryRun(cmd.OutOrStdout(), output.DryRunPlan{
 			Command:      "compare",

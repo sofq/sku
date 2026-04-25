@@ -93,3 +93,8 @@ func TestSupportedKindsIncludesCacheKV(t *testing.T) {
 	s := supportedKinds()
 	require.Contains(t, s, "cache.kv")
 }
+
+func TestSupportedKindsIncludesContainerOrchestration(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "container.orchestration")
+}

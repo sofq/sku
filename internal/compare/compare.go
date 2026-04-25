@@ -38,6 +38,10 @@ type Request struct {
 	Engine           string
 	DeploymentOption string
 
+	// container.orchestration
+	Tier string
+	Mode string
+
 	Regions []string
 	Sort    string
 	Limit   int
@@ -79,6 +83,14 @@ var kindRegistry = map[string]kindQuery{
 		return kinds.QueryCacheKV(ctx, c, kinds.CacheKVSpec{
 			MemoryGB: r.MemoryGB,
 			Engine:   r.Engine,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"container.orchestration": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryContainerOrchestration(ctx, c, kinds.ContainerOrchestrationSpec{
+			Mode:     r.Mode,
+			Tier:     r.Tier,
 			MaxPrice: r.MaxPrice,
 			Regions:  r.Regions,
 		})
