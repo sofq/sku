@@ -222,7 +222,7 @@ func TestLookupNoSQLDB_SeededStandardUSE1(t *testing.T) {
 
 	rows, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
 		Provider: "aws", Service: "dynamodb",
-		TableClass: "standard", Region: "us-east-1",
+		ResourceName: "standard", Region: "us-east-1",
 		Terms: catalog.Terms{Commitment: "on_demand"},
 	})
 	require.NoError(t, err)
@@ -251,7 +251,7 @@ func TestLookupCDN_SeededEUWest(t *testing.T) {
 	require.Equal(t, 0.085, rows[0].Prices[0].Amount)
 }
 
-func TestLookupNoSQLDB_MissingTableClassErrors(t *testing.T) {
+func TestLookupNoSQLDB_MissingResourceNameErrors(t *testing.T) {
 	cat := openSeededAWSM3a3(t)
 	_, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
 		Provider: "aws", Service: "dynamodb",

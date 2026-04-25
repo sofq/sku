@@ -138,7 +138,7 @@ func TestIntegration_DynamoDBPointLookup(t *testing.T) {
 
 	rows, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
 		Provider: "aws", Service: "dynamodb",
-		TableClass: "standard", Region: "us-east-1",
+		ResourceName: "standard", Region: "us-east-1",
 		Terms: catalog.Terms{Commitment: "on_demand"},
 	})
 	require.NoError(t, err)
