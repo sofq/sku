@@ -37,6 +37,7 @@ SHARD_BUDGETS: dict[str, int] = {
     'gcp_gce':                6_000_000,
     'gcp_gcs':                  500_000,
     'gcp_run':                  500_000,
+    'gcp_spanner':            5_000_000,
     'openrouter':             1_000_000,
 }
 

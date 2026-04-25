@@ -27,6 +27,7 @@ ALL_SHARDS: tuple[str, ...] = (
     "gcp_gce",
     "gcp_gcs",
     "gcp_run",
+    "gcp_spanner",
     "openrouter",
 )
 
@@ -55,6 +56,7 @@ _PROVIDER_OF: dict[str, str] = {
     "gcp_gce": "gcp",
     "gcp_gcs": "gcp",
     "gcp_run": "gcp",
+    "gcp_spanner": "gcp",
     "openrouter": "openrouter",
 }
 
