@@ -22,8 +22,15 @@ logger = logging.getLogger(__name__)
 _BILLING_BASE = "https://cloudbilling.googleapis.com/v1/services"
 _DRIFT_THRESHOLD = 0.01  # 1%
 
-# Default GCE service ID (Compute Engine); callers may override for other shards.
-_DEFAULT_GCE_SERVICE_ID = "6F81-5844-456A"
+# GCP Cloud Billing service IDs (callers may override).
+_DEFAULT_GCE_SERVICE_ID = "6F81-5844-456A"   # Compute Engine
+_GKE_SERVICE_ID = "CCD8-9BF1-090E"           # Kubernetes Engine
+_MEMORYSTORE_SERVICE_ID = "58CD-E7C3-72CA"   # Memorystore
+
+_SHARD_SERVICE_IDS: dict[str, str] = {
+    "gcp-gke": _GKE_SERVICE_ID,
+    "gcp-memorystore": _MEMORYSTORE_SERVICE_ID,
+}
 
 
 @dataclass

@@ -51,6 +51,12 @@ def _service_code(resource_name: str, sku_id: str) -> str:
         return "AmazonDynamoDB"
     if "cloudfront" in prefix:
         return "AmazonCloudFront"
+    if "eks" in prefix or resource_name.startswith("eks-") or resource_name.startswith("gke-"):
+        return "AmazonEKS"
+    if "elasticache" in prefix or "cache." in resource_name.lower():
+        return "AmazonElastiCache"
+    if "aurora" in prefix:
+        return "AmazonRDS"
     # Default: EC2
     return "AmazonEC2"
 
