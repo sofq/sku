@@ -1,0 +1,153 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-25T00:00:00Z",
+  "offerCode": "AmazonEKS",
+  "products": {
+    "3JPC5EER47BUUFC6": {
+      "sku": "3JPC5EER47BUUFC6",
+      "productFamily": "Compute",
+      "attributes": {
+        "servicecode": "AmazonEKS",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "tenancy": "Shared",
+        "usagetype": "USE1-Fargate-vCPU-Hours:perCPU",
+        "operation": "",
+        "cputype": "perCPU",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Elastic Container Service for Kubernetes"
+      }
+    },
+    "ZYWMR684YSMFHWEU": {
+      "sku": "ZYWMR684YSMFHWEU",
+      "productFamily": "Compute",
+      "attributes": {
+        "servicecode": "AmazonEKS",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "usagetype": "USE1-AmazonEKS-Hours:perCluster",
+        "operation": "CreateOperation",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Elastic Container Service for Kubernetes",
+        "tiertype": "HAStandard"
+      }
+    },
+    "M7977BSVFGDUJZ67": {
+      "sku": "M7977BSVFGDUJZ67",
+      "productFamily": "Compute",
+      "attributes": {
+        "servicecode": "AmazonEKS",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "usagetype": "USE1-AmazonEKS-Hours:extendedSupport",
+        "operation": "ExtendedSupport",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Elastic Container Service for Kubernetes",
+        "tiertype": "HAExtended"
+      }
+    },
+    "PT22UKNZNU9D3XSN": {
+      "sku": "PT22UKNZNU9D3XSN",
+      "productFamily": "Compute",
+      "attributes": {
+        "servicecode": "AmazonEKS",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region",
+        "tenancy": "Shared",
+        "usagetype": "USE1-Fargate-GB-Hours",
+        "operation": "",
+        "memorytype": "perGB",
+        "regionCode": "us-east-1",
+        "servicename": "Amazon Elastic Container Service for Kubernetes"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "3JPC5EER47BUUFC6": {
+        "3JPC5EER47BUUFC6.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "3JPC5EER47BUUFC6",
+          "effectiveDate": "2026-03-01T00:00:00Z",
+          "priceDimensions": {
+            "3JPC5EER47BUUFC6.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "3JPC5EER47BUUFC6.JRTCKXETXF.6YS6EN2CT7",
+              "description": "AWS Fargate - vCPU - US East (N. Virginia)",
+              "beginRange": "0",
+              "endRange": "Inf",
+              "unit": "hours",
+              "pricePerUnit": {
+                "USD": "0.0404800000"
+              },
+              "appliesTo": []
+            }
+          },
+          "termAttributes": {}
+        }
+      },
+      "ZYWMR684YSMFHWEU": {
+        "ZYWMR684YSMFHWEU.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "ZYWMR684YSMFHWEU",
+          "effectiveDate": "2026-03-01T00:00:00Z",
+          "priceDimensions": {
+            "ZYWMR684YSMFHWEU.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "ZYWMR684YSMFHWEU.JRTCKXETXF.6YS6EN2CT7",
+              "description": "Amazon EKS cluster usage in US East (N. Virginia)",
+              "beginRange": "0",
+              "endRange": "Inf",
+              "unit": "Hours",
+              "pricePerUnit": {
+                "USD": "0.1000000000"
+              },
+              "appliesTo": []
+            }
+          },
+          "termAttributes": {}
+        }
+      },
+      "M7977BSVFGDUJZ67": {
+        "M7977BSVFGDUJZ67.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "M7977BSVFGDUJZ67",
+          "effectiveDate": "2026-03-01T00:00:00Z",
+          "priceDimensions": {
+            "M7977BSVFGDUJZ67.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "M7977BSVFGDUJZ67.JRTCKXETXF.6YS6EN2CT7",
+              "description": "Amazon EKS extended support usage in US East (N. Virginia)",
+              "beginRange": "0",
+              "endRange": "Inf",
+              "unit": "hours",
+              "pricePerUnit": {
+                "USD": "0.5000000000"
+              },
+              "appliesTo": []
+            }
+          },
+          "termAttributes": {}
+        }
+      },
+      "PT22UKNZNU9D3XSN": {
+        "PT22UKNZNU9D3XSN.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "PT22UKNZNU9D3XSN",
+          "effectiveDate": "2026-03-01T00:00:00Z",
+          "priceDimensions": {
+            "PT22UKNZNU9D3XSN.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "PT22UKNZNU9D3XSN.JRTCKXETXF.6YS6EN2CT7",
+              "description": "AWS Fargate - Memory  - US East (N.Virginia)",
+              "beginRange": "0",
+              "endRange": "Inf",
+              "unit": "hours",
+              "pricePerUnit": {
+                "USD": "0.0044450000"
+              },
+              "appliesTo": []
+            }
+          },
+          "termAttributes": {}
+        }
+      }
+    }
+  }
+}

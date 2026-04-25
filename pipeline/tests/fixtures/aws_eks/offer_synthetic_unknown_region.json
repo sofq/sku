@@ -1,0 +1,39 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-25T00:00:00Z",
+  "offerCode": "AmazonEKS",
+  "products": {
+    "FAKE-UNKNOWN-REGION": {
+      "sku": "FAKE-UNKNOWN-REGION",
+      "productFamily": "Compute",
+      "attributes": {
+        "servicecode": "AmazonEKS",
+        "location": "Unknown Region",
+        "locationType": "AWS Region",
+        "usagetype": "UNK-AmazonEKS-Hours:perCluster",
+        "operation": "CreateOperation",
+        "regionCode": "xx-unknown-99",
+        "servicename": "Amazon Elastic Container Service for Kubernetes"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "FAKE-UNKNOWN-REGION": {
+        "FAKE-UNKNOWN-REGION.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "FAKE-UNKNOWN-REGION",
+          "priceDimensions": {
+            "FAKE-UNKNOWN-REGION.JRTCKXETXF.6YS6EN2CT7": {
+              "unit": "Hours",
+              "pricePerUnit": {
+                "USD": "0.1000000000"
+              },
+              "description": "EKS cluster - unknown region"
+            }
+          }
+        }
+      }
+    }
+  }
+}
