@@ -12,6 +12,7 @@ func newAWSCmd() *cobra.Command {
 	}
 	c.AddCommand(newAWSEC2Cmd())
 	c.AddCommand(newAWSRDSCmd())
+	c.AddCommand(newAWSAuroraCmd())
 	c.AddCommand(newAWSS3Cmd())
 	c.AddCommand(newAWSLambdaCmd())
 	c.AddCommand(newAWSEBSCmd())

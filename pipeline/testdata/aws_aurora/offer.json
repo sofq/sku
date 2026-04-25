@@ -1,0 +1,301 @@
+{
+  "products": {
+    "AURMYSQLR6GLGE1": {
+      "sku": "AURMYSQLR6GLGE1",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "db.r6g.large",
+        "databaseEngine": "Aurora MySQL",
+        "vcpu": "2",
+        "memory": "16 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURMYSQLR6GLGE2": {
+      "sku": "AURMYSQLR6GLGE2",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "db.r6g.large",
+        "databaseEngine": "Aurora MySQL",
+        "vcpu": "2",
+        "memory": "16 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURPGSQLR6GLGE1": {
+      "sku": "AURPGSQLR6GLGE1",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "db.r6g.large",
+        "databaseEngine": "Aurora PostgreSQL",
+        "vcpu": "2",
+        "memory": "16 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURPGSQLR6GLGE2": {
+      "sku": "AURPGSQLR6GLGE2",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "db.r6g.large",
+        "databaseEngine": "Aurora PostgreSQL",
+        "vcpu": "2",
+        "memory": "16 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURMYSQLR6GXLGE1": {
+      "sku": "AURMYSQLR6GXLGE1",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "db.r6g.xlarge",
+        "databaseEngine": "Aurora MySQL",
+        "vcpu": "4",
+        "memory": "32 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURPGSQLR6GXLGE1": {
+      "sku": "AURPGSQLR6GXLGE1",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "db.r6g.xlarge",
+        "databaseEngine": "Aurora PostgreSQL",
+        "vcpu": "4",
+        "memory": "32 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURMYSQLR6GLGE2X": {
+      "sku": "AURMYSQLR6GLGE2X",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "db.r6g.xlarge",
+        "databaseEngine": "Aurora MySQL",
+        "vcpu": "4",
+        "memory": "32 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURPGSQLR6GLGE2X": {
+      "sku": "AURPGSQLR6GLGE2X",
+      "productFamily": "Database Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "db.r6g.xlarge",
+        "databaseEngine": "Aurora PostgreSQL",
+        "vcpu": "4",
+        "memory": "32 GiB",
+        "deploymentOption": "Single-AZ"
+      }
+    },
+    "AURSV2MYSQLGE1": {
+      "sku": "AURSV2MYSQLGE1",
+      "productFamily": "ServerlessV2",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "databaseEngine": "Aurora MySQL",
+        "vcpu": "",
+        "memory": ""
+      }
+    },
+    "AURSV2PGSQLGE1": {
+      "sku": "AURSV2PGSQLGE1",
+      "productFamily": "ServerlessV2",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "databaseEngine": "Aurora PostgreSQL",
+        "vcpu": "",
+        "memory": ""
+      }
+    },
+    "AURSV2MYSQLGE2": {
+      "sku": "AURSV2MYSQLGE2",
+      "productFamily": "ServerlessV2",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "databaseEngine": "Aurora MySQL",
+        "vcpu": "",
+        "memory": ""
+      }
+    },
+    "AURSV2PGSQLGE2": {
+      "sku": "AURSV2PGSQLGE2",
+      "productFamily": "ServerlessV2",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "databaseEngine": "Aurora PostgreSQL",
+        "vcpu": "",
+        "memory": ""
+      }
+    },
+    "AURSTGE1STD": {
+      "sku": "AURSTGE1STD",
+      "productFamily": "Database Storage",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "storageMedia": "SSD (Aurora)",
+        "usagetype": "US-Aurora:StorageUsage"
+      }
+    },
+    "AURGEIOGE1": {
+      "sku": "AURGEIOGE1",
+      "productFamily": "System Operation",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "group": "Aurora-IO-Operation"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "AURMYSQLR6GLGE1": {
+        "AURMYSQLR6GLGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURMYSQLR6GLGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.2600"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURMYSQLR6GLGE2": {
+        "AURMYSQLR6GLGE2.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURMYSQLR6GLGE2.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.2900"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURPGSQLR6GLGE1": {
+        "AURPGSQLR6GLGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURPGSQLR6GLGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.2600"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURPGSQLR6GLGE2": {
+        "AURPGSQLR6GLGE2.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURPGSQLR6GLGE2.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.2900"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURMYSQLR6GXLGE1": {
+        "AURMYSQLR6GXLGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURMYSQLR6GXLGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.5200"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURPGSQLR6GXLGE1": {
+        "AURPGSQLR6GXLGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURPGSQLR6GXLGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.5200"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURMYSQLR6GLGE2X": {
+        "AURMYSQLR6GLGE2X.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURMYSQLR6GLGE2X.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.5800"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURPGSQLR6GLGE2X": {
+        "AURPGSQLR6GLGE2X.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURPGSQLR6GLGE2X.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.5800"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "AURSV2MYSQLGE1": {
+        "AURSV2MYSQLGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURSV2MYSQLGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.12"},
+              "unit": "ACU-Hr"
+            }
+          }
+        }
+      },
+      "AURSV2PGSQLGE1": {
+        "AURSV2PGSQLGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURSV2PGSQLGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.12"},
+              "unit": "ACU-Hr"
+            }
+          }
+        }
+      },
+      "AURSV2MYSQLGE2": {
+        "AURSV2MYSQLGE2.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURSV2MYSQLGE2.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.15"},
+              "unit": "ACU-Hr"
+            }
+          }
+        }
+      },
+      "AURSV2PGSQLGE2": {
+        "AURSV2PGSQLGE2.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURSV2PGSQLGE2.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.15"},
+              "unit": "ACU-Hr"
+            }
+          }
+        }
+      },
+      "AURSTGE1STD": {
+        "AURSTGE1STD.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURSTGE1STD.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.10"},
+              "unit": "GB-Mo"
+            }
+          }
+        }
+      },
+      "AURGEIOGE1": {
+        "AURGEIOGE1.JRTCKXETXF": {
+          "priceDimensions": {
+            "AURGEIOGE1.JRTCKXETXF.6YS6EN2CT7": {
+              "pricePerUnit": {"USD": "0.0000002"},
+              "unit": "IOs"
+            }
+          }
+        }
+      }
+    }
+  }
+}

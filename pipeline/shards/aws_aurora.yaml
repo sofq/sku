@@ -1,0 +1,12 @@
+shard: aws_aurora
+provider: aws
+service: aurora
+kind: db.relational
+cli:
+  group: aws
+  command: aurora
+  resource_flag: instance-type
+ingest:
+  module: aws_aurora
+  discover: aws.publication_date
+budget_bytes: 10000000
