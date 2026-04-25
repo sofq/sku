@@ -88,3 +88,8 @@ func TestRun_rejectsUnknownKind(t *testing.T) {
 	require.Contains(t, err.Error(), "unsupported")
 	require.Contains(t, err.Error(), "queue.messaging")
 }
+
+func TestSupportedKindsIncludesCacheKV(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "cache.kv")
+}
