@@ -19,7 +19,7 @@ from collections.abc import Iterable
 
 import requests
 
-from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS
+from ingest.gcp_common import _GCP_BILLING_BASE, service_ids_for_shard
 
 _UA = "sku-pipeline/0.0 (+https://github.com/sofq/sku)"
 
@@ -36,18 +36,19 @@ def discover(shards: Iterable[str], *, session: requests.Session | None = None) 
     try:
         out: dict[str, str] = {}
         for shard in shards:
-            service_id = _GCP_SERVICE_IDS[shard]
-            url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
-            resp = session.get(
-                url,
-                params={"pageSize": "1"},
-                headers={"User-Agent": _UA},
-                timeout=30,
-            )
-            if resp.status_code != 200:
-                raise RuntimeError(f"gcp_discover_http_{resp.status_code}: {shard}")
-            skus = resp.json().get("skus", [])
-            payload = json.dumps(skus, separators=(",", ":"), sort_keys=True).encode()
+            shard_skus = []
+            for service_id in service_ids_for_shard(shard):
+                url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
+                resp = session.get(
+                    url,
+                    params={"pageSize": "1"},
+                    headers={"User-Agent": _UA},
+                    timeout=30,
+                )
+                if resp.status_code != 200:
+                    raise RuntimeError(f"gcp_discover_http_{resp.status_code}: {shard}")
+                shard_skus.extend(resp.json().get("skus", []))
+            payload = json.dumps(shard_skus, separators=(",", ":"), sort_keys=True).encode()
             out[shard] = "sha256:" + hashlib.sha256(payload).hexdigest()
         return out
     finally:

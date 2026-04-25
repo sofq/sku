@@ -78,6 +78,40 @@ def test_gcp_gce_service_id_in_url(requests_mock, tmp_path):
     assert f"/services/{_GCE_SERVICE_ID}/skus" in requests_mock.request_history[0].url
 
 
+def test_gcp_spanner_service_id_in_url(requests_mock, tmp_path):
+    spanner_service_id = "CC63-0873-48FD"
+    requests_mock.get(
+        f"https://cloudbilling.googleapis.com/v1/services/{spanner_service_id}/skus",
+        json={"skus": [_SKU_A]},
+    )
+    target = tmp_path / "out.json"
+    fetch_skus("gcp_spanner", target)
+
+    assert requests_mock.call_count == 1
+    assert f"/services/{spanner_service_id}/skus" in requests_mock.request_history[0].url
+
+
+def test_gcp_memorystore_fetch_combines_redis_and_memcached_services(requests_mock, tmp_path):
+    redis_service_id = "5AF5-2C11-D467"
+    memcached_service_id = "9C2E-5AAC-D058"
+    requests_mock.get(
+        f"https://cloudbilling.googleapis.com/v1/services/{redis_service_id}/skus",
+        json={"skus": [{"skuId": "redis"}]},
+    )
+    requests_mock.get(
+        f"https://cloudbilling.googleapis.com/v1/services/{memcached_service_id}/skus",
+        json={"skus": [{"skuId": "memcached"}]},
+    )
+    target = tmp_path / "out.json"
+    fetch_skus("gcp_memorystore", target)
+
+    data = json.loads(target.read_text())
+    assert [sku["skuId"] for sku in data["skus"]] == ["memcached", "redis"]
+    requested_urls = [req.url for req in requests_mock.request_history]
+    assert any(f"/services/{redis_service_id}/skus" in url for url in requested_urls)
+    assert any(f"/services/{memcached_service_id}/skus" in url for url in requested_urls)
+
+
 def test_403_raises_gcp_forbidden_no_retry(requests_mock, tmp_path):
     """403 response raises RuntimeError('gcp_forbidden') immediately, no retries."""
     requests_mock.get(_GCE_BASE_URL, status_code=403)

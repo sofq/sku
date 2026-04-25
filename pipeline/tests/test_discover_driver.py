@@ -12,7 +12,7 @@ import requests_mock
 from discover.driver import ALL_SHARDS, run
 from ingest.aws_common import _AWS_OFFER_BASE
 from ingest.azure_common import _AZURE_RETAIL_BASE
-from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS
+from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS, service_ids_for_shard
 
 
 def _mock_all_providers(m: requests_mock.Mocker, *, aws_pub: str = "2026-04-18T00:00:00Z") -> None:
@@ -25,11 +25,12 @@ def _mock_all_providers(m: requests_mock.Mocker, *, aws_pub: str = "2026-04-18T0
             json={"publicationDate": aws_pub},
         )
     m.get(_AZURE_RETAIL_BASE, json={"Items": []})
-    for service_id in _GCP_SERVICE_IDS.values():
-        m.get(
-            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
-            json={"skus": [{"skuId": f"sku-{service_id}"}]},
-        )
+    for shard in _GCP_SERVICE_IDS:
+        for service_id in service_ids_for_shard(shard):
+            m.get(
+                f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+                json={"skus": [{"skuId": f"sku-{service_id}"}]},
+            )
     m.get("https://openrouter.ai/api/v1/models", json={"data": []})
 
 

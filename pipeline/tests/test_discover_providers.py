@@ -11,7 +11,7 @@ from discover import gcp as gcp_disc
 from discover import openrouter as or_disc
 from ingest.aws_common import _AWS_OFFER_BASE
 from ingest.azure_common import _AZURE_RETAIL_BASE
-from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS
+from ingest.gcp_common import _GCP_BILLING_BASE, _GCP_SERVICE_IDS, service_ids_for_shard
 
 # -----------------------------------------------------------------------------
 # AWS discover
@@ -187,6 +187,31 @@ def test_gcp_discover_http_failure_raises():
 def test_gcp_discover_unknown_shard_raises_keyerror():
     with pytest.raises(KeyError):
         gcp_disc.discover(["gcp_nope"])
+
+
+def test_gcp_discover_spanner_uses_cloud_spanner_service_id():
+    service_id = "CC63-0873-48FD"
+    with requests_mock.Mocker() as m:
+        m.get(
+            f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+            json={"skus": [{"skuId": "spanner"}]},
+        )
+        result = gcp_disc.discover(["gcp_spanner"])
+    assert result["gcp_spanner"].startswith("sha256:")
+
+
+def test_gcp_discover_memorystore_hashes_redis_and_memcached_services():
+    with requests_mock.Mocker() as m:
+        for service_id in service_ids_for_shard("gcp_memorystore"):
+            m.get(
+                f"{_GCP_BILLING_BASE}/services/{service_id}/skus",
+                json={"skus": [{"skuId": service_id}]},
+            )
+        result = gcp_disc.discover(["gcp_memorystore"])
+    assert result["gcp_memorystore"].startswith("sha256:")
+    requested_urls = [req.url for req in m.request_history]
+    assert any("/services/5AF5-2C11-D467/skus" in url for url in requested_urls)
+    assert any("/services/9C2E-5AAC-D058/skus" in url for url in requested_urls)
 
 
 # -----------------------------------------------------------------------------

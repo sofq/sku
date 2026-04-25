@@ -24,18 +24,22 @@ __all__ = [
     "parse_usage_unit",
     "fetch_skus",
     "build_authenticated_session",
+    "service_ids_for_shard",
 ]
 
 _GCP_BILLING_BASE = "https://cloudbilling.googleapis.com/v1"
 
-_GCP_SERVICE_IDS: dict[str, str] = {
+_GCP_SERVICE_IDS: dict[str, str | tuple[str, ...]] = {
     "gcp_gce": "6F81-5844-456A",  # Compute Engine
     "gcp_cloud_sql": "9662-B51E-5089",  # Cloud SQL
     "gcp_gcs": "95FF-2EF5-5EA1",  # Cloud Storage
     "gcp_run": "152E-C115-5142",  # Cloud Run
     "gcp_functions": "29E7-DA93-CA13",  # Cloud Functions
-    "gcp_spanner": "CCD8-5226-9C81",  # Cloud Spanner
-    "gcp_memorystore": "E5D3-7316-6E41",  # Cloud Memorystore
+    "gcp_spanner": "CC63-0873-48FD",  # Cloud Spanner
+    "gcp_memorystore": (
+        "5AF5-2C11-D467",  # Cloud Memorystore for Redis
+        "9C2E-5AAC-D058",  # Cloud Memorystore for Memcached
+    ),
 }
 
 _USAGE_UNITS: dict[str, tuple[float, str]] = {
@@ -84,6 +88,13 @@ def build_authenticated_session() -> requests.Session:
     return sess
 
 
+def service_ids_for_shard(shard: str) -> tuple[str, ...]:
+    service_ids = _GCP_SERVICE_IDS[shard]
+    if isinstance(service_ids, str):
+        return (service_ids,)
+    return service_ids
+
+
 def fetch_skus(
     shard: str,
     target: Path,
@@ -111,7 +122,7 @@ def fetch_skus(
     """
     # KeyError propagates naturally for unknown shards — this must happen before
     # any network setup so no requests are made.
-    service_id = _GCP_SERVICE_IDS[shard]
+    service_ids = service_ids_for_shard(shard)
 
     if session is None:
         session = requests.Session()
@@ -123,47 +134,49 @@ def fetch_skus(
         }
     )
 
-    base_url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
     all_skus: list[dict] = []
-    page_token: str | None = None
 
-    while True:
-        params: dict[str, str] = {"pageSize": "5000"}
-        if page_token:
-            params["pageToken"] = page_token
+    for service_id in service_ids:
+        base_url = f"{_GCP_BILLING_BASE}/services/{service_id}/skus"
+        page_token: str | None = None
 
-        # Per-page retry loop — resets between pages.
-        last_exc: Exception | None = None
-        resp = None
-        for attempt in range(retries):
-            try:
-                resp = session.get(base_url, params=params, timeout=30.0)
-                if resp.status_code == 403:
-                    raise RuntimeError(f"gcp_forbidden: {shard}/{service_id}")
-                if 400 <= resp.status_code < 500:
-                    raise RuntimeError(f"gcp fetch failed {resp.status_code}: {resp.url}")
-                if resp.status_code in (500, 502, 503, 504):
-                    last_exc = RuntimeError(
-                        f"gcp fetch server error {resp.status_code}: {resp.url}"
-                    )
+        while True:
+            params: dict[str, str] = {"pageSize": "5000"}
+            if page_token:
+                params["pageToken"] = page_token
+
+            # Per-page retry loop — resets between pages.
+            last_exc: Exception | None = None
+            resp = None
+            for attempt in range(retries):
+                try:
+                    resp = session.get(base_url, params=params, timeout=30.0)
+                    if resp.status_code == 403:
+                        raise RuntimeError(f"gcp_forbidden: {shard}/{service_id}")
+                    if 400 <= resp.status_code < 500:
+                        raise RuntimeError(f"gcp fetch failed {resp.status_code}: {resp.url}")
+                    if resp.status_code in (500, 502, 503, 504):
+                        last_exc = RuntimeError(
+                            f"gcp fetch server error {resp.status_code}: {resp.url}"
+                        )
+                        time.sleep(0.5 * (2**attempt))
+                        continue
+                    resp.raise_for_status()
+                    break
+                except RuntimeError:
+                    raise
+                except requests.RequestException as exc:
+                    last_exc = exc
                     time.sleep(0.5 * (2**attempt))
-                    continue
-                resp.raise_for_status()
+            else:
+                raise RuntimeError(f"gcp fetch failed after {retries} attempts: {last_exc}")
+
+            data = resp.json()
+            all_skus.extend(data.get("skus", []))
+
+            page_token = data.get("nextPageToken") or None
+            if not page_token:
                 break
-            except RuntimeError:
-                raise
-            except requests.RequestException as exc:
-                last_exc = exc
-                time.sleep(0.5 * (2**attempt))
-        else:
-            raise RuntimeError(f"gcp fetch failed after {retries} attempts: {last_exc}")
-
-        data = resp.json()
-        all_skus.extend(data.get("skus", []))
-
-        page_token = data.get("nextPageToken") or None
-        if not page_token:
-            break
 
     sorted_skus = sorted(all_skus, key=lambda x: x.get("skuId", ""))
 
