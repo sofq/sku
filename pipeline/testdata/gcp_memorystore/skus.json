@@ -1,0 +1,204 @@
+{
+  "skus": [
+    {
+      "skuId": "memorystore-redis-basic-5gb-us-east1",
+      "description": "Memorystore for Redis M1 5 GB Basic",
+      "serviceRegions": ["us-east1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Redis",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 49000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-redis-basic-5gb-europe-west1",
+      "description": "Memorystore for Redis M1 5 GB Basic",
+      "serviceRegions": ["europe-west1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Redis",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 55000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-redis-standard-16gb-us-east1",
+      "description": "Memorystore for Redis M3 16 GB Standard",
+      "serviceRegions": ["us-east1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Redis",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 210000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-redis-standard-16gb-europe-west1",
+      "description": "Memorystore for Redis M3 16 GB Standard",
+      "serviceRegions": ["europe-west1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Redis",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 240000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-memcached-basic-5gb-us-east1",
+      "description": "Memorystore for Memcached M1 5 GB",
+      "serviceRegions": ["us-east1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Memcached",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 42000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-memcached-basic-5gb-europe-west1",
+      "description": "Memorystore for Memcached M1 5 GB",
+      "serviceRegions": ["europe-west1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Memcached",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 48000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-redis-committed-use-us-east1",
+      "description": "Memorystore for Redis M1 5 GB Basic Committed Use",
+      "serviceRegions": ["us-east1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Redis",
+        "usageType": "Preemptible"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 30000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "memorystore-redis-eur-us-east1",
+      "description": "Memorystore for Redis M1 5 GB Basic EUR",
+      "serviceRegions": ["us-east1"],
+      "category": {
+        "serviceDisplayName": "Cloud Memorystore for Redis",
+        "usageType": "OnDemand"
+      },
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "EUR",
+                  "units": "0",
+                  "nanos": 45000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

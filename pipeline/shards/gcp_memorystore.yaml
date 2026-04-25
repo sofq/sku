@@ -1,0 +1,12 @@
+shard: gcp_memorystore
+provider: gcp
+service: memorystore
+kind: cache.kv
+cli:
+  group: gcp
+  command: memorystore
+  resource_flag: instance-type
+ingest:
+  module: gcp_memorystore
+  discover: gcp.api_version
+budget_bytes: 3000000
