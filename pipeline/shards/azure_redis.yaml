@@ -1,0 +1,12 @@
+shard: azure_redis
+provider: azure
+service: redis
+kind: cache.kv
+cli:
+  group: azure
+  command: redis
+  resource_flag: tier
+ingest:
+  module: azure_redis
+  discover: azure.retail_prices
+budget_bytes: 3000000
