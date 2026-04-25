@@ -22,7 +22,7 @@ func TestAuroraEstimator_Provisioned(t *testing.T) {
 	e, ok := Get("db.relational.aurora")
 	require.True(t, ok)
 
-	stubAuroraLookup(t, func(ctx context.Context, shard string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
+	stubAuroraLookup(t, func(_ context.Context, shard string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
 		require.Equal(t, "aws-aurora", shard)
 		require.Equal(t, "db.r6g.large", f.InstanceType)
 		require.Equal(t, catalog.Terms{Commitment: "on_demand", Tenancy: "aurora-postgres", OS: "single-az"}, f.Terms)
@@ -44,7 +44,7 @@ func TestAuroraEstimator_ServerlessV2(t *testing.T) {
 	Register(auroraEstimator{})
 	e, _ := Get("db.relational.aurora")
 
-	stubAuroraLookup(t, func(ctx context.Context, shard string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
+	stubAuroraLookup(t, func(_ context.Context, _ string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
 		require.Equal(t, "aurora-serverless-v2", f.InstanceType)
 		return []catalog.Row{{
 			SKUID: "sku-2", Provider: "aws", Service: "aurora",

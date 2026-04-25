@@ -20,7 +20,7 @@ func TestSpannerEstimator_PerPU(t *testing.T) {
 	resetRegistry(t)
 	Register(spannerEstimator{})
 	e, _ := Get("db.relational.spanner")
-	stubSpannerLookup(t, func(ctx context.Context, shard string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
+	stubSpannerLookup(t, func(_ context.Context, _ string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
 		require.Equal(t, "spanner-standard", f.InstanceType)
 		require.Equal(t, catalog.Terms{Commitment: "on_demand", Tenancy: "spanner-standard"}, f.Terms)
 		return []catalog.Row{{
@@ -40,7 +40,7 @@ func TestSpannerEstimator_PerNodeSugar(t *testing.T) {
 	resetRegistry(t)
 	Register(spannerEstimator{})
 	e, _ := Get("db.relational.spanner")
-	stubSpannerLookup(t, func(ctx context.Context, shard string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
+	stubSpannerLookup(t, func(_ context.Context, _ string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
 		require.Equal(t, catalog.Terms{Commitment: "on_demand", Tenancy: "spanner-enterprise"}, f.Terms)
 		return []catalog.Row{{
 			SKUID: "sku-z2", Provider: "gcp", Service: "spanner",
