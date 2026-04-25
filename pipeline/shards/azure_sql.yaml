@@ -9,4 +9,4 @@ cli:
 ingest:
   module: azure_sql
   discover: azure.api_version
-budget_bytes: 1000000
+budget_bytes: 3000000

@@ -1,5 +1,5 @@
-# Canonical region-group map. Expanded to P1 ("popular path") on 2026-04-22
-# per docs/superpowers/plans/2026-04-22-regions-yaml-p1-expansion.md.
+# Canonical region-group map. Expanded to R1 commercial-region coverage on
+# 2026-04-24 per docs/superpowers/plans/2026-04-24-m-beta-r1-regions.md.
 # Originally seeded: M3a.1 (AWS), m3b.1 (Azure), m3b.3 (GCP).
 version: 1
 groups:
@@ -7,58 +7,145 @@ groups:
     - {provider: aws,   region: us-east-1}
     - {provider: aws,   region: us-east-2}
     - {provider: aws,   region: ca-central-1}
+    - {provider: azure, region: canadaeast}
     - {provider: azure, region: eastus}
     - {provider: azure, region: eastus2}
     - {provider: azure, region: canadacentral}
     - {provider: gcp,   region: us-east1}
     - {provider: gcp,   region: us-east4}
+    - {provider: gcp,   region: us-east5}
     - {provider: gcp,   region: northamerica-northeast1}
+    - {provider: gcp,   region: northamerica-northeast2}
   us-central:
+    - {provider: aws,   region: mx-central-1}
     - {provider: azure, region: centralus}
+    - {provider: azure, region: northcentralus}
     - {provider: azure, region: southcentralus}
+    - {provider: azure, region: mexicocentral}
     - {provider: gcp,   region: us-central1}
+    - {provider: gcp,   region: us-south1}
+    - {provider: gcp,   region: northamerica-south1}
   us-west:
     - {provider: aws,   region: us-west-1}
     - {provider: aws,   region: us-west-2}
+    - {provider: aws,   region: ca-west-1}
+    - {provider: azure, region: westus}
+    - {provider: azure, region: westcentralus}
     - {provider: azure, region: westus2}
     - {provider: azure, region: westus3}
     - {provider: gcp,   region: us-west1}
+    - {provider: gcp,   region: us-west2}
+    - {provider: gcp,   region: us-west3}
+    - {provider: gcp,   region: us-west4}
   eu-west:
     - {provider: aws,   region: eu-west-1}
     - {provider: aws,   region: eu-west-2}
     - {provider: aws,   region: eu-west-3}
+    - {provider: aws,   region: eu-south-1}
+    - {provider: aws,   region: eu-south-2}
+    - {provider: azure, region: belgiumcentral}
     - {provider: azure, region: westeurope}
     - {provider: azure, region: uksouth}
+    - {provider: azure, region: ukwest}
     - {provider: azure, region: francecentral}
+    - {provider: azure, region: francesouth}
+    - {provider: azure, region: italynorth}
+    - {provider: azure, region: spaincentral}
     - {provider: gcp,   region: europe-west1}
     - {provider: gcp,   region: europe-west2}
     - {provider: gcp,   region: europe-west4}
+    - {provider: gcp,   region: europe-west8}
+    - {provider: gcp,   region: europe-west9}
+    - {provider: gcp,   region: europe-west12}
+    - {provider: gcp,   region: europe-southwest1}
   eu-central:
     - {provider: aws,   region: eu-central-1}
+    - {provider: aws,   region: eu-central-2}
+    - {provider: azure, region: austriaeast}
     - {provider: azure, region: germanywestcentral}
+    - {provider: azure, region: germanynorth}
+    - {provider: azure, region: polandcentral}
+    - {provider: azure, region: switzerlandnorth}
+    - {provider: azure, region: switzerlandwest}
     - {provider: gcp,   region: europe-west3}
+    - {provider: gcp,   region: europe-west6}
+    - {provider: gcp,   region: europe-west10}
+    - {provider: gcp,   region: europe-central2}
   eu-north:
     - {provider: aws,   region: eu-north-1}
+    - {provider: azure, region: denmarkeast}
     - {provider: azure, region: northeurope}
+    - {provider: azure, region: norwayeast}
+    - {provider: azure, region: norwaywest}
+    - {provider: azure, region: swedencentral}
+    - {provider: gcp,   region: europe-north1}
+    - {provider: gcp,   region: europe-north2}
   asia-ne:
+    - {provider: aws,   region: ap-east-1}
+    - {provider: aws,   region: ap-east-2}
     - {provider: aws,   region: ap-northeast-1}
     - {provider: aws,   region: ap-northeast-2}
+    - {provider: aws,   region: ap-northeast-3}
+    - {provider: azure, region: eastasia}
     - {provider: azure, region: japaneast}
+    - {provider: azure, region: japanwest}
     - {provider: azure, region: koreacentral}
+    - {provider: azure, region: koreasouth}
     - {provider: gcp,   region: asia-northeast1}
+    - {provider: gcp,   region: asia-northeast2}
+    - {provider: gcp,   region: asia-northeast3}
+    - {provider: gcp,   region: asia-east1}
+    - {provider: gcp,   region: asia-east2}
   asia-se:
     - {provider: aws,   region: ap-southeast-1}
+    - {provider: aws,   region: ap-southeast-3}
+    - {provider: aws,   region: ap-southeast-5}
+    - {provider: aws,   region: ap-southeast-7}
+    - {provider: azure, region: indonesiacentral}
+    - {provider: azure, region: malaysiawest}
     - {provider: azure, region: southeastasia}
     - {provider: gcp,   region: asia-southeast1}
+    - {provider: gcp,   region: asia-southeast2}
+    - {provider: gcp,   region: asia-southeast3}
   asia-south:
     - {provider: aws,   region: ap-south-1}
+    - {provider: aws,   region: ap-south-2}
     - {provider: azure, region: centralindia}
+    - {provider: azure, region: southindia}
+    - {provider: azure, region: westindia}
     - {provider: gcp,   region: asia-south1}
+    - {provider: gcp,   region: asia-south2}
   oceania:
     - {provider: aws,   region: ap-southeast-2}
+    - {provider: aws,   region: ap-southeast-4}
+    - {provider: aws,   region: ap-southeast-6}
+    - {provider: azure, region: australiacentral}
+    - {provider: azure, region: australiacentral2}
     - {provider: azure, region: australiaeast}
+    - {provider: azure, region: australiasoutheast}
+    - {provider: azure, region: newzealandnorth}
     - {provider: gcp,   region: australia-southeast1}
+    - {provider: gcp,   region: australia-southeast2}
   sa:
     - {provider: aws,   region: sa-east-1}
     - {provider: azure, region: brazilsouth}
+    - {provider: azure, region: brazilsoutheast}
+    - {provider: azure, region: chilecentral}
     - {provider: gcp,   region: southamerica-east1}
+    - {provider: gcp,   region: southamerica-west1}
+  africa:
+    - {provider: aws,   region: af-south-1}
+    - {provider: azure, region: southafricanorth}
+    - {provider: azure, region: southafricawest}
+    - {provider: gcp,   region: africa-south1}
+  middle-east:
+    - {provider: aws,   region: il-central-1}
+    - {provider: aws,   region: me-south-1}
+    - {provider: aws,   region: me-central-1}
+    - {provider: azure, region: israelcentral}
+    - {provider: azure, region: qatarcentral}
+    - {provider: azure, region: uaecentral}
+    - {provider: azure, region: uaenorth}
+    - {provider: gcp,   region: me-west1}
+    - {provider: gcp,   region: me-central1}
+    - {provider: gcp,   region: me-central2}

@@ -25,8 +25,8 @@ def test_normalizer_still_maps_aws_regions():
 
 def test_normalizer_rejects_unknown_azure_region():
     n = load_region_normalizer()
-    with pytest.raises(KeyError, match="azure/mexicocentral"):
-        n.normalize("azure", "mexicocentral")
+    with pytest.raises(KeyError, match="azure/moonbasecentral"):
+        n.normalize("azure", "moonbasecentral")
 
 
 def test_parse_unit_of_measure_hour():

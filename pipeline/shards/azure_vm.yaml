@@ -9,4 +9,4 @@ cli:
 ingest:
   module: azure_vm
   discover: azure.api_version
-budget_bytes: 20000000
+budget_bytes: 40000000

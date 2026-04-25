@@ -9,4 +9,4 @@ cli:
 ingest:
   module: gcp_gce
   discover: gcp.api_version
-budget_bytes: 2000000
+budget_bytes: 6000000

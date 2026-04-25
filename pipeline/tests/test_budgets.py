@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-from package.budgets import BudgetExceeded, check_shard_size, SHARD_BUDGETS
+from package.budgets import SHARD_BUDGETS, BudgetExceeded, check_shard_size
 
 
 def test_check_shard_size_passes_under_budget():
-    # aws-ec2 today is ~2.2 MB; budget is ~20 MB — nowhere near the limit.
+    # aws-ec2 remains well below its R1-expanded budget in fixture-sized tests.
     check_shard_size(shard="aws_ec2", compressed_bytes=2_000_000)
 
 
@@ -17,7 +17,7 @@ def test_check_shard_size_fails_over_budget():
     msg = str(exc.value)
     assert "aws_ec2" in msg
     assert "100,000,000" in msg or "100000000" in msg
-    assert str(SHARD_BUDGETS["aws_ec2"]) in msg or "20,000,000" in msg
+    assert f"{SHARD_BUDGETS['aws_ec2']:,}" in msg or str(SHARD_BUDGETS["aws_ec2"]) in msg
 
 
 def test_unknown_shard_raises():

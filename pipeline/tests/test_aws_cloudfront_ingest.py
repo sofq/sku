@@ -61,6 +61,8 @@ def test_location_map_fans_out_to_p1_regions():
     assert "ap-southeast-2" in values, "Australia must fan out to ap-southeast-2"
     assert "ap-south-1" in values, "India must fan out to ap-south-1"
     assert "ca-central-1" in values, "Canada must fan out to ca-central-1"
+    assert "me-central-1" in values, "Middle East must fan out to me-central-1"
+    assert "af-south-1" in values, "South Africa must fan out to af-south-1"
 
 
 def test_location_map_exhaustiveness():

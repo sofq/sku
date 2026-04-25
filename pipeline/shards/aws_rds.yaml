@@ -9,4 +9,4 @@ cli:
 ingest:
   module: aws_rds
   discover: aws.publication_date
-budget_bytes: 5000000
+budget_bytes: 10000000

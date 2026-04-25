@@ -47,8 +47,8 @@ LOCATION_MAP: dict[str, str] = {
     "Australia":      "ap-southeast-2",
     "India":          "ap-south-1",
     "South America":  "sa-east-1",
-    "Middle East":    "eu-west-1",   # no ME region in P1; revisit in P2
-    "South Africa":   "eu-west-1",   # no AF region in P1
+    "Middle East":    "me-central-1",
+    "South Africa":   "af-south-1",
     "Any":            "us-east-1",
 }
 
