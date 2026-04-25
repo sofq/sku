@@ -71,11 +71,17 @@ gh workflow run data-gcp.yml
 # Bypass AWS ETag fast path (force full re-ingest regardless of 304s):
 gh workflow run data-aws.yml -f force_full_ingest=true
 
-# Re-publish against last-good provider artifacts (no re-ingest):
+# Dry-run publish against last-good provider artifacts (no release writes):
 gh workflow run data-publish.yml
 
-# Full end-to-end pipeline with wait and publish:
+# Re-publish against last-good provider artifacts (replace today's release):
+gh workflow run data-publish.yml -f dry_run=false -f replace_existing_release=true
+
+# Full end-to-end dry run with wait:
 gh workflow run data-daily.yml
+
+# Full end-to-end pipeline with wait and publish:
+gh workflow run data-daily.yml -f dry_run=false
 ```
 
 ## Verifying codegen outputs

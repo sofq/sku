@@ -31,7 +31,6 @@ Before enabling it, prove the end-to-end flow with two manual dispatches:
 ```bash
 # 1. Dry run — discover + ingest + diff-package, but skip publish.
 gh workflow run data-daily.yml \
-  -F dry_run=true \
   -F force_baseline=true
 
 gh run watch   # wait for completion; confirm all jobs green
@@ -90,8 +89,9 @@ whatever has changed since the last green release via the discover state.
 If a scheduled run has already completed but you need to re-publish (e.g. to
 pick up a fixed ingest module):
 
-1. Delete the existing release: `gh release delete data-$(date -u +%Y.%m.%d) --yes --cleanup-tag`
-2. `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true`
+1. `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true -F replace_existing_release=true`
+2. Watch the run; the publish step replaces `data-$(date -u +%Y.%m.%d)` before
+   recreating `data-latest`.
 
 `force_baseline=true` rebuilds every shard baseline, bypassing the discover
 "nothing changed" short-circuit and resetting every client's delta chain
@@ -121,9 +121,9 @@ gh issue close <issue-number> --comment "Purge verified; manifest fresh on jsDel
 - `discover` job reports every shard errored → upstream site (pricing feed)
   is probably down. Workflow exits 2; no release published. Re-run once
   upstream recovers.
-- `publish` job succeeds but no new release shows up → check `gh release
-  list`; the `gh release create` step may have race-conflicted on the tag.
-  Re-run with `force_baseline=true` after deleting any partial release.
+- `publish` job fails with `release already exists` → today's release already
+  exists. Dry-run for testing, or re-run with `replace_existing_release=true`
+  when you intend to replace the public release.
 
 ## Related files
 
