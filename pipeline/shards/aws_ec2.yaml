@@ -9,4 +9,4 @@ cli:
 ingest:
   module: aws_ec2
   discover: aws.publication_date
-budget_bytes: 20000000
+budget_bytes: 40000000

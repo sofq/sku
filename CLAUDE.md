@@ -132,8 +132,9 @@ export SKU_DATA_DIR=$(pwd)/dist/pipeline
 
 ./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind compute.vm --vcpu 8 --memory 32 --regions us-east,eu-west --sort price
-./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions asia-south --limit 5 --preset compare  # P1: India
-./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions oceania --limit 5 --preset compare    # P1: AU/NZ
+./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions asia-south --limit 5 --preset compare  # R1: India
+./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions africa --limit 5 --preset compare      # R1: Africa
+./bin/sku compare --kind compute.vm --vcpu 4 --memory 16 --regions middle-east --limit 5 --preset compare # R1: Middle East
 ./bin/sku compare --kind storage.object --storage-class standard --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind db.relational --vcpu 2 --memory 8 \
                    --engine postgres --deployment-option single-az --regions us-east --limit 5 --preset compare

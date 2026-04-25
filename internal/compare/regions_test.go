@@ -22,6 +22,18 @@ func TestExpand_knownGroupExpands(t *testing.T) {
 	require.Equal(t, []string{"us-east"}, groups)
 }
 
+func TestExpand_r1GroupsExpand(t *testing.T) {
+	lits, groups, err := Expand([]string{"africa", "middle-east"})
+	require.NoError(t, err)
+	require.Contains(t, lits, "af-south-1")
+	require.Contains(t, lits, "southafricanorth")
+	require.Contains(t, lits, "africa-south1")
+	require.Contains(t, lits, "me-central-1")
+	require.Contains(t, lits, "qatarcentral")
+	require.Contains(t, lits, "me-central1")
+	require.Equal(t, []string{"africa", "middle-east"}, groups)
+}
+
 func TestExpand_dedupsMixedInput(t *testing.T) {
 	lits, _, err := Expand([]string{"us-east", "us-east-1"})
 	require.NoError(t, err)

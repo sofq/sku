@@ -67,9 +67,9 @@ def test_unknown_region_skipped(tmp_path):
     # Mutate the first Consumption USD item to an unseen region.
     for it in bad["Items"]:
         if it["type"] == "Consumption" and it["currencyCode"] == "USD":
-            it["armRegionName"] = "mexicocentral"
+            it["armRegionName"] = "moonbasecentral"
             break
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
     rows = list(ingest(prices_path=p))
-    assert all(r["region"] != "mexicocentral" for r in rows)
+    assert all(r["region"] != "moonbasecentral" for r in rows)

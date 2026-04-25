@@ -48,5 +48,5 @@ def test_region_normalizer_covers_gcp():
 
 def test_region_normalizer_unknown_gcp_region_raises():
     n = load_region_normalizer()
-    with pytest.raises(KeyError, match="gcp/me-central1"):
-        n.normalize("gcp", "me-central1")
+    with pytest.raises(KeyError, match="gcp/moonbase-central1"):
+        n.normalize("gcp", "moonbase-central1")

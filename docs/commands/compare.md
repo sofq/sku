@@ -17,7 +17,7 @@ sku compare --kind <kind> [spec] [flags]
 | `--storage-class` | `storage.object`. |
 | `--engine` | `db.relational` (e.g. `postgres`, `mysql`). |
 | `--deployment-option` | `db.relational` (e.g. `single-az`, `multi-az`). |
-| `--regions` | Comma-separated region prefixes (e.g. `us-east,eu-west`). |
+| `--regions` | Comma-separated region groups or provider regions (e.g. `us-east,eu-west,africa,middle-east`). |
 | `--sort` | `price` (default), `provider`, `region`. |
 | `--limit` | Cap row count (per shard, then merged). |
 
@@ -26,6 +26,7 @@ sku compare --kind <kind> [spec] [flags]
 ```bash
 sku compare --kind compute.vm      --vcpu 4 --memory 16 --regions us-east --limit 5 --preset compare
 sku compare --kind compute.vm      --vcpu 8 --memory 32 --regions us-east,eu-west --sort price
+sku compare --kind compute.vm      --vcpu 4 --memory 16 --regions africa,middle-east --limit 5
 sku compare --kind storage.object  --storage-class standard --regions us-east --limit 5
 sku compare --kind db.relational   --vcpu 2 --memory 8 --engine postgres \
              --deployment-option single-az --regions us-east --limit 5
