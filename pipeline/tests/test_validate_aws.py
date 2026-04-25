@@ -312,6 +312,69 @@ def test_revalidate_eks_control_plane_uses_eks_filters_and_operation_match() -> 
     assert missing == []
 
 
+def test_revalidate_eks_paginates_when_match_on_second_page() -> None:
+    """EKS uses NextToken pagination when the matching SKU is past page 1."""
+    sample = Sample(
+        sku_id="ZYWMR684YSMFHWEU",
+        region="us-east-1",
+        resource_name="eks-standard",
+        price_amount=0.10,
+        price_currency="USD",
+        dimension="cluster",
+    )
+    client = boto3.client("pricing", region_name="us-east-1")
+    stubber = Stubber(client)
+    # Page 1: only Fargate / Outposts items, no CreateOperation -> no match.
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                _eks_price_list_item(
+                    sku_id="OUTPOSTS",
+                    operation="CreateOperation",
+                    usage_type="USE1-AmazonEKS-Hours-Outposts:perCluster",
+                    amount="0.1000000000",
+                ),
+            ],
+            "NextToken": "page2-token",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonEKS",
+            "Filters": [{"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"}],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+        },
+    )
+    # Page 2: contains the standard cluster SKU.
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                _eks_price_list_item(
+                    sku_id="ZYWMR684YSMFHWEU",
+                    operation="CreateOperation",
+                    usage_type="USE1-AmazonEKS-Hours:perCluster",
+                    amount="0.1000000000",
+                ),
+            ],
+            "NextToken": "",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonEKS",
+            "Filters": [{"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"}],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+            "NextToken": "page2-token",
+        },
+    )
+    with stubber:
+        drift, missing = revalidate([sample], client=client)
+    assert drift == []
+    assert missing == []
+
+
 def test_revalidate_eks_fargate_selects_requested_dimension() -> None:
     """EKS Fargate validation compares the vCPU sample to the vCPU upstream SKU."""
     sample = Sample(

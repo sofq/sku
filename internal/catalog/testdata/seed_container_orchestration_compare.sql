@@ -48,7 +48,7 @@ INSERT INTO metadata VALUES
   ('source_url','https://pricing.us-east-1.amazonaws.com/'),
   ('shard','aws-eks'),
   ('allowed_kinds','["container.orchestration"]'),
-  ('serving_providers','["aws","azure","gcp"]');
+  ('serving_providers','["aws"]');
 
 INSERT INTO skus VALUES
   ('eks-std-use1',  'aws',   'eks', 'container.orchestration', 'eks-standard', 'us-east-1', 'us-east', 'hash-eks-std'),

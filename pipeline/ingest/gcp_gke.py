@@ -127,6 +127,12 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
 
     # Pass 2: emit rows
 
+    if not autopilot_regions:
+        logger.warning(
+            "ingest.gcp_gke: no Autopilot mCPU regions discovered; standard "
+            "control-plane and Autopilot rows will both be empty",
+        )
+
     if not regional_sku_seen:
         logger.warning(
             "ingest.gcp_gke: regional control-plane SKU %s not present in "
@@ -165,7 +171,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             "resource_attrs": {
                 "vcpu": None,
                 "memory_gb": None,
-                "extra": {"mode": "control-plane"},
+                "extra": {"tier": "standard", "mode": "control-plane"},
             },
             "terms": terms,
             "prices": [
@@ -206,7 +212,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             "resource_attrs": {
                 "vcpu": None,
                 "memory_gb": None,
-                "extra": {"mode": "autopilot"},
+                "extra": {"tier": "autopilot", "mode": "autopilot"},
             },
             "terms": terms,
             "prices": [

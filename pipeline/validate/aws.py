@@ -136,30 +136,45 @@ def revalidate(
     for s in samples:
         service_code = _service_code(s.resource_name, s.sku_id)
         filters, max_results = _filters_for_sample(s, service_code)
-        try:
-            resp = client.get_products(
-                ServiceCode=service_code,
-                Filters=filters,
-                FormatVersion="aws_v1",
-                MaxResults=max_results,
-            )
-        except Exception:
-            logger.exception("AWS Pricing API call failed for %s", s.sku_id)
-            missing.append(s.sku_id)
-            continue
 
-        price_list = resp.get("PriceList", [])
-        if not price_list:
-            logger.debug("No upstream price found for %s", s.sku_id)
-            missing.append(s.sku_id)
-            continue
+        # EKS uses a regionCode-only filter and can exceed MaxResults=100
+        # across the page (standard / extended-support / Outposts / Fargate
+        # vCPU / GB / ephemeral storage). Paginate via NextToken so the
+        # target SKU is never silently skipped past the first page.
+        upstream: float | None = None
+        next_token: str | None = None
+        page_failed = False
+        while True:
+            kwargs: dict = {
+                "ServiceCode": service_code,
+                "Filters": filters,
+                "FormatVersion": "aws_v1",
+                "MaxResults": max_results,
+            }
+            if next_token:
+                kwargs["NextToken"] = next_token
+            try:
+                resp = client.get_products(**kwargs)
+            except Exception:
+                logger.exception("AWS Pricing API call failed for %s", s.sku_id)
+                page_failed = True
+                break
 
-        upstream = None
-        for item in price_list:
-            upstream = _extract_price(item, s)
+            for item in resp.get("PriceList", []):
+                upstream = _extract_price(item, s)
+                if upstream is not None:
+                    break
             if upstream is not None:
                 break
-        if upstream is None or upstream == 0:
+
+            next_token = resp.get("NextToken")
+            if not next_token or service_code != "AmazonEKS":
+                # Only EKS may need pagination; other services use a
+                # tight (instanceType, regionCode) filter that fits in
+                # one page.
+                break
+
+        if page_failed or upstream is None or upstream == 0:
             logger.debug("Could not parse upstream price for %s", s.sku_id)
             missing.append(s.sku_id)
             continue

@@ -48,7 +48,7 @@ INSERT INTO metadata VALUES
   ('source_url','https://pricing.us-east-1.amazonaws.com/'),
   ('shard','aws-eks'),
   ('allowed_kinds','["container.orchestration"]'),
-  ('serving_providers','["aws","azure","gcp"]');
+  ('serving_providers','["aws"]');
 
 -- terms_hash for (on_demand,'kubernetes','standard','','','') = 464f9f8f1d0d0af5b414f7b07c8f03a3
 -- terms_hash for (on_demand,'kubernetes','premium','','','')  = ea7cf9e0382060bd96b7d8bb64dba984

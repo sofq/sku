@@ -19,6 +19,7 @@ def test_standard_control_plane_row_emitted():
     assert standard, "expected at least one gke-standard row"
     row = standard[0]
     assert row["resource_attrs"]["extra"]["mode"] == "control-plane"
+    assert row["resource_attrs"]["extra"]["tier"] == "standard"
     prices = row["prices"]
     cluster_prices = [p for p in prices if p["dimension"] == "cluster"]
     assert cluster_prices, "expected a 'cluster' price dimension"
@@ -30,6 +31,8 @@ def test_autopilot_row_has_three_price_dimensions():
     autopilot = [r for r in rows if r["resource_name"] == "gke-autopilot"]
     assert autopilot, "expected at least one gke-autopilot row"
     row = autopilot[0]
+    assert row["resource_attrs"]["extra"]["mode"] == "autopilot"
+    assert row["resource_attrs"]["extra"]["tier"] == "autopilot"
     dims = {p["dimension"] for p in row["prices"]}
     assert "vcpu" in dims
     assert "memory" in dims
