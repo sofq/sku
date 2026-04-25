@@ -7,7 +7,7 @@
 #
 # GCP auth: `gcp_*` shards build an ADC-authenticated session at run time
 # (see `ingest.gcp_common.build_authenticated_session`). CI ADC is populated
-# by `google-github-actions/auth@v2`; no static API key required.
+# by `google-github-actions/auth`; no static API key required.
 #
 # Output: `dist/pipeline/<dashed-shard>.db` + `.rows.jsonl` (dashed names
 # match what the Go binary expects in SKU_DATA_DIR).

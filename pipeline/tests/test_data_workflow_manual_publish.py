@@ -8,6 +8,10 @@ def _workflow(name: str) -> str:
     return (ROOT / ".github" / "workflows" / name).read_text()
 
 
+def _workflows() -> list[Path]:
+    return sorted((ROOT / ".github" / "workflows").glob("*.yml"))
+
+
 def _input_block(text: str, input_name: str) -> str:
     match = re.search(rf"^      {input_name}:\n(?P<body>(?:        .*\n)+)", text, re.MULTILINE)
     assert match is not None, f"missing workflow_dispatch input {input_name}"
@@ -45,3 +49,20 @@ def test_data_publish_requires_explicit_replace_for_existing_catalog_release() -
     assert (
         'gh api --method DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/data-${CATALOG_VERSION}"'
     ) in text
+
+
+def test_workflows_do_not_pin_known_node20_actions() -> None:
+    download_artifact = "actions/download-artifact"
+    deprecated_patterns = (
+        f"{download_artifact}@v5",
+        f"{download_artifact}@v6",
+    )
+    offenders: list[str] = []
+
+    for workflow in _workflows():
+        text = workflow.read_text()
+        for pattern in deprecated_patterns:
+            if pattern in text:
+                offenders.append(f"{workflow.name}: {pattern}")
+
+    assert offenders == []

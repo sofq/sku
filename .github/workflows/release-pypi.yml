@@ -81,7 +81,7 @@ jobs:
       id-token: write
     environment: pypi-publish
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           path: dist
           merge-multiple: true

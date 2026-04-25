@@ -3,7 +3,7 @@
 GCP auth: when `--live` hits GCP shards, credentials come from Google
 Application Default Credentials (ADC). Under GitHub Actions this is the
 OIDC-federated service-account token injected by
-`google-github-actions/auth@v2`; locally, any gcloud login or
+`google-github-actions/auth`; locally, any gcloud login or
 `GOOGLE_APPLICATION_CREDENTIALS` path works.
 """
 

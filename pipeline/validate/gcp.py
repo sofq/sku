@@ -2,7 +2,7 @@
 
 Uses Application Default Credentials (``google.auth.default()``) — under
 GitHub Actions, this picks up the Workload Identity Federation token injected
-by ``google-github-actions/auth@v2``. Then iterates
+by ``google-github-actions/auth``. Then iterates
 ``cloudbilling.googleapis.com/v1/services/{sid}/skus`` filtered by region.
 """
 
