@@ -124,6 +124,33 @@ def test_azure_discover_redis_uses_live_service_name():
     assert qs.get("$filter") == ["servicename eq 'redis cache'"]
 
 
+def test_azure_discover_aks_hash_includes_container_instances():
+    with requests_mock.Mocker() as m:
+        m.get(
+            _AZURE_RETAIL_BASE,
+            [
+                {"json": {"Items": [{"meterName": "Standard Uptime SLA", "retailPrice": 0.1}]}},
+                {"json": {"Items": [{"meterName": "Standard vCPU Duration", "retailPrice": 0.02}]}},
+            ],
+        )
+        first = azure_disc.discover(["azure_aks"])
+
+    with requests_mock.Mocker() as m:
+        m.get(
+            _AZURE_RETAIL_BASE,
+            [
+                {"json": {"Items": [{"meterName": "Standard Uptime SLA", "retailPrice": 0.1}]}},
+                {"json": {"Items": [{"meterName": "Standard vCPU Duration", "retailPrice": 0.03}]}},
+            ],
+        )
+        second = azure_disc.discover(["azure_aks"])
+        filters = [req.qs["$filter"][0] for req in m.request_history]
+
+    assert first["azure_aks"] != second["azure_aks"]
+    assert "servicename eq 'azure kubernetes service'" in filters
+    assert "servicename eq 'container instances'" in filters
+
+
 # -----------------------------------------------------------------------------
 # GCP discover
 # -----------------------------------------------------------------------------

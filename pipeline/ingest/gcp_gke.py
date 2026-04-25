@@ -53,9 +53,15 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     with skus_path.open() as f:
         skus = json.load(f).get("skus", [])
 
+    tracked_regions = {
+        region: group
+        for (provider, region), group in normalizer.table.items()
+        if provider == _PROVIDER
+    }
+
     # Pass 1: collect Autopilot regions and per-region prices
     # Key = region, value = dict with keys: mcpu, memory, storage
-    autopilot_regions: dict[str, dict[str, float]] = {}
+    autopilot_regions: dict[str, dict[str, Any]] = {}
 
     # Also collect the Regional control-plane price (global SKU, single price).
     # `regional_sku_seen` lets us distinguish "we found the SKU, here's the
@@ -129,8 +135,8 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
 
     if not autopilot_regions:
         logger.warning(
-            "ingest.gcp_gke: no Autopilot mCPU regions discovered; standard "
-            "control-plane and Autopilot rows will both be empty",
+            "ingest.gcp_gke: no Autopilot mCPU regions discovered; "
+            "Autopilot rows will be empty",
         )
 
     if not regional_sku_seen:
@@ -143,11 +149,10 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             len(autopilot_regions),
         )
 
-    # Standard control-plane rows — one per Autopilot region
-    for region, data in autopilot_regions.items():
-        region_normalized = data.get("_region_normalized")
-        if region_normalized is None:
-            continue
+    # Standard control-plane rows — one per tracked GCP region. The regional
+    # control-plane SKU is global, so these rows must not depend on Autopilot
+    # per-region SKU coverage.
+    for region, region_normalized in sorted(tracked_regions.items()):
         terms = apply_kind_defaults(
             _KIND,
             {

@@ -1,4 +1,5 @@
 """Tests for gcp_gke ingest module."""
+import json
 from pathlib import Path
 
 import pytest
@@ -24,6 +25,25 @@ def test_standard_control_plane_row_emitted():
     cluster_prices = [p for p in prices if p["dimension"] == "cluster"]
     assert cluster_prices, "expected a 'cluster' price dimension"
     assert abs(cluster_prices[0]["amount"] - 0.10) < 1e-6
+
+
+def test_standard_control_plane_rows_do_not_depend_on_autopilot_regions(tmp_path: Path):
+    source = json.loads((FIX / "skus.json").read_text())
+    source["skus"] = [
+        sku
+        for sku in source["skus"]
+        if "Autopilot Pod mCPU Requests" not in sku.get("description", "")
+    ]
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(json.dumps(source))
+
+    rows = list(ingest(skus_path=skus_path))
+
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    autopilot = [r for r in rows if r["resource_name"] == "gke-autopilot"]
+    assert standard, "standard rows should still be emitted from the regional cluster SKU"
+    assert {r["region"] for r in standard} >= {"us-east1"}
+    assert autopilot == []
 
 
 def test_autopilot_row_has_three_price_dimensions():
