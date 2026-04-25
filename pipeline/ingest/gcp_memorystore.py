@@ -102,11 +102,14 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         if usd <= 0:
             continue
 
+        resource_name = f"memorystore-{engine}-{tier}-{int(memory_gb)}gb"
+        base_sku_id = sku.get("skuId") or resource_name
+        region_scoped_sku_id = len(regions) > 1
         for region in regions:
             region_normalized = normalizer.try_normalize(_PROVIDER, region)
             if region_normalized is None:
                 continue
-            resource_name = f"memorystore-{engine}-{tier}-{int(memory_gb)}gb"
+            sku_id = f"{base_sku_id}-{region}" if region_scoped_sku_id else base_sku_id
             terms = apply_kind_defaults(
                 _KIND,
                 {
@@ -119,7 +122,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
                 },
             )
             yield {
-                "sku_id": sku.get("skuId") or f"{resource_name}-{region}",
+                "sku_id": sku_id,
                 "provider": _PROVIDER,
                 "service": _SERVICE,
                 "kind": _KIND,

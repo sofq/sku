@@ -36,13 +36,14 @@ def _sku(
     sku_id: str,
     description: str,
     service: str,
+    service_regions: list[str] | None = None,
     nanos: int = 1000000,
     usage_unit: str = "h",
 ) -> dict:
     return {
         "skuId": sku_id,
         "description": description,
-        "serviceRegions": ["us-east1"],
+        "serviceRegions": service_regions or ["us-east1"],
         "category": {
             "serviceDisplayName": service,
             "usageType": "OnDemand",
@@ -121,3 +122,27 @@ def test_ingest_handles_live_memcached_ram_and_skips_core(tmp_path):
         "tier": "standard",
     }
     assert rows[0]["resource_attrs"]["memory_gb"] == 1
+
+
+def test_ingest_makes_region_scoped_sku_ids_for_multi_region_skus(tmp_path):
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(
+        json.dumps(
+            {
+                "skus": [
+                    _sku(
+                        sku_id="redis-basic-m1",
+                        description="Redis Capacity Basic M1 Iowa",
+                        service="Cloud Memorystore for Redis",
+                        service_regions=["us-east1", "us-central1"],
+                    )
+                ]
+            }
+        )
+    )
+
+    rows = list(ingest(skus_path=skus_path))
+
+    assert len(rows) == 2
+    assert {r["region"] for r in rows} == {"us-east1", "us-central1"}
+    assert len({r["sku_id"] for r in rows}) == len(rows)
