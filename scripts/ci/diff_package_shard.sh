@@ -38,10 +38,12 @@ if [ -f "$prev_db" ]; then
 fi
 
 # 1) Sanity check — row-count drift + schema + FK integrity.
-python -m package.sanity_check \
-  --shard "$public_shard" \
-  --shard-db "$today_db" \
-  $(if [ "$has_previous" = "true" ]; then echo "--previous-db $prev_db"; fi)
+sanity_args=(--shard "$public_shard" --shard-db "$today_db")
+if [ "$has_previous" = "true" ] && [ "$BASELINE_REBUILD" != "true" ]; then
+  sanity_args+=(--previous-db "$prev_db")
+fi
+
+python -m package.sanity_check "${sanity_args[@]}"
 
 # 2) Delta — only when we have a previous baseline to chain from AND we're
 #    not forcing a full baseline rebuild (rebuild invalidates old chain).
