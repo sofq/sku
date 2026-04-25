@@ -11,6 +11,10 @@ on:
       dry_run:
         description: "Forward to provider workflows and stop before publish"
         required: false
+        default: "true"
+      replace_existing_release:
+        description: "Forward to publish; replace today's data release if it already exists"
+        required: false
         default: "false"
       force_baseline:
         description: "Forward to child workflows"
@@ -34,9 +38,9 @@ jobs:
         id: dispatch
         env:
           GH_TOKEN:          ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN:           ${{ github.event.inputs.dry_run }}
-          FORCE_BASELINE:    ${{ github.event.inputs.force_baseline }}
-          FORCE_FULL_INGEST: ${{ github.event.inputs.force_full_ingest }}
+          DRY_RUN:           ${{ github.event.inputs.dry_run || 'false' }}
+          FORCE_BASELINE:    ${{ github.event.inputs.force_baseline || 'false' }}
+          FORCE_FULL_INGEST: ${{ github.event.inputs.force_full_ingest || 'false' }}
         run: |
           set -euo pipefail
           # Dispatch each child; capture the new run id by diffing `gh run list`
@@ -99,10 +103,11 @@ jobs:
         if: always() && github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN:  ${{ github.event.inputs.dry_run }}
+          DRY_RUN:  ${{ github.event.inputs.dry_run || 'false' }}
+          REPLACE_EXISTING_RELEASE: ${{ github.event.inputs.replace_existing_release || 'false' }}
         run: |
           set -euo pipefail
-          gh workflow run data-publish.yml -f dry_run="$DRY_RUN"
+          gh workflow run data-publish.yml -f dry_run="$DRY_RUN" -f replace_existing_release="$REPLACE_EXISTING_RELEASE"
           echo "publish dispatched — watch via: gh run list --workflow data-publish.yml --limit 1"
 
       - name: Skip publish for dry run

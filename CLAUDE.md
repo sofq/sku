@@ -22,8 +22,9 @@ Agent quick-start for the `sku` repo.
 | Run discover (fixture / dry-run) | `make discover` |
 | Run discover against real upstreams | `DISCOVER_LIVE=1 make discover` (GCP uses ADC; run `gcloud auth application-default login` first) |
 | Live-ingest a single shard | `make shard-live SHARD=aws_ec2 SRC=/path/to/offer.json` |
-| Dispatch daily data workflow (dry-run) | `gh workflow run data-daily.yml -F dry_run=true -F force_baseline=true` |
+| Dispatch daily data workflow (dry-run) | `gh workflow run data-daily.yml -F force_baseline=true` |
 | Dispatch daily data workflow (publish) | `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true` |
+| Replace today's data release | `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true -F replace_existing_release=true` |
 
 ## Repo map
 

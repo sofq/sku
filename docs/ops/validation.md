@@ -210,7 +210,8 @@ Decision tree:
    - Investigate the relevant `pipeline/ingest/<shard>.py`; add a
      regression test fixture in `pipeline/tests/`.
    - Push the fix; force a `workflow_dispatch` of `data-daily.yml` with
-     `force_baseline=true` to republish.
+     `dry_run=false`, `force_baseline=true`, and `replace_existing_release=true`
+     to republish today's catalog.
 4. **Validator false positive** (e.g. unit-of-measure mismatch that
    doesn't matter economically).
    - Patch `pipeline/validate/<provider>.py` or the specific filter in
