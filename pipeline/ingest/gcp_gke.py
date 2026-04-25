@@ -152,6 +152,11 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     # Standard control-plane rows — one per tracked GCP region. The regional
     # control-plane SKU is global, so these rows must not depend on Autopilot
     # per-region SKU coverage.
+    standard_extra: dict[str, Any] = {"tier": "standard", "mode": "control-plane"}
+    if not regional_sku_seen:
+        # Mark fallback rows so downstream consumers (validate, audits) can
+        # distinguish synthetic-default pricing from live upstream prices.
+        standard_extra["price_source"] = "default_fallback"
     for region, region_normalized in sorted(tracked_regions.items()):
         terms = apply_kind_defaults(
             _KIND,
@@ -176,7 +181,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             "resource_attrs": {
                 "vcpu": None,
                 "memory_gb": None,
-                "extra": {"tier": "standard", "mode": "control-plane"},
+                "extra": dict(standard_extra),
             },
             "terms": terms,
             "prices": [

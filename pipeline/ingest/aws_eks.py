@@ -129,7 +129,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
                     "os": "fargate",
                 })
                 fargate_buckets[region] = {
-                    "sku_id": sku_id,
+                    "sku_id": f"aws-eks-fargate-{region}",
                     "provider": _PROVIDER,
                     "service": _SERVICE,
                     "kind": _KIND,
@@ -158,7 +158,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
                     "os": "fargate",
                 })
                 fargate_buckets[region] = {
-                    "sku_id": sku_id,
+                    "sku_id": f"aws-eks-fargate-{region}",
                     "provider": _PROVIDER,
                     "service": _SERVICE,
                     "kind": _KIND,

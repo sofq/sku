@@ -76,6 +76,34 @@ def test_spot_sku_is_filtered():
             )
 
 
+def test_standard_rows_omit_price_source_when_regional_sku_present():
+    rows = _rows()
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    assert standard, "expected at least one gke-standard row"
+    for row in standard:
+        assert "price_source" not in row["resource_attrs"]["extra"], (
+            "live regional SKU price should not carry the fallback sentinel"
+        )
+
+
+def test_standard_rows_carry_fallback_sentinel_when_regional_sku_missing(tmp_path: Path):
+    source = json.loads((FIX / "skus.json").read_text())
+    source["skus"] = [
+        sku for sku in source["skus"] if sku.get("skuId") != "B561-BFBD-1264"
+    ]
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(json.dumps(source))
+
+    rows = list(ingest(skus_path=skus_path))
+
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    assert standard, "standard rows must still emit using the default fallback"
+    for row in standard:
+        assert row["resource_attrs"]["extra"].get("price_source") == "default_fallback"
+        cluster = [p for p in row["prices"] if p["dimension"] == "cluster"]
+        assert cluster and abs(cluster[0]["amount"] - 0.10) < 1e-9
+
+
 def test_terms_tenancy_is_kubernetes():
     rows = _rows()
     assert rows, "expected rows from fixture"

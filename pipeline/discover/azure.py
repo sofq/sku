@@ -32,6 +32,8 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_aks": "serviceName eq 'Azure Kubernetes Service'",
 }
 
+# Tuple order is part of the discover-hash contract: reordering invalidates
+# every previously published discover hash for that shard. Append, never reorder.
 _EXTRA_SHARD_FILTERS: dict[str, tuple[str, ...]] = {
     "azure_aks": ("serviceName eq 'Container Instances'",),
 }

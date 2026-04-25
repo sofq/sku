@@ -128,7 +128,7 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 		if f.vcpu != 0 || f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
 			f.availabilityTier != "" || f.storageGB != 0 || f.deploymentOption != "" || f.tier != "" || f.mode != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				"cache.kv accepts --memory / --engine / --max-price / --regions")
+				"cache.kv does not accept --vcpu / --gpu-count / --storage-class / --durability-nines / --availability-tier / --storage-gb / --deployment-option / --tier / --mode")
 		}
 	case "container.orchestration":
 		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
