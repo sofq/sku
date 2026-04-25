@@ -4,6 +4,7 @@
       "skuId": "spanner-standard-us-east1",
       "description": "Cloud Spanner Standard edition Processing Unit",
       "serviceRegions": ["us-east1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -25,6 +26,7 @@
       "skuId": "spanner-standard-europe-west1",
       "description": "Cloud Spanner Standard edition Processing Unit",
       "serviceRegions": ["europe-west1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -46,6 +48,7 @@
       "skuId": "spanner-enterprise-us-east1",
       "description": "Cloud Spanner Enterprise edition Processing Unit",
       "serviceRegions": ["us-east1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -67,6 +70,7 @@
       "skuId": "spanner-enterprise-europe-west1",
       "description": "Cloud Spanner Enterprise edition Processing Unit",
       "serviceRegions": ["europe-west1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -88,6 +92,7 @@
       "skuId": "spanner-enterprise-plus-us-east1",
       "description": "Cloud Spanner Enterprise Plus edition Processing Unit",
       "serviceRegions": ["us-east1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -109,6 +114,7 @@
       "skuId": "spanner-enterprise-plus-europe-west1",
       "description": "Cloud Spanner Enterprise Plus edition Processing Unit",
       "serviceRegions": ["europe-west1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -130,6 +136,7 @@
       "skuId": "spanner-storage-ssd-us-east1",
       "description": "Cloud Spanner SSD storage",
       "serviceRegions": ["us-east1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -151,6 +158,7 @@
       "skuId": "spanner-storage-ssd-europe-west1",
       "description": "Cloud Spanner SSD storage",
       "serviceRegions": ["europe-west1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -172,6 +180,7 @@
       "skuId": "spanner-unrecognized-us-east1",
       "description": "Cloud Spanner Backup storage",
       "serviceRegions": ["us-east1"],
+      "category": {"usageType": "OnDemand"},
       "pricingInfo": [
         {
           "pricingExpression": {
@@ -182,6 +191,50 @@
                   "currencyCode": "USD",
                   "units": "0",
                   "nanos": 30000000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "spanner-standard-committed-use-us-east1",
+      "description": "Cloud Spanner Standard edition Processing Unit Commit1Yr",
+      "serviceRegions": ["us-east1"],
+      "category": {"usageType": "Commit1Yr"},
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 63000
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "skuId": "spanner-standard-eur-us-east1",
+      "description": "Cloud Spanner Standard edition Processing Unit EUR",
+      "serviceRegions": ["us-east1"],
+      "category": {"usageType": "OnDemand"},
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "h",
+            "tieredRates": [
+              {
+                "unitPrice": {
+                  "currencyCode": "EUR",
+                  "units": "0",
+                  "nanos": 85000
                 }
               }
             ]

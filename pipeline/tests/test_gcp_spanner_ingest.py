@@ -34,3 +34,15 @@ def test_ingest_emits_three_editions():
     eds = {r["resource_attrs"]["extra"].get("edition") for r in rows
            if r["resource_attrs"]["extra"].get("edition")}
     assert {"standard", "enterprise", "enterprise-plus"}.issubset(eds)
+
+
+def test_ingest_filters_committed_use_skus():
+    rows = list(ingest(skus_path=FIXTURE / "skus.json"))
+    sku_ids = {r["sku_id"] for r in rows}
+    assert "spanner-standard-committed-use-us-east1" not in sku_ids
+
+
+def test_ingest_filters_non_usd_skus():
+    rows = list(ingest(skus_path=FIXTURE / "skus.json"))
+    sku_ids = {r["sku_id"] for r in rows}
+    assert "spanner-standard-eur-us-east1" not in sku_ids

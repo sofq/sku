@@ -62,6 +62,19 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         data = json.load(fh)
 
     for sku in data.get("skus", []):
+        # Skip committed-use and non-USD SKUs that land alongside on-demand rows.
+        category = sku.get("category", {})
+        usage_type = category.get("usageType", "OnDemand")  # default OnDemand for simple fixtures
+        if usage_type != "OnDemand":
+            continue
+        try:
+            rates = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"]
+            currency = rates[0]["unitPrice"].get("currencyCode", "USD")
+            if currency != "USD":
+                continue
+        except (KeyError, IndexError):
+            continue
+
         description = sku.get("description", "")
         service_regions = sku.get("serviceRegions", [])
         if not service_regions:
