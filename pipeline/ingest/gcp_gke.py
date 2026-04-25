@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -14,6 +15,8 @@ from normalize.terms import terms_hash
 
 from ._duckdb import dumps
 from .gcp_common import load_region_normalizer
+
+logger = logging.getLogger(__name__)
 
 _PROVIDER = "gcp"
 _SERVICE = "gke"
@@ -29,6 +32,10 @@ _SKIP_COMMITTED = "Committed"
 
 # SKU id for the Regional Kubernetes Clusters control-plane price
 _REGIONAL_SKU_ID = "B561-BFBD-1264"
+# Last-resort default if upstream omits _REGIONAL_SKU_ID. GKE has charged
+# $0.10/cluster-hour since 2020. We warn whenever we fall back so daily-data
+# CI surfaces the upstream gap rather than silently shipping a stale price.
+_REGIONAL_SKU_DEFAULT_PRICE = 0.10
 
 
 def _hourly_usd(sku: dict) -> float:
@@ -50,8 +57,11 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     # Key = region, value = dict with keys: mcpu, memory, storage
     autopilot_regions: dict[str, dict[str, float]] = {}
 
-    # Also collect the Regional control-plane price (global SKU, single price)
-    regional_cluster_price: float = 0.10  # default
+    # Also collect the Regional control-plane price (global SKU, single price).
+    # `regional_sku_seen` lets us distinguish "we found the SKU, here's the
+    # live price" from "we never saw the SKU, falling back to the default".
+    regional_cluster_price: float = _REGIONAL_SKU_DEFAULT_PRICE
+    regional_sku_seen = False
 
     for sku in skus:
         description = sku.get("description", "")
@@ -61,6 +71,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
             p = _hourly_usd(sku)
             if p > 0:
                 regional_cluster_price = p
+                regional_sku_seen = True
             continue
 
         # Skip unwanted cluster-level SKUs
@@ -115,6 +126,16 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
                 autopilot_regions[region]["storage"] = _hourly_usd(sku)
 
     # Pass 2: emit rows
+
+    if not regional_sku_seen:
+        logger.warning(
+            "ingest.gcp_gke: regional control-plane SKU %s not present in "
+            "upstream response; falling back to $%.2f/cluster-hour for all "
+            "%d regions",
+            _REGIONAL_SKU_ID,
+            _REGIONAL_SKU_DEFAULT_PRICE,
+            len(autopilot_regions),
+        )
 
     # Standard control-plane rows — one per Autopilot region
     for region, data in autopilot_regions.items():

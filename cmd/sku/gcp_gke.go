@@ -65,6 +65,14 @@ func newGCPGKEListCmd() *cobra.Command {
 	return c
 }
 
+// modeExplicit is true when the caller passed `--mode` on the command line.
+// We use this to distinguish "user accepted the default" (where we may
+// auto-promote based on --tier) from "user contradicted themselves"
+// (which should still error).
+func modeExplicit(cmd *cobra.Command) bool {
+	return cmd.Flags().Changed("mode")
+}
+
 func runGCPGKE(cmd *cobra.Command, f *gkeFlags, requireRegion bool) error {
 	s := globalSettings(cmd)
 	if f.mode != "control-plane" && f.mode != "autopilot" {
@@ -76,6 +84,13 @@ func runGCPGKE(cmd *cobra.Command, f *gkeFlags, requireRegion bool) error {
 	// For autopilot mode, tier defaults to "autopilot"
 	if f.mode == "autopilot" && f.tier == "" {
 		f.tier = "autopilot"
+	}
+	// Symmetric convenience: `--tier autopilot` without an explicit `--mode`
+	// promotes mode to autopilot, so `gcp gke list --tier autopilot` works
+	// without forcing the user to set both flags. Explicit
+	// `--mode control-plane --tier autopilot` still errors below.
+	if f.tier == "autopilot" && f.mode == "control-plane" && !modeExplicit(cmd) {
+		f.mode = "autopilot"
 	}
 	if f.mode == "control-plane" && f.tier == "" {
 		e := skuerrors.Validation("flag_invalid", "tier", "",
