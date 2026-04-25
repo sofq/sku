@@ -55,6 +55,10 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         region = item.get("armRegionName", "")
         usd = float(item.get("retailPrice", 0))
         unit_raw = item.get("unitOfMeasure", "")
+        row_type = item.get("type", "Consumption")
+        currency = item.get("currencyCode", "USD")
+        if row_type != "Consumption" or currency != "USD":
+            continue
         if not region or usd <= 0:
             continue
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
@@ -84,6 +88,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             resource_name = "cosmos-serverless"
         else:  # provisioned
             per_ru_hour = usd / 100.0 if "100 ru/s" in meter_name.lower() else usd
+            usd = per_ru_hour
             extra = {
                 "capacity_mode": "provisioned",
                 "api": api,

@@ -82,15 +82,20 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         region = item.get("armRegionName", "")
         usd = float(item.get("retailPrice", 0))
         uom = item.get("unitOfMeasure", "")
+        row_type = item.get("type", "Consumption")
+        currency = item.get("currencyCode", "USD")
+        if row_type != "Consumption" or currency != "USD":
+            continue
         if not region or usd <= 0:
             continue
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:
             continue
         try:
-            _divisor, unit = parse_unit_of_measure(uom)
+            divisor, unit = parse_unit_of_measure(uom)
         except ValueError:
             continue
+        usd = usd / divisor
 
         memory_gb = _MEMORY_GB.get((tier, size))
         resource_name = f"{tier.capitalize()} {size}"

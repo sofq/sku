@@ -161,9 +161,11 @@ func TestCompareCmd_dryRunDBRelationalIncludesAzureHostedDBShards(t *testing.T) 
 	cmd.SetErr(&stderr)
 	cmd.SetArgs([]string{"compare", "--kind", "db.relational", "--dry-run"})
 	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"aws-aurora"`)
 	require.Contains(t, stdout.String(), `"azure-postgres"`)
 	require.Contains(t, stdout.String(), `"azure-mysql"`)
 	require.Contains(t, stdout.String(), `"azure-mariadb"`)
+	require.Contains(t, stdout.String(), `"gcp-spanner"`)
 }
 
 func TestCompareCmd_dryRunCacheKVIncludesCacheShards(t *testing.T) {
