@@ -1,0 +1,57 @@
+name: Bug report
+description: Report incorrect behavior in the CLI, updater, catalog reader, or data pipeline.
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for reproducible product bugs. For automated catalog drift, use the catalog-drift template instead.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect instead?
+      placeholder: "`sku compare ...` returned ... but I expected ..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Commands, catalog version, input files, and environment needed to reproduce.
+      placeholder: |
+        1. Run `sku ...`
+        2. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Paste the relevant terminal output, JSON error, or workflow log excerpt.
+      render: shell
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: sku version
+      description: Output of `sku version`, commit SHA, or release tag.
+      placeholder: "v0.0.0 / commit SHA"
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - catalog data
+        - updater
+        - compare/search
+        - estimate
+        - pipeline
+        - docs
+    validations:
+      required: true

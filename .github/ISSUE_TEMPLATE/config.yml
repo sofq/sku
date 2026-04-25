@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Catalog validation runbook
+    url: https://github.com/sofq/sku/blob/main/docs/ops/validation.md
+    about: Triage catalog drift and weekly validation workflow failures.
+  - name: Data workflow runbook
+    url: https://github.com/sofq/sku/blob/main/docs/ops/data-workflows.md
+    about: Operate provider ingest, publish, and daily dispatcher workflows.
