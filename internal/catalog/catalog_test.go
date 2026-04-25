@@ -462,3 +462,31 @@ func TestLookupCacheKV_MissingResourceNameErrors(t *testing.T) {
 	})
 	require.Error(t, err)
 }
+
+func openSeededContainerOrchestration(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_container_orchestration.sql", "aws-eks.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupContainerOrchestration_ByResourceNameAndRegion(t *testing.T) {
+	cat := openSeededContainerOrchestration(t)
+	rows, err := cat.LookupContainerOrchestration(context.Background(), catalog.ContainerOrchestrationFilter{
+		Provider: "aws", Service: "eks",
+		ResourceName: "eks-standard", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "kubernetes", OS: "standard"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "eks-standard", rows[0].ResourceName)
+}
+
+func TestLookupContainerOrchestration_MissingResourceName(t *testing.T) {
+	cat := openSeededContainerOrchestration(t)
+	_, err := cat.LookupContainerOrchestration(context.Background(), catalog.ContainerOrchestrationFilter{
+		Provider: "aws", Service: "eks",
+	})
+	require.Error(t, err)
+}

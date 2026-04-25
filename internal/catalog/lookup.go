@@ -481,6 +481,31 @@ WHERE `
 	return out, rs.Err()
 }
 
+// ContainerOrchestrationFilter captures the flags `sku <provider> <k8s-service> price/list` exposes.
+// resource_name holds the provider-specific cluster identifier:
+//
+//	AWS:   "eks-standard" / "eks-extended-support" / "eks-fargate"
+//	Azure: "aks-free" / "aks-standard" / "aks-premium" / "aks-virtual-nodes-linux" / "aks-virtual-nodes-windows"
+//	GCP:   "gke-standard" / "gke-autopilot"
+//
+// Tier is carried in Terms.OS; product family ("kubernetes") in Terms.Tenancy.
+type ContainerOrchestrationFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupContainerOrchestration runs the container.orchestration point lookup / list query.
+func (c *Catalog) LookupContainerOrchestration(ctx context.Context, f ContainerOrchestrationFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupContainerOrchestration requires ResourceName")
+	}
+	return c.lookupResource(ctx, "container.orchestration", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
 // FillPrices loads the prices rows for r.SKUID and appends them to r.Prices.
 // Exported so internal/compare/kinds can reuse the same scan path without
 // duplicating the query.
