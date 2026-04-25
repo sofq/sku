@@ -47,22 +47,21 @@ func (auroraEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) 
 		return LineItem{}, fmt.Errorf("estimate/aurora: no SKU for %s/%s in %s (engine=%s)",
 			it.Service, instanceType, region, engine)
 	}
-	if len(rows) > 1 {
-		return LineItem{}, fmt.Errorf("estimate/aurora: ambiguous (%d rows)", len(rows))
-	}
-	r := rows[0]
 
 	wantUnit := func(u string) bool { return hourlyUnits[u] }
 	if capacityMode == "serverless-v2" {
 		wantUnit = func(u string) bool { return u == "acu-hr" }
 	}
+	var r catalog.Row
 	var hourly float64
 	var unit string
-	for _, p := range r.Prices {
-		if p.Dimension == "compute" && wantUnit(p.Unit) {
-			hourly = p.Amount
-			unit = p.Unit
-			break
+	for _, row := range rows {
+		for _, p := range row.Prices {
+			if p.Dimension == "compute" && wantUnit(p.Unit) && (hourly == 0 || p.Amount < hourly) {
+				r = row
+				hourly = p.Amount
+				unit = p.Unit
+			}
 		}
 	}
 	if hourly == 0 {

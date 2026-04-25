@@ -39,6 +39,34 @@ func TestAuroraEstimator_Provisioned(t *testing.T) {
 	require.InDelta(t, 0.50*730*2, li.MonthlyUSD, 1e-6)
 }
 
+func TestAuroraEstimator_ProvisionedChoosesLowestHourlyMatch(t *testing.T) {
+	resetRegistry(t)
+	Register(auroraEstimator{})
+	e, ok := Get("db.relational.aurora")
+	require.True(t, ok)
+
+	stubAuroraLookup(t, func(_ context.Context, _ string, _ catalog.DBRelationalFilter) ([]catalog.Row, error) {
+		return []catalog.Row{
+			{
+				SKUID: "higher", Provider: "aws", Service: "aurora",
+				ResourceName: "db.r6g.large", Region: "us-east-1",
+				Prices: []catalog.Price{{Dimension: "compute", Amount: 0.338, Unit: "hrs"}},
+			},
+			{
+				SKUID: "lower", Provider: "aws", Service: "aurora",
+				ResourceName: "db.r6g.large", Region: "us-east-1",
+				Prices: []catalog.Price{{Dimension: "compute", Amount: 0.260, Unit: "hrs"}},
+			},
+		}, nil
+	})
+	item, err := ParseItem("aws/aurora:db.r6g.large:region=us-east-1:hours=730:engine=aurora-postgres")
+	require.NoError(t, err)
+	li, err := e.Estimate(context.Background(), item)
+	require.NoError(t, err)
+	require.Equal(t, "lower", li.SKUID)
+	require.InDelta(t, 0.260*730, li.MonthlyUSD, 1e-6)
+}
+
 func TestAuroraEstimator_ServerlessV2(t *testing.T) {
 	resetRegistry(t)
 	Register(auroraEstimator{})
