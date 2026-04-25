@@ -26,6 +26,7 @@ _VALID_KINDS: frozenset[str] = frozenset({
     "db.nosql",
     "network.cdn",
     "llm.text",
+    "cache.kv",
 })
 
 

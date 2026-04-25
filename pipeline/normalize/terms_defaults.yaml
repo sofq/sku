@@ -88,3 +88,10 @@ defaults:
     support_tier: ""
     upfront: ""
     payment_option: ""
+  cache.kv:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""

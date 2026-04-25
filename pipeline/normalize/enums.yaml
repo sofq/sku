@@ -16,6 +16,7 @@ kind:
   - storage.block
   - db.nosql
   - network.cdn
+  - cache.kv
 
 commitment:
   - on_demand
@@ -40,6 +41,18 @@ tenancy:
   - cloud-sql-postgres
   - cloud-sql-mysql
   - cloud-sql-sqlserver
+  # cache.kv engines — repurpose tenancy slot for cache engine type
+  - redis
+  - memcached
+  - sql
+  - mongo
+  - cassandra
+  - table
+  - gremlin
+  - spanner-standard
+  - spanner-enterprise
+  - spanner-enterprise-plus
+  - spanner-storage
 
 os:
   - ""
@@ -55,6 +68,15 @@ os:
   - flexible-server
   - zonal
   - regional
+  # cache.kv deployment/tier options — repurpose os slot
+  - provisioned
+  - serverless
+  - serverless-v2
+  - storage
+  - basic
+  - standard
+  - premium
+  - enterprise
 
 support_tier:
   - ""
