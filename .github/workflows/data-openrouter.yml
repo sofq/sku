@@ -1,9 +1,9 @@
-# .github/workflows/data-gcp.yml
-name: data-gcp
+# .github/workflows/data-openrouter.yml
+name: data-openrouter
 
 on:
   schedule:
-    - cron: "30 3 * * *"          # 03:30 UTC — GCP wave
+    - cron: "45 3 * * *"          # 03:45 UTC — OpenRouter wave
   workflow_dispatch:
     inputs:
       dry_run:
@@ -18,10 +18,10 @@ on:
 permissions:
   contents:  read
   actions:   read
-  id-token:  write              # Workload Identity Federation for GCP Cloud Billing
+  # OpenRouter API is authenticated via OPENROUTER_API_KEY — no OIDC needed.
 
 concurrency:
-  group: data-gcp
+  group: data-openrouter
   cancel-in-progress: false
 
 jobs:
@@ -35,12 +35,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
-
-      - name: Authenticate to GCP via Workload Identity Federation
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account:            ${{ vars.GCP_VALIDATE_SA }}
 
       - name: Resolve previous release version
         id: previous
@@ -60,7 +54,7 @@ jobs:
             --pattern 'state.json' \
             --dir dist/pipeline/discover || echo "no state.json (allowed)"
 
-      - name: Discover changed GCP shards
+      - name: Discover changed OpenRouter shards
         id: discover
         env:
           FORCE_BASELINE: ${{ github.event.inputs.force_baseline }}
@@ -77,7 +71,7 @@ jobs:
           python -m discover \
             --state dist/pipeline/discover/state.json \
             --out   dist/pipeline/discover/changed.json \
-            --shards gcp_gce,gcp_cloud_sql,gcp_gcs,gcp_run,gcp_functions,gcp_spanner,gcp_memorystore \
+            --shards openrouter \
             --live  $flag
 
           shards=$(jq -c '.shards' dist/pipeline/discover/changed.json)
@@ -89,7 +83,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: github.event.inputs.dry_run != 'true'
         with:
-          name: discover-gcp
+          name: discover-openrouter
           path: dist/pipeline/discover/
           retention-days: 14
 
@@ -105,22 +99,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-pipeline
-
-      - name: Authenticate to GCP via Workload Identity Federation
-        if: startsWith(matrix.shard, 'gcp_')
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
-          service_account:            ${{ vars.GCP_VALIDATE_SA }}
-
       - name: Fetch upstream + ingest + package
         timeout-minutes: 30
         env:
-          SHARD:             ${{ matrix.shard }}
-          CATALOG_VERSION:   ${{ needs.discover.outputs.catalog_version }}
-          SKU_ETAG_MODE:     "off"   # GCP discover already version-hashes; ETag is redundant
+          SHARD:           ${{ matrix.shard }}
+          CATALOG_VERSION: ${{ needs.discover.outputs.catalog_version }}
+          SKU_ETAG_MODE:   "off"   # OpenRouter is not CDN-cached
         run: bash scripts/ci/ingest_shard.sh
-
       - uses: actions/upload-artifact@v7
         if: github.event.inputs.dry_run != 'true'
         with:
@@ -186,12 +171,12 @@ jobs:
           path: dist/pipeline/release/
       - uses: actions/download-artifact@v7
         with:
-          name: discover-gcp
-          path: dist/pipeline/discover-gcp/
+          name: discover-openrouter
+          path: dist/pipeline/discover-openrouter/
       - uses: actions/upload-artifact@v7
         with:
-          name: shards-gcp-${{ needs.discover.outputs.catalog_version }}
+          name: shards-openrouter-${{ needs.discover.outputs.catalog_version }}
           path: |
             dist/pipeline/release/
-            dist/pipeline/discover-gcp/
+            dist/pipeline/discover-openrouter/
           retention-days: 14

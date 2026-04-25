@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Downloads the latest `shards-<provider>-<version>` artifact produced by
 # the data-<provider>.yml workflow whose most recent run completed
-# successfully. Called with $1 = provider name (aws|azure|gcp) and
+# successfully. Called with $1 = provider name (aws|azure|gcp|openrouter) and
 # $2 = expected catalog version (YYYY.MM.DD).
 #
 # IMPORTANT: this script flattens shard artifacts (*.db.zst, *.sql.gz,

@@ -78,22 +78,26 @@ jobs:
           dispatch_and_wait data-gcp.yml gcp \
             -f dry_run="$DRY_RUN" \
             -f force_baseline="$FORCE_BASELINE"
+          dispatch_and_wait data-openrouter.yml openrouter \
+            -f dry_run="$DRY_RUN" \
+            -f force_baseline="$FORCE_BASELINE"
 
       - name: Wait for provider workflows
         env:
           GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
-          AWS_RUN:     ${{ steps.dispatch.outputs.aws_run_id }}
-          AZURE_RUN:   ${{ steps.dispatch.outputs.azure_run_id }}
-          GCP_RUN:     ${{ steps.dispatch.outputs.gcp_run_id }}
+          AWS_RUN:        ${{ steps.dispatch.outputs.aws_run_id }}
+          AZURE_RUN:      ${{ steps.dispatch.outputs.azure_run_id }}
+          GCP_RUN:        ${{ steps.dispatch.outputs.gcp_run_id }}
+          OPENROUTER_RUN: ${{ steps.dispatch.outputs.openrouter_run_id }}
         run: |
           set -euo pipefail
           # `gh run watch --exit-status` blocks until the run finishes and
-          # exits non-zero on failure. We want all three to complete but a
+          # exits non-zero on failure. We want all four to complete but a
           # single provider failure should NOT block publish — the manifest
           # will just carry that provider's shards at yesterday's versions
           # (intentional failure isolation). So we watch each independently
           # and tolerate non-zero exits.
-          for run in "$AWS_RUN" "$AZURE_RUN" "$GCP_RUN"; do
+          for run in "$AWS_RUN" "$AZURE_RUN" "$GCP_RUN" "$OPENROUTER_RUN"; do
             [ -z "$run" ] && continue
             gh run watch "$run" --interval 30 || \
               echo "::warning::run $run did not succeed — publish will skip this provider's shards"

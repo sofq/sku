@@ -51,9 +51,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/pipeline/release
-          bash scripts/ci/download_provider_artifacts.sh aws   "${{ steps.version.outputs.catalog_version }}"
-          bash scripts/ci/download_provider_artifacts.sh azure "${{ steps.version.outputs.catalog_version }}"
-          bash scripts/ci/download_provider_artifacts.sh gcp   "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh aws        "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh azure     "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh gcp       "${{ steps.version.outputs.catalog_version }}"
+          bash scripts/ci/download_provider_artifacts.sh openrouter "${{ steps.version.outputs.catalog_version }}"
 
       - name: Merge per-provider discover state.json
         run: |
@@ -62,7 +63,7 @@ jobs:
           # If a provider's workflow didn't produce an artifact today (run
           # skipped or failed), its state.json is absent — the merge simply
           # keeps yesterday's values via the other providers.
-          mapfile -t inputs < <(find dist/pipeline/aws-in dist/pipeline/azure-in dist/pipeline/gcp-in \
+          mapfile -t inputs < <(find dist/pipeline/aws-in dist/pipeline/azure-in dist/pipeline/gcp-in dist/pipeline/openrouter-in \
             -maxdepth 5 -name 'state.json' -type f 2>/dev/null | sort)
           if [ "${#inputs[@]}" -eq 0 ]; then
             echo "no state.json files to merge — provider workflows produced none" >&2
