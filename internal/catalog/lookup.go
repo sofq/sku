@@ -348,6 +348,31 @@ func (c *Catalog) LookupCDN(ctx context.Context, f CDNFilter) ([]Row, error) {
 		f.ResourceName, f.Region, f.Terms)
 }
 
+// CacheKVFilter captures the flags `sku <provider> <cache-service> price/list` exposes.
+// resource_name holds the provider-specific node identifier:
+//
+//	AWS:   "cache.r6g.large"
+//	Azure: "Standard C1" / "Premium P1" / "Enterprise E5"
+//	GCP:   "memorystore-redis-standard-5gb"
+//
+// Engine is carried in Terms.Tenancy ("redis" | "memcached").
+type CacheKVFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupCacheKV runs the cache.kv point lookup / list query.
+func (c *Catalog) LookupCacheKV(ctx context.Context, f CacheKVFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupCacheKV requires ResourceName")
+	}
+	return c.lookupResource(ctx, "cache.kv", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
 // lookupResource is the shared scan path for cloud kinds. Region is
 // optional (empty region returns every region's row for the given
 // resource_name). terms_hash is computed client-side from f.Terms before
