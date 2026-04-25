@@ -61,6 +61,8 @@ ride with M-γ's schema bump).
 
 M-γ.1 S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure Redis, Spanner, Memorystore shards + cache.kv compare kind + estimators.
 
+M-γ.2 S1 containers (managed Kubernetes): EKS, AKS, GKE shards + container.orchestration compare kind. Worker/node prices remain in `aws_ec2` / `azure_vm` / `gcp_gce`.
+
 ### Quick path (agent, repeatable, M3b.4 surface)
 
 ```bash
@@ -191,6 +193,26 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku estimate --item azure/cosmosdb:serverless:region=eastus:api=sql:ru_million=50 --pretty
 ./bin/sku estimate --item gcp/spanner:standard:region=us-east1:pu=1000:hours=730 --pretty
 ./bin/sku estimate --item gcp/spanner:enterprise:region=us-east1:node=2:hours=730 --pretty
+
+# M-γ.2 S1 containers (managed Kubernetes): EKS, AKS, GKE shards + container.orchestration compare kind.
+./bin/sku aws eks   price --tier standard          --region us-east-1 --preset agent
+./bin/sku aws eks   price --mode fargate           --region us-east-1
+./bin/sku aws eks   list  --tier extended-support
+./bin/sku azure aks price --tier premium           --region eastus    --preset agent
+./bin/sku azure aks price --mode virtual-nodes     --region eastus    --aci-os linux
+./bin/sku azure aks list  --tier free
+./bin/sku gcp gke   price --tier standard          --region us-east1  --preset agent
+./bin/sku gcp gke   price --mode autopilot         --region us-east1
+./bin/sku gcp gke   list  --tier autopilot
+
+./bin/sku compare --kind container.orchestration --regions us-east             --limit 5 --preset compare
+./bin/sku compare --kind container.orchestration --tier standard --regions us  --limit 5
+./bin/sku compare --kind container.orchestration --mode autopilot --regions us-east
+
+# Reminder: worker / node-pool prices live in the existing VM shards
+./bin/sku aws ec2   price --instance-type m5.large --region us-east-1    # EKS workers
+./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region eastus  # AKS nodes
+./bin/sku gcp gce   price --machine-type n1-standard-2 --region us-east1 # GKE nodes
 ```
 
 ### Distribution smoke (M6)
