@@ -10,6 +10,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
@@ -61,6 +62,7 @@ _LIVE_PRODUCT_RE = re.compile(
     r"^Azure Redis Cache (?P<tier>Basic|Standard|Premium|Enterprise)$",
     re.IGNORECASE,
 )
+_SKU_SUFFIX_RE = re.compile(r"[^a-z0-9]+")
 
 
 def _classify(item: dict[str, Any]) -> tuple[str, str] | None:
@@ -82,11 +84,17 @@ def _classify(item: dict[str, Any]) -> tuple[str, str] | None:
     return tier, size
 
 
+def _suffix(value: str) -> str:
+    out = _SKU_SUFFIX_RE.sub("-", value.lower()).strip("-")
+    return out or "meter"
+
+
 def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
     normalizer = load_region_normalizer()
     with prices_path.open() as f:
         items = json.load(f).get("Items", [])
 
+    parsed: list[tuple[dict[str, Any], str, str, float, str, str, str, str, str]] = []
     for item in items:
         meter_name = item.get("meterName", "")
         cls = _classify(item)
@@ -111,6 +119,20 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             continue
         usd = usd / divisor
 
+        sku_id = item.get("skuId") or f"{_SERVICE}-{tier}-{size}-{region}"
+        parsed.append((item, sku_id, tier, usd, unit, region, region_normalized, meter_name, size))
+
+    sku_counts = Counter(sku_id for _, sku_id, *_ in parsed)
+    seen_suffixed: Counter[str] = Counter()
+
+    for item, sku_id, tier, usd, unit, region, region_normalized, meter_name, size in parsed:
+        if sku_counts[sku_id] > 1:
+            suffixed = f"{sku_id}-{_suffix(meter_name)}"
+            seen_suffixed[suffixed] += 1
+            if seen_suffixed[suffixed] > 1:
+                suffixed = f"{suffixed}-{seen_suffixed[suffixed]}"
+            sku_id = suffixed
+
         memory_gb = _MEMORY_GB.get((tier, size))
         resource_name = f"{tier.capitalize()} {size}"
 
@@ -123,7 +145,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             "payment_option": "",
         })
         yield {
-            "sku_id": item.get("skuId") or f"{_SERVICE}-{tier}-{size}-{region}",
+            "sku_id": sku_id,
             "provider": _PROVIDER,
             "service": _SERVICE,
             "kind": _KIND,

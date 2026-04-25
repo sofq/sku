@@ -110,3 +110,40 @@ def test_ingest_handles_live_azure_redis_cache_product_shape(tmp_path):
     assert rows[0]["resource_name"] == "Standard C3"
     assert rows[0]["resource_attrs"]["memory_gb"] == 6.0
     assert rows[0]["resource_attrs"]["extra"]["tier"] == "standard"
+
+
+def test_ingest_scopes_duplicate_live_sku_ids_by_meter_name(tmp_path):
+    prices = tmp_path / "prices.json"
+    prices.write_text(json.dumps({
+        "Items": [
+            {
+                "skuId": "standard-c1-westindia",
+                "productName": "Azure Redis Cache Standard",
+                "skuName": "C1",
+                "meterName": "C1 Cache",
+                "armRegionName": "westindia",
+                "retailPrice": 0.138,
+                "unitOfMeasure": "1 Hour",
+                "type": "Consumption",
+                "currencyCode": "USD",
+            },
+            {
+                "skuId": "standard-c1-westindia",
+                "productName": "Azure Redis Cache Standard",
+                "skuName": "C1",
+                "meterName": "C1 Cache Instance",
+                "armRegionName": "westindia",
+                "retailPrice": 0.069,
+                "unitOfMeasure": "1 Hour",
+                "type": "Consumption",
+                "currencyCode": "USD",
+            },
+        ],
+    }))
+
+    rows = list(ingest(prices_path=prices))
+
+    assert [row["sku_id"] for row in rows] == [
+        "standard-c1-westindia-c1-cache",
+        "standard-c1-westindia-c1-cache-instance",
+    ]
