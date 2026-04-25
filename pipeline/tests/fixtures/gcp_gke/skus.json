@@ -1,0 +1,158 @@
+{
+  "skus": [
+    {
+      "name": "services/CCD8-9BF1-090E/skus/6B92-A835-08AB",
+      "skuId": "6B92-A835-08AB",
+      "description": "Zonal Kubernetes Clusters",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["global"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "displayQuantity": 1,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 100000000}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "GLOBAL", "regions": []}
+    },
+    {
+      "name": "services/CCD8-9BF1-090E/skus/6E15-CD04-4DC0",
+      "skuId": "6E15-CD04-4DC0",
+      "description": "Extended Period Kubernetes Clusters",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["global"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "displayQuantity": 1,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 500000000}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "GLOBAL", "regions": []}
+    },
+    {
+      "name": "services/CCD8-9BF1-090E/skus/9FF0-AB0A-36E8",
+      "skuId": "9FF0-AB0A-36E8",
+      "description": "Autopilot Pod Memory Requests (us-east1)",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy.h",
+          "displayQuantity": 1,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 4922500}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "REGIONAL", "regions": ["us-east1"]}
+    },
+    {
+      "name": "services/CCD8-9BF1-090E/skus/B561-BFBD-1264",
+      "skuId": "B561-BFBD-1264",
+      "description": "Regional Kubernetes Clusters",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["global"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "displayQuantity": 1,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 100000000}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "GLOBAL", "regions": []}
+    },
+    {
+      "name": "services/CCD8-9BF1-090E/skus/C16F-E112-D388",
+      "skuId": "C16F-E112-D388",
+      "description": "Autopilot Pod Ephemeral Storage Requests (us-east1)",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy.h",
+          "displayQuantity": 1,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 54800}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "REGIONAL", "regions": ["us-east1"]}
+    },
+    {
+      "name": "services/CCD8-9BF1-090E/skus/CA45-51A5-8C74",
+      "skuId": "CA45-51A5-8C74",
+      "description": "Autopilot Pod mCPU Requests (us-east1)",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "displayQuantity": 1000,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 44500}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "REGIONAL", "regions": ["us-east1"]}
+    },
+    {
+      "name": "services/CCD8-9BF1-090E/skus/D99D-BB2D-0B5F",
+      "skuId": "D99D-BB2D-0B5F",
+      "description": "Autopilot Spot Pod mCPU Requests (us-east1)",
+      "category": {
+        "serviceDisplayName": "Kubernetes Engine",
+        "resourceFamily": "Compute",
+        "resourceGroup": "Kubernetes",
+        "usageType": "Preemptible"
+      },
+      "serviceRegions": ["us-east1"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "h",
+          "displayQuantity": 1000,
+          "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 13300}}]
+        },
+        "currencyConversionRate": 1
+      }],
+      "serviceProviderName": "Google",
+      "geoTaxonomy": {"type": "REGIONAL", "regions": ["us-east1"]}
+    }
+  ]
+}
