@@ -52,10 +52,14 @@ func (auroraEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) 
 	}
 	r := rows[0]
 
+	wantUnit := func(u string) bool { return hourlyUnits[u] }
+	if capacityMode == "serverless-v2" {
+		wantUnit = func(u string) bool { return u == "acu-hr" }
+	}
 	var hourly float64
 	var unit string
 	for _, p := range r.Prices {
-		if p.Dimension == "compute" && hourlyUnits[p.Unit] {
+		if p.Dimension == "compute" && wantUnit(p.Unit) {
 			hourly = p.Amount
 			unit = p.Unit
 			break

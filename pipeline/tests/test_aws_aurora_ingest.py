@@ -24,6 +24,7 @@ def test_ingest_emits_serverless_v2_rows():
     assert sample["resource_name"] == "aurora-serverless-v2"
     assert sample["resource_attrs"]["vcpu"] is None
     assert "acu_hour_usd" in sample["resource_attrs"]["extra"]
+    assert sample["prices"][0]["unit"] == "acu-hr"
 
 
 def test_ingest_carries_storage_in_extra():

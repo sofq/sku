@@ -49,7 +49,7 @@ func TestAuroraEstimator_ServerlessV2(t *testing.T) {
 		return []catalog.Row{{
 			SKUID: "sku-2", Provider: "aws", Service: "aurora",
 			ResourceName: "aurora-serverless-v2", Region: "us-east-1",
-			Prices: []catalog.Price{{Dimension: "compute", Amount: 0.12, Unit: "hour"}},
+			Prices: []catalog.Price{{Dimension: "compute", Amount: 0.12, Unit: "acu-hr"}},
 		}}, nil
 	})
 	item, err := ParseItem("aws/aurora:serverless-v2:region=us-east-1:acu_hours=8000:engine=aurora-postgres")
