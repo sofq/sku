@@ -41,11 +41,11 @@ type compareFlags struct {
 }
 
 var (
-	compareVMShards                      = []string{"aws-ec2", "azure-vm", "gcp-gce"}
-	compareStorageObjectShards           = []string{"aws-s3", "azure-blob", "gcp-gcs"}
-	compareDBRelationalShards            = []string{"aws-rds", "aws-aurora", "azure-sql", "azure-postgres", "azure-mysql", "azure-mariadb", "gcp-cloud-sql", "gcp-spanner"}
-	compareCacheKVShards                 = []string{"aws-elasticache", "azure-redis", "gcp-memorystore"}
-	compareContainerOrchestrationShards  = []string{"aws-eks", "azure-aks", "gcp-gke"}
+	compareVMShards                     = []string{"aws-ec2", "azure-vm", "gcp-gce"}
+	compareStorageObjectShards          = []string{"aws-s3", "azure-blob", "gcp-gcs"}
+	compareDBRelationalShards           = []string{"aws-rds", "aws-aurora", "azure-sql", "azure-postgres", "azure-mysql", "azure-mariadb", "gcp-cloud-sql", "gcp-spanner"}
+	compareCacheKVShards                = []string{"aws-elasticache", "azure-redis", "gcp-memorystore"}
+	compareContainerOrchestrationShards = []string{"aws-eks", "azure-aks", "gcp-gke"}
 )
 
 func shardsForKind(kind string) []string {

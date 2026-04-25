@@ -75,7 +75,7 @@ jobs:
           python -m discover \
             --state dist/pipeline/discover/state.json \
             --out   dist/pipeline/discover/changed.json \
-            --shards aws_ec2,aws_rds,aws_s3,aws_lambda,aws_ebs,aws_dynamodb,aws_cloudfront,aws_aurora,aws_elasticache \
+            --shards aws_ec2,aws_rds,aws_s3,aws_lambda,aws_ebs,aws_dynamodb,aws_cloudfront,aws_aurora,aws_elasticache,aws_eks \
             --live  $flag
 
           shards=$(jq -c '.shards' dist/pipeline/discover/changed.json)

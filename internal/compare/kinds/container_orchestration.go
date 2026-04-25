@@ -16,8 +16,8 @@ import (
 //
 // Tier filters terms.os exact-match. Unknown tier returns empty rows.
 type ContainerOrchestrationSpec struct {
-	Mode     string   // default "control-plane"; also "fargate" | "autopilot" | "virtual-nodes"
-	Tier     string   // optional terms.os filter
+	Mode     string // default "control-plane"; also "fargate" | "autopilot" | "virtual-nodes"
+	Tier     string // optional terms.os filter
 	MaxPrice float64
 	Regions  []string
 }
