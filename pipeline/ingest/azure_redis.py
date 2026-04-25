@@ -57,9 +57,23 @@ _PARSE = re.compile(
     r"^(?P<tier>Basic|Standard|Premium|Enterprise)\s+(?P<size>[CPE]\d+)",
     re.IGNORECASE,
 )
+_LIVE_PRODUCT_RE = re.compile(
+    r"^Azure Redis Cache (?P<tier>Basic|Standard|Premium|Enterprise)$",
+    re.IGNORECASE,
+)
 
 
-def _classify(meter_name: str) -> tuple[str, str] | None:
+def _classify(item: dict[str, Any]) -> tuple[str, str] | None:
+    product_name = item.get("productName", "").strip()
+    product_match = _LIVE_PRODUCT_RE.match(product_name)
+    if product_match:
+        tier = _TIER_MAP[product_match.group("tier").lower()]
+        size = item.get("skuName", "").strip().upper()
+        if _MEMORY_GB.get((tier, size)) is None:
+            return None
+        return tier, size
+
+    meter_name = item.get("meterName", "")
     m = _PARSE.match(meter_name.strip())
     if not m:
         return None
@@ -75,7 +89,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
 
     for item in items:
         meter_name = item.get("meterName", "")
-        cls = _classify(meter_name)
+        cls = _classify(item)
         if cls is None:
             continue
         tier, size = cls

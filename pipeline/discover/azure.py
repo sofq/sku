@@ -28,7 +28,7 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_mysql": "serviceName eq 'Azure Database for MySQL'",
     "azure_mariadb": "serviceName eq 'Azure Database for MariaDB'",
     "azure_cosmosdb": "serviceName eq 'Azure Cosmos DB'",
-    "azure_redis": "serviceName eq 'Azure Cache for Redis'",
+    "azure_redis": "serviceName eq 'Redis Cache'",
 }
 
 

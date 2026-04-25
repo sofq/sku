@@ -72,3 +72,41 @@ def test_ingest_skips_non_consumption_and_non_usd_rows(tmp_path):
     }))
     rows = list(ingest(prices_path=prices))
     assert [r["sku_id"] for r in rows] == ["keep"]
+
+
+def test_ingest_handles_live_azure_redis_cache_product_shape(tmp_path):
+    prices = tmp_path / "prices.json"
+    prices.write_text(json.dumps({
+        "Items": [
+            {
+                "skuId": "standard-c3-eastus",
+                "productName": "Azure Redis Cache Standard",
+                "skuName": "C3",
+                "meterName": "C3 Cache Instance",
+                "armRegionName": "eastus",
+                "retailPrice": 0.281,
+                "unitOfMeasure": "1 Hour",
+                "type": "Consumption",
+                "currencyCode": "USD",
+            },
+            {
+                "skuId": "managed-b20-eastus",
+                "productName": "Azure Managed Redis - Balanced",
+                "skuName": "B20",
+                "meterName": "B20 Cache Instance",
+                "armRegionName": "eastus",
+                "retailPrice": 0.692,
+                "unitOfMeasure": "1 Hour",
+                "type": "Consumption",
+                "currencyCode": "USD",
+            },
+        ],
+    }))
+
+    rows = list(ingest(prices_path=prices))
+
+    assert len(rows) == 1
+    assert rows[0]["sku_id"] == "standard-c3-eastus"
+    assert rows[0]["resource_name"] == "Standard C3"
+    assert rows[0]["resource_attrs"]["memory_gb"] == 6.0
+    assert rows[0]["resource_attrs"]["extra"]["tier"] == "standard"

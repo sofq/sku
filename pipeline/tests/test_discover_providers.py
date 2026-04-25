@@ -116,6 +116,14 @@ def test_azure_discover_uses_top_one_param():
     assert qs.get("$top") == ["1"]
 
 
+def test_azure_discover_redis_uses_live_service_name():
+    with requests_mock.Mocker() as m:
+        m.get(_AZURE_RETAIL_BASE, json={"Items": []})
+        azure_disc.discover(["azure_redis"])
+        qs = m.request_history[0].qs
+    assert qs.get("$filter") == ["servicename eq 'redis cache'"]
+
+
 # -----------------------------------------------------------------------------
 # GCP discover
 # -----------------------------------------------------------------------------
