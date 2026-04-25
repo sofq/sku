@@ -23,7 +23,7 @@ func TestAWSDynamoDB_Price_SeededUSE1(t *testing.T) {
 	}
 }
 
-func TestAWSDynamoDB_Price_MissingTableClass(t *testing.T) {
+func TestAWSDynamoDB_Price_MissingRequiredFlag(t *testing.T) {
 	rc := newRootCmd()
 	rc.SetArgs([]string{"aws", "dynamodb", "price", "--region", "us-east-1"})
 	var out, errb bytes.Buffer

@@ -312,11 +312,11 @@ func (c *Catalog) LookupStorageBlock(ctx context.Context, f StorageBlockFilter) 
 // NoSQLDBFilter captures the flags `sku aws dynamodb price/list` exposes.
 // resource_name holds the table class slug ("standard" / "standard-ia").
 type NoSQLDBFilter struct {
-	Provider   string
-	Service    string
-	TableClass string
-	Region     string
-	Terms      Terms
+	Provider     string
+	Service      string
+	ResourceName string // table class for DynamoDB; capacity-mode slug for Cosmos
+	Region       string
+	Terms        Terms
 }
 
 // CDNFilter captures the flags `sku aws cloudfront price/list` exposes.
@@ -332,11 +332,11 @@ type CDNFilter struct {
 
 // LookupNoSQLDB runs the db.nosql point lookup / list query.
 func (c *Catalog) LookupNoSQLDB(ctx context.Context, f NoSQLDBFilter) ([]Row, error) {
-	if f.TableClass == "" {
-		return nil, fmt.Errorf("catalog: LookupNoSQLDB requires TableClass")
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupNoSQLDB requires ResourceName")
 	}
 	return c.lookupResource(ctx, "db.nosql", f.Provider, f.Service,
-		f.TableClass, f.Region, f.Terms)
+		f.ResourceName, f.Region, f.Terms)
 }
 
 // LookupCDN runs the network.cdn point lookup / list query.
@@ -345,6 +345,31 @@ func (c *Catalog) LookupCDN(ctx context.Context, f CDNFilter) ([]Row, error) {
 		return nil, fmt.Errorf("catalog: LookupCDN requires ResourceName")
 	}
 	return c.lookupResource(ctx, "network.cdn", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// CacheKVFilter captures the flags `sku <provider> <cache-service> price/list` exposes.
+// resource_name holds the provider-specific node identifier:
+//
+//	AWS:   "cache.r6g.large"
+//	Azure: "Standard C1" / "Premium P1" / "Enterprise E5"
+//	GCP:   "memorystore-redis-standard-5gb"
+//
+// Engine is carried in Terms.Tenancy ("redis" | "memcached").
+type CacheKVFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupCacheKV runs the cache.kv point lookup / list query.
+func (c *Catalog) LookupCacheKV(ctx context.Context, f CacheKVFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupCacheKV requires ResourceName")
+	}
+	return c.lookupResource(ctx, "cache.kv", f.Provider, f.Service,
 		f.ResourceName, f.Region, f.Terms)
 }
 

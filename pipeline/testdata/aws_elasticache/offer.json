@@ -1,0 +1,104 @@
+{
+  "products": {
+    "EC_R6G_LARGE_REDIS_USE1": {
+      "sku": "EC_R6G_LARGE_REDIS_USE1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "cache.r6g.large",
+        "cacheEngine": "Redis",
+        "vcpu": "2",
+        "memory": "13.07 GiB"
+      }
+    },
+    "EC_R6G_LARGE_REDIS_EUW1": {
+      "sku": "EC_R6G_LARGE_REDIS_EUW1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "cache.r6g.large",
+        "cacheEngine": "Redis",
+        "vcpu": "2",
+        "memory": "13.07 GiB"
+      }
+    },
+    "EC_R6G_LARGE_MEMCD_USE1": {
+      "sku": "EC_R6G_LARGE_MEMCD_USE1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "cache.r6g.large",
+        "cacheEngine": "Memcached",
+        "vcpu": "2",
+        "memory": "13.07 GiB"
+      }
+    },
+    "EC_R6G_LARGE_MEMCD_EUW1": {
+      "sku": "EC_R6G_LARGE_MEMCD_EUW1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "cache.r6g.large",
+        "cacheEngine": "Memcached",
+        "vcpu": "2",
+        "memory": "13.07 GiB"
+      }
+    },
+    "EC_R6G_XL_REDIS_USE1": {
+      "sku": "EC_R6G_XL_REDIS_USE1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "cache.r6g.xlarge",
+        "cacheEngine": "Redis",
+        "vcpu": "4",
+        "memory": "26.32 GiB"
+      }
+    },
+    "EC_R6G_XL_REDIS_EUW1": {
+      "sku": "EC_R6G_XL_REDIS_EUW1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "cache.r6g.xlarge",
+        "cacheEngine": "Redis",
+        "vcpu": "4",
+        "memory": "26.32 GiB"
+      }
+    },
+    "EC_R6G_XL_MEMCD_USE1": {
+      "sku": "EC_R6G_XL_MEMCD_USE1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "cache.r6g.xlarge",
+        "cacheEngine": "Memcached",
+        "vcpu": "4",
+        "memory": "26.32 GiB"
+      }
+    },
+    "EC_R6G_XL_MEMCD_EUW1": {
+      "sku": "EC_R6G_XL_MEMCD_EUW1",
+      "productFamily": "Cache Instance",
+      "attributes": {
+        "regionCode": "eu-west-1",
+        "instanceType": "cache.r6g.xlarge",
+        "cacheEngine": "Memcached",
+        "vcpu": "4",
+        "memory": "26.32 GiB"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "EC_R6G_LARGE_REDIS_USE1": {"EC_R6G_LARGE_REDIS_USE1.JRTCKXETXF": {"priceDimensions": {"EC_R6G_LARGE_REDIS_USE1.JRTCKXETXF.6YS6EN2CT7": {"pricePerUnit": {"USD": "0.156"}, "unit": "Hrs"}}}},
+      "EC_R6G_LARGE_REDIS_EUW1": {"EC_R6G_LARGE_REDIS_EUW1.JRTCKXETXF": {"priceDimensions": {"EC_R6G_LARGE_REDIS_EUW1.JRTCKXETXF.6YS6EN2CT7": {"pricePerUnit": {"USD": "0.178"}, "unit": "Hrs"}}}},
+      "EC_R6G_LARGE_MEMCD_USE1": {"EC_R6G_LARGE_MEMCD_USE1.JRTCKXETXF": {"priceDimensions": {"EC_R6G_LARGE_MEMCD_USE1.JRTCKXETXF.6YS6EN2CT7": {"pricePerUnit": {"USD": "0.133"}, "unit": "Hrs"}}}},
+      "EC_R6G_LARGE_MEMCD_EUW1": {"EC_R6G_LARGE_MEMCD_EUW1.JRTCKXETXF": {"priceDimensions": {"EC_R6G_LARGE_MEMCD_EUW1.JRTCKXETXF.6YS6EN2CT7": {"pricePerUnit": {"USD": "0.152"}, "unit": "Hrs"}}}},
+      "EC_R6G_XL_REDIS_USE1":    {"EC_R6G_XL_REDIS_USE1.JRTCKXETXF":    {"priceDimensions": {"EC_R6G_XL_REDIS_USE1.JRTCKXETXF.6YS6EN2CT7":    {"pricePerUnit": {"USD": "0.312"}, "unit": "Hrs"}}}},
+      "EC_R6G_XL_REDIS_EUW1":    {"EC_R6G_XL_REDIS_EUW1.JRTCKXETXF":    {"priceDimensions": {"EC_R6G_XL_REDIS_EUW1.JRTCKXETXF.6YS6EN2CT7":    {"pricePerUnit": {"USD": "0.356"}, "unit": "Hrs"}}}},
+      "EC_R6G_XL_MEMCD_USE1":    {"EC_R6G_XL_MEMCD_USE1.JRTCKXETXF":    {"priceDimensions": {"EC_R6G_XL_MEMCD_USE1.JRTCKXETXF.6YS6EN2CT7":    {"pricePerUnit": {"USD": "0.266"}, "unit": "Hrs"}}}},
+      "EC_R6G_XL_MEMCD_EUW1":    {"EC_R6G_XL_MEMCD_EUW1.JRTCKXETXF":    {"priceDimensions": {"EC_R6G_XL_MEMCD_EUW1.JRTCKXETXF.6YS6EN2CT7":    {"pricePerUnit": {"USD": "0.304"}, "unit": "Hrs"}}}}
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "Items": [
+    {
+      "skuId": "DZH318Z0BP8R/000B",
+      "productName": "Azure Cosmos DB",
+      "meterName": "100 RU/s",
+      "armRegionName": "eastus",
+      "retailPrice": 0.008,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0BP8R/001A",
+      "productName": "Azure Cosmos DB",
+      "meterName": "100 RU/s",
+      "armRegionName": "westeurope",
+      "retailPrice": 0.009,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0BP8R/002C",
+      "productName": "Azure Cosmos DB",
+      "meterName": "Serverless Request Units",
+      "armRegionName": "eastus",
+      "retailPrice": 0.25,
+      "unitOfMeasure": "1M RU"
+    },
+    {
+      "skuId": "DZH318Z0BP8R/003D",
+      "productName": "Azure Cosmos DB",
+      "meterName": "Serverless Request Units",
+      "armRegionName": "westeurope",
+      "retailPrice": 0.284,
+      "unitOfMeasure": "1M RU"
+    },
+    {
+      "skuId": "DZH318Z0BP8R/004E",
+      "productName": "Azure Cosmos DB",
+      "meterName": "Data storage",
+      "armRegionName": "eastus",
+      "retailPrice": 0.25,
+      "unitOfMeasure": "1 GB/Month"
+    },
+    {
+      "skuId": "DZH318Z0BP8R/005F",
+      "productName": "Azure Cosmos DB for MongoDB",
+      "meterName": "100 RU/s",
+      "armRegionName": "eastus",
+      "retailPrice": 0.008,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0BP8R/006G",
+      "productName": "Azure Cosmos DB for MongoDB",
+      "meterName": "Serverless Request Units",
+      "armRegionName": "eastus",
+      "retailPrice": 0.25,
+      "unitOfMeasure": "1M RU"
+    }
+  ]
+}

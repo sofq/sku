@@ -75,6 +75,14 @@ var kindRegistry = map[string]kindQuery{
 			Regions:          r.Regions,
 		})
 	},
+	"cache.kv": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryCacheKV(ctx, c, kinds.CacheKVSpec{
+			MemoryGB: r.MemoryGB,
+			Engine:   r.Engine,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
 }
 
 func supportedKinds() string {

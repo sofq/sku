@@ -14,5 +14,7 @@ func newGCPCmd() *cobra.Command {
 	c.AddCommand(newGCPGCSCmd())
 	c.AddCommand(newGCPRunCmd())
 	c.AddCommand(newGCPFunctionsCmd())
+	c.AddCommand(newGCPSpannerCmd())
+	c.AddCommand(newGCPMemorystoreCmd())
 	return c
 }

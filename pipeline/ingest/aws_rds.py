@@ -29,8 +29,6 @@ _ENGINE_MAP = {
     "MariaDB":           "mariadb",
     "Oracle":            "oracle",
     "SQL Server":        "sqlserver",
-    "Aurora PostgreSQL": "aurora-postgres",
-    "Aurora MySQL":      "aurora-mysql",
 }
 _DEPL_MAP = {
     "Single-AZ":                    "single-az",

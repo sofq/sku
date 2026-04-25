@@ -99,9 +99,9 @@ func runAWSDynamoDB(cmd *cobra.Command, f *ddbFlags, requireRegion bool) error {
 
 	rows, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
 		Provider: "aws", Service: "dynamodb",
-		TableClass: f.tableClass,
-		Region:     f.region,
-		Terms:      f.terms(),
+		ResourceName: f.tableClass,
+		Region:       f.region,
+		Terms:        f.terms(),
 	})
 	if err != nil {
 		return skuerrors.WriteWrap(cmd.ErrOrStderr(), skuerrors.CodeGeneric, "aws dynamodb %s: %w", cmd.Use, err)

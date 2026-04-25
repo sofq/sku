@@ -222,7 +222,7 @@ func TestLookupNoSQLDB_SeededStandardUSE1(t *testing.T) {
 
 	rows, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
 		Provider: "aws", Service: "dynamodb",
-		TableClass: "standard", Region: "us-east-1",
+		ResourceName: "standard", Region: "us-east-1",
 		Terms: catalog.Terms{Commitment: "on_demand"},
 	})
 	require.NoError(t, err)
@@ -251,7 +251,7 @@ func TestLookupCDN_SeededEUWest(t *testing.T) {
 	require.Equal(t, 0.085, rows[0].Prices[0].Amount)
 }
 
-func TestLookupNoSQLDB_MissingTableClassErrors(t *testing.T) {
+func TestLookupNoSQLDB_MissingResourceNameErrors(t *testing.T) {
 	cat := openSeededAWSM3a3(t)
 	_, err := cat.LookupNoSQLDB(context.Background(), catalog.NoSQLDBFilter{
 		Provider: "aws", Service: "dynamodb",
@@ -430,4 +430,35 @@ func TestLookupServerlessFunction_GCPFunctionsPointLookup(t *testing.T) {
 	require.Len(t, rows, 1)
 	require.Equal(t, "functions", rows[0].Service)
 	require.Equal(t, "x86_64", rows[0].ResourceName)
+}
+
+func openSeededCacheKV(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_cache_kv.sql", "aws-elasticache.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupCacheKV_ByResourceNameAndRegion(t *testing.T) {
+	cat := openSeededCacheKV(t)
+	rows, err := cat.LookupCacheKV(context.Background(), catalog.CacheKVFilter{
+		Provider: "aws", Service: "elasticache",
+		ResourceName: "cache.r6g.large", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "redis"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "cache.r6g.large", rows[0].ResourceName)
+	require.NotNil(t, rows[0].ResourceAttrs.MemoryGB)
+}
+
+func TestLookupCacheKV_MissingResourceNameErrors(t *testing.T) {
+	cat := openSeededCacheKV(t)
+	_, err := cat.LookupCacheKV(context.Background(), catalog.CacheKVFilter{
+		Provider: "aws", Service: "elasticache",
+		Region: "us-east-1",
+		Terms:  catalog.Terms{Commitment: "on_demand", Tenancy: "redis"},
+	})
+	require.Error(t, err)
 }

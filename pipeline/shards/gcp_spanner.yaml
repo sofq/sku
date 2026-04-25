@@ -1,0 +1,12 @@
+shard: gcp_spanner
+provider: gcp
+service: spanner
+kind: db.relational
+cli:
+  group: gcp
+  command: spanner
+  resource_flag: edition
+ingest:
+  module: gcp_spanner
+  discover: gcp.api_version
+budget_bytes: 5000000

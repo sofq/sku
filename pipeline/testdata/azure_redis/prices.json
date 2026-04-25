@@ -1,0 +1,52 @@
+{
+  "Items": [
+    {
+      "skuId": "DZH318Z0C7VX/000A",
+      "productName": "Azure Cache for Redis",
+      "meterName": "Basic C0 Cache",
+      "armRegionName": "eastus",
+      "retailPrice": 0.022,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0C7VX/001B",
+      "productName": "Azure Cache for Redis",
+      "meterName": "Standard C1 Cache",
+      "armRegionName": "eastus",
+      "retailPrice": 0.093,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0C7VX/002C",
+      "productName": "Azure Cache for Redis",
+      "meterName": "Standard C1 Cache",
+      "armRegionName": "westeurope",
+      "retailPrice": 0.105,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0C7VX/003D",
+      "productName": "Azure Cache for Redis",
+      "meterName": "Premium P1 Cache",
+      "armRegionName": "eastus",
+      "retailPrice": 0.554,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0C7VX/004E",
+      "productName": "Azure Cache for Redis",
+      "meterName": "Premium P1 Cache",
+      "armRegionName": "westeurope",
+      "retailPrice": 0.627,
+      "unitOfMeasure": "1 Hour"
+    },
+    {
+      "skuId": "DZH318Z0C7VX/005F",
+      "productName": "Azure Cache for Redis Enterprise",
+      "meterName": "Enterprise E5 Cache",
+      "armRegionName": "eastus",
+      "retailPrice": 1.241,
+      "unitOfMeasure": "1 Hour"
+    }
+  ]
+}
