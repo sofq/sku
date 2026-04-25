@@ -39,6 +39,28 @@ func TestGCPGKEInvalidMode(t *testing.T) {
 	require.Contains(t, buf.String(), "flag_invalid")
 }
 
+func TestGCPGKERejectsAutopilotTierForControlPlane(t *testing.T) {
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "gke", "price", "--mode", "control-plane", "--tier", "autopilot", "--region", "us-east1"})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, buf.String(), "flag_invalid")
+}
+
+func TestGCPGKERejectsStandardTierForAutopilot(t *testing.T) {
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "gke", "price", "--mode", "autopilot", "--tier", "standard", "--region", "us-east1"})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, buf.String(), "flag_invalid")
+}
+
 func TestGCPGKEDryRun(t *testing.T) {
 	cmd := newRootCmd()
 	cmd.SetArgs([]string{

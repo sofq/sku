@@ -73,3 +73,61 @@ exit 0
     assert result.returncode == 0, result.stderr
     assert "ETag 304" in result.stdout
     assert "--pattern aws-s3.db.zst" in (tmp_path / "gh.log").read_text()
+
+
+def test_azure_aks_fetches_and_passes_aci_prices(tmp_path: Path) -> None:
+    repo = Path(__file__).resolve().parents[2]
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    python_log = tmp_path / "python.log"
+
+    _write_executable(
+        fake_bin / "python",
+        """#!/usr/bin/env bash
+set -euo pipefail
+printf 'ARGS:%s\\n' "$*" >> "$PYTHON_CALL_LOG"
+if [ "${1:-}" = "-m" ]; then
+  out=""
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = "--out" ]; then
+      out="$2"
+      break
+    fi
+    shift
+  done
+  if [ -n "$out" ]; then
+    mkdir -p "$(dirname "$out")"
+    touch "$out"
+  fi
+  exit 0
+fi
+script="$(cat)"
+printf 'SCRIPT:%s\\n' "$script" >> "$PYTHON_CALL_LOG"
+exit 0
+""",
+    )
+
+    env = os.environ.copy()
+    env.update(
+        {
+            "PATH": f"{fake_bin}:{env['PATH']}",
+            "SHARD": "azure_aks",
+            "CATALOG_VERSION": "2026.04.25",
+            "PYTHON_CALL_LOG": str(python_log),
+        }
+    )
+
+    result = subprocess.run(
+        ["bash", "scripts/ci/ingest_shard.sh"],
+        cwd=repo,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    log = python_log.read_text()
+    assert "Container Instances" in log
+    assert "ARGS:-m ingest.azure_aks" in log
+    assert "--aci-prices dist/pipeline/raw/azure_aks-aci-prices.json" in log

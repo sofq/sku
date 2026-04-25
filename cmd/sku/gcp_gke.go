@@ -83,6 +83,18 @@ func runGCPGKE(cmd *cobra.Command, f *gkeFlags, requireRegion bool) error {
 		skuerrors.Write(cmd.ErrOrStderr(), e)
 		return e
 	}
+	if f.mode == "control-plane" && f.tier != "standard" {
+		e := skuerrors.Validation("flag_invalid", "tier", f.tier,
+			"control-plane mode requires --tier standard")
+		skuerrors.Write(cmd.ErrOrStderr(), e)
+		return e
+	}
+	if f.mode == "autopilot" && f.tier != "autopilot" {
+		e := skuerrors.Validation("flag_invalid", "tier", f.tier,
+			"autopilot mode requires --tier autopilot")
+		skuerrors.Write(cmd.ErrOrStderr(), e)
+		return e
+	}
 	if requireRegion && f.region == "" {
 		e := skuerrors.Validation("flag_invalid", "region", "", "pass --region <gcp-region>")
 		skuerrors.Write(cmd.ErrOrStderr(), e)
