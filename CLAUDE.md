@@ -59,6 +59,8 @@ M-α — pipeline architecture for coverage expansion:
 Next: M-β (R1 regions), then M-γ (S1 services) (dedup respec pending; will
 ride with M-γ's schema bump).
 
+M-γ.1 S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure Redis, Spanner, Memorystore shards + cache.kv compare kind + estimators.
+
 ### Quick path (agent, repeatable, M3b.4 surface)
 
 ```bash
@@ -165,6 +167,30 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 
 ./bin/sku update openrouter --channel daily            # delta-chain walk
 ./bin/sku update aws-ec2   --channel stable            # baseline-only
+
+./bin/sku aws aurora       price --instance-type db.r6g.large --region us-east-1 --engine aurora-postgres --preset agent
+./bin/sku aws aurora       list  --instance-type db.r6g.large
+./bin/sku aws elasticache  price --instance-type cache.r6g.large --region us-east-1 --engine redis --preset agent
+./bin/sku aws elasticache  list  --instance-type cache.r6g.large
+
+./bin/sku azure cosmosdb   price --capacity-mode provisioned --region eastus --api sql --preset agent
+./bin/sku azure cosmosdb   price --capacity-mode serverless  --region eastus --api sql
+./bin/sku azure redis      price --tier standard --size C1 --region eastus --preset agent
+./bin/sku azure redis      list  --tier premium  --size P1
+
+./bin/sku gcp spanner      price --edition standard --pu 1000 --region us-east1 --preset agent
+./bin/sku gcp spanner      price --edition enterprise --pu 1000 --region us-east1
+./bin/sku gcp memorystore  price --instance-type memorystore-redis-standard-5gb --region us-east1 --preset agent
+
+./bin/sku compare --kind cache.kv --memory 16 --regions us-east --limit 5 --preset compare
+./bin/sku compare --kind cache.kv --memory 16 --engine memcached --regions us-east --limit 5
+
+./bin/sku estimate --item aws/aurora:db.r6g.large:region=us-east-1:engine=aurora-postgres:hours=730 --pretty
+./bin/sku estimate --item aws/aurora:serverless-v2:region=us-east-1:engine=aurora-postgres:acu_hours=8000 --pretty
+./bin/sku estimate --item azure/cosmosdb:provisioned:region=eastus:api=sql:ru_per_sec=1000:hours=730 --pretty
+./bin/sku estimate --item azure/cosmosdb:serverless:region=eastus:api=sql:ru_million=50 --pretty
+./bin/sku estimate --item gcp/spanner:standard:region=us-east1:pu=1000:hours=730 --pretty
+./bin/sku estimate --item gcp/spanner:enterprise:region=us-east1:node=2:hours=730 --pretty
 ```
 
 ### Distribution smoke (M6)
