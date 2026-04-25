@@ -1,0 +1,12 @@
+shard: azure_aks
+provider: azure
+service: aks
+kind: container.orchestration
+cli:
+  group: azure
+  command: aks
+  resource_flag: tier
+ingest:
+  module: azure_aks
+  discover: azure.retail_prices
+budget_bytes: 3000000

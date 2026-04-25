@@ -19,5 +19,6 @@ func newAzureCmd() *cobra.Command {
 	c.AddCommand(newAzureMariaDBCmd())
 	c.AddCommand(newAzureCosmosDBCmd())
 	c.AddCommand(newAzureRedisCmd())
+	c.AddCommand(newAzureAKSCmd())
 	return c
 }
