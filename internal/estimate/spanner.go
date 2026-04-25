@@ -45,6 +45,9 @@ func (spannerEstimator) Estimate(ctx context.Context, it Item) (LineItem, error)
 	if len(rows) == 0 {
 		return LineItem{}, fmt.Errorf("estimate/spanner: no SKU for edition=%s in %s", edition, region)
 	}
+	if len(rows) > 1 {
+		return LineItem{}, fmt.Errorf("estimate/spanner: ambiguous (%d rows) for edition=%s in %s", len(rows), edition, region)
+	}
 	r := rows[0]
 
 	pu, err := paramFloat(it.Params, "pu", 0, 0)

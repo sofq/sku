@@ -45,6 +45,9 @@ func (cosmosEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) 
 	if len(rows) == 0 {
 		return LineItem{}, fmt.Errorf("estimate/cosmos: no SKU for %s api=%s in %s", capacityMode, api, region)
 	}
+	if len(rows) > 1 {
+		return LineItem{}, fmt.Errorf("estimate/cosmos: ambiguous (%d rows) for %s in %s", len(rows), capacityMode, region)
+	}
 	r := rows[0]
 
 	var qty, monthly, hourly float64
@@ -65,6 +68,9 @@ func (cosmosEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) 
 				break
 			}
 		}
+		if hourly == 0 {
+			return LineItem{}, fmt.Errorf("estimate/cosmos: no provisioned price on SKU %s", r.SKUID)
+		}
 		qty = ruPerSec * hours
 		qtyUnit = "ru/s-hour"
 		monthly = hourly * qty
@@ -78,6 +84,9 @@ func (cosmosEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) 
 				hourly = p.Amount
 				break
 			}
+		}
+		if hourly == 0 {
+			return LineItem{}, fmt.Errorf("estimate/cosmos: no serverless price on SKU %s", r.SKUID)
 		}
 		qty = ruMillion
 		qtyUnit = "1M-ru"

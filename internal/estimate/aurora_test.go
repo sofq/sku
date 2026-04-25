@@ -25,6 +25,7 @@ func TestAuroraEstimator_Provisioned(t *testing.T) {
 	stubAuroraLookup(t, func(ctx context.Context, shard string, f catalog.DBRelationalFilter) ([]catalog.Row, error) {
 		require.Equal(t, "aws-aurora", shard)
 		require.Equal(t, "db.r6g.large", f.InstanceType)
+		require.Equal(t, catalog.Terms{Commitment: "on_demand", Tenancy: "aurora-postgres", OS: "single-az"}, f.Terms)
 		return []catalog.Row{{
 			SKUID: "sku-1", Provider: "aws", Service: "aurora",
 			ResourceName: "db.r6g.large", Region: "us-east-1",

@@ -21,6 +21,7 @@ func TestCosmosEstimator_Provisioned(t *testing.T) {
 	Register(cosmosEstimator{})
 	e, _ := Get("db.nosql.cosmos")
 	stubCosmosLookup(t, func(ctx context.Context, shard string, f catalog.NoSQLDBFilter) ([]catalog.Row, error) {
+		require.Equal(t, catalog.Terms{Commitment: "on_demand", Tenancy: "sql", OS: "provisioned"}, f.Terms)
 		return []catalog.Row{{
 			SKUID: "sku-x", Provider: "azure", Service: "cosmosdb",
 			ResourceName: "cosmos-provisioned",
@@ -40,6 +41,7 @@ func TestCosmosEstimator_Serverless(t *testing.T) {
 	Register(cosmosEstimator{})
 	e, _ := Get("db.nosql.cosmos")
 	stubCosmosLookup(t, func(ctx context.Context, shard string, f catalog.NoSQLDBFilter) ([]catalog.Row, error) {
+		require.Equal(t, catalog.Terms{Commitment: "on_demand", Tenancy: "sql", OS: "serverless"}, f.Terms)
 		return []catalog.Row{{
 			SKUID: "sku-y", Provider: "azure", Service: "cosmosdb",
 			ResourceName: "cosmos-serverless",
