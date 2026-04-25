@@ -29,6 +29,7 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_mariadb": "serviceName eq 'Azure Database for MariaDB'",
     "azure_cosmosdb": "serviceName eq 'Azure Cosmos DB'",
     "azure_redis": "serviceName eq 'Redis Cache'",
+    "azure_aks": "serviceName eq 'Azure Kubernetes Service'",
 }
 
 

@@ -40,6 +40,7 @@ _GCP_SERVICE_IDS: dict[str, str | tuple[str, ...]] = {
         "5AF5-2C11-D467",  # Cloud Memorystore for Redis
         "9C2E-5AAC-D058",  # Cloud Memorystore for Memcached
     ),
+    "gcp_gke": "CCD8-9BF1-090E",  # Kubernetes Engine
 }
 
 _USAGE_UNITS: dict[str, tuple[float, str]] = {
