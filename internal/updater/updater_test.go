@@ -156,11 +156,12 @@ func TestInstall_DecompressError(t *testing.T) {
 func TestDefaultSources_Contains(t *testing.T) {
 	for _, shard := range []string{
 		"openrouter", "aws-ec2", "aws-rds", "aws-s3", "aws-lambda", "aws-ebs",
-		"aws-dynamodb", "aws-cloudfront",
+		"aws-dynamodb", "aws-cloudfront", "aws-aurora", "aws-elasticache",
 		"azure-vm", "azure-sql",
 		"azure-blob", "azure-functions", "azure-disks",
+		"azure-cosmosdb", "azure-redis",
 		"gcp-gce", "gcp-cloud-sql",
-		"gcp-gcs", "gcp-run", "gcp-functions",
+		"gcp-gcs", "gcp-run", "gcp-functions", "gcp-spanner", "gcp-memorystore",
 	} {
 		if _, ok := updater.DefaultSources[shard]; !ok {
 			t.Errorf("DefaultSources missing shard %q", shard)

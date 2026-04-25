@@ -166,6 +166,23 @@ func TestCompareCmd_dryRunDBRelationalIncludesAzureHostedDBShards(t *testing.T) 
 	require.Contains(t, stdout.String(), `"azure-mariadb"`)
 }
 
+func TestCompareCmd_dryRunCacheKVIncludesCacheShards(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "cache.kv",
+		"--memory", "16", "--engine", "memcached",
+		"--regions", "us-east", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"kind":"cache.kv"`)
+	require.Contains(t, stdout.String(), `"memory_gb":16`)
+	require.Contains(t, stdout.String(), `"engine":"memcached"`)
+	require.Contains(t, stdout.String(), `"aws-elasticache"`)
+	require.Contains(t, stdout.String(), `"azure-redis"`)
+	require.Contains(t, stdout.String(), `"gcp-memorystore"`)
+}
+
 func TestCompare_dryRun(t *testing.T) {
 	testutilSeededComputeVMCatalog(t)
 	var stdout bytes.Buffer
