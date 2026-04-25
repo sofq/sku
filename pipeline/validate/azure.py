@@ -18,6 +18,16 @@ logger = logging.getLogger(__name__)
 _AZURE_PRICES_URL = "https://prices.azure.com/api/retail/prices"
 _DRIFT_THRESHOLD = 0.01  # 1%
 
+_AKS_CONTROL_PLANE_METERS = {
+    "aks-standard": "Standard Uptime SLA",
+    "aks-premium": "Standard Long Term Support",
+}
+
+_AKS_VIRTUAL_NODE_METERS = {
+    "vcpu": "Standard vCPU Duration",
+    "memory": "Standard Memory Duration",
+}
+
 
 @dataclass
 class DriftRecord:
@@ -28,6 +38,29 @@ class DriftRecord:
     upstream_amount: float
     delta_pct: float
     source: str = "azure"
+
+
+def _filter_for_sample(s: Sample) -> str | None:
+    if s.resource_name == "aks-free":
+        return None
+    if s.resource_name in _AKS_CONTROL_PLANE_METERS:
+        meter = _AKS_CONTROL_PLANE_METERS[s.resource_name]
+        return (
+            "serviceName eq 'Azure Kubernetes Service' "
+            f"and meterName eq '{meter}' "
+            f"and armRegionName eq '{s.region}'"
+        )
+    if s.resource_name == "aks-virtual-nodes-linux":
+        meter = _AKS_VIRTUAL_NODE_METERS.get(s.dimension)
+        if meter is None:
+            return ""
+        return (
+            "serviceName eq 'Container Instances' "
+            "and skuName eq 'Standard' "
+            f"and meterName eq '{meter}' "
+            f"and armRegionName eq '{s.region}'"
+        )
+    return f"meterName eq '{s.resource_name}' and armRegionName eq '{s.region}'"
 
 
 def revalidate(
@@ -56,9 +89,23 @@ def revalidate(
     missing: list[str] = []
 
     for s in samples:
-        filter_str = (
-            f"meterName eq '{s.resource_name}' and armRegionName eq '{s.region}'"
-        )
+        filter_str = _filter_for_sample(s)
+        if filter_str is None:
+            upstream = 0.0
+            delta_pct = 0.0 if s.price_amount == 0 else 100.0
+            if delta_pct >= _DRIFT_THRESHOLD * 100:
+                drift.append(
+                    DriftRecord(
+                        sku_id=s.sku_id,
+                        catalog_amount=s.price_amount,
+                        upstream_amount=upstream,
+                        delta_pct=delta_pct,
+                    )
+                )
+            continue
+        if filter_str == "":
+            missing.append(s.sku_id)
+            continue
         try:
             resp = session.get(
                 _AZURE_PRICES_URL,

@@ -104,3 +104,64 @@ def test_azure_multiple_samples(requests_mock: requests_mock_module.Mocker) -> N
     assert len(drift) == 1
     assert drift[0].sku_id == s2.sku_id
     assert missing == []
+
+
+def test_azure_aks_standard_filters_by_upstream_meter_name(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """AKS validation maps aks-standard to the real Azure meter name."""
+    sample = Sample(
+        sku_id="azure-aks-standard-eastus",
+        region="eastus",
+        resource_name="aks-standard",
+        price_amount=0.10,
+        price_currency="USD",
+        dimension="cluster",
+    )
+    requests_mock.get(_AZURE_PRICES_URL, json=_api_response(0.10))
+    drift, missing = revalidate([sample])
+    assert drift == []
+    assert missing == []
+    filt = requests_mock.last_request.qs["$filter"][0]
+    assert "metername eq 'standard uptime sla'" in filt
+    assert "servicename eq 'azure kubernetes service'" in filt
+
+
+def test_azure_aks_free_synthetic_zero_does_not_require_upstream_call(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """AKS free rows are synthetic zero-price rows and validate without API lookup."""
+    sample = Sample(
+        sku_id="azure-aks-free-eastus",
+        region="eastus",
+        resource_name="aks-free",
+        price_amount=0.0,
+        price_currency="USD",
+        dimension="cluster",
+    )
+    drift, missing = revalidate([sample])
+    assert drift == []
+    assert missing == []
+    assert requests_mock.call_count == 0
+
+
+def test_azure_aks_virtual_nodes_filters_by_container_instance_dimension(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """AKS virtual-node validation maps memory samples to ACI memory pricing."""
+    sample = Sample(
+        sku_id="azure-aks-vn-linux-eastus",
+        region="eastus",
+        resource_name="aks-virtual-nodes-linux",
+        price_amount=0.00445,
+        price_currency="USD",
+        dimension="memory",
+    )
+    requests_mock.get(_AZURE_PRICES_URL, json=_api_response(0.00445))
+    drift, missing = revalidate([sample])
+    assert drift == []
+    assert missing == []
+    filt = requests_mock.last_request.qs["$filter"][0]
+    assert "servicename eq 'container instances'" in filt
+    assert "metername eq 'standard memory duration'" in filt
+    assert "skuname eq 'standard'" in filt

@@ -95,7 +95,9 @@ def revalidate(
     for s in samples:
         url = f"{_BILLING_BASE}/{service_id}/skus"
         params: dict = {}
-        upstream_price = _fetch_sku_price(session, url, params, s.region, s.resource_name)
+        upstream_price = _fetch_sku_price(
+            session, url, params, s.region, s.resource_name, s.dimension, s.sku_id
+        )
 
         if upstream_price is None:
             logger.debug("No GCP upstream price for %s", s.sku_id)
@@ -122,6 +124,8 @@ def _fetch_sku_price(
     params: dict,
     region: str,
     resource_name: str,
+    dimension: str = "",
+    sku_id: str = "",
 ) -> float | None:
     """Paginate the SKU list and return the first matching price."""
     page_token = ""
@@ -138,8 +142,7 @@ def _fetch_sku_price(
             return None
 
         for sku in data.get("skus", []):
-            regions = sku.get("serviceRegions", [])
-            if region not in regions:
+            if not _sku_matches_sample(sku, region, resource_name, dimension, sku_id):
                 continue
             pricing_info = sku.get("pricingInfo", [])
             if not pricing_info:
@@ -160,3 +163,33 @@ def _fetch_sku_price(
             break
 
     return None
+
+
+def _sku_matches_sample(
+    sku: dict,
+    region: str,
+    resource_name: str,
+    dimension: str,
+    sku_id: str,
+) -> bool:
+    desc = sku.get("description", "")
+    regions = sku.get("serviceRegions", [])
+    if resource_name == "gke-standard":
+        return sku.get("skuId") == "B561-BFBD-1264" or desc == "Regional Kubernetes Clusters"
+    if resource_name == "gke-autopilot":
+        if region not in regions:
+            return False
+        if dimension == "vcpu":
+            return "Autopilot Pod mCPU Requests" in desc and "Spot" not in desc and "Arm" not in desc
+        if dimension == "memory":
+            return "Autopilot Pod Memory Requests" in desc and "Spot" not in desc and "Arm" not in desc
+        if dimension == "storage":
+            return (
+                "Autopilot Pod Ephemeral Storage Requests" in desc
+                and "Spot" not in desc
+                and "Arm" not in desc
+            )
+        return False
+    if sku_id and sku.get("skuId") == sku_id:
+        return True
+    return region in regions

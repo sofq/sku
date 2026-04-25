@@ -52,6 +52,47 @@ def _billing_response(nanos: int, units: int = 0) -> dict:
     }
 
 
+def _gke_billing_response() -> dict:
+    """Return GKE SKUs where the first positive regional SKU is not the match."""
+    return {
+        "skus": [
+            {
+                "skuId": "6B92-A835-08AB",
+                "description": "Zonal Kubernetes Clusters",
+                "serviceRegions": ["global"],
+                "pricingInfo": [
+                    {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "0", "nanos": 100_000_000}}]}}
+                ],
+            },
+            {
+                "skuId": "B561-BFBD-1264",
+                "description": "Regional Kubernetes Clusters",
+                "serviceRegions": ["global"],
+                "pricingInfo": [
+                    {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "0", "nanos": 100_000_000}}]}}
+                ],
+            },
+            {
+                "skuId": "CA45-51A5-8C74",
+                "description": "Autopilot Pod mCPU Requests (us-east1)",
+                "serviceRegions": ["us-east1"],
+                "pricingInfo": [
+                    {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "0", "nanos": 44_500}}]}}
+                ],
+            },
+            {
+                "skuId": "9FF0-AB0A-36E8",
+                "description": "Autopilot Pod Memory Requests (us-east1)",
+                "serviceRegions": ["us-east1"],
+                "pricingInfo": [
+                    {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "0", "nanos": 4_922_500}}]}}
+                ],
+            },
+        ],
+        "nextPageToken": "",
+    }
+
+
 def _mock_auth() -> tuple[MagicMock, MagicMock]:
     """Return mock (credentials, project) for google.auth.default."""
     creds = MagicMock()
@@ -111,3 +152,43 @@ def test_gcp_missing_upstream(requests_mock: requests_mock_module.Mocker) -> Non
     assert drift == []
     assert len(missing) == 1
     assert missing[0] == _SAMPLE.sku_id
+
+
+def test_gcp_gke_standard_matches_regional_cluster_sku_even_when_global(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """GKE standard validation must select Regional Kubernetes Clusters."""
+    service_id = "CCD8-9BF1-090E"
+    sample = Sample(
+        sku_id="B561-BFBD-1264-us-east1",
+        region="us-east1",
+        resource_name="gke-standard",
+        price_amount=0.10,
+        price_currency="USD",
+        dimension="cluster",
+    )
+    requests_mock.get(f"{_BASE_URL}/{service_id}/skus", json=_gke_billing_response())
+    with patch("google.auth.default", return_value=_mock_auth()):
+        drift, missing = revalidate([sample], service_id=service_id)
+    assert drift == []
+    assert missing == []
+
+
+def test_gcp_gke_autopilot_matches_requested_dimension(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """GKE Autopilot memory validation must not use the first regional price."""
+    service_id = "CCD8-9BF1-090E"
+    sample = Sample(
+        sku_id="gke-autopilot-us-east1",
+        region="us-east1",
+        resource_name="gke-autopilot",
+        price_amount=0.0049225,
+        price_currency="USD",
+        dimension="memory",
+    )
+    requests_mock.get(f"{_BASE_URL}/{service_id}/skus", json=_gke_billing_response())
+    with patch("google.auth.default", return_value=_mock_auth()):
+        drift, missing = revalidate([sample], service_id=service_id)
+    assert drift == []
+    assert missing == []

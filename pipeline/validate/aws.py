@@ -61,10 +61,30 @@ def _service_code(resource_name: str, sku_id: str) -> str:
     return "AmazonEC2"
 
 
-def _extract_price(price_list_item: str) -> float | None:
-    """Extract the first OnDemand price from a PriceList JSON string."""
+def _eks_item_matches(sample: Sample, item: dict) -> bool:
+    attrs = item.get("product", {}).get("attributes", {})
+    op = attrs.get("operation", "")
+    usage = attrs.get("usagetype", "")
+    match sample.resource_name:
+        case "eks-standard":
+            return op == "CreateOperation" and "Outposts" not in usage
+        case "eks-extended-support":
+            return op == "ExtendedSupport"
+        case "eks-fargate":
+            if sample.dimension == "vcpu":
+                return "Fargate-vCPU-Hours" in usage
+            if sample.dimension == "memory":
+                return "Fargate-GB-Hours" in usage and "Ephemeral" not in usage
+    return False
+
+
+def _extract_price(price_list_item: str, sample: Sample | None = None) -> float | None:
+    """Extract the matching OnDemand price from a PriceList JSON string."""
     try:
         obj = json.loads(price_list_item)
+        if sample is not None and sample.resource_name.startswith("eks-"):
+            if not _eks_item_matches(sample, obj):
+                return None
         terms = obj.get("terms", {})
         on_demand = terms.get("OnDemand", {})
         for term in on_demand.values():
@@ -77,6 +97,18 @@ def _extract_price(price_list_item: str) -> float | None:
     except (json.JSONDecodeError, ValueError, AttributeError, TypeError):
         pass
     return None
+
+
+def _filters_for_sample(s: Sample, service_code: str) -> tuple[list[dict[str, str]], int]:
+    if service_code == "AmazonEKS":
+        return ([{"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region}], 100)
+    return (
+        [
+            {"Type": "TERM_MATCH", "Field": "instanceType", "Value": s.resource_name},
+            {"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region},
+        ],
+        1,
+    )
 
 
 def revalidate(
@@ -103,16 +135,13 @@ def revalidate(
 
     for s in samples:
         service_code = _service_code(s.resource_name, s.sku_id)
-        filters = [
-            {"Type": "TERM_MATCH", "Field": "instanceType", "Value": s.resource_name},
-            {"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region},
-        ]
+        filters, max_results = _filters_for_sample(s, service_code)
         try:
             resp = client.get_products(
                 ServiceCode=service_code,
                 Filters=filters,
                 FormatVersion="aws_v1",
-                MaxResults=1,
+                MaxResults=max_results,
             )
         except Exception:
             logger.exception("AWS Pricing API call failed for %s", s.sku_id)
@@ -125,7 +154,11 @@ def revalidate(
             missing.append(s.sku_id)
             continue
 
-        upstream = _extract_price(price_list[0])
+        upstream = None
+        for item in price_list:
+            upstream = _extract_price(item, s)
+            if upstream is not None:
+                break
         if upstream is None or upstream == 0:
             logger.debug("Could not parse upstream price for %s", s.sku_id)
             missing.append(s.sku_id)
