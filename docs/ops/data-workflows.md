@@ -8,7 +8,7 @@ and manual re-dispatch procedures.
 
 ```
                   ┌─────────────────────────────────────────┐
-                  │   gh workflow run data-daily.yml         │
+                  │   gh workflow run data-dispatch.yml      │
                   │   (manual dispatch — waits end-to-end)   │
                   └────────────┬────────────────────────────┘
                                │ dispatches
@@ -18,7 +18,7 @@ and manual re-dispatch procedures.
         (AWS shards)   (Azure shards)  (GCP + OpenRouter)
               │                │                │
               └────────────────┼────────────────┘
-                               │ data-daily.yml polls all three,
+                               │ data-dispatch.yml polls all three,
                                │ then dispatches (if: always())
                                ▼
                        data-publish.yml
@@ -39,9 +39,9 @@ crons already produced.
 | `data-azure.yml` | cron 03:15 UTC daily |
 | `data-gcp.yml` | cron 03:30 UTC daily |
 | `data-publish.yml` | cron 04:30 UTC daily (nightly fallback) |
-| `data-daily.yml` | manual dispatch only (no cron) |
+| `data-dispatch.yml` | manual dispatch only (no cron) |
 
-The maintainer-initiated `gh workflow run data-daily.yml` path waits for the
+The maintainer-initiated `gh workflow run data-dispatch.yml` path waits for the
 three providers and then fires publish end-to-end. The 04:30 publish cron is
 the unattended nightly fallback — it runs regardless of how the provider
 workflows completed.
@@ -78,10 +78,10 @@ gh workflow run data-publish.yml
 gh workflow run data-publish.yml -f dry_run=false -f replace_existing_release=true
 
 # Full end-to-end dry run with wait:
-gh workflow run data-daily.yml
+gh workflow run data-dispatch.yml
 
 # Full end-to-end pipeline with wait and publish:
-gh workflow run data-daily.yml -f dry_run=false
+gh workflow run data-dispatch.yml -f dry_run=false
 ```
 
 ## Verifying codegen outputs
@@ -102,7 +102,7 @@ If `git diff` is non-empty, stage and commit the generated files before opening 
 - `.github/workflows/data-azure.yml` — Azure discover / ingest / diff_package / bundle
 - `.github/workflows/data-gcp.yml` — GCP + OpenRouter discover / ingest / diff_package / bundle
 - `.github/workflows/data-publish.yml` — artifact download / manifest / release / CDN
-- `.github/workflows/data-daily.yml` — thin dispatcher (manual dispatch entry point)
+- `.github/workflows/data-dispatch.yml` — thin dispatcher (manual dispatch entry point)
 - `scripts/ci/download_provider_artifacts.sh` — per-provider artifact download
 - `scripts/ci/merge_discover_state.py` — union of per-provider discover state
-- `docs/ops/data-daily-runbook.md` — legacy operational concerns (secrets, bootstrap, incident recovery)
+- `docs/ops/data-dispatch-runbook.md` — legacy operational concerns (secrets, bootstrap, incident recovery)

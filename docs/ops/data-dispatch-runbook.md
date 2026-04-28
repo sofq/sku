@@ -1,14 +1,17 @@
-# Data-daily workflow runbook
+# Data-dispatch workflow runbook (legacy)
 
 > **M-α note:** As of M-α, the daily pipeline is four workflows (three
-> provider + one publish), fronted by the `data-daily.yml` dispatcher which
-> preserves the existing end-to-end entry point. See
-> [`data-workflows.md`](data-workflows.md) for the topology. This runbook
-> still covers legacy operational concerns shared across them.
+> provider + one publish), fronted by the `data-dispatch.yml` dispatcher
+> (formerly `data-daily.yml`) which preserves the existing end-to-end entry
+> point. See [`data-workflows.md`](data-workflows.md) for the current
+> topology. This runbook still covers legacy operational concerns shared
+> across them — the **cron-related sections below are historical** (the
+> dispatcher itself has no cron; provider-level crons live in
+> `data-aws.yml`/`data-azure.yml`/`data-gcp.yml` and `data-publish.yml`).
 
-Maintainer guide for `.github/workflows/data-daily.yml` — the cron-driven
-daily release that publishes shard baselines, SQL deltas, and `manifest.json`
-under the `data-YYYY.MM.DD` tag.
+Maintainer guide for `.github/workflows/data-dispatch.yml` — the manual
+end-to-end entry point that publishes shard baselines, SQL deltas, and
+`manifest.json` under the `data-YYYY.MM.DD` tag.
 
 ## Secrets + variables required
 
@@ -25,12 +28,12 @@ with `data-validate.yml`.
 
 ## First green run (bootstrap)
 
-The cron schedule is **commented out** in `data-daily.yml` when it first lands.
+The cron schedule is **commented out** in `data-dispatch.yml` when it first lands.
 Before enabling it, prove the end-to-end flow with two manual dispatches:
 
 ```bash
 # 1. Dry run — discover + ingest + diff-package, but skip publish.
-gh workflow run data-daily.yml \
+gh workflow run data-dispatch.yml \
   -F force_baseline=true
 
 gh run watch   # wait for completion; confirm all jobs green
@@ -43,7 +46,7 @@ one and run `sqlite3 aws-ec2.db '.tables'` — expect `skus`, `prices`,
 
 ```bash
 # 2. Publish run — creates the first `data-YYYY.MM.DD` release.
-gh workflow run data-daily.yml \
+gh workflow run data-dispatch.yml \
   -F dry_run=false \
   -F force_baseline=true
 
@@ -62,7 +65,7 @@ Only after both runs are green do you enable the cron schedule (next section).
 
 ## Enabling the cron schedule
 
-Edit `.github/workflows/data-daily.yml` and uncomment the `- cron:` line under
+Edit `.github/workflows/data-dispatch.yml` and uncomment the `- cron:` line under
 `on.schedule`:
 
 ```yaml
@@ -71,17 +74,17 @@ on:
     - cron: "0 3 * * *"
 ```
 
-Open a PR titled `ci: enable daily cron for data-daily.yml`, merge after
+Open a PR titled `ci: enable daily cron for data-dispatch.yml`, merge after
 review. The first cron fire is at the next 03:00 UTC after merge.
 
 ## Disabling on incident
 
-`gh workflow disable data-daily.yml` pauses the cron and blocks further
+`gh workflow disable data-dispatch.yml` pauses the cron and blocks further
 manual dispatch. Use when upstream pricing pages are degraded, when the
 sanity check is failing consistently, or when the pipeline needs a pause for
 remediation work.
 
-Re-enable with `gh workflow enable data-daily.yml`. The next run picks up
+Re-enable with `gh workflow enable data-dispatch.yml`. The next run picks up
 whatever has changed since the last green release via the discover state.
 
 ## Manually republishing today's catalog
@@ -89,7 +92,7 @@ whatever has changed since the last green release via the discover state.
 If a scheduled run has already completed but you need to re-publish (e.g. to
 pick up a fixed ingest module):
 
-1. `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true -F replace_existing_release=true`
+1. `gh workflow run data-dispatch.yml -F dry_run=false -F force_baseline=true -F replace_existing_release=true`
 2. Watch the run; the publish step replaces `data-$(date -u +%Y.%m.%d)` before
    recreating `data-latest`.
 
@@ -127,7 +130,7 @@ gh issue close <issue-number> --comment "Purge verified; manifest fresh on jsDel
 
 ## Related files
 
-- `.github/workflows/data-daily.yml` — the workflow itself
+- `.github/workflows/data-dispatch.yml` — the workflow itself
 - `.github/actions/setup-pipeline/action.yml` — composite Python setup
 - `scripts/ci/ingest_shard.sh` — per-shard live fetch + ingest
 - `scripts/ci/diff_package_shard.sh` — sanity + delta + optional baseline

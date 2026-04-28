@@ -22,9 +22,9 @@ Agent quick-start for the `sku` repo.
 | Run discover (fixture / dry-run) | `make discover` |
 | Run discover against real upstreams | `DISCOVER_LIVE=1 make discover` (GCP uses ADC; run `gcloud auth application-default login` first) |
 | Live-ingest a single shard | `make shard-live SHARD=aws_ec2 SRC=/path/to/offer.json` |
-| Dispatch daily data workflow (dry-run) | `gh workflow run data-daily.yml -F force_baseline=true` |
-| Dispatch daily data workflow (publish) | `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true` |
-| Replace today's data release | `gh workflow run data-daily.yml -F dry_run=false -F force_baseline=true -F replace_existing_release=true` |
+| Dispatch full data pipeline (dry-run) | `gh workflow run data-dispatch.yml -F force_baseline=true` |
+| Dispatch full data pipeline (publish) | `gh workflow run data-dispatch.yml -F dry_run=false -F force_baseline=true` |
+| Replace today's data release | `gh workflow run data-dispatch.yml -F dry_run=false -F force_baseline=true -F replace_existing_release=true` |
 
 ## Repo map
 
@@ -46,8 +46,8 @@ Agent quick-start for the `sku` repo.
 M-α — pipeline architecture for coverage expansion:
 - Monolithic `data-daily.yml` split into three per-provider workflows
   (`data-aws.yml` 03:00, `data-azure.yml` 03:15, `data-gcp.yml` 03:30 UTC)
-  plus `data-publish.yml` (04:30 UTC fallback); `data-daily.yml` kept as a
-  thin manual-dispatch dispatcher. See
+  plus `data-publish.yml` (04:30 UTC fallback); `data-dispatch.yml` (formerly
+  `data-daily.yml`) kept as a thin manual-dispatch dispatcher. See
   `docs/superpowers/specs/2026-04-24-m-alpha-pipeline-architecture-design.md`
   for the full design (note: Feature D dedup and Go-side codegen were cut —
   see the plan file).

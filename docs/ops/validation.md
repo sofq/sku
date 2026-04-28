@@ -4,15 +4,15 @@ Maintainer guide for `.github/workflows/data-validate.yml` — the weekly
 (Mondays 04:00 UTC + `workflow_dispatch`) cross-check that re-fetches a
 stratified sample of SKUs from each upstream provider, compares against the
 published shard, and files a `catalog-drift` issue on >1% price divergence.
-Independent of `data-daily.yml`: a failing validate run does **not** roll
-back a published release, it just alerts.
+Independent of the daily ingest workflows: a failing validate run does **not**
+roll back a published release, it just alerts.
 
 ## Auth model
 
 | Provider | Auth path | Why not anonymous |
 |---|---|---|
 | AWS | Short-lived OIDC → IAM role `sku-validator` → SigV4 `pricing:GetProducts` | Query API requires SigV4. Bulk JSON is anonymous but the daily ingest already reads it — cross-checking against the same source catches fewer parser bugs. |
-| GCP | Short-lived OIDC → Workload Identity Federation → service account `sku-validator@<project>.iam` → `cloudbilling.googleapis.com/v1/services/{sid}/skus` | Cloud Billing Catalog API requires a bearer token. `data-daily.yml` and `data-weekly.yml` use the same WIF path. |
+| GCP | Short-lived OIDC → Workload Identity Federation → service account `sku-validator@<project>.iam` → `cloudbilling.googleapis.com/v1/services/{sid}/skus` | Cloud Billing Catalog API requires a bearer token. `data-gcp.yml` and `data-weekly.yml` use the same WIF path. |
 | Azure | Anonymous `prices.azure.com/api/retail/prices` | Azure retail prices are public. |
 | OpenRouter | Anonymous `openrouter.ai/api/v1/models/{id}/endpoints` | Public. |
 
@@ -186,8 +186,8 @@ Review quarterly:
 
 The `configure-aws-credentials@v4` / `google-github-actions/auth@v2` step
 fails. The matrix cell for that shard fails; other cells keep running
-(`fail-fast: false`). **No release is affected** — `data-daily.yml` runs
-independently and doesn't consult `data-validate.yml`.
+(`fail-fast: false`). **No release is affected** — the daily ingest workflows
+run independently and don't consult `data-validate.yml`.
 
 Recovery: fix the trust policy or WIF condition, re-dispatch.
 
@@ -203,13 +203,14 @@ Decision tree:
 2. **Real upstream price change?** (common after AWS price revisions).
    - Verify upstream by hand: `aws pricing get-products --service-code AmazonEC2 --filters ...`.
    - If upstream has indeed moved, the shard will pick it up on the next
-     `data-daily` run. Close the issue with a link to the next release.
+     daily ingest run. Close the issue with a link to the next release.
 3. **Upstream unchanged, catalog wrong?** (parser bug).
-   - Disable the `data-daily.yml` cron temporarily (comment out the
-     `schedule` block; merge; re-enable after fix).
+   - Disable the affected provider's cron temporarily (comment out the
+     `schedule` block in `data-aws.yml`/`data-azure.yml`/`data-gcp.yml`;
+     merge; re-enable after fix).
    - Investigate the relevant `pipeline/ingest/<shard>.py`; add a
      regression test fixture in `pipeline/tests/`.
-   - Push the fix; force a `workflow_dispatch` of `data-daily.yml` with
+   - Push the fix; force a `workflow_dispatch` of `data-dispatch.yml` with
      `dry_run=false`, `force_baseline=true`, and `replace_existing_release=true`
      to republish today's catalog.
 4. **Validator false positive** (e.g. unit-of-measure mismatch that

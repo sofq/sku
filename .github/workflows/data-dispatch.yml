@@ -1,9 +1,9 @@
-# .github/workflows/data-daily.yml
-# Thin dispatcher preserved for the existing `gh workflow run data-daily.yml`
+# .github/workflows/data-dispatch.yml
+# Thin dispatcher for the manual `gh workflow run data-dispatch.yml`
 # entry point. Real work happens in the four child workflows. This workflow
 # fans out to the three providers, waits for them to finish, then triggers
 # publish — matching today's single-command end-to-end maintainer UX.
-name: data-daily
+name: data-dispatch
 
 on:
   workflow_dispatch:

@@ -19,14 +19,14 @@ def _input_block(text: str, input_name: str) -> str:
 
 
 def test_manual_data_runs_are_dry_by_default() -> None:
-    for workflow in ("data-daily.yml", "data-publish.yml"):
+    for workflow in ("data-dispatch.yml", "data-publish.yml"):
         block = _input_block(_workflow(workflow), "dry_run")
 
         assert 'default: "true"' in block
 
 
-def test_data_daily_forwards_replace_existing_release_to_publish() -> None:
-    text = _workflow("data-daily.yml")
+def test_data_dispatch_forwards_replace_existing_release_to_publish() -> None:
+    text = _workflow("data-dispatch.yml")
 
     block = _input_block(text, "replace_existing_release")
     assert 'default: "false"' in block

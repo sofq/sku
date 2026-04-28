@@ -64,5 +64,6 @@ Instead:
 3. Re-run Steps 1–4.
 
 Releases after the bootstrap (normal daily releases) follow the `data-YYYY.MM.DD`
-convention and are cut by `data-daily.yml`; this runbook covers the one-time
-bootstrap only.
+convention and are cut by the daily ingest workflows (`data-aws.yml`,
+`data-azure.yml`, `data-gcp.yml`, `data-publish.yml`); this runbook covers the
+one-time bootstrap only.
