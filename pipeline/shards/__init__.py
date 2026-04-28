@@ -18,7 +18,7 @@ import yaml
 _VALID_PROVIDERS: frozenset[str] = frozenset({"aws", "azure", "gcp", "openrouter"})
 _VALID_KINDS: frozenset[str] = frozenset({
     "compute.vm",
-    "compute.container",
+    "compute.container",          # reserved for Fargate/ACI/Cloud Run reclass (M3b.4 note)
     "compute.serverless",
     "storage.object",
     "storage.block",
@@ -27,6 +27,7 @@ _VALID_KINDS: frozenset[str] = frozenset({
     "network.cdn",
     "llm.text",
     "cache.kv",
+    "container.orchestration",    # M-γ.2: EKS/AKS/GKE control plane + serverless modes
 })
 
 

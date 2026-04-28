@@ -81,14 +81,24 @@ PYEOF
 
   azure_*)
     prices="$RAW_DIR/${SHARD}-prices.json"
+    ingest_args=(--prices "$prices")
     python - <<PYEOF
 from pathlib import Path
 from discover.azure import _SHARD_FILTERS
 from ingest.azure_common import fetch_prices
 fetch_prices(_SHARD_FILTERS["$SHARD"], Path("$prices"))
 PYEOF
+    if [ "$SHARD" = "azure_aks" ]; then
+      aci_prices="$RAW_DIR/${SHARD}-aci-prices.json"
+      python - <<PYEOF
+from pathlib import Path
+from ingest.azure_common import fetch_prices
+fetch_prices("serviceName eq 'Container Instances'", Path("$aci_prices"))
+PYEOF
+      ingest_args+=(--aci-prices "$aci_prices")
+    fi
     python -m "ingest.${SHARD}" \
-      --prices "$prices" \
+      "${ingest_args[@]}" \
       --out "$OUT_DIR/$SHARD.rows.jsonl" \
       --catalog-version "$CATALOG_VERSION"
     ;;

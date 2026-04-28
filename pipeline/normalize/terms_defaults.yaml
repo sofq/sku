@@ -95,3 +95,10 @@ defaults:
     support_tier: ""
     upfront: ""
     payment_option: ""
+  container.orchestration:
+    commitment: on_demand
+    tenancy: kubernetes      # always "kubernetes" — single product family
+    os: standard             # tier slot ("free"|"standard"|"premium"|"extended-support"|"fargate"|"autopilot"|"virtual-nodes")
+    support_tier: ""
+    upfront: ""
+    payment_option: ""

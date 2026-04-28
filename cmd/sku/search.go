@@ -28,7 +28,7 @@ type searchFlags struct {
 func (f *searchFlags) bind(c *cobra.Command) {
 	c.Flags().StringVar(&f.provider, "provider", "", "cloud provider (aws | azure | gcp)")
 	c.Flags().StringVar(&f.service, "service", "", "service within provider (ec2 | rds | ...)")
-	c.Flags().StringVar(&f.kind, "kind", "", "resource kind (compute.vm | db.relational | ...)")
+	c.Flags().StringVar(&f.kind, "kind", "", "resource kind (compute.vm | db.relational | storage.object | cache.kv — container.orchestration not yet supported via search)")
 	c.Flags().StringVar(&f.resourceName, "resource-name", "", "exact resource name (e.g. m5.large)")
 	c.Flags().StringVar(&f.region, "region", "", "provider region (e.g. us-east-1)")
 	c.Flags().Int64Var(&f.minVCPU, "min-vcpu", 0, "minimum vCPU count")

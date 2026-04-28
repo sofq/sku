@@ -59,6 +59,34 @@ def _price_list_item(amount: str) -> str:
     )
 
 
+def _eks_price_list_item(*, sku_id: str, operation: str, usage_type: str, amount: str) -> str:
+    """Return a minimal AmazonEKS PriceList item."""
+    return json.dumps(
+        {
+            "product": {
+                "sku": sku_id,
+                "attributes": {
+                    "operation": operation,
+                    "regionCode": "us-east-1",
+                    "usagetype": usage_type,
+                },
+            },
+            "terms": {
+                "OnDemand": {
+                    "term1": {
+                        "priceDimensions": {
+                            "pd1": {
+                                "pricePerUnit": {"USD": amount},
+                                "unit": "Hrs",
+                            }
+                        }
+                    }
+                }
+            },
+        }
+    )
+
+
 def _make_stubbed_client(responses: list[dict]) -> boto3.client:
     """Return a pricing client with queued stub responses."""
     client = boto3.client("pricing", region_name="us-east-1")
@@ -243,3 +271,150 @@ def test_revalidate_multiple_samples() -> None:
     assert drift[0].sku_id == s2.sku_id
     assert len(missing) == 1
     assert missing[0] == s3.sku_id
+
+
+def test_revalidate_eks_control_plane_uses_eks_filters_and_operation_match() -> None:
+    """EKS control-plane validation matches AmazonEKS operation, not instanceType."""
+    sample = Sample(
+        sku_id="ZYWMR684YSMFHWEU",
+        region="us-east-1",
+        resource_name="eks-standard",
+        price_amount=0.10,
+        price_currency="USD",
+        dimension="cluster",
+    )
+    client = boto3.client("pricing", region_name="us-east-1")
+    stubber = Stubber(client)
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                _eks_price_list_item(
+                    sku_id="ZYWMR684YSMFHWEU",
+                    operation="CreateOperation",
+                    usage_type="USE1-AmazonEKS-Hours:perCluster",
+                    amount="0.1000000000",
+                )
+            ],
+            "NextToken": "",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonEKS",
+            "Filters": [{"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"}],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+        },
+    )
+    with stubber:
+        drift, missing = revalidate([sample], client=client)
+    assert drift == []
+    assert missing == []
+
+
+def test_revalidate_eks_paginates_when_match_on_second_page() -> None:
+    """EKS uses NextToken pagination when the matching SKU is past page 1."""
+    sample = Sample(
+        sku_id="ZYWMR684YSMFHWEU",
+        region="us-east-1",
+        resource_name="eks-standard",
+        price_amount=0.10,
+        price_currency="USD",
+        dimension="cluster",
+    )
+    client = boto3.client("pricing", region_name="us-east-1")
+    stubber = Stubber(client)
+    # Page 1: only Fargate / Outposts items, no CreateOperation -> no match.
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                _eks_price_list_item(
+                    sku_id="OUTPOSTS",
+                    operation="CreateOperation",
+                    usage_type="USE1-AmazonEKS-Hours-Outposts:perCluster",
+                    amount="0.1000000000",
+                ),
+            ],
+            "NextToken": "page2-token",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonEKS",
+            "Filters": [{"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"}],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+        },
+    )
+    # Page 2: contains the standard cluster SKU.
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                _eks_price_list_item(
+                    sku_id="ZYWMR684YSMFHWEU",
+                    operation="CreateOperation",
+                    usage_type="USE1-AmazonEKS-Hours:perCluster",
+                    amount="0.1000000000",
+                ),
+            ],
+            "NextToken": "",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonEKS",
+            "Filters": [{"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"}],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+            "NextToken": "page2-token",
+        },
+    )
+    with stubber:
+        drift, missing = revalidate([sample], client=client)
+    assert drift == []
+    assert missing == []
+
+
+def test_revalidate_eks_fargate_selects_requested_dimension() -> None:
+    """EKS Fargate validation compares the vCPU sample to the vCPU upstream SKU."""
+    sample = Sample(
+        sku_id="eks-fargate-us-east-1",
+        region="us-east-1",
+        resource_name="eks-fargate",
+        price_amount=0.04048,
+        price_currency="USD",
+        dimension="vcpu",
+    )
+    client = boto3.client("pricing", region_name="us-east-1")
+    stubber = Stubber(client)
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                _eks_price_list_item(
+                    sku_id="PT22UKNZNU9D3XSN",
+                    operation="",
+                    usage_type="USE1-Fargate-GB-Hours",
+                    amount="0.0044450000",
+                ),
+                _eks_price_list_item(
+                    sku_id="3JPC5EER47BUUFC6",
+                    operation="",
+                    usage_type="USE1-Fargate-vCPU-Hours:perCPU",
+                    amount="0.0404800000",
+                ),
+            ],
+            "NextToken": "",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonEKS",
+            "Filters": [{"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"}],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+        },
+    )
+    with stubber:
+        drift, missing = revalidate([sample], client=client)
+    assert drift == []
+    assert missing == []

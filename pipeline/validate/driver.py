@@ -72,8 +72,9 @@ def _default_revalidator(shard: str) -> RevalidateFunc:
         from validate.azure import revalidate
         return revalidate
     if shard.startswith("gcp-"):
-        from validate.gcp import revalidate
-        return revalidate
+        from validate.gcp import revalidate, _SHARD_SERVICE_IDS, _DEFAULT_GCE_SERVICE_ID
+        sid = _SHARD_SERVICE_IDS.get(shard, _DEFAULT_GCE_SERVICE_ID)
+        return lambda samples, **kw: revalidate(samples, service_id=sid, **kw)
     if shard.startswith("openrouter"):
         from validate.openrouter import revalidate
         return revalidate

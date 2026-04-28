@@ -1,0 +1,113 @@
+"""Tests for gcp_gke ingest module."""
+import json
+from pathlib import Path
+
+import pytest
+
+from ingest.gcp_gke import ingest
+
+
+FIX = Path(__file__).parent / "fixtures" / "gcp_gke"
+
+
+def _rows():
+    return list(ingest(skus_path=FIX / "skus.json"))
+
+
+def test_standard_control_plane_row_emitted():
+    rows = _rows()
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    assert standard, "expected at least one gke-standard row"
+    row = standard[0]
+    assert row["resource_attrs"]["extra"]["mode"] == "control-plane"
+    assert row["resource_attrs"]["extra"]["tier"] == "standard"
+    prices = row["prices"]
+    cluster_prices = [p for p in prices if p["dimension"] == "cluster"]
+    assert cluster_prices, "expected a 'cluster' price dimension"
+    assert abs(cluster_prices[0]["amount"] - 0.10) < 1e-6
+
+
+def test_standard_control_plane_rows_do_not_depend_on_autopilot_regions(tmp_path: Path):
+    source = json.loads((FIX / "skus.json").read_text())
+    source["skus"] = [
+        sku
+        for sku in source["skus"]
+        if "Autopilot Pod mCPU Requests" not in sku.get("description", "")
+    ]
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(json.dumps(source))
+
+    rows = list(ingest(skus_path=skus_path))
+
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    autopilot = [r for r in rows if r["resource_name"] == "gke-autopilot"]
+    assert standard, "standard rows should still be emitted from the regional cluster SKU"
+    assert {r["region"] for r in standard} >= {"us-east1"}
+    assert autopilot == []
+
+
+def test_autopilot_row_has_three_price_dimensions():
+    rows = _rows()
+    autopilot = [r for r in rows if r["resource_name"] == "gke-autopilot"]
+    assert autopilot, "expected at least one gke-autopilot row"
+    row = autopilot[0]
+    assert row["resource_attrs"]["extra"]["mode"] == "autopilot"
+    assert row["resource_attrs"]["extra"]["tier"] == "autopilot"
+    dims = {p["dimension"] for p in row["prices"]}
+    assert "vcpu" in dims
+    assert "memory" in dims
+    assert "storage" in dims
+
+
+def test_zonal_sku_is_filtered():
+    rows = _rows()
+    names = {r["resource_name"] for r in rows}
+    assert "gke-zonal" not in names, "Zonal Kubernetes Clusters SKU should not produce any row"
+
+
+def test_spot_sku_is_filtered():
+    rows = _rows()
+    # Spot mCPU price from fixture: 13300 / 1e9 = 0.0000133
+    spot_price = 13300 / 1e9
+    for row in rows:
+        for price in row["prices"]:
+            assert abs(price["amount"] - spot_price) > 1e-10, (
+                f"Spot mCPU price {spot_price} found in row {row['resource_name']} — should be filtered"
+            )
+
+
+def test_standard_rows_omit_price_source_when_regional_sku_present():
+    rows = _rows()
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    assert standard, "expected at least one gke-standard row"
+    for row in standard:
+        assert "price_source" not in row["resource_attrs"]["extra"], (
+            "live regional SKU price should not carry the fallback sentinel"
+        )
+
+
+def test_standard_rows_carry_fallback_sentinel_when_regional_sku_missing(tmp_path: Path):
+    source = json.loads((FIX / "skus.json").read_text())
+    source["skus"] = [
+        sku for sku in source["skus"] if sku.get("skuId") != "B561-BFBD-1264"
+    ]
+    skus_path = tmp_path / "skus.json"
+    skus_path.write_text(json.dumps(source))
+
+    rows = list(ingest(skus_path=skus_path))
+
+    standard = [r for r in rows if r["resource_name"] == "gke-standard"]
+    assert standard, "standard rows must still emit using the default fallback"
+    for row in standard:
+        assert row["resource_attrs"]["extra"].get("price_source") == "default_fallback"
+        cluster = [p for p in row["prices"] if p["dimension"] == "cluster"]
+        assert cluster and abs(cluster[0]["amount"] - 0.10) < 1e-9
+
+
+def test_terms_tenancy_is_kubernetes():
+    rows = _rows()
+    assert rows, "expected rows from fixture"
+    for row in rows:
+        assert row["terms"]["tenancy"] == "kubernetes", (
+            f"row {row['resource_name']} has tenancy={row['terms']['tenancy']!r}, expected 'kubernetes'"
+        )

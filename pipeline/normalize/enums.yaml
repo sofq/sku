@@ -17,6 +17,7 @@ kind:
   - db.nosql
   - network.cdn
   - cache.kv
+  - container.orchestration
 
 commitment:
   - on_demand
@@ -53,6 +54,8 @@ tenancy:
   - spanner-enterprise
   - spanner-enterprise-plus
   - spanner-storage
+  # container.orchestration — repurpose tenancy slot for the product family
+  - kubernetes
 
 os:
   - ""
@@ -77,6 +80,12 @@ os:
   - standard
   - premium
   - enterprise
+  # container.orchestration tiers / modes — repurpose os slot
+  - extended-support       # EKS Extended Support
+  - fargate                # EKS Fargate
+  - free                   # AKS Free tier (zero-priced control plane)
+  - virtual-nodes          # AKS virtual-nodes / ACI
+  - autopilot              # GKE Autopilot
 
 support_tier:
   - ""

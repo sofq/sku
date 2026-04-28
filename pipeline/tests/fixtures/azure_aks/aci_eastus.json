@@ -1,0 +1,50 @@
+{
+  "Items": [
+    {
+      "currencyCode": "USD",
+      "tierMinimumUnits": 0.0,
+      "retailPrice": 0.00445,
+      "unitPrice": 0.00445,
+      "armRegionName": "eastus",
+      "location": "US East",
+      "effectiveStartDate": "2019-03-01T00:00:00Z",
+      "meterId": "3842ef03-27b8-401d-a6c9-798c98f7e44b",
+      "meterName": "Standard Memory Duration",
+      "productId": "DZH318Z0BQV6",
+      "skuId": "DZH318Z0BQV6/0003",
+      "productName": "Container Instances",
+      "skuName": "Standard",
+      "serviceName": "Container Instances",
+      "serviceId": "DZH31976D030",
+      "serviceFamily": "Containers",
+      "unitOfMeasure": "1 GB Hour",
+      "type": "Consumption",
+      "isPrimaryMeterRegion": true,
+      "armSkuName": ""
+    },
+    {
+      "currencyCode": "USD",
+      "tierMinimumUnits": 0.0,
+      "retailPrice": 0.0405,
+      "unitPrice": 0.0405,
+      "armRegionName": "eastus",
+      "location": "US East",
+      "effectiveStartDate": "2019-03-01T00:00:00Z",
+      "meterId": "db5587e2-8e05-44e6-9a36-717135049487",
+      "meterName": "Standard vCPU Duration",
+      "productId": "DZH318Z0BQV6",
+      "skuId": "DZH318Z0BQV6/0003",
+      "productName": "Container Instances",
+      "skuName": "Standard",
+      "serviceName": "Container Instances",
+      "serviceId": "DZH31976D030",
+      "serviceFamily": "Containers",
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "isPrimaryMeterRegion": true,
+      "armSkuName": ""
+    }
+  ],
+  "NextPageLink": null,
+  "Count": 2
+}

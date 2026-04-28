@@ -29,6 +29,13 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_mariadb": "serviceName eq 'Azure Database for MariaDB'",
     "azure_cosmosdb": "serviceName eq 'Azure Cosmos DB'",
     "azure_redis": "serviceName eq 'Redis Cache'",
+    "azure_aks": "serviceName eq 'Azure Kubernetes Service'",
+}
+
+# Tuple order is part of the discover-hash contract: reordering invalidates
+# every previously published discover hash for that shard. Append, never reorder.
+_EXTRA_SHARD_FILTERS: dict[str, tuple[str, ...]] = {
+    "azure_aks": ("serviceName eq 'Container Instances'",),
 }
 
 
@@ -44,18 +51,21 @@ def discover(shards: Iterable[str], *, session: requests.Session | None = None) 
     try:
         out: dict[str, str] = {}
         for shard in shards:
-            filter_str = _SHARD_FILTERS[shard]
-            params = {
-                "$filter": filter_str,
-                "$top": "1",
-                "api-version": "2023-01-01-preview",
-            }
-            resp = session.get(
-                _AZURE_RETAIL_BASE, params=params, headers={"User-Agent": _UA}, timeout=60
-            )
-            if resp.status_code != 200:
-                raise RuntimeError(f"azure_discover_http_{resp.status_code}: {shard}")
-            items = resp.json().get("Items", [])
+            filters = (_SHARD_FILTERS[shard], *_EXTRA_SHARD_FILTERS.get(shard, ()))
+            groups = []
+            for filter_str in filters:
+                params = {
+                    "$filter": filter_str,
+                    "$top": "1",
+                    "api-version": "2023-01-01-preview",
+                }
+                resp = session.get(
+                    _AZURE_RETAIL_BASE, params=params, headers={"User-Agent": _UA}, timeout=60
+                )
+                if resp.status_code != 200:
+                    raise RuntimeError(f"azure_discover_http_{resp.status_code}: {shard}")
+                groups.append({"filter": filter_str, "items": resp.json().get("Items", [])})
+            items = groups[0]["items"] if len(groups) == 1 else groups
             payload = json.dumps(items, separators=(",", ":"), sort_keys=True).encode()
             out[shard] = hashlib.sha256(payload).hexdigest()
         return out

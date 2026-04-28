@@ -1,0 +1,12 @@
+shard: aws_eks
+provider: aws
+service: eks
+kind: container.orchestration
+cli:
+  group: aws
+  command: eks
+  resource_flag: tier
+ingest:
+  module: aws_eks
+  discover: aws.publication_date
+budget_bytes: 2000000

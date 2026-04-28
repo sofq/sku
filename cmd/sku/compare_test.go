@@ -195,3 +195,29 @@ func TestCompare_dryRun(t *testing.T) {
 	require.Contains(t, stdout.String(), `"dry_run":true`)
 	require.Contains(t, stdout.String(), `"command":"compare"`)
 }
+
+func TestCompareContainerOrchestrationDryRun(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "container.orchestration",
+		"--tier", "standard", "--mode", "control-plane",
+		"--regions", "us-east-1", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"kind":"container.orchestration"`)
+	require.Contains(t, stdout.String(), `"tier":"standard"`)
+	require.Contains(t, stdout.String(), `"mode":"control-plane"`)
+}
+
+func TestCompareRejectsTierOnComputeVM(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "compute.vm",
+		"--vcpu", "2", "--memory", "8", "--tier", "standard"})
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, stderr.String(), "kind-flag-mismatch")
+}

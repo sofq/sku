@@ -71,7 +71,7 @@ jobs:
           python -m discover \
             --state dist/pipeline/discover/state.json \
             --out   dist/pipeline/discover/changed.json \
-            --shards azure_vm,azure_sql,azure_blob,azure_functions,azure_disks,azure_postgres,azure_mysql,azure_mariadb,azure_cosmosdb,azure_redis \
+            --shards azure_vm,azure_sql,azure_blob,azure_functions,azure_disks,azure_postgres,azure_mysql,azure_mariadb,azure_cosmosdb,azure_redis,azure_aks \
             --live  $flag
 
           shards=$(jq -c '.shards' dist/pipeline/discover/changed.json)

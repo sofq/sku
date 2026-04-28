@@ -44,6 +44,7 @@ var DefaultSources = map[string]string{
 	"aws-cloudfront":  "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-cloudfront",
 	"aws-aurora":      "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-aurora",
 	"aws-elasticache": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-elasticache",
+	"aws-eks":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-eks",
 	"azure-vm":        "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-vm",
 	"azure-sql":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-sql",
 	"azure-blob":      "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-blob",
@@ -54,6 +55,7 @@ var DefaultSources = map[string]string{
 	"azure-mariadb":   "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-mariadb",
 	"azure-cosmosdb":  "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-cosmosdb",
 	"azure-redis":     "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-redis",
+	"azure-aks":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-aks",
 	"gcp-gce":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gce",
 	"gcp-cloud-sql":   "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-cloud-sql",
 	"gcp-gcs":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gcs",
@@ -61,6 +63,7 @@ var DefaultSources = map[string]string{
 	"gcp-functions":   "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-functions",
 	"gcp-spanner":     "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-spanner",
 	"gcp-memorystore": "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-memorystore",
+	"gcp-gke":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gke",
 }
 
 // ShardNames returns the keys of DefaultSources. Used by the Cobra

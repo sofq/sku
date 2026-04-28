@@ -160,6 +160,7 @@ func TestDefaultSources_Contains(t *testing.T) {
 		"azure-vm", "azure-sql",
 		"azure-blob", "azure-functions", "azure-disks",
 		"azure-cosmosdb", "azure-redis",
+		"aws-eks", "azure-aks", "gcp-gke",
 		"gcp-gce", "gcp-cloud-sql",
 		"gcp-gcs", "gcp-run", "gcp-functions", "gcp-spanner", "gcp-memorystore",
 	} {
