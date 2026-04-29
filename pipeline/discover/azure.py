@@ -30,6 +30,7 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_cosmosdb": "serviceName eq 'Azure Cosmos DB'",
     "azure_redis": "serviceName eq 'Redis Cache'",
     "azure_aks": "serviceName eq 'Azure Kubernetes Service'",
+    "azure_appservice": "serviceName eq 'Azure App Service'",
 }
 
 # Tuple order is part of the discover-hash contract: reordering invalidates

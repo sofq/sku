@@ -12,7 +12,10 @@ var providerServiceKind = map[string]string{
 	"azure/blob":     "storage.object",
 	"gcp/gcs":        "storage.object",
 	"llm/text":       "llm.text",
-	"aws/aurora":     "db.relational.aurora",
-	"azure/cosmosdb": "db.nosql.cosmos",
-	"gcp/spanner":    "db.relational.spanner",
+	"aws/aurora":        "db.relational.aurora",
+	"azure/cosmosdb":    "db.nosql.cosmos",
+	"gcp/spanner":       "db.relational.spanner",
+	"aws/opensearch":    "search.engine.opensearch",
+	"azure/appservice":  "paas.app.appservice",
+	"gcp/bigquery":      "warehouse.query.bigquery",
 }
