@@ -40,6 +40,15 @@ class DriftRecord:
     source: str = "azure"
 
 
+# App Service SKU names as used in resource_name (e.g. "P1v3", "B2", "S1").
+_APP_SERVICE_SKUS = frozenset({
+    "F1", "D1", "B1", "B2", "B3", "S1", "S2", "S3",
+    "P0v3", "P1v3", "P2v3", "P3v3", "P1v2", "P2v2", "P3v2",
+    "I1v2", "I2v2", "I3v2", "I4v2", "I5v2", "I6v2",
+    "I1", "I2", "I3",
+})
+
+
 def _filter_for_sample(s: Sample) -> str | None:
     if s.resource_name == "aks-free":
         return None
@@ -58,6 +67,12 @@ def _filter_for_sample(s: Sample) -> str | None:
             "serviceName eq 'Container Instances' "
             "and skuName eq 'Standard' "
             f"and meterName eq '{meter}' "
+            f"and armRegionName eq '{s.region}'"
+        )
+    if s.resource_name in _APP_SERVICE_SKUS:
+        return (
+            "serviceName eq 'Azure App Service' "
+            f"and skuName eq '{s.resource_name}' "
             f"and armRegionName eq '{s.region}'"
         )
     return f"meterName eq '{s.resource_name}' and armRegionName eq '{s.region}'"

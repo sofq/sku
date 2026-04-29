@@ -45,6 +45,7 @@ var DefaultSources = map[string]string{
 	"aws-aurora":      "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-aurora",
 	"aws-elasticache": "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-elasticache",
 	"aws-eks":         "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-eks",
+	"aws-opensearch":  "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-opensearch",
 	"azure-vm":        "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-vm",
 	"azure-sql":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-sql",
 	"azure-blob":      "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-blob",
@@ -55,8 +56,9 @@ var DefaultSources = map[string]string{
 	"azure-mariadb":   "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-mariadb",
 	"azure-cosmosdb":  "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-cosmosdb",
 	"azure-redis":     "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-redis",
-	"azure-aks":       "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-aks",
-	"gcp-gce":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gce",
+	"azure-aks":        "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-aks",
+	"azure-appservice": "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-appservice",
+	"gcp-gce":          "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gce",
 	"gcp-cloud-sql":   "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-cloud-sql",
 	"gcp-gcs":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gcs",
 	"gcp-run":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-run",
@@ -64,6 +66,7 @@ var DefaultSources = map[string]string{
 	"gcp-spanner":     "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-spanner",
 	"gcp-memorystore": "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-memorystore",
 	"gcp-gke":         "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gke",
+	"gcp-bigquery":    "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-bigquery",
 }
 
 // ShardNames returns the keys of DefaultSources. Used by the Cobra
