@@ -1,0 +1,12 @@
+shard: azure_appservice
+provider: azure
+service: appservice
+kind: paas.app
+cli:
+  group: azure
+  command: appservice
+  resource_flag: sku
+ingest:
+  module: azure_appservice
+  discover: azure.retail_prices
+budget_bytes: 3145728

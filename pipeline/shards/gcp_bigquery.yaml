@@ -1,0 +1,12 @@
+shard: gcp_bigquery
+provider: gcp
+service: bigquery
+kind: warehouse.query
+cli:
+  group: gcp
+  command: bigquery
+  resource_flag: mode
+ingest:
+  module: gcp_bigquery
+  discover: gcp.publication_date
+budget_bytes: 4194304
