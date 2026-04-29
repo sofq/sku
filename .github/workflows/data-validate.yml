@@ -134,6 +134,7 @@ jobs:
             --report "dist/pipeline/${SHARD}.report.json" \
             "${extra[@]}"
       - uses: actions/upload-artifact@v7
+        if: always() && hashFiles(format('dist/pipeline/{0}.report.json', matrix.shard)) != ''
         with:
           name: validate-${{ matrix.shard }}
           path: dist/pipeline/*.report.json
