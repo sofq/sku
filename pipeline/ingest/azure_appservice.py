@@ -126,6 +126,8 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             continue
 
         usd = usd / divisor
+        if usd <= 0:
+            continue
 
         # Extract canonical SKU name from skuName or meterName
         sku_match = _SKU_RE.search(sku_name_raw) or _SKU_RE.search(meter_name)

@@ -1,0 +1,48 @@
+{
+  "Items": [
+    {
+      "skuId": "DZH318Z0BQ3Q/0002",
+      "productName": "Azure App Service (Linux) - PremiumV3",
+      "meterName": "P1v3 App Service Hours",
+      "skuName": "P1v3",
+      "armRegionName": "eastus",
+      "retailPrice": 0.169,
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "currencyCode": "USD"
+    },
+    {
+      "skuId": "DZH318Z0BQ3Q/0003",
+      "productName": "Azure App Service (Windows) - PremiumV3",
+      "meterName": "P1v3 Windows App Service Hours",
+      "skuName": "P1v3",
+      "armRegionName": "eastus",
+      "retailPrice": 0.225,
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "currencyCode": "USD"
+    },
+    {
+      "skuId": "DZH318Z0BRVZ/0001",
+      "productName": "Azure App Service (Linux) - Free",
+      "meterName": "F1 App Service Hours",
+      "skuName": "F1",
+      "armRegionName": "eastus",
+      "retailPrice": 0.0,
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "currencyCode": "USD"
+    },
+    {
+      "skuId": "DZH318Z0BQ3Q/0004",
+      "productName": "Azure App Service (Linux) - Standard",
+      "meterName": "S1 App Service Hours",
+      "skuName": "S1",
+      "armRegionName": "eastus",
+      "retailPrice": 0.10,
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "currencyCode": "USD"
+    }
+  ]
+}

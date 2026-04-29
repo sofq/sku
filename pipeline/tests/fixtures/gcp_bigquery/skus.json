@@ -1,0 +1,82 @@
+{
+  "skus": [
+    {
+      "skuId": "BQ-ON-DEMAND-USE",
+      "description": "Analysis: On-demand queries",
+      "serviceRegions": ["US"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "tebibytes",
+          "tieredRates": [{
+            "unitPrice": {"units": "5", "nanos": 0}
+          }]
+        }
+      }]
+    },
+    {
+      "skuId": "BQ-ENT-SLOTS-EU",
+      "description": "BigQuery Enterprise edition slot commitment",
+      "serviceRegions": ["EU"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "slot-hour",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 34000000}
+          }]
+        }
+      }]
+    },
+    {
+      "skuId": "BQ-ENT-PLUS-SLOTS-USE",
+      "description": "BigQuery Enterprise Plus edition slot commitment",
+      "serviceRegions": ["US"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "slot-hour",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 60000000}
+          }]
+        }
+      }]
+    },
+    {
+      "skuId": "BQ-ACTIVE-STORAGE-USE",
+      "description": "Active Logical Storage",
+      "serviceRegions": ["US"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 20000000}
+          }]
+        }
+      }]
+    },
+    {
+      "skuId": "BQ-LONGTERM-STORAGE-EU",
+      "description": "Long-term Logical Storage",
+      "serviceRegions": ["EU"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 10000000}
+          }]
+        }
+      }]
+    },
+    {
+      "skuId": "BQ-SKIP-BATCH",
+      "description": "Batch Analysis queries",
+      "serviceRegions": ["US"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "tebibytes",
+          "tieredRates": [{
+            "unitPrice": {"units": "2", "nanos": 0}
+          }]
+        }
+      }]
+    }
+  ]
+}
