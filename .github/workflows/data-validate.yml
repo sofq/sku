@@ -43,7 +43,9 @@ jobs:
           mkdir -p dist/pipeline/validate
           gh release download "$tag" --pattern manifest.json --dir dist/pipeline/validate/
           if [ -n "$REQUESTED" ]; then
-            shards=$(echo "$REQUESTED" | jq -R 'split(",")')
+            # `-c` keeps it on one line; otherwise GHA rejects the multi-line
+            # value when assigned to $GITHUB_OUTPUT.
+            shards=$(echo "$REQUESTED" | jq -Rc 'split(",")')
           else
             shards=$(jq -c '.shards | keys' dist/pipeline/validate/manifest.json)
           fi
