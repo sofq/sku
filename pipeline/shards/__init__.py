@@ -28,6 +28,9 @@ _VALID_KINDS: frozenset[str] = frozenset({
     "llm.text",
     "cache.kv",
     "container.orchestration",    # M-γ.2: EKS/AKS/GKE control plane + serverless modes
+    "search.engine",              # M-γ.3: aws_opensearch
+    "paas.app",                   # M-γ.3: azure_appservice
+    "warehouse.query",            # M-γ.3: gcp_bigquery
 })
 
 

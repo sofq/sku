@@ -18,6 +18,9 @@ kind:
   - network.cdn
   - cache.kv
   - container.orchestration
+  - search.engine
+  - paas.app
+  - warehouse.query
 
 commitment:
   - on_demand
@@ -86,9 +89,23 @@ os:
   - free                   # AKS Free tier (zero-priced control plane)
   - virtual-nodes          # AKS virtual-nodes / ACI
   - autopilot              # GKE Autopilot
+  - managed-cluster        # search.engine (OpenSearch managed)
+  - on-demand              # warehouse.query (BigQuery on-demand)
 
 support_tier:
   - ""
+  - free
+  - shared
+  - basic
+  - standard
+  - premium
+  - premiumv3
+  - isolated
+  - isolatedv2
+  - enterprise
+  - enterprise-plus
+  - storage-active
+  - storage-long-term
 
 payment_option:
   - ""
