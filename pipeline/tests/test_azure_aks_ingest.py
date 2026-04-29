@@ -44,6 +44,28 @@ def test_virtual_nodes_emits_linux_row():
             assert "memory" in dims
 
 
+def test_virtual_nodes_dedupes_per_second_meter():
+    # Azure publishes both "1 GB Hour" and "1 GB Second" meters for some
+    # regions (e.g. francesouth). The ingest must keep only the per-hour
+    # denomination — otherwise the shard build hits a UNIQUE constraint on
+    # (sku_id, dimension, tier).
+    rows = list(ingest(
+        prices_path=FIX / "aks_eastus.json",
+        aci_prices_path=FIX / "aci_francesouth_dup.json",
+    ))
+    vn = [r for r in rows if r["region"] == "francesouth"
+          and r["resource_attrs"]["extra"].get("mode") == "virtual-nodes"]
+    assert len(vn) == 1
+    prices = vn[0]["prices"]
+    keys = [(p["dimension"], p["tier"]) for p in prices]
+    assert len(keys) == len(set(keys)), f"duplicate price keys: {keys}"
+    by_dim = {p["dimension"]: p for p in prices}
+    assert by_dim["memory"]["amount"] == 0.00722
+    assert by_dim["memory"]["unit"] == "gb-hour"
+    assert by_dim["vcpu"]["amount"] == 0.0658
+    assert by_dim["vcpu"]["unit"] == "hour"
+
+
 def test_terms_tenancy_is_kubernetes():
     rows = list(ingest(prices_path=FIX / "aks_eastus.json"))
     for r in rows:

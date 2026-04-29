@@ -133,13 +133,20 @@ def ingest(*, prices_path: Path, aci_prices_path: Path | None = None) -> Iterabl
 
             usd = float(item.get("retailPrice", 0))
             uom = item.get("unitOfMeasure", "")
-            # Normalize unit: "1 Hour" -> "hour", "1 GB Hour" -> "gb-hour"
-            unit = "gb-hour" if "GB" in uom else "hour"
-
+            # Azure occasionally publishes both per-Hour and per-Second meters
+            # for the same SKU (e.g. francesouth Memory Duration). Only accept
+            # the per-hour denomination — anything else would either duplicate a
+            # row or land a per-second amount under a per-hour unit label.
             if "vCPU" in meter_name and "Memory" not in meter_name:
+                if uom != "1 Hour":
+                    continue
                 dim = "vcpu"
+                unit = "hour"
             elif "Memory" in meter_name:
+                if uom != "1 GB Hour":
+                    continue
                 dim = "memory"
+                unit = "gb-hour"
             else:
                 continue
 
