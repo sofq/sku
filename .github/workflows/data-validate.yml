@@ -74,14 +74,46 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_VALIDATE_SA }}
-      - name: Download shard from latest release
+      - name: Reconstruct shard from manifest chain
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CV: ${{ needs.resolve.outputs.catalog_version }}
           SHARD: ${{ matrix.shard }}
+        # Mirror what `sku update` does on a client: pull `baseline_url` (which
+        # may live in an older release than `data-${CV}` since baselines only
+        # rebuild on day 1/15 of each month) plus every delta listed in
+        # `deltas[]` and apply them in order. Earlier revisions assumed every
+        # release contained `<shard>.db.zst`, which is only true on
+        # baseline-rebuild days.
         run: |
-          gh release download "data-${CV}" --pattern "${SHARD}.db.zst" --dir dist/pipeline/
-          zstd -d "dist/pipeline/${SHARD}.db.zst"
+          set -euo pipefail
+          work=dist/pipeline
+          mkdir -p "$work"
+          gh release download "data-${CV}" --pattern manifest.json --dir "$work/"
+          manifest="$work/manifest.json"
+
+          baseline_url=$(jq -er --arg s "$SHARD" '.shards[$s].baseline_url' "$manifest")
+          baseline_sha=$(jq -er --arg s "$SHARD" '.shards[$s].baseline_sha256' "$manifest")
+
+          curl -fsSL "$baseline_url" -o "$work/${SHARD}.db.zst"
+          echo "$baseline_sha  $work/${SHARD}.db.zst" | sha256sum -c -
+          zstd -d -f "$work/${SHARD}.db.zst" -o "$work/${SHARD}.db"
+
+          # Iterate deltas in apply-order; multi-part deltas expand to parts[].
+          jq -r --arg s "$SHARD" '
+            .shards[$s].deltas // [] | .[] |
+            if has("parts") then (.parts[] | "\(.url)\t\(.sha256)")
+            else "\(.url)\t\(.sha256)" end
+          ' "$manifest" | while IFS=$'\t' read -r url sha; do
+            [ -z "$url" ] && continue
+            part="$work/$(basename "$url")"
+            curl -fsSL "$url" -o "$part"
+            echo "$sha  $part" | sha256sum -c -
+            gunzip -c "$part" | sqlite3 "$work/${SHARD}.db"
+            rm -f "$part"
+          done
+
+          rm -f "$work/${SHARD}.db.zst"
       - name: Download vantage instances.json (EC2 only)
         if: matrix.shard == 'aws-ec2'
         run: |
@@ -112,6 +144,12 @@ jobs:
           SHARD: ${{ matrix.shard }}
           CV: ${{ needs.resolve.outputs.catalog_version }}
         run: |
+          set -euo pipefail
+          # Self-heal labels — repo originally lacked these so the issue
+          # creation step exited non-zero. `gh label create` is idempotent
+          # via the `|| true` fallback when the label already exists.
+          gh label create pipeline       --color B60205 --description "CI data pipeline / publish workflows" 2>/dev/null || true
+          gh label create catalog-drift  --color D93F0B --description "Validator detected divergence between published catalog and upstream" 2>/dev/null || true
           gh issue create \
             --title "Catalog drift in ${SHARD} (catalog ${CV})" \
             --label "pipeline,catalog-drift" \
