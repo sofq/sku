@@ -386,8 +386,10 @@ func (c *Catalog) lookupResource(
 	var args []any
 	where = append(where, "s.kind = ?")
 	args = append(args, kind)
-	where = append(where, "s.resource_name = ?")
-	args = append(args, resourceName)
+	if resourceName != "" {
+		where = append(where, "s.resource_name = ?")
+		args = append(args, resourceName)
+	}
 	if provider != "" {
 		where = append(where, "s.provider = ?")
 		args = append(args, provider)
@@ -503,6 +505,179 @@ func (c *Catalog) LookupContainerOrchestration(ctx context.Context, f ContainerO
 		return nil, fmt.Errorf("catalog: LookupContainerOrchestration requires ResourceName")
 	}
 	return c.lookupResource(ctx, "container.orchestration", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// SearchEngineFilter captures the flags `sku <provider> <search-service> price/list` exposes.
+// resource_name holds the provider-specific node identifier:
+//
+//	AWS: "r6g.large.search" (managed-cluster) / "opensearch-serverless" (serverless)
+//
+// Mode is carried in Terms.OS ("managed-cluster" | "serverless").
+type SearchEngineFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupSearchEngine runs the search.engine point lookup / list query.
+func (c *Catalog) LookupSearchEngine(ctx context.Context, f SearchEngineFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupSearchEngine requires ResourceName")
+	}
+	return c.lookupResource(ctx, "search.engine", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// PaasAppFilter captures the flags `sku <provider> <app-service> price/list` exposes.
+// resource_name holds the provider-specific plan SKU:
+//
+//	Azure: "P1v3" / "P2v3" / "F1" / "I1v2" ...
+//
+// OS is in Terms.OS ("linux" | "windows"); tier is in Terms.SupportTier.
+// ResourceName is optional — omitting it returns all plans in the given tier.
+type PaasAppFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupPaasApp runs the paas.app point lookup / list query.
+// ResourceName is optional; omit to list all plans matching the other filters.
+// Unlike other Lookup methods, this filters on individual term columns rather
+// than terms_hash so that tier-only queries (no OS specified) work correctly.
+func (c *Catalog) LookupPaasApp(ctx context.Context, f PaasAppFilter) ([]Row, error) {
+	var where []string
+	var args []any
+	where = append(where, "s.kind = 'paas.app'")
+	if f.ResourceName != "" {
+		where = append(where, "s.resource_name = ?")
+		args = append(args, f.ResourceName)
+	}
+	if f.Provider != "" {
+		where = append(where, "s.provider = ?")
+		args = append(args, f.Provider)
+	}
+	if f.Service != "" {
+		where = append(where, "s.service = ?")
+		args = append(args, f.Service)
+	}
+	if f.Region != "" {
+		where = append(where, "s.region = ?")
+		args = append(args, f.Region)
+	}
+	if f.Terms.OS != "" {
+		where = append(where, "t.os = ?")
+		args = append(args, f.Terms.OS)
+	}
+	if f.Terms.SupportTier != "" {
+		where = append(where, "t.support_tier = ?")
+		args = append(args, f.Terms.SupportTier)
+	}
+	if f.Terms.Tenancy != "" {
+		where = append(where, "t.tenancy = ?")
+		args = append(args, f.Terms.Tenancy)
+	}
+
+	const queryBase = `
+SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,
+       s.region_normalized, s.terms_hash,
+       t.commitment, t.tenancy, t.os, t.support_tier, t.upfront, t.payment_option,
+       ra.vcpu, ra.memory_gb, ra.storage_gb, ra.gpu_count, ra.gpu_model,
+       ra.architecture, ra.extra
+FROM skus s
+JOIN terms t ON t.sku_id = s.sku_id
+LEFT JOIN resource_attrs ra ON ra.sku_id = s.sku_id
+WHERE `
+	query := queryBase + strings.Join(where, " AND ") + "\nORDER BY s.region, s.sku_id" //nolint:gosec // G202: no user input in SQL concatenation
+
+	rs, err := c.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("catalog: LookupPaasApp: %w", err)
+	}
+	defer func() { _ = rs.Close() }()
+
+	var out []Row
+	for rs.Next() {
+		var r Row
+		var supportTier, upfront, paymentOption sql.NullString
+		var vcpu sql.NullInt64
+		var mem, storage sql.NullFloat64
+		var gpuCount sql.NullInt64
+		var gpuModel, arch, extraJSON sql.NullString
+		if err := rs.Scan(
+			&r.SKUID, &r.Provider, &r.Service, &r.Kind, &r.ResourceName, &r.Region,
+			&r.RegionGroup, &r.TermsHash,
+			&r.Terms.Commitment, &r.Terms.Tenancy, &r.Terms.OS,
+			&supportTier, &upfront, &paymentOption,
+			&vcpu, &mem, &storage, &gpuCount, &gpuModel, &arch, &extraJSON,
+		); err != nil {
+			return nil, err
+		}
+		r.CatalogVersion = c.catalogVersion
+		r.Currency = c.currency
+		r.Terms.SupportTier = supportTier.String
+		r.Terms.Upfront = upfront.String
+		r.Terms.PaymentOption = paymentOption.String
+		if vcpu.Valid {
+			v := vcpu.Int64
+			r.ResourceAttrs.VCPU = &v
+		}
+		if mem.Valid {
+			v := mem.Float64
+			r.ResourceAttrs.MemoryGB = &v
+		}
+		if storage.Valid {
+			v := storage.Float64
+			r.ResourceAttrs.StorageGB = &v
+		}
+		if gpuCount.Valid {
+			v := gpuCount.Int64
+			r.ResourceAttrs.GPUCount = &v
+		}
+		if gpuModel.Valid {
+			v := gpuModel.String
+			r.ResourceAttrs.GPUModel = &v
+		}
+		if arch.Valid {
+			v := arch.String
+			r.ResourceAttrs.Architecture = &v
+		}
+		if extraJSON.Valid && extraJSON.String != "" {
+			_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
+		}
+		if err := c.FillPrices(ctx, &r); err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, rs.Err()
+}
+
+// WarehouseQueryFilter captures the flags `sku <provider> <warehouse-service> price/list` exposes.
+// resource_name holds the provider-specific pricing mode:
+//
+//	GCP: "on-demand" / "capacity-standard" / "capacity-enterprise" / "storage-active" / "storage-long-term"
+//
+// Mode is in Terms.OS ("on-demand"); edition/storage discriminator in Terms.SupportTier.
+type WarehouseQueryFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Terms        Terms
+}
+
+// LookupWarehouseQuery runs the warehouse.query point lookup / list query.
+func (c *Catalog) LookupWarehouseQuery(ctx context.Context, f WarehouseQueryFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupWarehouseQuery requires ResourceName")
+	}
+	return c.lookupResource(ctx, "warehouse.query", f.Provider, f.Service,
 		f.ResourceName, f.Region, f.Terms)
 }
 
