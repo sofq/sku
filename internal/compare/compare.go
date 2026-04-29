@@ -42,6 +42,13 @@ type Request struct {
 	Tier string
 	Mode string
 
+	// paas.app
+	PlanOS string
+
+	// warehouse.query
+	Edition     string
+	StorageTier string
+
 	Regions []string
 	Sort    string
 	Limit   int
@@ -93,6 +100,30 @@ var kindRegistry = map[string]kindQuery{
 			Tier:     r.Tier,
 			MaxPrice: r.MaxPrice,
 			Regions:  r.Regions,
+		})
+	},
+	"search.engine": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QuerySearchEngine(ctx, c, kinds.SearchEngineSpec{
+			Mode:     r.Mode,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"paas.app": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryPaasApp(ctx, c, kinds.PaasAppSpec{
+			PlanOS:   r.PlanOS,
+			Tier:     r.Tier,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"warehouse.query": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryWarehouseQuery(ctx, c, kinds.WarehouseQuerySpec{
+			Mode:        r.Mode,
+			Edition:     r.Edition,
+			StorageTier: r.StorageTier,
+			MaxPrice:    r.MaxPrice,
+			Regions:     r.Regions,
 		})
 	},
 }

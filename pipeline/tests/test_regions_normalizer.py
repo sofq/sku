@@ -90,11 +90,34 @@ def test_r1_gcp_region_coverage():
         "us-south1",
         "us-west1", "us-west2", "us-west3", "us-west4",
     }
-    actual = {key[1] for key in norm.table if key[0] == "gcp"}
+    # Exclude BigQuery multi-region pseudo-regions from the strict geographic check.
+    actual = {key[1] for key in norm.table if key[0] == "gcp" and not key[1].startswith("bq-")}
     missing = expected_gcp - actual
     assert not missing, f"missing GCP regions: {missing}"
     extra = actual - expected_gcp
     assert not extra, f"unexpected GCP regions: {extra}"
+
+
+def test_bq_pseudo_regions_normalize():
+    """bq-us / bq-eu are self-referential: normalize(gcp, bq-us) == bq-us."""
+    norm = load_region_normalizer()
+    assert norm.normalize("gcp", "bq-us") == "bq-us"
+    assert norm.normalize("gcp", "bq-eu") == "bq-eu"
+
+
+def test_bq_bare_region_names_raise():
+    """Raw BigQuery multi-region names US / EU must not map — ingest converts them first."""
+    norm = load_region_normalizer()
+    try:
+        norm.normalize("gcp", "US")
+        raise AssertionError("Expected KeyError for 'US'")
+    except KeyError:
+        pass
+    try:
+        norm.normalize("gcp", "EU")
+        raise AssertionError("Expected KeyError for 'EU'")
+    except KeyError:
+        pass
 
 
 def test_r1_adds_africa_and_middle_east_groups():

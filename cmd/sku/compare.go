@@ -38,6 +38,13 @@ type compareFlags struct {
 	// container.orchestration
 	tier string
 	mode string
+
+	// paas.app
+	planOS string
+
+	// warehouse.query
+	edition     string
+	storageTier string
 }
 
 var (
@@ -46,6 +53,9 @@ var (
 	compareDBRelationalShards           = []string{"aws-rds", "aws-aurora", "azure-sql", "azure-postgres", "azure-mysql", "azure-mariadb", "gcp-cloud-sql", "gcp-spanner"}
 	compareCacheKVShards                = []string{"aws-elasticache", "azure-redis", "gcp-memorystore"}
 	compareContainerOrchestrationShards = []string{"aws-eks", "azure-aks", "gcp-gke"}
+	compareSearchEngineShards           = []string{"aws-opensearch"}
+	comparePaasAppShards                = []string{"azure-appservice"}
+	compareWarehouseQueryShards         = []string{"gcp-bigquery"}
 )
 
 func shardsForKind(kind string) []string {
@@ -60,6 +70,12 @@ func shardsForKind(kind string) []string {
 		return compareCacheKVShards
 	case "container.orchestration":
 		return compareContainerOrchestrationShards
+	case "search.engine":
+		return compareSearchEngineShards
+	case "paas.app":
+		return comparePaasAppShards
+	case "warehouse.query":
+		return compareWarehouseQueryShards
 	}
 	return nil
 }
@@ -68,10 +84,10 @@ func newCompareCmd() *cobra.Command {
 	var f compareFlags
 	c := &cobra.Command{
 		Use:   "compare",
-		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, cache.kv)",
+		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, cache.kv, search.engine, paas.app, warehouse.query)",
 		RunE:  func(cmd *cobra.Command, _ []string) error { return runCompare(cmd, &f) },
 	}
-	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (compute.vm | storage.object | db.relational | cache.kv | container.orchestration)")
+	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (compute.vm | storage.object | db.relational | cache.kv | container.orchestration | search.engine | paas.app | warehouse.query)")
 	c.Flags().Int64Var(&f.vcpu, "vcpu", 0, "minimum vCPU count")
 	c.Flags().Float64Var(&f.memoryGB, "memory", 0, "minimum memory in GB")
 	c.Flags().Int64Var(&f.gpuCount, "gpu-count", 0, "minimum GPU count (0 excludes GPU SKUs)")
@@ -85,8 +101,11 @@ func newCompareCmd() *cobra.Command {
 	c.Flags().StringVar(&f.engine, "engine", "", "db.relational engine (postgres | mysql | ...) or cache.kv engine (redis | memcached)")
 	c.Flags().StringVar(&f.deploymentOption, "deployment-option", "", "db.relational deployment option (single-az | multi-az | zonal | regional)")
 	c.Flags().Float64Var(&f.storageGB, "storage-gb", 0, "db.relational minimum storage (GB)")
-	c.Flags().StringVar(&f.tier, "tier", "", "container.orchestration tier (free|standard|premium|extended-support|autopilot — container.orchestration only)")
-	c.Flags().StringVar(&f.mode, "mode", "", "container.orchestration mode (control-plane|fargate|autopilot|virtual-nodes — container.orchestration only)")
+	c.Flags().StringVar(&f.tier, "tier", "", "container.orchestration/paas.app tier (free|standard|premium|... — container.orchestration or paas.app only)")
+	c.Flags().StringVar(&f.mode, "mode", "", "mode filter (container.orchestration: control-plane|fargate|...; search.engine: managed-cluster|serverless; warehouse.query: on-demand|capacity|storage)")
+	c.Flags().StringVar(&f.planOS, "os", "", "paas.app OS filter (linux|windows — paas.app only)")
+	c.Flags().StringVar(&f.edition, "edition", "", "warehouse.query capacity edition (enterprise|enterprise-plus — warehouse.query only)")
+	c.Flags().StringVar(&f.storageTier, "storage-tier", "", "warehouse.query storage tier (active|long-term — warehouse.query only)")
 	return c
 }
 
@@ -95,7 +114,7 @@ func newCompareCmd() *cobra.Command {
 func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E) {
 	if f.kind == "" {
 		return nil, skuerrors.Validation("flag_invalid", "kind", "",
-			"pass --kind compute.vm | storage.object | db.relational | cache.kv | container.orchestration")
+			"pass --kind compute.vm | storage.object | db.relational | cache.kv | container.orchestration | search.engine | paas.app | warehouse.query")
 	}
 	supportedKinds := map[string]bool{
 		"compute.vm":              true,
@@ -103,10 +122,13 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 		"db.relational":           true,
 		"cache.kv":                true,
 		"container.orchestration": true,
+		"search.engine":           true,
+		"paas.app":                true,
+		"warehouse.query":         true,
 	}
 	if !supportedKinds[f.kind] {
 		return nil, skuerrors.Validation("flag_invalid", "kind", f.kind,
-			"supported kinds: compute.vm, storage.object, db.relational, cache.kv, container.orchestration")
+			"supported kinds: compute.vm, storage.object, db.relational, cache.kv, container.orchestration, search.engine, paas.app, warehouse.query")
 	}
 	switch f.kind {
 	case "compute.vm":
@@ -133,9 +155,31 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 	case "container.orchestration":
 		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
 			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
-			f.engine != "" || f.deploymentOption != "" {
+			f.engine != "" || f.deploymentOption != "" || f.planOS != "" || f.edition != "" || f.storageTier != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"container.orchestration accepts --tier / --mode / --regions / --max-price")
+		}
+	case "search.engine":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"search.engine accepts --mode / --regions / --max-price")
+		}
+	case "paas.app":
+		if f.vcpu != 0 || f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
+			f.availabilityTier != "" || f.storageGB != 0 || f.engine != "" ||
+			f.deploymentOption != "" || f.mode != "" || f.edition != "" || f.storageTier != "" {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"paas.app accepts --os / --tier / --vcpu / --memory / --regions / --max-price")
+		}
+	case "warehouse.query":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"warehouse.query accepts --mode / --edition / --storage-tier / --regions / --max-price")
 		}
 	}
 	switch f.sort {
@@ -231,6 +275,9 @@ func compareLookup(ctx context.Context, f compareFlags, s *batch.Settings) ([]ca
 		DeploymentOption: f.deploymentOption,
 		Tier:             f.tier,
 		Mode:             f.mode,
+		PlanOS:           f.planOS,
+		Edition:          f.edition,
+		StorageTier:      f.storageTier,
 		Regions:          regionLiterals,
 		Sort:             f.sort,
 		Limit:            f.limit,
@@ -304,6 +351,9 @@ func compareFlagsFromArgs(args map[string]any) compareFlags {
 		storageGB:        storageGB,
 		tier:             argString(args, "tier"),
 		mode:             argString(args, "mode"),
+		planOS:           argString(args, "os"),
+		edition:          argString(args, "edition"),
+		storageTier:      argString(args, "storage_tier"),
 	}
 }
 
@@ -362,6 +412,15 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		case "container.orchestration":
 			args["tier"] = f.tier
 			args["mode"] = f.mode
+		case "search.engine":
+			args["mode"] = f.mode
+		case "paas.app":
+			args["os"] = f.planOS
+			args["tier"] = f.tier
+		case "warehouse.query":
+			args["mode"] = f.mode
+			args["edition"] = f.edition
+			args["storage_tier"] = f.storageTier
 		}
 		return output.EmitDryRun(cmd.OutOrStdout(), output.DryRunPlan{
 			Command:      "compare",
