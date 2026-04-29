@@ -145,6 +145,56 @@ def test_azure_aks_free_synthetic_zero_does_not_require_upstream_call(
     assert requests_mock.call_count == 0
 
 
+def test_azure_ambiguous_multi_item_response_is_missing_not_drift(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """When the meterName+region filter returns multiple Items with disagreeing
+    positive unitPrices, treat as missing rather than guessing items[0].
+    Otherwise we file false-positive drift records (e.g. Azure SQL where one
+    meter spans compute, vCore-overage and storage line-items).
+    """
+    requests_mock.get(
+        _AZURE_PRICES_URL,
+        json={
+            "Items": [
+                {
+                    "meterName": "vCore",
+                    "armRegionName": "eastus",
+                    "unitPrice": 0.5,
+                    "currencyCode": "USD",
+                    "skuName": "GP_Gen5",
+                    "productName": "SQL Database Single General Purpose - Compute Gen5",
+                    "type": "Consumption",
+                    "unitOfMeasure": "1 Hour",
+                },
+                {
+                    "meterName": "vCore",
+                    "armRegionName": "eastus",
+                    "unitPrice": 0.25,
+                    "currencyCode": "USD",
+                    "skuName": "GP_Gen5",
+                    "productName": "SQL Database Elastic Pool General Purpose - Compute Gen5",
+                    "type": "Consumption",
+                    "unitOfMeasure": "1 Hour",
+                },
+            ],
+            "NextPageLink": None,
+            "Count": 2,
+        },
+    )
+    sample = Sample(
+        sku_id="azure-sql/GP_Gen5_2/eastus",
+        region="eastus",
+        resource_name="vCore",
+        price_amount=0.5,
+        price_currency="USD",
+        dimension="on-demand",
+    )
+    drift, missing = revalidate([sample])
+    assert drift == []
+    assert missing == [sample.sku_id]
+
+
 def test_azure_aks_virtual_nodes_filters_by_container_instance_dimension(
     requests_mock: requests_mock_module.Mocker,
 ) -> None:

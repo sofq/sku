@@ -23,6 +23,13 @@ logger = logging.getLogger(__name__)
 
 _DRIFT_THRESHOLD = 0.01  # 1%
 
+# Services where ``(instanceType, regionCode)`` is insufficient to pin down a
+# single SKU — e.g. RDS varies by databaseEngine + deploymentOption, and
+# ElastiCache varies by cacheEngine. The Sample dataclass doesn't carry those
+# fields, so we widen the page and skip the sample if the response contains
+# multiple disagreeing positive prices.
+_ENGINE_AMBIGUOUS_SERVICES = frozenset({"AmazonRDS", "AmazonElastiCache"})
+
 
 @dataclass
 class DriftRecord:
@@ -102,13 +109,15 @@ def _extract_price(price_list_item: str, sample: Sample | None = None) -> float 
 def _filters_for_sample(s: Sample, service_code: str) -> tuple[list[dict[str, str]], int]:
     if service_code == "AmazonEKS":
         return ([{"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region}], 100)
-    return (
-        [
-            {"Type": "TERM_MATCH", "Field": "instanceType", "Value": s.resource_name},
-            {"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region},
-        ],
-        1,
-    )
+    base_filters = [
+        {"Type": "TERM_MATCH", "Field": "instanceType", "Value": s.resource_name},
+        {"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region},
+    ]
+    if service_code in _ENGINE_AMBIGUOUS_SERVICES:
+        # Widen the page so we can detect engine ambiguity rather than
+        # silently picking ``PriceList[0]`` (the bug behind #24, #27, #28).
+        return base_filters, 100
+    return base_filters, 1
 
 
 def revalidate(
@@ -141,7 +150,13 @@ def revalidate(
         # across the page (standard / extended-support / Outposts / Fargate
         # vCPU / GB / ephemeral storage). Paginate via NextToken so the
         # target SKU is never silently skipped past the first page.
+        # For engine-ambiguous services (RDS, ElastiCache) we collect all
+        # distinct positive prices and bail if the response is ambiguous —
+        # the Sample alone cannot disambiguate engine/deployment, so picking
+        # PriceList[0] produces false-positive drift (#24, #27, #28).
+        is_ambiguous_service = service_code in _ENGINE_AMBIGUOUS_SERVICES
         upstream: float | None = None
+        candidate_prices: set[float] = set()
         next_token: str | None = None
         page_failed = False
         while True:
@@ -161,8 +176,13 @@ def revalidate(
                 break
 
             for item in resp.get("PriceList", []):
-                upstream = _extract_price(item, s)
-                if upstream is not None:
+                price = _extract_price(item, s)
+                if price is None or price <= 0:
+                    continue
+                if is_ambiguous_service:
+                    candidate_prices.add(price)
+                else:
+                    upstream = price
                     break
             if upstream is not None:
                 break
@@ -173,6 +193,18 @@ def revalidate(
                 # tight (instanceType, regionCode) filter that fits in
                 # one page.
                 break
+
+        if is_ambiguous_service and not page_failed and upstream is None:
+            if len(candidate_prices) == 1:
+                upstream = candidate_prices.pop()
+            elif len(candidate_prices) > 1:
+                logger.debug(
+                    "AWS response is ambiguous for %s (%d distinct prices)",
+                    s.sku_id,
+                    len(candidate_prices),
+                )
+                missing.append(s.sku_id)
+                continue
 
         if page_failed or upstream is None or upstream == 0:
             logger.debug("Could not parse upstream price for %s", s.sku_id)

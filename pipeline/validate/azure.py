@@ -125,11 +125,28 @@ def revalidate(
             missing.append(s.sku_id)
             continue
 
-        # Use the first matching item's unitPrice.
-        upstream = float(items[0].get("unitPrice", 0) or 0)
-        if upstream == 0:
+        # When the meterName+region filter returns multiple line items with
+        # disagreeing positive prices (e.g. SQL vCore meters that span single,
+        # elastic-pool, and storage line-items), we cannot disambiguate from
+        # the catalog Sample alone — mark as missing rather than guessing
+        # ``items[0]`` and filing a false-positive drift record.
+        positive_prices = {
+            float(it.get("unitPrice", 0) or 0)
+            for it in items
+            if float(it.get("unitPrice", 0) or 0) > 0
+        }
+        if not positive_prices:
             missing.append(s.sku_id)
             continue
+        if len(positive_prices) > 1:
+            logger.debug(
+                "Azure response is ambiguous for %s (%d distinct prices)",
+                s.sku_id,
+                len(positive_prices),
+            )
+            missing.append(s.sku_id)
+            continue
+        upstream = positive_prices.pop()
 
         delta_pct = abs(s.price_amount - upstream) / upstream * 100
         if delta_pct >= _DRIFT_THRESHOLD * 100:

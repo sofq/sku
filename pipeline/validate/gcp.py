@@ -22,15 +22,28 @@ logger = logging.getLogger(__name__)
 _BILLING_BASE = "https://cloudbilling.googleapis.com/v1/services"
 _DRIFT_THRESHOLD = 0.01  # 1%
 
-# GCP Cloud Billing service IDs (callers may override).
+# Default service ID used when callers don't specify (matches the legacy
+# behaviour of single-service GCE shards). The driver should always pass an
+# explicit service_id for known shards.
 _DEFAULT_GCE_SERVICE_ID = "6F81-5844-456A"   # Compute Engine
-_GKE_SERVICE_ID = "CCD8-9BF1-090E"           # Kubernetes Engine
-_MEMORYSTORE_SERVICE_ID = "58CD-E7C3-72CA"   # Memorystore
 
-_SHARD_SERVICE_IDS: dict[str, str] = {
-    "gcp-gke": _GKE_SERVICE_ID,
-    "gcp-memorystore": _MEMORYSTORE_SERVICE_ID,
-}
+
+def service_ids_for_shard(shard: str) -> tuple[str, ...] | None:
+    """Return the ingest-side service IDs for ``shard`` (e.g. ``"gcp-spanner"``).
+
+    Source of truth lives in :mod:`pipeline.ingest.gcp_common` — duplicating
+    it here is what produced the false-positive drift records in #22-#37.
+    Returns ``None`` if the shard is unknown to the ingest registry.
+    """
+    from ingest.gcp_common import _GCP_SERVICE_IDS
+
+    key = shard.replace("-", "_")
+    raw = _GCP_SERVICE_IDS.get(key)
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        return (raw,)
+    return tuple(raw)
 
 
 @dataclass
@@ -60,7 +73,7 @@ def _get_bearer_token() -> str:
 def revalidate(
     samples: list[Sample],
     *,
-    service_id: str = _DEFAULT_GCE_SERVICE_ID,
+    service_id: str | tuple[str, ...] = _DEFAULT_GCE_SERVICE_ID,
     session: requests.Session | None = None,
 ) -> tuple[list[DriftRecord], list[str]]:
     """Re-fetch each sample from the GCP Cloud Billing API.
@@ -70,7 +83,9 @@ def revalidate(
     samples:
         Samples to validate.
     service_id:
-        Cloud Billing service ID (e.g. ``"6F81-5844-456A"`` for GCE).
+        Cloud Billing service ID, or a tuple of IDs to query in turn (e.g.
+        Memorystore is split into Redis + Memcached services). The first
+        service that yields a match wins.
     session:
         Optional ``requests.Session`` for dependency injection in tests.
 
@@ -81,6 +96,9 @@ def revalidate(
     """
     if session is None:
         session = requests.Session()
+    service_ids: tuple[str, ...] = (
+        (service_id,) if isinstance(service_id, str) else tuple(service_id)
+    )
 
     try:
         token = _get_bearer_token()
@@ -93,11 +111,14 @@ def revalidate(
     missing: list[str] = []
 
     for s in samples:
-        url = f"{_BILLING_BASE}/{service_id}/skus"
-        params: dict = {}
-        upstream_price = _fetch_sku_price(
-            session, url, params, s.region, s.resource_name, s.dimension, s.sku_id
-        )
+        upstream_price: float | None = None
+        for sid in service_ids:
+            url = f"{_BILLING_BASE}/{sid}/skus"
+            upstream_price = _fetch_sku_price(
+                session, url, {}, s.region, s.resource_name, s.dimension, s.sku_id
+            )
+            if upstream_price is not None:
+                break
 
         if upstream_price is None:
             logger.debug("No GCP upstream price for %s", s.sku_id)
@@ -190,6 +211,17 @@ def _sku_matches_sample(
                 and "Arm" not in desc
             )
         return False
-    if sku_id and sku.get("skuId") == sku_id:
+    if not sku_id:
+        return False
+    upstream_id = sku.get("skuId", "")
+    if upstream_id == sku_id:
         return True
-    return region in regions
+    # Some ingest paths append a suffix to disambiguate duplicate upstream
+    # skuIds, using either ``-`` (e.g. Memorystore: ``{skuId}-{region}``) or
+    # ``:`` (e.g. GCE: ``{skuId}:{machine_type}``). Accept those as matches —
+    # but require the separator so we don't get spurious prefix hits.
+    if upstream_id and (
+        sku_id.startswith(upstream_id + "-") or sku_id.startswith(upstream_id + ":")
+    ):
+        return region in regions
+    return False

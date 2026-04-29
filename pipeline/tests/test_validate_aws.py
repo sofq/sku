@@ -273,6 +273,78 @@ def test_revalidate_multiple_samples() -> None:
     assert missing[0] == s3.sku_id
 
 
+def _rds_price_list_item(*, engine: str, deployment: str, amount: str) -> str:
+    """Return a JSON-encoded RDS PriceList item for a given engine/deployment."""
+    return json.dumps(
+        {
+            "product": {
+                "attributes": {
+                    "instanceType": "db.m5.large",
+                    "regionCode": "us-east-1",
+                    "databaseEngine": engine,
+                    "deploymentOption": deployment,
+                }
+            },
+            "terms": {
+                "OnDemand": {
+                    "term1": {
+                        "priceDimensions": {
+                            "pd1": {
+                                "pricePerUnit": {"USD": amount},
+                                "unit": "Hrs",
+                            }
+                        }
+                    }
+                }
+            },
+        }
+    )
+
+
+def test_revalidate_rds_ambiguous_engine_is_missing_not_drift() -> None:
+    """RDS revalidation cannot disambiguate by engine (Sample lacks engine info),
+    so a multi-engine PriceList must be treated as missing rather than picking
+    the first non-zero price (which produces false-positive drift records).
+    """
+    sample = Sample(
+        sku_id="aws-rds/db.m5.large/us-east-1",
+        region="us-east-1",
+        resource_name="db.m5.large",
+        price_amount=0.171,
+        price_currency="USD",
+        dimension="on-demand",
+    )
+    client = boto3.client("pricing", region_name="us-east-1")
+    stubber = Stubber(client)
+    stubber.add_response(
+        "get_products",
+        {
+            "PriceList": [
+                # Catalog stores postgres single-az ($0.171). Upstream returns
+                # mysql first ($0.342) — currently the validator picks mysql
+                # and files drift. With the fix, it should mark as missing.
+                _rds_price_list_item(engine="MySQL", deployment="Multi-AZ", amount="0.342"),
+                _rds_price_list_item(engine="PostgreSQL", deployment="Single-AZ", amount="0.171"),
+            ],
+            "NextToken": "",
+            "FormatVersion": "aws_v1",
+        },
+        expected_params={
+            "ServiceCode": "AmazonRDS",
+            "Filters": [
+                {"Type": "TERM_MATCH", "Field": "instanceType", "Value": "db.m5.large"},
+                {"Type": "TERM_MATCH", "Field": "regionCode", "Value": "us-east-1"},
+            ],
+            "FormatVersion": "aws_v1",
+            "MaxResults": 100,
+        },
+    )
+    with stubber:
+        drift, missing = revalidate([sample], client=client)
+    assert drift == []
+    assert missing == [sample.sku_id]
+
+
 def test_revalidate_eks_control_plane_uses_eks_filters_and_operation_match() -> None:
     """EKS control-plane validation matches AmazonEKS operation, not instanceType."""
     sample = Sample(

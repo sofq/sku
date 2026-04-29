@@ -13,7 +13,7 @@ from validate.sampler import Sample
 _BASE_URL = "https://cloudbilling.googleapis.com/v1/services"
 
 _SAMPLE = Sample(
-    sku_id="gcp-gce/n1-standard-2/us-east1",
+    sku_id="some-sku-id:n1-standard-2",
     region="us-east1",
     resource_name="n1-standard-2",
     price_amount=0.095,
@@ -168,6 +168,92 @@ def test_gcp_gke_standard_matches_regional_cluster_sku_even_when_global(
         dimension="cluster",
     )
     requests_mock.get(f"{_BASE_URL}/{service_id}/skus", json=_gke_billing_response())
+    with patch("google.auth.default", return_value=_mock_auth()):
+        drift, missing = revalidate([sample], service_id=service_id)
+    assert drift == []
+    assert missing == []
+
+
+def test_gcp_unmatched_sku_is_missing_not_drift(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """When the catalog sku_id has no exact match in the queried service, mark
+    as missing — never fall back to the first SKU that happens to be in the
+    same region (that produces wildly wrong drift records, e.g. comparing a
+    Spanner PU-hour price to an unrelated GCE compute SKU).
+    """
+    service_id = "CC63-0873-48FD"  # Spanner
+    # Catalog sku_id won't match any upstream skuId in this response.
+    sample = Sample(
+        sku_id="0E4C-7EAD-157A",
+        region="us-east1",
+        resource_name="spanner-standard",
+        price_amount=0.41,
+        price_currency="USD",
+        dimension="compute",
+    )
+    requests_mock.get(
+        f"{_BASE_URL}/{service_id}/skus",
+        json={
+            "skus": [
+                {
+                    "skuId": "DIFFERENT-SKU-ID",
+                    "description": "Some other Spanner SKU",
+                    "serviceRegions": ["us-east1"],
+                    "pricingInfo": [
+                        {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "0", "nanos": 80_000_000}}]}}
+                    ],
+                }
+            ],
+            "nextPageToken": "",
+        },
+    )
+    with patch("google.auth.default", return_value=_mock_auth()):
+        drift, missing = revalidate([sample], service_id=service_id)
+    assert drift == []
+    assert missing == [sample.sku_id]
+
+
+def test_gcp_region_suffixed_catalog_id_matches_upstream(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """Memorystore stores ``{skuId}-{region}`` for multi-region SKUs (per
+    pipeline/ingest/gcp_memorystore.py). The validator must recognise this
+    suffix scheme and match against the bare upstream skuId.
+    """
+    service_id = "5AF5-2C11-D467"  # Memorystore Redis
+    sample = Sample(
+        sku_id="4ADD-4226-A7A7-us-east1",
+        region="us-east1",
+        resource_name="memorystore-redis-standard-5gb",
+        price_amount=0.054,
+        price_currency="USD",
+        dimension="compute",
+    )
+    requests_mock.get(
+        f"{_BASE_URL}/{service_id}/skus",
+        json={
+            "skus": [
+                {
+                    "skuId": "0000-AAAA-BBBB",
+                    "description": "Some Memorystore SKU we don't want",
+                    "serviceRegions": ["us-east1"],
+                    "pricingInfo": [
+                        {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "9", "nanos": 0}}]}}
+                    ],
+                },
+                {
+                    "skuId": "4ADD-4226-A7A7",
+                    "description": "Memorystore Redis Standard 5GB Capacity",
+                    "serviceRegions": ["us-east1", "us-east4"],
+                    "pricingInfo": [
+                        {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "0", "nanos": 54_000_000}}]}}
+                    ],
+                },
+            ],
+            "nextPageToken": "",
+        },
+    )
     with patch("google.auth.default", return_value=_mock_auth()):
         drift, missing = revalidate([sample], service_id=service_id)
     assert drift == []
