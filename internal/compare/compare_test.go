@@ -114,3 +114,33 @@ func TestSupportedKindsIncludesContainerOrchestration(t *testing.T) {
 	s := supportedKinds()
 	require.Contains(t, s, "container.orchestration")
 }
+
+func TestSupportedKindsIncludesMessagingQueue(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "messaging.queue")
+}
+
+func TestSupportedKindsIncludesMessagingTopic(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "messaging.topic")
+}
+
+func TestSupportedKindsIncludesDNSZone(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "dns.zone")
+}
+
+func TestSupportedKindsIncludesAPIGateway(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "api.gateway")
+}
+
+func TestSupportedKindsIncludesNetworkCDN(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "network.cdn")
+}
+
+func TestSupportedKindsIncludesDBNoSQL(t *testing.T) {
+	s := supportedKinds()
+	require.Contains(t, s, "db.nosql")
+}

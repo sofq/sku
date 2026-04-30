@@ -136,6 +136,50 @@ var kindRegistry = map[string]kindQuery{
 			Regions:     r.Regions,
 		})
 	},
+	"messaging.queue": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryMessagingQueue(ctx, c, kinds.MessagingQueueSpec{
+			Mode:     r.Mode,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"messaging.topic": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryMessagingTopic(ctx, c, kinds.MessagingTopicSpec{
+			Mode:     r.Mode,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"dns.zone": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryDNSZone(ctx, c, kinds.DNSZoneSpec{
+			Mode:     r.Mode,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"api.gateway": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryAPIGateway(ctx, c, kinds.APIGatewaySpec{
+			Mode:     r.Mode,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"network.cdn": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryNetworkCDN(ctx, c, kinds.NetworkCDNSpec{
+			Mode:     r.Mode,
+			GB:       r.GB,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
+	"db.nosql": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
+		return kinds.QueryDBNoSQL(ctx, c, kinds.DBNoSQLSpec{
+			Engine:   r.Engine,
+			Mode:     r.Mode,
+			MaxPrice: r.MaxPrice,
+			Regions:  r.Regions,
+		})
+	},
 }
 
 func supportedKinds() string {
