@@ -77,6 +77,7 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_VALIDATE_SA }}
       - name: Reconstruct shard from manifest chain
+        id: reconstruct
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CV: ${{ needs.resolve.outputs.catalog_version }}
@@ -123,6 +124,7 @@ jobs:
             https://raw.githubusercontent.com/vantage-sh/ec2instances.info/master/www/instances.json \
             -o dist/pipeline/instances.json
       - name: Run validator
+        id: validator
         env:
           SHARD: ${{ matrix.shard }}
         run: |
@@ -140,8 +142,11 @@ jobs:
         with:
           name: validate-${{ matrix.shard }}
           path: dist/pipeline/*.report.json
-      - name: File drift issue on failure
-        if: failure()
+      - name: File or update drift issue
+        # Only fire when the validator itself reported drift. Reconstruction
+        # failures (manifest 404s, sha mismatches) surface as red runs in the
+        # Actions UI but should not masquerade as catalog drift.
+        if: always() && steps.validator.outcome == 'failure'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SHARD: ${{ matrix.shard }}
@@ -153,10 +158,39 @@ jobs:
           # via the `|| true` fallback when the label already exists.
           gh label create pipeline       --color B60205 --description "CI data pipeline / publish workflows" 2>/dev/null || true
           gh label create catalog-drift  --color D93F0B --description "Validator detected divergence between published catalog and upstream" 2>/dev/null || true
-          gh issue create \
-            --title "Catalog drift in ${SHARD} (catalog ${CV})" \
-            --label "pipeline,catalog-drift" \
-            --body "See workflow run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID} and the attached validate-${SHARD} artifact."
+          title="Catalog drift in ${SHARD}"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body=$(printf 'Catalog %s — validator reported drift.\n\nRun: %s\nArtifact: validate-%s' "$CV" "$run_url" "$SHARD")
+          # Reuse an open issue per shard so weekly runs comment instead of
+          # piling up duplicates. Match by exact title rather than the search
+          # API's loose tokenization.
+          existing=$(gh issue list \
+              --label catalog-drift --state open --limit 100 \
+              --json number,title \
+            | jq --arg t "$title" -r '[.[] | select(.title == $t) | .number] | first // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --label "pipeline,catalog-drift" --body "$body"
+          fi
+      - name: Close drift issue on recovery
+        if: steps.validator.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHARD: ${{ matrix.shard }}
+          CV: ${{ needs.resolve.outputs.catalog_version }}
+        run: |
+          set -euo pipefail
+          title="Catalog drift in ${SHARD}"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          existing=$(gh issue list \
+              --label catalog-drift --state open --limit 100 \
+              --json number,title \
+            | jq --arg t "$title" -r '[.[] | select(.title == $t) | .number] | first // empty')
+          if [ -n "$existing" ]; then
+            gh issue close "$existing" \
+              --comment "Resolved: validator passed in catalog ${CV} (run ${run_url})."
+          fi
 
   gcp-machine-types-refresh:
     if: github.event_name == 'schedule'
