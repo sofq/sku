@@ -7,6 +7,7 @@ import pytest
 
 from ingest.aws_cloudfront import ingest
 from normalize.cdn_locations import LOCATION_MAP
+from ._tier_contiguity import assert_tiers_contiguous
 
 _DATA = Path(__file__).resolve().parent.parent / "testdata"
 FIXTURE = _DATA / "aws_cloudfront" / "offer.json"
@@ -29,11 +30,29 @@ def test_all_rows_are_network_cdn_kind():
     assert {r["kind"] for r in rows} == {"network.cdn"}
 
 
-def test_every_row_has_single_dto_dimension():
+def test_every_row_has_single_egress_dimension():
     rows = list(ingest(offer_path=FIXTURE))
     for r in rows:
-        assert [p["dimension"] for p in r["prices"]] == ["data_transfer_out"]
+        assert [p["dimension"] for p in r["prices"]] == ["egress"]
         assert r["prices"][0]["unit"] == "gb"
+        assert r["prices"][0]["tier"] == "0"
+        assert r["prices"][0]["tier_upper"] == ""
+
+
+def test_extra_fields():
+    rows = list(ingest(offer_path=FIXTURE))
+    for r in rows:
+        extra = r["resource_attrs"]["extra"]
+        assert extra["mode"] == "edge-egress"
+        assert extra["sku"] == "cloudfront-global"
+        assert extra["tier"] == "PriceClass_All"
+
+
+def test_tiers_contiguous():
+    rows = list(ingest(offer_path=FIXTURE))
+    # Check contiguity per row: each row is an independent single-tier group
+    for row in rows:
+        assert_tiers_contiguous([row], "network.cdn", "bytes")
 
 
 def test_resource_name_is_standard():

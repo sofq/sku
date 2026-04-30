@@ -108,11 +108,15 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             "region_normalized": region_normalized,
             "terms_hash": terms_hash(terms),
             "resource_attrs": {
-                "extra": {"tier": "PriceClass_All"},
+                "extra": {
+                    "tier": "PriceClass_All",
+                    "mode": "edge-egress",
+                    "sku": "cloudfront-global",
+                },
             },
             "terms": terms,
             "prices": [
-                {"dimension": "data_transfer_out", "tier": "",
+                {"dimension": "egress", "tier": "0", "tier_upper": "",
                  "amount": entry["usd"], "unit": entry["unit"].lower()},
             ],
         }
