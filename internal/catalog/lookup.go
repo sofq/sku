@@ -311,22 +311,38 @@ func (c *Catalog) LookupStorageBlock(ctx context.Context, f StorageBlockFilter) 
 
 // NoSQLDBFilter captures the flags `sku aws dynamodb price/list` exposes.
 // resource_name holds the table class slug ("standard" / "standard-ia").
+//
+// Engine is the token in terms.tenancy: "dynamodb" / "cosmos-sql" /
+// "cosmos-mongo" / "firestore-native". It is carried here for compare
+// handlers (Task 0.5) to use as a post-filter; LookupNoSQLDB itself passes
+// engine narrowing via Terms.Tenancy — set Terms.Tenancy when you want the
+// lookup to narrow by engine.
+//
+// Mode is a token in extra.mode: "provisioned" / "serverless" / "native" /
+// etc. Also used as a post-filter by compare handlers.
 type NoSQLDBFilter struct {
 	Provider     string
 	Service      string
 	ResourceName string // table class for DynamoDB; capacity-mode slug for Cosmos
 	Region       string
+	Engine       string // post-filter for compare handlers; pass via Terms.Tenancy to LookupNoSQLDB
+	Mode         string // post-filter for compare handlers
 	Terms        Terms
 }
 
 // CDNFilter captures the flags `sku aws cloudfront price/list` exposes.
 // resource_name is the CloudFront offering slug ("standard"); region carries
 // the canonical edge region (see pipeline/ingest/aws_cloudfront.LOCATION_MAP).
+//
+// Mode and Sku are populated by the network_cdn compare handler (Task 0.5)
+// for post-filtering; LookupCDN itself does not filter on these fields.
 type CDNFilter struct {
 	Provider     string
 	Service      string
 	ResourceName string
 	Region       string
+	Mode         string // post-filter for compare handlers
+	Sku          string // post-filter for compare handlers
 	Terms        Terms
 }
 
@@ -741,6 +757,90 @@ func scanResourceRow(rs *sql.Rows) (Row, error) {
 		_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
 	}
 	return r, nil
+}
+
+// MessagingQueueFilter captures the flags `sku <provider> <queue-service> price/list` exposes.
+// resource_name holds the provider-specific queue identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type MessagingQueueFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupMessagingQueue runs the messaging.queue point lookup / list query.
+func (c *Catalog) LookupMessagingQueue(ctx context.Context, f MessagingQueueFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupMessagingQueue requires ResourceName")
+	}
+	return c.lookupResource(ctx, "messaging.queue", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// MessagingTopicFilter captures the flags `sku <provider> <topic-service> price/list` exposes.
+// resource_name holds the provider-specific topic identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type MessagingTopicFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupMessagingTopic runs the messaging.topic point lookup / list query.
+func (c *Catalog) LookupMessagingTopic(ctx context.Context, f MessagingTopicFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupMessagingTopic requires ResourceName")
+	}
+	return c.lookupResource(ctx, "messaging.topic", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// DNSZoneFilter captures the flags `sku <provider> <dns-service> price/list` exposes.
+// resource_name holds the provider-specific DNS zone identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type DNSZoneFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupDNSZone runs the dns.zone point lookup / list query.
+func (c *Catalog) LookupDNSZone(ctx context.Context, f DNSZoneFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupDNSZone requires ResourceName")
+	}
+	return c.lookupResource(ctx, "dns.zone", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// APIGatewayFilter captures the flags `sku <provider> <api-gateway-service> price/list` exposes.
+// resource_name holds the provider-specific API gateway identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type APIGatewayFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupAPIGateway runs the api.gateway point lookup / list query.
+func (c *Catalog) LookupAPIGateway(ctx context.Context, f APIGatewayFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupAPIGateway requires ResourceName")
+	}
+	return c.lookupResource(ctx, "api.gateway", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
 }
 
 // FillPrices loads the prices rows for r.SKUID and appends them to r.Prices.
