@@ -53,3 +53,62 @@ func TestGCPBigQueryListCmd_RequiresMode(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, buf.String(), "mode")
 }
+
+func TestGCPBigQueryPriceCmd_RejectsUnknownMode(t *testing.T) {
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "bigquery", "price", "--mode", "bogus", "--region", "bq-us"})
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, buf.String(), "flag_invalid")
+}
+
+// Real-lookup tests below open a seeded gcp-bigquery shard and exercise the
+// catalog query path end-to-end. These guard against the class of bug where
+// the CLI's Terms tuple disagrees with what the ingest writes.
+
+func TestGCPBigQueryPrice_OnDemand_HappyPath(t *testing.T) {
+	testutilSeededGCPBigQueryCatalog(t)
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "bigquery", "price", "--mode", "on-demand", "--region", "bq-us"})
+	var out, errb bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&errb)
+	require.NoError(t, cmd.Execute(), errb.String())
+	require.Contains(t, out.String(), `"name":"on-demand"`)
+}
+
+func TestGCPBigQueryPrice_CapacityStandard_HappyPath(t *testing.T) {
+	testutilSeededGCPBigQueryCatalog(t)
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "bigquery", "price", "--mode", "capacity-standard", "--region", "bq-us"})
+	var out, errb bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&errb)
+	require.NoError(t, cmd.Execute(), errb.String())
+	require.Contains(t, out.String(), `"name":"capacity-standard"`)
+}
+
+func TestGCPBigQueryPrice_CapacityEnterprisePlus_HappyPath(t *testing.T) {
+	testutilSeededGCPBigQueryCatalog(t)
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "bigquery", "price", "--mode", "capacity-enterprise-plus", "--region", "bq-us"})
+	var out, errb bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&errb)
+	require.NoError(t, cmd.Execute(), errb.String())
+	require.Contains(t, out.String(), `"name":"capacity-enterprise-plus"`)
+}
+
+func TestGCPBigQueryList_DropsRegion(t *testing.T) {
+	testutilSeededGCPBigQueryCatalog(t)
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"gcp", "bigquery", "list", "--mode", "storage-active"})
+	var out, errb bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&errb)
+	require.NoError(t, cmd.Execute(), errb.String())
+	require.Contains(t, out.String(), `"name":"storage-active"`)
+}

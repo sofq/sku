@@ -45,3 +45,24 @@ def test_ingest_empty_offer_returns_no_rows(tmp_path):
     empty = tmp_path / "offer.json"
     empty.write_text('{"products": {}, "terms": {"OnDemand": {}}}')
     assert list(ingest(offer_path=empty)) == []
+
+
+def test_ingest_serverless_collapses_to_one_row_per_region():
+    # AWS publishes compute-OCU / indexing-OCU / storage-OCU as separate
+    # offer SKUs; the ingest must collapse them into a single logical SKU
+    # per region so `sku aws opensearch price --mode serverless` returns
+    # one row with three price dimensions, not three rows.
+    rows = list(ingest(offer_path=FIX / "offer.json"))
+    sl = [r for r in rows if r["resource_attrs"]["extra"]["mode"] == "serverless"]
+    assert len(sl) == 1, f"expected 1 serverless row, got {len(sl)}"
+    row = sl[0]
+    dims = {p["dimension"] for p in row["prices"]}
+    assert dims == {"compute-ocu", "indexing-ocu", "storage"}
+
+
+def test_ingest_serverless_storage_uses_gb_month_unit():
+    rows = list(ingest(offer_path=FIX / "offer.json"))
+    sl = [r for r in rows if r["resource_attrs"]["extra"]["mode"] == "serverless"]
+    assert sl
+    storage_prices = [p for p in sl[0]["prices"] if p["dimension"] == "storage"]
+    assert storage_prices and storage_prices[0]["unit"] == "gb-month"

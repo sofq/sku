@@ -25,6 +25,14 @@
         "operation": "OpenSearchStorageOCU"
       }
     },
+    "OPENSEARCH_SERVERLESS_INDEXING_USE1": {
+      "sku": "OPENSEARCH_SERVERLESS_INDEXING_USE1",
+      "productFamily": "Amazon OpenSearch Serverless",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "operation": "OpenSearchIndexingOCU"
+      }
+    },
     "OPENSEARCH_UNKNOWN_REGION": {
       "sku": "OPENSEARCH_UNKNOWN_REGION",
       "productFamily": "Amazon OpenSearch Service",
@@ -62,6 +70,16 @@
             "OPENSEARCH_SERVERLESS_STORAGE_USE1.OD.1": {
               "pricePerUnit": {"USD": "0.024"},
               "unit": "GB-Mo"
+            }
+          }
+        }
+      },
+      "OPENSEARCH_SERVERLESS_INDEXING_USE1": {
+        "OPENSEARCH_SERVERLESS_INDEXING_USE1.OD": {
+          "priceDimensions": {
+            "OPENSEARCH_SERVERLESS_INDEXING_USE1.OD.1": {
+              "pricePerUnit": {"USD": "0.24"},
+              "unit": "OCU-Hours"
             }
           }
         }

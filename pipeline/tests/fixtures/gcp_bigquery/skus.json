@@ -14,6 +14,19 @@
       }]
     },
     {
+      "skuId": "BQ-STD-SLOTS-USE",
+      "description": "BigQuery Standard edition slot commitment",
+      "serviceRegions": ["US"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "slot-hour",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 20000000}
+          }]
+        }
+      }]
+    },
+    {
       "skuId": "BQ-ENT-SLOTS-EU",
       "description": "BigQuery Enterprise edition slot commitment",
       "serviceRegions": ["EU"],

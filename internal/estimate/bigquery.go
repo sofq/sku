@@ -22,11 +22,12 @@ func (bigqueryEstimator) Kind() string { return "warehouse.query.bigquery" }
 
 // Estimate dispatches to the correct BigQuery pricing model based on resource:
 //
-//	on-demand             — :tb_queried=<n>
-//	capacity-standard     — :slots=<n>:hours=<n>
-//	capacity-enterprise   — :slots=<n>:hours=<n>
-//	storage-active        — :gb_month=<n>
-//	storage-long-term     — :gb_month=<n>
+//	on-demand                 — :tb_queried=<n>
+//	capacity-standard         — :slots=<n>:hours=<n>
+//	capacity-enterprise       — :slots=<n>:hours=<n>
+//	capacity-enterprise-plus  — :slots=<n>:hours=<n>
+//	storage-active            — :gb_month=<n>
+//	storage-long-term         — :gb_month=<n>
 func (bigqueryEstimator) Estimate(ctx context.Context, it Item) (LineItem, error) {
 	region := it.Params["region"]
 	if region == "" {
@@ -35,12 +36,13 @@ func (bigqueryEstimator) Estimate(ctx context.Context, it Item) (LineItem, error
 
 	resource := it.Resource
 	switch resource {
-	case "on-demand", "capacity-standard", "capacity-enterprise",
+	case "on-demand",
+		"capacity-standard", "capacity-enterprise", "capacity-enterprise-plus",
 		"storage-active", "storage-long-term":
 	default:
 		return LineItem{}, fmt.Errorf(
 			"estimate/bigquery: resource must be on-demand|capacity-standard|capacity-enterprise|"+
-				"storage-active|storage-long-term, got %q", resource)
+				"capacity-enterprise-plus|storage-active|storage-long-term, got %q", resource)
 	}
 
 	rows, err := lookupBigQuery(ctx, "gcp-bigquery", catalog.WarehouseQueryFilter{
@@ -48,7 +50,7 @@ func (bigqueryEstimator) Estimate(ctx context.Context, it Item) (LineItem, error
 		Service:      "bigquery",
 		ResourceName: resource,
 		Region:       region,
-		Terms:        catalog.Terms{Commitment: "on_demand", OS: "on-demand"},
+		Terms:        catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "on-demand"},
 	})
 	if err != nil {
 		return LineItem{}, fmt.Errorf("estimate/bigquery: lookup: %w", err)
@@ -61,7 +63,7 @@ func (bigqueryEstimator) Estimate(ctx context.Context, it Item) (LineItem, error
 	switch resource {
 	case "on-demand":
 		return bigqueryOnDemand(it, r)
-	case "capacity-standard", "capacity-enterprise":
+	case "capacity-standard", "capacity-enterprise", "capacity-enterprise-plus":
 		return bigqueryCapacity(it, r)
 	default: // storage-active, storage-long-term
 		return bigqueryStorage(it, r)

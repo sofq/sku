@@ -72,7 +72,7 @@ func TestOpenSearchEstimator_Serverless(t *testing.T) {
 		return []catalog.Row{{
 			SKUID: "sku-os-sl", Provider: "aws", Service: "opensearch",
 			ResourceName: "opensearch-serverless", Region: "us-east-1",
-			Prices: []catalog.Price{{Dimension: "ocu", Amount: 0.24, Unit: "hour"}},
+			Prices: []catalog.Price{{Dimension: "compute-ocu", Amount: 0.24, Unit: "hour"}},
 		}}, nil
 	})
 
@@ -93,7 +93,7 @@ func TestOpenSearchEstimator_ServerlessMissingOCUHours(t *testing.T) {
 		return []catalog.Row{{
 			SKUID: "sku-os-sl", Provider: "aws", Service: "opensearch",
 			ResourceName: "opensearch-serverless", Region: "us-east-1",
-			Prices: []catalog.Price{{Dimension: "ocu", Amount: 0.24, Unit: "hour"}},
+			Prices: []catalog.Price{{Dimension: "compute-ocu", Amount: 0.24, Unit: "hour"}},
 		}}, nil
 	})
 

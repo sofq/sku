@@ -77,12 +77,15 @@ def _parse_regions(sku: dict) -> list[str]:
 def _classify(description: str) -> tuple[str, str, str] | None:
     """Return (resource_name, support_tier, dimension) or None to skip.
 
-    resource_name choices:
-      on-demand          → on-demand analysis
-      capacity-standard  → Enterprise edition slots
-      capacity-enterprise→ Enterprise Plus edition slots
-      storage-active     → active storage
-      storage-long-term  → long-term (cold) storage
+    resource_name maps 1:1 to the BigQuery edition name so the CLI's
+    `--mode <name>` matches the ingested rows directly:
+
+      on-demand                → on-demand analysis (per-TB)
+      capacity-standard        → Standard edition slot commitment
+      capacity-enterprise      → Enterprise edition slot commitment
+      capacity-enterprise-plus → Enterprise Plus edition slot commitment
+      storage-active           → active storage (per GB-month)
+      storage-long-term        → long-term (cold) storage (per GB-month)
     """
     desc = description.lower()
 
@@ -92,12 +95,17 @@ def _classify(description: str) -> tuple[str, str, str] | None:
 
     if "enterprise plus" in desc or "enterprise_plus" in desc:
         if "slot" in desc:
-            return "capacity-enterprise", "enterprise-plus", "slot"
+            return "capacity-enterprise-plus", "enterprise-plus", "slot"
         return None
 
     if "enterprise" in desc:
         if "slot" in desc:
-            return "capacity-standard", "enterprise", "slot"
+            return "capacity-enterprise", "enterprise", "slot"
+        return None
+
+    if "standard" in desc and "edition" in desc:
+        if "slot" in desc:
+            return "capacity-standard", "standard", "slot"
         return None
 
     if "long-term" in desc or "long term" in desc:
@@ -145,9 +153,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
         # Canonicalize unit
         if "TiBy" in usage_unit or "tebibyte" in usage_unit.lower():
             unit = "tb"
-        elif "GiBy" in usage_unit:
-            unit = "gb-month"
-        elif "mo" in usage_unit.lower():
+        elif "GiBy" in usage_unit or "mo" in usage_unit.lower():
             unit = "gb-month"
         elif dimension == "slot":
             unit = "slot-hour"

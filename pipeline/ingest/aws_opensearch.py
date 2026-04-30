@@ -73,13 +73,21 @@ def _classify_managed_cluster(attrs: dict) -> tuple[str, str] | None:
     return instance_type, family
 
 
-def _classify_serverless(attrs: dict) -> str | None:
-    """Return dimension name or None to skip."""
+def _classify_serverless(attrs: dict) -> tuple[str, str] | None:
+    """Return (dimension, billed_unit) or None to skip.
+
+    Three serverless dimensions co-exist on one logical SKU per region:
+      compute-ocu  — OpenSearchComputeOCU operation, billed per hour
+      indexing-ocu — OpenSearchIndexingOCU operation, billed per hour
+      storage      — OpenSearchStorageOCU operation, billed per gb-month
+    """
     operation = attrs.get("operation", "")
     if "OpenSearchComputeOCU" in operation:
-        return "ocu"
-    if "OpenSearchStorageOCU" in operation or "OpenSearchIndexingOCU" in operation:
-        return "storage"
+        return "compute-ocu", "hour"
+    if "OpenSearchIndexingOCU" in operation:
+        return "indexing-ocu", "hour"
+    if "OpenSearchStorageOCU" in operation:
+        return "storage", "gb-month"
     return None
 
 
@@ -89,6 +97,12 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         offer = json.load(f)
     products = offer.get("products", {})
     terms_od = offer.get("terms", {}).get("OnDemand", {})
+
+    # Serverless rows are aggregated by region: AWS publishes a separate
+    # offer SKU per OCU dimension (compute / indexing / storage), but the
+    # CLI exposes them as one logical opensearch-serverless row with three
+    # price entries.
+    serverless_by_region: dict[str, dict[str, Any]] = {}
 
     for sku_id, product in products.items():
         family = product.get("productFamily", "")
@@ -146,41 +160,46 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             }
 
         elif family in ("Amazon OpenSearch Serverless", "Amazon OpenSearch Service Serverless"):
-            dimension = _classify_serverless(attrs)
-            if dimension is None:
+            classified = _classify_serverless(attrs)
+            if classified is None:
                 continue
-            # Serverless uses a single resource_name for all OCU/storage rows.
-            resource_name = "opensearch-serverless"
-            billed_unit = "gb-month" if dimension == "storage" else "hour"
-            terms = apply_kind_defaults(_KIND, {
-                "commitment": "on_demand",
-                "tenancy": "shared",
-                "os": "serverless",
-                "support_tier": "",
-                "upfront": "",
-                "payment_option": "",
-            })
-            yield {
-                "sku_id": sku_id,
-                "provider": _PROVIDER,
-                "service": _SERVICE,
-                "kind": _KIND,
-                "resource_name": resource_name,
-                "region": region,
-                "region_normalized": region_normalized,
-                "terms_hash": terms_hash(terms),
-                "resource_attrs": {
-                    "vcpu": None,
-                    "memory_gb": None,
-                    "extra": {
-                        "mode": "serverless",
+            dimension, billed_unit = classified
+            row = serverless_by_region.get(region)
+            if row is None:
+                terms = apply_kind_defaults(_KIND, {
+                    "commitment": "on_demand",
+                    "tenancy": "shared",
+                    "os": "serverless",
+                    "support_tier": "",
+                    "upfront": "",
+                    "payment_option": "",
+                })
+                row = {
+                    "sku_id": f"opensearch-serverless-{region}",
+                    "provider": _PROVIDER,
+                    "service": _SERVICE,
+                    "kind": _KIND,
+                    "resource_name": "opensearch-serverless",
+                    "region": region,
+                    "region_normalized": region_normalized,
+                    "terms_hash": terms_hash(terms),
+                    "resource_attrs": {
+                        "vcpu": None,
+                        "memory_gb": None,
+                        "extra": {"mode": "serverless"},
                     },
-                },
-                "terms": terms,
-                "prices": [
-                    {"dimension": dimension, "tier": "", "amount": usd, "unit": billed_unit},
-                ],
-            }
+                    "terms": terms,
+                    "prices": [],
+                }
+                serverless_by_region[region] = row
+            row["prices"].append(
+                {"dimension": dimension, "tier": "", "amount": usd, "unit": billed_unit}
+            )
+
+    for row in serverless_by_region.values():
+        # Sort prices for deterministic output.
+        row["prices"].sort(key=lambda p: p["dimension"])
+        yield row
 
 
 def main() -> int:

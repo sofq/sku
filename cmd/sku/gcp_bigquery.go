@@ -30,7 +30,16 @@ func (f *bigqueryFlags) bind(c *cobra.Command) {
 }
 
 func (f *bigqueryFlags) terms() catalog.Terms {
-	return catalog.Terms{Commitment: "on_demand", OS: "on-demand"}
+	return catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "on-demand"}
+}
+
+var bigqueryModes = map[string]bool{
+	"on-demand":                true,
+	"capacity-standard":        true,
+	"capacity-enterprise":      true,
+	"capacity-enterprise-plus": true,
+	"storage-active":           true,
+	"storage-long-term":        true,
 }
 
 func newGCPBigQueryPriceCmd() *cobra.Command {
@@ -60,6 +69,12 @@ func runGCPBigQuery(cmd *cobra.Command, f *bigqueryFlags, requireRegion bool) er
 	if f.mode == "" {
 		e := skuerrors.Validation("flag_invalid", "mode", "",
 			"pass --mode on-demand, --mode capacity-standard, --mode capacity-enterprise, --mode capacity-enterprise-plus, --mode storage-active, or --mode storage-long-term")
+		skuerrors.Write(cmd.ErrOrStderr(), e)
+		return e
+	}
+	if !bigqueryModes[f.mode] {
+		e := skuerrors.Validation("flag_invalid", "mode", f.mode,
+			"allowed: on-demand | capacity-standard | capacity-enterprise | capacity-enterprise-plus | storage-active | storage-long-term")
 		skuerrors.Write(cmd.ErrOrStderr(), e)
 		return e
 	}

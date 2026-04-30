@@ -102,12 +102,14 @@ func opensearchServerless(it Item, rows []catalog.Row) (LineItem, error) {
 		return LineItem{}, fmt.Errorf("estimate/opensearch: serverless needs :ocu_hours=<n>")
 	}
 
-	// Find the OCU compute row (dimension="ocu").
+	// Find the compute-OCU price. The serverless ingest emits one logical
+	// SKU per region with three price dimensions (compute-ocu / indexing-ocu
+	// / storage); :ocu_hours bills against compute-ocu only.
 	var r catalog.Row
 	var ocuPrice float64
 	for _, row := range rows {
 		for _, p := range row.Prices {
-			if p.Dimension == "ocu" {
+			if p.Dimension == "compute-ocu" {
 				r = row
 				ocuPrice = p.Amount
 			}

@@ -168,7 +168,7 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 				"search.engine accepts --mode / --regions / --max-price")
 		}
 	case "paas.app":
-		if f.vcpu != 0 || f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
+		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
 			f.availabilityTier != "" || f.storageGB != 0 || f.engine != "" ||
 			f.deploymentOption != "" || f.mode != "" || f.edition != "" || f.storageTier != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
