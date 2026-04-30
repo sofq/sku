@@ -549,10 +549,11 @@ type PaasAppFilter struct {
 // Unlike other Lookup methods, this filters on individual term columns rather
 // than terms_hash so that tier-only queries (no OS specified) work correctly.
 func (c *Catalog) LookupPaasApp(ctx context.Context, f PaasAppFilter) ([]Row, error) {
-	var where []string
+	where := []string{
+		"s.kind = 'paas.app'",
+		"t.commitment = 'on_demand'",
+	}
 	var args []any
-	where = append(where, "s.kind = 'paas.app'")
-	where = append(where, "t.commitment = 'on_demand'")
 	if f.ResourceName != "" {
 		where = append(where, "s.resource_name = ?")
 		args = append(args, f.ResourceName)
@@ -581,80 +582,7 @@ func (c *Catalog) LookupPaasApp(ctx context.Context, f PaasAppFilter) ([]Row, er
 		where = append(where, "t.tenancy = ?")
 		args = append(args, f.Terms.Tenancy)
 	}
-
-	const queryBase = `
-SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,
-       s.region_normalized, s.terms_hash,
-       t.commitment, t.tenancy, t.os, t.support_tier, t.upfront, t.payment_option,
-       ra.vcpu, ra.memory_gb, ra.storage_gb, ra.gpu_count, ra.gpu_model,
-       ra.architecture, ra.extra
-FROM skus s
-JOIN terms t ON t.sku_id = s.sku_id
-LEFT JOIN resource_attrs ra ON ra.sku_id = s.sku_id
-WHERE `
-	query := queryBase + strings.Join(where, " AND ") + "\nORDER BY s.region, s.sku_id" //nolint:gosec // G202: no user input in SQL concatenation
-
-	rs, err := c.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("catalog: LookupPaasApp: %w", err)
-	}
-	defer func() { _ = rs.Close() }()
-
-	var out []Row
-	for rs.Next() {
-		var r Row
-		var supportTier, upfront, paymentOption sql.NullString
-		var vcpu sql.NullInt64
-		var mem, storage sql.NullFloat64
-		var gpuCount sql.NullInt64
-		var gpuModel, arch, extraJSON sql.NullString
-		if err := rs.Scan(
-			&r.SKUID, &r.Provider, &r.Service, &r.Kind, &r.ResourceName, &r.Region,
-			&r.RegionGroup, &r.TermsHash,
-			&r.Terms.Commitment, &r.Terms.Tenancy, &r.Terms.OS,
-			&supportTier, &upfront, &paymentOption,
-			&vcpu, &mem, &storage, &gpuCount, &gpuModel, &arch, &extraJSON,
-		); err != nil {
-			return nil, err
-		}
-		r.CatalogVersion = c.catalogVersion
-		r.Currency = c.currency
-		r.Terms.SupportTier = supportTier.String
-		r.Terms.Upfront = upfront.String
-		r.Terms.PaymentOption = paymentOption.String
-		if vcpu.Valid {
-			v := vcpu.Int64
-			r.ResourceAttrs.VCPU = &v
-		}
-		if mem.Valid {
-			v := mem.Float64
-			r.ResourceAttrs.MemoryGB = &v
-		}
-		if storage.Valid {
-			v := storage.Float64
-			r.ResourceAttrs.StorageGB = &v
-		}
-		if gpuCount.Valid {
-			v := gpuCount.Int64
-			r.ResourceAttrs.GPUCount = &v
-		}
-		if gpuModel.Valid {
-			v := gpuModel.String
-			r.ResourceAttrs.GPUModel = &v
-		}
-		if arch.Valid {
-			v := arch.String
-			r.ResourceAttrs.Architecture = &v
-		}
-		if extraJSON.Valid && extraJSON.String != "" {
-			_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
-		}
-		if err := c.FillPrices(ctx, &r); err != nil {
-			return nil, err
-		}
-		out = append(out, r)
-	}
-	return out, rs.Err()
+	return c.runResourceColumnQuery(ctx, "LookupPaasApp", where, args)
 }
 
 // WarehouseQueryFilter captures the flags `sku <provider> <warehouse-service> price/list` exposes.
@@ -680,11 +608,11 @@ func (c *Catalog) LookupWarehouseQuery(ctx context.Context, f WarehouseQueryFilt
 	if f.ResourceName == "" {
 		return nil, fmt.Errorf("catalog: LookupWarehouseQuery requires ResourceName")
 	}
-	var where []string
-	var args []any
-	where = append(where, "s.kind = 'warehouse.query'")
-	where = append(where, "s.resource_name = ?")
-	args = append(args, f.ResourceName)
+	where := []string{
+		"s.kind = 'warehouse.query'",
+		"s.resource_name = ?",
+	}
+	args := []any{f.ResourceName}
 	if f.Provider != "" {
 		where = append(where, "s.provider = ?")
 		args = append(args, f.Provider)
@@ -713,7 +641,16 @@ func (c *Catalog) LookupWarehouseQuery(ctx context.Context, f WarehouseQueryFilt
 		where = append(where, "t.support_tier = ?")
 		args = append(args, f.Terms.SupportTier)
 	}
+	return c.runResourceColumnQuery(ctx, "LookupWarehouseQuery", where, args)
+}
 
+// runResourceColumnQuery executes a `s.kind = ...`-anchored point/list query
+// whose WHERE was built from already-validated literals + placeholders.
+//
+// Used by lookups that filter on individual term columns rather than
+// terms_hash (LookupPaasApp / LookupWarehouseQuery) — these need to expose
+// partial-tuple queries the CLI can't reproduce as a hash.
+func (c *Catalog) runResourceColumnQuery(ctx context.Context, label string, where []string, args []any) ([]Row, error) {
 	const queryBase = `
 SELECT s.sku_id, s.provider, s.service, s.kind, s.resource_name, s.region,
        s.region_normalized, s.terms_hash,
@@ -728,65 +665,76 @@ WHERE `
 
 	rs, err := c.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("catalog: LookupWarehouseQuery: %w", err)
+		return nil, fmt.Errorf("catalog: %s: %w", label, err)
 	}
 	defer func() { _ = rs.Close() }()
 
 	var out []Row
 	for rs.Next() {
-		var r Row
-		var supportTier, upfront, paymentOption sql.NullString
-		var vcpu sql.NullInt64
-		var mem, storage sql.NullFloat64
-		var gpuCount sql.NullInt64
-		var gpuModel, arch, extraJSON sql.NullString
-		if err := rs.Scan(
-			&r.SKUID, &r.Provider, &r.Service, &r.Kind, &r.ResourceName, &r.Region,
-			&r.RegionGroup, &r.TermsHash,
-			&r.Terms.Commitment, &r.Terms.Tenancy, &r.Terms.OS,
-			&supportTier, &upfront, &paymentOption,
-			&vcpu, &mem, &storage, &gpuCount, &gpuModel, &arch, &extraJSON,
-		); err != nil {
+		r, err := scanResourceRow(rs)
+		if err != nil {
 			return nil, err
 		}
 		r.CatalogVersion = c.catalogVersion
 		r.Currency = c.currency
-		r.Terms.SupportTier = supportTier.String
-		r.Terms.Upfront = upfront.String
-		r.Terms.PaymentOption = paymentOption.String
-		if vcpu.Valid {
-			v := vcpu.Int64
-			r.ResourceAttrs.VCPU = &v
-		}
-		if mem.Valid {
-			v := mem.Float64
-			r.ResourceAttrs.MemoryGB = &v
-		}
-		if storage.Valid {
-			v := storage.Float64
-			r.ResourceAttrs.StorageGB = &v
-		}
-		if gpuCount.Valid {
-			v := gpuCount.Int64
-			r.ResourceAttrs.GPUCount = &v
-		}
-		if gpuModel.Valid {
-			v := gpuModel.String
-			r.ResourceAttrs.GPUModel = &v
-		}
-		if arch.Valid {
-			v := arch.String
-			r.ResourceAttrs.Architecture = &v
-		}
-		if extraJSON.Valid && extraJSON.String != "" {
-			_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
-		}
 		if err := c.FillPrices(ctx, &r); err != nil {
 			return nil, err
 		}
 		out = append(out, r)
 	}
 	return out, rs.Err()
+}
+
+// scanResourceRow scans one row of the standard SELECT projection used by
+// runResourceColumnQuery (and the search.engine equivalent in lookupResource)
+// into a Row. CatalogVersion / Currency / Prices are populated by the caller.
+func scanResourceRow(rs *sql.Rows) (Row, error) {
+	var r Row
+	var supportTier, upfront, paymentOption sql.NullString
+	var vcpu sql.NullInt64
+	var mem, storage sql.NullFloat64
+	var gpuCount sql.NullInt64
+	var gpuModel, arch, extraJSON sql.NullString
+	if err := rs.Scan(
+		&r.SKUID, &r.Provider, &r.Service, &r.Kind, &r.ResourceName, &r.Region,
+		&r.RegionGroup, &r.TermsHash,
+		&r.Terms.Commitment, &r.Terms.Tenancy, &r.Terms.OS,
+		&supportTier, &upfront, &paymentOption,
+		&vcpu, &mem, &storage, &gpuCount, &gpuModel, &arch, &extraJSON,
+	); err != nil {
+		return Row{}, err
+	}
+	r.Terms.SupportTier = supportTier.String
+	r.Terms.Upfront = upfront.String
+	r.Terms.PaymentOption = paymentOption.String
+	if vcpu.Valid {
+		v := vcpu.Int64
+		r.ResourceAttrs.VCPU = &v
+	}
+	if mem.Valid {
+		v := mem.Float64
+		r.ResourceAttrs.MemoryGB = &v
+	}
+	if storage.Valid {
+		v := storage.Float64
+		r.ResourceAttrs.StorageGB = &v
+	}
+	if gpuCount.Valid {
+		v := gpuCount.Int64
+		r.ResourceAttrs.GPUCount = &v
+	}
+	if gpuModel.Valid {
+		v := gpuModel.String
+		r.ResourceAttrs.GPUModel = &v
+	}
+	if arch.Valid {
+		v := arch.String
+		r.ResourceAttrs.Architecture = &v
+	}
+	if extraJSON.Valid && extraJSON.String != "" {
+		_ = json.Unmarshal([]byte(extraJSON.String), &r.ResourceAttrs.Extra)
+	}
+	return r, nil
 }
 
 // FillPrices loads the prices rows for r.SKUID and appends them to r.Prices.

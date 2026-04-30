@@ -43,6 +43,17 @@
       "unitOfMeasure": "1 Hour",
       "type": "Consumption",
       "currencyCode": "USD"
+    },
+    {
+      "skuId": "DZH318Z0BQ3Q/0010",
+      "productName": "Azure App Service (Linux) - Isolated v2",
+      "meterName": "I1v2 App Service Hours",
+      "skuName": "I1v2",
+      "armRegionName": "eastus",
+      "retailPrice": 0.4,
+      "unitOfMeasure": "1 Hour",
+      "type": "Consumption",
+      "currencyCode": "USD"
     }
   ]
 }

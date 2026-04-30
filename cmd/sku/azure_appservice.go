@@ -1,8 +1,6 @@
 package sku
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/sofq/sku/internal/catalog"
@@ -105,7 +103,7 @@ func runAzureAppService(cmd *cobra.Command, f *appServiceFlags, requireRegion bo
 	if stale := applyStaleGate(cmd, cat, shardAzureAppService, s); stale != nil {
 		return stale
 	}
-	rows, err := cat.LookupPaasApp(context.Background(), catalog.PaasAppFilter{
+	rows, err := cat.LookupPaasApp(cmd.Context(), catalog.PaasAppFilter{
 		Provider:     "azure",
 		Service:      "appservice",
 		ResourceName: f.sku,

@@ -50,3 +50,17 @@ def test_ingest_empty_prices_returns_no_rows(tmp_path):
     empty = tmp_path / "prices.json"
     empty.write_text('{"Items": []}')
     assert list(ingest(prices_path=empty)) == []
+
+
+def test_ingest_isolated_v2_sku_canonicalizes_to_lowercase_v():
+    # Regression: prior canonicalization only normalized P*v* to lowercase v,
+    # leaving I*v2 as "I1V2" — which mismatched _PLAN_SKU_SPECS keys
+    # (lowercase v) and _APP_SERVICE_SKUS in validate/azure.py.
+    rows = list(ingest(prices_path=FIX / "prices.json"))
+    iso = [r for r in rows if r["resource_name"].startswith("I")]
+    assert iso, "expected at least one Isolated-v2 row"
+    for r in iso:
+        assert r["resource_name"] == "I1v2", r["resource_name"]
+        assert not r["resource_attrs"]["extra"].get("unknown_sku")
+        assert r["resource_attrs"]["vcpu"] == 2
+        assert r["resource_attrs"]["memory_gb"] == 8.0

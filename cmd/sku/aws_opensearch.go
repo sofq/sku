@@ -1,8 +1,6 @@
 package sku
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/sofq/sku/internal/catalog"
@@ -23,18 +21,16 @@ type opensearchFlags struct {
 	instanceType string
 	mode         string
 	region       string
-	commitment   string
 }
 
 func (f *opensearchFlags) bind(c *cobra.Command) {
 	c.Flags().StringVar(&f.instanceType, "instance-type", "", "OpenSearch instance type, e.g. r6g.large.search; omit when --mode=serverless")
 	c.Flags().StringVar(&f.mode, "mode", "managed-cluster", "managed-cluster | serverless")
 	c.Flags().StringVar(&f.region, "region", "", "AWS region")
-	c.Flags().StringVar(&f.commitment, "commitment", "on_demand", "on_demand")
 }
 
 func (f *opensearchFlags) terms() catalog.Terms {
-	return catalog.Terms{Commitment: f.commitment, Tenancy: "shared", OS: f.mode}
+	return catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: f.mode}
 }
 
 func (f *opensearchFlags) resourceName() string {
@@ -92,7 +88,6 @@ func runAWSOpenSearch(cmd *cobra.Command, f *opensearchFlags, requireRegion bool
 				"instance_type": f.instanceType,
 				"mode":          f.mode,
 				"region":        f.region,
-				"commitment":    f.commitment,
 			},
 			Shards: []string{shardAWSOpenSearch},
 			Preset: s.Preset,
@@ -112,7 +107,7 @@ func runAWSOpenSearch(cmd *cobra.Command, f *opensearchFlags, requireRegion bool
 	if stale := applyStaleGate(cmd, cat, shardAWSOpenSearch, s); stale != nil {
 		return stale
 	}
-	rows, err := cat.LookupSearchEngine(context.Background(), catalog.SearchEngineFilter{
+	rows, err := cat.LookupSearchEngine(cmd.Context(), catalog.SearchEngineFilter{
 		Provider:     "aws",
 		Service:      "opensearch",
 		ResourceName: f.resourceName(),

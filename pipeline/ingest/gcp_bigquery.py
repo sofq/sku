@@ -113,7 +113,7 @@ def _classify(description: str) -> tuple[str, str, str] | None:
             return "storage-long-term", "storage-long-term", "storage"
         return None
 
-    if "active" in desc or "logical" in desc:
+    if "active" in desc:
         if "storage" in desc:
             return "storage-active", "storage-active", "storage"
         return None

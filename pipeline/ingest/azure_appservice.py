@@ -77,8 +77,24 @@ _TIER_KEYWORDS: list[tuple[str, str]] = [
     ("Free",        "free"),
 ]
 
-_SKU_RE = re.compile(r"\b(F1|D1|B[123]|S[123]|P[0-3]v[23]?|I[1-6]v?2?)\b", re.IGNORECASE)
+_SKU_RE = re.compile(r"\b(F1|D1|B[123]|S[123]|P[0-3]v[23]|I[1-6]v2|I[1-3])\b", re.IGNORECASE)
 _OS_RE  = re.compile(r"\b(Linux|Windows)\b", re.IGNORECASE)
+
+_PI_VERSIONED_RE = re.compile(r"^([PI])(\d)V(\d)$", re.IGNORECASE)
+
+
+def _canonicalize_sku(raw: str) -> str:
+    """Canonicalize a matched SKU token to the form used as a `_PLAN_SKU_SPECS` key.
+
+    P/I-tier versioned SKUs use a lowercase `v` ("P1v3", "I1v2"); other tiers
+    are uppercase ("F1", "B2", "S1"). Without this, Isolated-v2 SKUs end up
+    mismatched downstream — see `_PLAN_SKU_SPECS` and `_APP_SERVICE_SKUS`.
+    """
+    upper = raw.upper()
+    m = _PI_VERSIONED_RE.match(upper)
+    if m:
+        return f"{m.group(1)}{m.group(2)}v{m.group(3)}"
+    return upper
 
 
 def _classify_tier(product_name: str) -> str:
@@ -133,9 +149,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         sku_match = _SKU_RE.search(sku_name_raw) or _SKU_RE.search(meter_name)
         if not sku_match:
             continue
-        sku = sku_match.group(1).upper()
-        # Normalize Pxv3 pattern to P*v3
-        sku = re.sub(r"(?i)P(\d)V(\d)", lambda m: f"P{m.group(1)}v{m.group(2)}", sku)
+        sku = _canonicalize_sku(sku_match.group(1))
 
         tier = _classify_tier(product_name)
         if not tier:

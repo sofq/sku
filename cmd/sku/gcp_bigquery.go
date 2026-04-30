@@ -1,8 +1,6 @@
 package sku
 
 import (
-	"context"
-
 	"github.com/spf13/cobra"
 
 	"github.com/sofq/sku/internal/catalog"
@@ -108,7 +106,7 @@ func runGCPBigQuery(cmd *cobra.Command, f *bigqueryFlags, requireRegion bool) er
 	if stale := applyStaleGate(cmd, cat, shardGCPBigQuery, s); stale != nil {
 		return stale
 	}
-	rows, err := cat.LookupWarehouseQuery(context.Background(), catalog.WarehouseQueryFilter{
+	rows, err := cat.LookupWarehouseQuery(cmd.Context(), catalog.WarehouseQueryFilter{
 		Provider:     "gcp",
 		Service:      "bigquery",
 		ResourceName: f.mode,
