@@ -215,3 +215,52 @@ def test_azure_aks_virtual_nodes_filters_by_container_instance_dimension(
     assert "servicename eq 'container instances'" in filt
     assert "metername eq 'standard memory duration'" in filt
     assert "skuname eq 'standard'" in filt
+
+
+def test_azure_appservice_filters_by_sample_sku_id_to_disambiguate_os(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    sample = Sample(
+        sku_id="DZH318Z0BQ3Q/0002",
+        region="eastus",
+        resource_name="P1v3",
+        price_amount=0.169,
+        price_currency="USD",
+        dimension="instance",
+    )
+    requests_mock.get(
+        _AZURE_PRICES_URL,
+        json={
+            "Items": [
+                {
+                    "skuId": "DZH318Z0BQ3Q/0002",
+                    "meterName": "P1v3 App Service Hours",
+                    "armRegionName": "eastus",
+                    "unitPrice": 0.169,
+                    "currencyCode": "USD",
+                    "skuName": "P1v3",
+                    "productName": "Azure App Service (Linux) - PremiumV3",
+                    "type": "Consumption",
+                    "unitOfMeasure": "1 Hour",
+                },
+                {
+                    "skuId": "DZH318Z0BQ3Q/0003",
+                    "meterName": "P1v3 Windows App Service Hours",
+                    "armRegionName": "eastus",
+                    "unitPrice": 0.225,
+                    "currencyCode": "USD",
+                    "skuName": "P1v3",
+                    "productName": "Azure App Service (Windows) - PremiumV3",
+                    "type": "Consumption",
+                    "unitOfMeasure": "1 Hour",
+                },
+            ],
+            "NextPageLink": None,
+            "Count": 2,
+        },
+    )
+    drift, missing = revalidate([sample])
+    assert drift == []
+    assert missing == []
+    filt = requests_mock.last_request.qs["$filter"][0]
+    assert "skuid eq 'dzh318z0bq3q/0002'" in filt

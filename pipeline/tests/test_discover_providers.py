@@ -249,6 +249,11 @@ def test_gcp_discover_memorystore_hashes_redis_and_memcached_services():
     assert any("/services/9C2E-5AAC-D058/skus" in url for url in requested_urls)
 
 
+def test_gcp_bigquery_uses_bigquery_service_id_not_cloud_storage():
+    assert _GCP_SERVICE_IDS["gcp_bigquery"] == "24E6-581D-38E5"
+    assert _GCP_SERVICE_IDS["gcp_bigquery"] != _GCP_SERVICE_IDS["gcp_gcs"]
+
+
 # -----------------------------------------------------------------------------
 # OpenRouter discover
 # -----------------------------------------------------------------------------

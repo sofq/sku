@@ -49,6 +49,10 @@ _APP_SERVICE_SKUS = frozenset({
 })
 
 
+def _odata_literal(value: str) -> str:
+    return value.replace("'", "''")
+
+
 def _filter_for_sample(s: Sample) -> str | None:
     if s.resource_name == "aks-free":
         return None
@@ -72,10 +76,17 @@ def _filter_for_sample(s: Sample) -> str | None:
     if s.resource_name in _APP_SERVICE_SKUS:
         return (
             "serviceName eq 'Azure App Service' "
-            f"and skuName eq '{s.resource_name}' "
-            f"and armRegionName eq '{s.region}'"
+            f"and skuName eq '{_odata_literal(s.resource_name)}' "
+            f"and armRegionName eq '{_odata_literal(s.region)}' "
+            f"and skuId eq '{_odata_literal(s.sku_id)}'"
         )
     return f"meterName eq '{s.resource_name}' and armRegionName eq '{s.region}'"
+
+
+def _filter_response_items(s: Sample, items: list[dict]) -> list[dict]:
+    if s.resource_name in _APP_SERVICE_SKUS:
+        return [item for item in items if item.get("skuId") == s.sku_id]
+    return items
 
 
 def revalidate(
@@ -134,7 +145,7 @@ def revalidate(
             missing.append(s.sku_id)
             continue
 
-        items = data.get("Items", [])
+        items = _filter_response_items(s, data.get("Items", []))
         if not items:
             logger.debug("No Azure upstream price for %s", s.sku_id)
             missing.append(s.sku_id)
