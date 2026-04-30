@@ -1,0 +1,89 @@
+{
+  "products": {
+    "OPENSEARCH_R6G_LARGE_USE1": {
+      "sku": "OPENSEARCH_R6G_LARGE_USE1",
+      "productFamily": "Amazon OpenSearch Service",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "instanceType": "r6g.large.search",
+        "operation": "RunInstances"
+      }
+    },
+    "OPENSEARCH_SERVERLESS_OCU_USE1": {
+      "sku": "OPENSEARCH_SERVERLESS_OCU_USE1",
+      "productFamily": "Amazon OpenSearch Serverless",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "operation": "OpenSearchComputeOCU"
+      }
+    },
+    "OPENSEARCH_SERVERLESS_STORAGE_USE1": {
+      "sku": "OPENSEARCH_SERVERLESS_STORAGE_USE1",
+      "productFamily": "Amazon OpenSearch Serverless",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "operation": "OpenSearchStorageOCU"
+      }
+    },
+    "OPENSEARCH_SERVERLESS_INDEXING_USE1": {
+      "sku": "OPENSEARCH_SERVERLESS_INDEXING_USE1",
+      "productFamily": "Amazon OpenSearch Serverless",
+      "attributes": {
+        "regionCode": "us-east-1",
+        "operation": "OpenSearchIndexingOCU"
+      }
+    },
+    "OPENSEARCH_UNKNOWN_REGION": {
+      "sku": "OPENSEARCH_UNKNOWN_REGION",
+      "productFamily": "Amazon OpenSearch Service",
+      "attributes": {
+        "regionCode": "xx-fake-1",
+        "instanceType": "r6g.large.search"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "OPENSEARCH_R6G_LARGE_USE1": {
+        "OPENSEARCH_R6G_LARGE_USE1.OD": {
+          "priceDimensions": {
+            "OPENSEARCH_R6G_LARGE_USE1.OD.1": {
+              "pricePerUnit": {"USD": "0.166"},
+              "unit": "Hrs"
+            }
+          }
+        }
+      },
+      "OPENSEARCH_SERVERLESS_OCU_USE1": {
+        "OPENSEARCH_SERVERLESS_OCU_USE1.OD": {
+          "priceDimensions": {
+            "OPENSEARCH_SERVERLESS_OCU_USE1.OD.1": {
+              "pricePerUnit": {"USD": "0.24"},
+              "unit": "OCU-Hours"
+            }
+          }
+        }
+      },
+      "OPENSEARCH_SERVERLESS_STORAGE_USE1": {
+        "OPENSEARCH_SERVERLESS_STORAGE_USE1.OD": {
+          "priceDimensions": {
+            "OPENSEARCH_SERVERLESS_STORAGE_USE1.OD.1": {
+              "pricePerUnit": {"USD": "0.024"},
+              "unit": "GB-Mo"
+            }
+          }
+        }
+      },
+      "OPENSEARCH_SERVERLESS_INDEXING_USE1": {
+        "OPENSEARCH_SERVERLESS_INDEXING_USE1.OD": {
+          "priceDimensions": {
+            "OPENSEARCH_SERVERLESS_INDEXING_USE1.OD.1": {
+              "pricePerUnit": {"USD": "0.24"},
+              "unit": "OCU-Hours"
+            }
+          }
+        }
+      }
+    }
+  }
+}

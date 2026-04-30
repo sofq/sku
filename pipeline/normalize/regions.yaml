@@ -149,3 +149,8 @@ groups:
     - {provider: gcp,   region: me-west1}
     - {provider: gcp,   region: me-central1}
     - {provider: gcp,   region: me-central2}
+  # BigQuery multi-region pseudo-regions — self-referential (region_normalized = region).
+  bq-us:
+    - {provider: gcp,   region: bq-us}
+  bq-eu:
+    - {provider: gcp,   region: bq-eu}

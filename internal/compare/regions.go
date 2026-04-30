@@ -37,6 +37,9 @@ var literalSet = func() map[string]struct{} {
 			m[r] = struct{}{}
 		}
 	}
+	// BigQuery multi-region pseudo-regions (not in any provider group).
+	m["bq-us"] = struct{}{}
+	m["bq-eu"] = struct{}{}
 	return m
 }()
 
@@ -62,7 +65,7 @@ func Expand(inputs []string) ([]string, []string, error) {
 			litSet[in] = struct{}{}
 			continue
 		}
-		return nil, nil, fmt.Errorf("compare: unknown region or group %q; pass a known group (us-east, us-central, us-west, eu-west, eu-central, eu-north, asia-ne, asia-se, asia-south, oceania, sa, africa, middle-east) or a provider region literal", in)
+		return nil, nil, fmt.Errorf("compare: unknown region or group %q; pass a known group (us-east, us-central, us-west, eu-west, eu-central, eu-north, asia-ne, asia-se, asia-south, oceania, sa, africa, middle-east) or a provider region literal (BigQuery: bq-us, bq-eu)", in)
 	}
 	lits := make([]string, 0, len(litSet))
 	for r := range litSet {

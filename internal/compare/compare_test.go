@@ -79,6 +79,22 @@ func TestRun_storageObjectAndDBRelationalDispatch(t *testing.T) {
 	require.NotEmpty(t, drows)
 }
 
+func TestRun_paasAppDispatchPassesSizingFilters(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("SKU_DATA_DIR", dir)
+	path := buildShard(t, dir, "azure-appservice", filepath.Join("..", "catalog", "testdata", "seed_paas_app_compare.sql"))
+
+	rows, err := Run(context.Background(), Request{
+		Kind:     "paas.app",
+		VCPU:     2,
+		MemoryGB: 4,
+		Targets:  []ShardTarget{{Name: "azure-appservice", Path: path}},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "P2v3", rows[0].ResourceName)
+}
+
 func TestRun_rejectsUnknownKind(t *testing.T) {
 	_, err := Run(context.Background(), Request{
 		Kind:    "queue.messaging",

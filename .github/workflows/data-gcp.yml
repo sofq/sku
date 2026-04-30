@@ -77,7 +77,7 @@ jobs:
           python -m discover \
             --state dist/pipeline/discover/state.json \
             --out   dist/pipeline/discover/changed.json \
-            --shards gcp_gce,gcp_cloud_sql,gcp_gcs,gcp_run,gcp_functions,gcp_spanner,gcp_memorystore,gcp_gke \
+            --shards gcp_gce,gcp_cloud_sql,gcp_gcs,gcp_run,gcp_functions,gcp_spanner,gcp_memorystore,gcp_gke,gcp_bigquery \
             --live  $flag
 
           shards=$(jq -c '.shards' dist/pipeline/discover/changed.json)

@@ -102,3 +102,24 @@ defaults:
     support_tier: ""
     upfront: ""
     payment_option: ""
+  search.engine:
+    commitment: on_demand
+    tenancy: shared
+    os: managed-cluster
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  paas.app:
+    commitment: on_demand
+    tenancy: dedicated
+    os: linux
+    support_tier: free
+    upfront: ""
+    payment_option: ""
+  warehouse.query:
+    commitment: on_demand
+    tenancy: shared
+    os: on-demand
+    support_tier: ""
+    upfront: ""
+    payment_option: ""

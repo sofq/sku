@@ -64,6 +64,8 @@ def _service_code(resource_name: str, sku_id: str) -> str:
         return "AmazonElastiCache"
     if "aurora" in prefix:
         return "AmazonRDS"
+    if "opensearch" in prefix or resource_name.endswith(".search") or resource_name == "opensearch-serverless":
+        return "AmazonES"
     # Default: EC2
     return "AmazonEC2"
 
@@ -109,6 +111,15 @@ def _extract_price(price_list_item: str, sample: Sample | None = None) -> float 
 def _filters_for_sample(s: Sample, service_code: str) -> tuple[list[dict[str, str]], int]:
     if service_code == "AmazonEKS":
         return ([{"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region}], 100)
+    if service_code == "AmazonES":
+        # Serverless rows (resource_name="opensearch-serverless") have no instanceType
+        # in the pricing API; skip them rather than returning zero results.
+        if s.resource_name == "opensearch-serverless":
+            return ([], 0)
+        return ([
+            {"Type": "TERM_MATCH", "Field": "instanceType", "Value": s.resource_name},
+            {"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region},
+        ], 1)
     base_filters = [
         {"Type": "TERM_MATCH", "Field": "instanceType", "Value": s.resource_name},
         {"Type": "TERM_MATCH", "Field": "regionCode", "Value": s.region},
@@ -145,6 +156,11 @@ def revalidate(
     for s in samples:
         service_code = _service_code(s.resource_name, s.sku_id)
         filters, max_results = _filters_for_sample(s, service_code)
+
+        # Empty filter list signals "not revalidatable upstream" — skip.
+        if max_results == 0:
+            missing.append(s.sku_id)
+            continue
 
         # EKS uses a regionCode-only filter and can exceed MaxResults=100
         # across the page (standard / extended-support / Outposts / Fargate

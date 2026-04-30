@@ -201,9 +201,17 @@ def _sku_matches_sample(
         if region not in regions:
             return False
         if dimension == "vcpu":
-            return "Autopilot Pod mCPU Requests" in desc and "Spot" not in desc and "Arm" not in desc
+            return (
+                "Autopilot Pod mCPU Requests" in desc
+                and "Spot" not in desc
+                and "Arm" not in desc
+            )
         if dimension == "memory":
-            return "Autopilot Pod Memory Requests" in desc and "Spot" not in desc and "Arm" not in desc
+            return (
+                "Autopilot Pod Memory Requests" in desc
+                and "Spot" not in desc
+                and "Arm" not in desc
+            )
         if dimension == "storage":
             return (
                 "Autopilot Pod Ephemeral Storage Requests" in desc
@@ -223,5 +231,18 @@ def _sku_matches_sample(
     if upstream_id and (
         sku_id.startswith(upstream_id + "-") or sku_id.startswith(upstream_id + ":")
     ):
-        return region in regions
+        return _region_matches(region, regions)
     return False
+
+
+def _region_matches(region: str, upstream_regions: list[str]) -> bool:
+    if not upstream_regions:
+        return region in {"global", "bq-us", "bq-eu"}
+    if region in upstream_regions:
+        return True
+    bigquery_multiregions = {
+        "bq-us": "US",
+        "bq-eu": "EU",
+    }
+    upstream_region = bigquery_multiregions.get(region)
+    return upstream_region in upstream_regions if upstream_region else False

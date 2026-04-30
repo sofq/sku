@@ -97,6 +97,7 @@ _AWS_SERVICE_CODES: dict[str, str] = {
     "aws_cloudfront": "AmazonCloudFront",
     "aws_elasticache": "AmazonElastiCache",
     "aws_eks": "AmazonEKS",
+    "aws_opensearch": "AmazonES",
 }
 
 # Multiple shards share an upstream offer — aws_ec2 + aws_ebs both consume

@@ -260,6 +260,74 @@ def test_gcp_region_suffixed_catalog_id_matches_upstream(
     assert missing == []
 
 
+def test_gcp_bigquery_multiregion_suffix_matches_upstream_us_region(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    service_id = "24E6-581D-38E5"
+    sample = Sample(
+        sku_id="2E27-4F75-95CD-bq-us",
+        region="bq-us",
+        resource_name="on-demand",
+        price_amount=6.25,
+        price_currency="USD",
+        dimension="query",
+    )
+    requests_mock.get(
+        f"{_BASE_URL}/{service_id}/skus",
+        json={
+            "skus": [
+                {
+                    "skuId": "2E27-4F75-95CD",
+                    "description": "BigQuery Analysis",
+                    "serviceRegions": ["US"],
+                    "pricingInfo": [
+                        {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "6", "nanos": 250_000_000}}]}}
+                    ],
+                }
+            ],
+            "nextPageToken": "",
+        },
+    )
+    with patch("google.auth.default", return_value=_mock_auth()):
+        drift, missing = revalidate([sample], service_id=service_id)
+    assert drift == []
+    assert missing == []
+
+
+def test_gcp_bigquery_empty_regions_match_generated_multiregion_rows(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    service_id = "24E6-581D-38E5"
+    sample = Sample(
+        sku_id="2E27-4F75-95CD-bq-us",
+        region="bq-us",
+        resource_name="on-demand",
+        price_amount=6.25,
+        price_currency="USD",
+        dimension="query",
+    )
+    requests_mock.get(
+        f"{_BASE_URL}/{service_id}/skus",
+        json={
+            "skus": [
+                {
+                    "skuId": "2E27-4F75-95CD",
+                    "description": "BigQuery Analysis",
+                    "serviceRegions": [],
+                    "pricingInfo": [
+                        {"pricingExpression": {"tieredRates": [{"unitPrice": {"units": "6", "nanos": 250_000_000}}]}}
+                    ],
+                }
+            ],
+            "nextPageToken": "",
+        },
+    )
+    with patch("google.auth.default", return_value=_mock_auth()):
+        drift, missing = revalidate([sample], service_id=service_id)
+    assert drift == []
+    assert missing == []
+
+
 def test_gcp_gke_autopilot_matches_requested_dimension(
     requests_mock: requests_mock_module.Mocker,
 ) -> None:

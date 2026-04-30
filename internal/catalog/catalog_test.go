@@ -490,3 +490,92 @@ func TestLookupContainerOrchestration_MissingResourceName(t *testing.T) {
 	})
 	require.Error(t, err)
 }
+
+func openSeededSearchEngine(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_aws_opensearch.sql", "aws-opensearch.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupSearchEngine_ByResourceNameAndRegion(t *testing.T) {
+	cat := openSeededSearchEngine(t)
+	rows, err := cat.LookupSearchEngine(context.Background(), catalog.SearchEngineFilter{
+		Provider: "aws", Service: "opensearch",
+		ResourceName: "r6g.large.search", Region: "us-east-1",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "managed-cluster"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "r6g.large.search", rows[0].ResourceName)
+	require.NotNil(t, rows[0].ResourceAttrs.MemoryGB)
+}
+
+func TestLookupSearchEngine_MissingResourceNameErrors(t *testing.T) {
+	cat := openSeededSearchEngine(t)
+	_, err := cat.LookupSearchEngine(context.Background(), catalog.SearchEngineFilter{
+		Provider: "aws", Service: "opensearch",
+	})
+	require.Error(t, err)
+}
+
+func openSeededPaasApp(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_azure_appservice.sql", "azure-appservice.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupPaasApp_ByResourceNameAndRegion(t *testing.T) {
+	cat := openSeededPaasApp(t)
+	rows, err := cat.LookupPaasApp(context.Background(), catalog.PaasAppFilter{
+		Provider: "azure", Service: "appservice",
+		ResourceName: "P1v3", Region: "eastus",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "dedicated", OS: "linux", SupportTier: "premiumv3"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "P1v3", rows[0].ResourceName)
+	require.Equal(t, "linux", rows[0].Terms.OS)
+}
+
+func TestLookupPaasApp_TierOnlyQuery(t *testing.T) {
+	cat := openSeededPaasApp(t)
+	// No ResourceName — returns all plans in premiumv3 tier.
+	rows, err := cat.LookupPaasApp(context.Background(), catalog.PaasAppFilter{
+		Provider: "azure", Service: "appservice", Region: "eastus",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "dedicated", SupportTier: "premiumv3"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 2) // linux + windows P1v3
+}
+
+func openSeededWarehouseQuery(t *testing.T) *catalog.Catalog {
+	t.Helper()
+	cat, err := catalog.Open(seedShardFromFile(t, "seed_gcp_bigquery.sql", "gcp-bigquery.db"))
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = cat.Close() })
+	return cat
+}
+
+func TestLookupWarehouseQuery_ByResourceNameAndRegion(t *testing.T) {
+	cat := openSeededWarehouseQuery(t)
+	rows, err := cat.LookupWarehouseQuery(context.Background(), catalog.WarehouseQueryFilter{
+		Provider: "gcp", Service: "bigquery",
+		ResourceName: "on-demand", Region: "bq-us",
+		Terms: catalog.Terms{Commitment: "on_demand", Tenancy: "shared", OS: "on-demand"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "on-demand", rows[0].ResourceName)
+}
+
+func TestLookupWarehouseQuery_MissingResourceNameErrors(t *testing.T) {
+	cat := openSeededWarehouseQuery(t)
+	_, err := cat.LookupWarehouseQuery(context.Background(), catalog.WarehouseQueryFilter{
+		Provider: "gcp", Service: "bigquery",
+	})
+	require.Error(t, err)
+}

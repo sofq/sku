@@ -63,6 +63,8 @@ M-γ.1 S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure Redis, Spann
 
 M-γ.2 S1 containers (managed Kubernetes): EKS, AKS, GKE shards + container.orchestration compare kind. Worker/node prices remain in `aws_ec2` / `azure_vm` / `gcp_gce`.
 
+M-γ.3 S1 PaaS / search / warehouse: aws_opensearch, azure_appservice, gcp_bigquery shards + search.engine, paas.app, warehouse.query compare kinds + estimators (opensearch, appservice, bigquery). BigQuery pseudo-regions bq-us / bq-eu added.
+
 ### Quick path (agent, repeatable, M3b.4 surface)
 
 ```bash
@@ -213,6 +215,33 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku aws ec2   price --instance-type m5.large --region us-east-1    # EKS workers
 ./bin/sku azure vm  price --arm-sku-name Standard_D2_v3 --region eastus  # AKS nodes
 ./bin/sku gcp gce   price --machine-type n1-standard-2 --region us-east1 # GKE nodes
+
+# M-γ.3 S1 PaaS / search / warehouse
+./bin/sku aws opensearch   price --instance-type r6g.large.search --region us-east-1 --preset agent
+./bin/sku aws opensearch   price --mode serverless                --region us-east-1
+./bin/sku aws opensearch   list  --instance-type r6g.large.search
+./bin/sku azure appservice price --sku P1v3  --region eastus --os linux  --preset agent
+./bin/sku azure appservice price --sku P1v3  --region eastus --os windows
+./bin/sku azure appservice list  --sku P2v3
+./bin/sku gcp bigquery     price --mode on-demand       --region bq-us   --preset agent
+./bin/sku gcp bigquery     price --mode capacity-standard --region bq-us
+./bin/sku gcp bigquery     price --mode storage-active   --region bq-eu
+./bin/sku gcp bigquery     list  --mode on-demand
+
+./bin/sku compare --kind search.engine   --regions us-east --limit 5 --preset compare
+./bin/sku compare --kind search.engine   --mode serverless --regions us-east --limit 5
+./bin/sku compare --kind search.engine   --vcpu 4 --memory 16 --regions us-east --limit 5
+./bin/sku compare --kind paas.app        --regions us-east --limit 5 --preset compare
+./bin/sku compare --kind paas.app        --os windows      --regions us-east --limit 5
+./bin/sku compare --kind warehouse.query --regions us-east --limit 5 --preset compare
+./bin/sku compare --kind warehouse.query --mode capacity --edition enterprise --regions us-east
+
+./bin/sku estimate --item aws/opensearch:r6g.large.search:region=us-east-1:count=3:hours=730 --pretty
+./bin/sku estimate --item aws/opensearch:serverless:region=us-east-1:ocu_hours=720 --pretty
+./bin/sku estimate --item azure/appservice:P1v3:region=eastus:os=linux:count=2:hours=730 --pretty
+./bin/sku estimate --item gcp/bigquery:on-demand:region=bq-us:tb_queried=100 --pretty
+./bin/sku estimate --item gcp/bigquery:capacity-standard:region=bq-us:slots=500:hours=730 --pretty
+./bin/sku estimate --item gcp/bigquery:storage-active:region=bq-us:gb_month=5000 --pretty
 ```
 
 ### Distribution smoke (M6)

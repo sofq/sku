@@ -1,0 +1,12 @@
+shard: aws_opensearch
+provider: aws
+service: opensearch
+kind: search.engine
+cli:
+  group: aws
+  command: opensearch
+  resource_flag: instance-type
+ingest:
+  module: aws_opensearch
+  discover: aws.publication_date
+budget_bytes: 3145728
