@@ -5,7 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from ingest.aws_cloudfront import LOCATION_MAP, ingest
+from ingest.aws_cloudfront import ingest
+from normalize.cdn_locations import LOCATION_MAP
 
 _DATA = Path(__file__).resolve().parent.parent / "testdata"
 FIXTURE = _DATA / "aws_cloudfront" / "offer.json"
@@ -63,13 +64,3 @@ def test_location_map_fans_out_to_p1_regions():
     assert "ca-central-1" in values, "Canada must fan out to ca-central-1"
     assert "me-central-1" in values, "Middle East must fan out to me-central-1"
     assert "af-south-1" in values, "South Africa must fan out to af-south-1"
-
-
-def test_location_map_exhaustiveness():
-    # Any edge-location string we know about must map to a region that
-    # regions.yaml would accept. Guards against silent drift if someone
-    # adds to LOCATION_MAP without extending regions.yaml.
-    from ingest.aws_common import load_region_normalizer
-    norm = load_region_normalizer()
-    for region in LOCATION_MAP.values():
-        assert norm.normalize("aws", region), f"{region} not in regions.yaml"

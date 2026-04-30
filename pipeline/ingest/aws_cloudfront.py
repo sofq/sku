@@ -19,6 +19,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from normalize.cdn_locations import LOCATION_MAP, lookup  # noqa: F401
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
@@ -28,29 +29,6 @@ from .aws_common import load_region_normalizer
 _PROVIDER = "aws"
 _SERVICE = "cloudfront"
 _KIND = "network.cdn"
-
-# Upstream edge-location strings → canonical AWS region code.
-# Every entry's value must also exist in pipeline/normalize/regions.yaml;
-# the test_location_map_exhaustiveness test enforces this. Additional
-# edge regions land when regions.yaml grows (spec §3 future regions).
-LOCATION_MAP: dict[str, str] = {
-    # Legacy fixture strings (kept for fixture compatibility).
-    "United States, Mexico, & Canada":         "us-east-1",
-    "Europe, Israel":                          "eu-west-1",
-    "Asia Pacific (including Japan & Taiwan)": "ap-northeast-1",
-    # Current upstream fromLocation strings (as of 2025-Q4).
-    "United States":  "us-east-1",
-    "Canada":         "ca-central-1",
-    "Europe":         "eu-west-1",
-    "Asia Pacific":   "ap-northeast-1",
-    "Japan":          "ap-northeast-1",
-    "Australia":      "ap-southeast-2",
-    "India":          "ap-south-1",
-    "South America":  "sa-east-1",
-    "Middle East":    "me-central-1",
-    "South Africa":   "af-south-1",
-    "Any":            "us-east-1",
-}
 
 _SQL = """
 WITH prod_keys AS (
