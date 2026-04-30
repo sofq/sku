@@ -1,0 +1,211 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AmazonApiGateway",
+  "version": "20260415000000",
+  "products": {
+    "APIGW-REST-USE1": {
+      "sku": "APIGW-REST-USE1",
+      "productFamily": "API Calls",
+      "attributes": {
+        "servicecode": "AmazonApiGateway",
+        "operation": "ApiGatewayRequest",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region"
+      }
+    },
+    "APIGW-REST-EUW1": {
+      "sku": "APIGW-REST-EUW1",
+      "productFamily": "API Calls",
+      "attributes": {
+        "servicecode": "AmazonApiGateway",
+        "operation": "ApiGatewayRequest",
+        "location": "EU (Ireland)",
+        "locationType": "AWS Region"
+      }
+    },
+    "APIGW-HTTP-USE1": {
+      "sku": "APIGW-HTTP-USE1",
+      "productFamily": "API Calls",
+      "attributes": {
+        "servicecode": "AmazonApiGateway",
+        "operation": "ApiGatewayHttpApi",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region"
+      }
+    },
+    "APIGW-HTTP-EUW1": {
+      "sku": "APIGW-HTTP-EUW1",
+      "productFamily": "API Calls",
+      "attributes": {
+        "servicecode": "AmazonApiGateway",
+        "operation": "ApiGatewayHttpApi",
+        "location": "EU (Ireland)",
+        "locationType": "AWS Region"
+      }
+    },
+    "APIGW-WS-USE1": {
+      "sku": "APIGW-WS-USE1",
+      "productFamily": "API Calls",
+      "attributes": {
+        "servicecode": "AmazonApiGateway",
+        "operation": "ApiGatewayWebSocket",
+        "location": "US East (N. Virginia)",
+        "locationType": "AWS Region"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "APIGW-REST-USE1": {
+        "APIGW-REST-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "APIGW-REST-USE1",
+          "effectiveDate": "2026-04-01T00:00:00Z",
+          "priceDimensions": {
+            "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CT7",
+              "description": "REST API calls - first 333M",
+              "beginRange": "0",
+              "endRange": "333000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000035"}
+            },
+            "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CT8": {
+              "rateCode": "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CT8",
+              "description": "REST API calls - next 667M (up to 1B)",
+              "beginRange": "333000000",
+              "endRange": "1000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000319"}
+            },
+            "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CT9": {
+              "rateCode": "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CT9",
+              "description": "REST API calls - next 19B (up to 20B)",
+              "beginRange": "1000000000",
+              "endRange": "20000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000271"}
+            },
+            "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CTA": {
+              "rateCode": "APIGW-REST-USE1.JRTCKXETXF.6YS6EN2CTA",
+              "description": "REST API calls - over 20B",
+              "beginRange": "20000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000172"}
+            }
+          }
+        }
+      },
+      "APIGW-REST-EUW1": {
+        "APIGW-REST-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "APIGW-REST-EUW1",
+          "effectiveDate": "2026-04-01T00:00:00Z",
+          "priceDimensions": {
+            "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CT7",
+              "description": "REST API calls - first 333M (EU)",
+              "beginRange": "0",
+              "endRange": "333000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000038"}
+            },
+            "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CT8": {
+              "rateCode": "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CT8",
+              "description": "REST API calls - next 667M (EU)",
+              "beginRange": "333000000",
+              "endRange": "1000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000346"}
+            },
+            "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CT9": {
+              "rateCode": "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CT9",
+              "description": "REST API calls - next 19B (EU)",
+              "beginRange": "1000000000",
+              "endRange": "20000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000294"}
+            },
+            "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CTA": {
+              "rateCode": "APIGW-REST-EUW1.JRTCKXETXF.6YS6EN2CTA",
+              "description": "REST API calls - over 20B (EU)",
+              "beginRange": "20000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000186"}
+            }
+          }
+        }
+      },
+      "APIGW-HTTP-USE1": {
+        "APIGW-HTTP-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "APIGW-HTTP-USE1",
+          "effectiveDate": "2026-04-01T00:00:00Z",
+          "priceDimensions": {
+            "APIGW-HTTP-USE1.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "APIGW-HTTP-USE1.JRTCKXETXF.6YS6EN2CT7",
+              "description": "HTTP API calls - first 300M",
+              "beginRange": "0",
+              "endRange": "300000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.000001"}
+            },
+            "APIGW-HTTP-USE1.JRTCKXETXF.6YS6EN2CT8": {
+              "rateCode": "APIGW-HTTP-USE1.JRTCKXETXF.6YS6EN2CT8",
+              "description": "HTTP API calls - over 300M",
+              "beginRange": "300000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000009"}
+            }
+          }
+        }
+      },
+      "APIGW-HTTP-EUW1": {
+        "APIGW-HTTP-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "APIGW-HTTP-EUW1",
+          "effectiveDate": "2026-04-01T00:00:00Z",
+          "priceDimensions": {
+            "APIGW-HTTP-EUW1.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "APIGW-HTTP-EUW1.JRTCKXETXF.6YS6EN2CT7",
+              "description": "HTTP API calls - first 300M (EU)",
+              "beginRange": "0",
+              "endRange": "300000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000108"}
+            },
+            "APIGW-HTTP-EUW1.JRTCKXETXF.6YS6EN2CT8": {
+              "rateCode": "APIGW-HTTP-EUW1.JRTCKXETXF.6YS6EN2CT8",
+              "description": "HTTP API calls - over 300M (EU)",
+              "beginRange": "300000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.00000097"}
+            }
+          }
+        }
+      },
+      "APIGW-WS-USE1": {
+        "APIGW-WS-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "APIGW-WS-USE1",
+          "effectiveDate": "2026-04-01T00:00:00Z",
+          "priceDimensions": {
+            "APIGW-WS-USE1.JRTCKXETXF.6YS6EN2CT7": {
+              "rateCode": "APIGW-WS-USE1.JRTCKXETXF.6YS6EN2CT7",
+              "description": "WebSocket API calls (skipped)",
+              "beginRange": "0",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.000001"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,264 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AWSQueueService",
+  "version": "20260415000000",
+  "products": {
+    "SQS-STD-USE1": {
+      "sku": "SQS-STD-USE1",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AWSQueueService",
+        "location": "US East (N. Virginia)",
+        "regionCode": "us-east-1",
+        "queueType": "Standard"
+      }
+    },
+    "SQS-STD-EUW1": {
+      "sku": "SQS-STD-EUW1",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AWSQueueService",
+        "location": "EU (Ireland)",
+        "regionCode": "eu-west-1",
+        "queueType": "Standard"
+      }
+    },
+    "SQS-STD-APN1": {
+      "sku": "SQS-STD-APN1",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AWSQueueService",
+        "location": "Asia Pacific (Tokyo)",
+        "regionCode": "ap-northeast-1",
+        "queueType": "Standard"
+      }
+    },
+    "SQS-FIFO-USE1": {
+      "sku": "SQS-FIFO-USE1",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AWSQueueService",
+        "location": "US East (N. Virginia)",
+        "regionCode": "us-east-1",
+        "queueType": "FIFO (first-in, first-out)"
+      }
+    },
+    "SQS-FIFO-EUW1": {
+      "sku": "SQS-FIFO-EUW1",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AWSQueueService",
+        "location": "EU (Ireland)",
+        "regionCode": "eu-west-1",
+        "queueType": "FIFO (first-in, first-out)"
+      }
+    },
+    "SQS-FIFO-APN1": {
+      "sku": "SQS-FIFO-APN1",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AWSQueueService",
+        "location": "Asia Pacific (Tokyo)",
+        "regionCode": "ap-northeast-1",
+        "queueType": "FIFO (first-in, first-out)"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SQS-STD-USE1": {
+        "SQS-STD-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SQS-STD-USE1",
+          "priceDimensions": {
+            "SQS-STD-USE1.JRTCKXETXF.1": {
+              "rateCode": "SQS-STD-USE1.JRTCKXETXF.1",
+              "description": "First 100 billion Amazon SQS Requests per month",
+              "beginRange": "0",
+              "endRange": "100000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004000"}
+            },
+            "SQS-STD-USE1.JRTCKXETXF.2": {
+              "rateCode": "SQS-STD-USE1.JRTCKXETXF.2",
+              "description": "Next 100 billion Amazon SQS Requests per month",
+              "beginRange": "100000000000",
+              "endRange": "200000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000003500"}
+            },
+            "SQS-STD-USE1.JRTCKXETXF.3": {
+              "rateCode": "SQS-STD-USE1.JRTCKXETXF.3",
+              "description": "Over 200 billion Amazon SQS Requests per month",
+              "beginRange": "200000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000003200"}
+            }
+          }
+        }
+      },
+      "SQS-STD-EUW1": {
+        "SQS-STD-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SQS-STD-EUW1",
+          "priceDimensions": {
+            "SQS-STD-EUW1.JRTCKXETXF.1": {
+              "rateCode": "SQS-STD-EUW1.JRTCKXETXF.1",
+              "description": "First 100 billion Amazon SQS Requests per month",
+              "beginRange": "0",
+              "endRange": "100000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004200"}
+            },
+            "SQS-STD-EUW1.JRTCKXETXF.2": {
+              "rateCode": "SQS-STD-EUW1.JRTCKXETXF.2",
+              "description": "Next 100 billion Amazon SQS Requests per month",
+              "beginRange": "100000000000",
+              "endRange": "200000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000003700"}
+            },
+            "SQS-STD-EUW1.JRTCKXETXF.3": {
+              "rateCode": "SQS-STD-EUW1.JRTCKXETXF.3",
+              "description": "Over 200 billion Amazon SQS Requests per month",
+              "beginRange": "200000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000003400"}
+            }
+          }
+        }
+      },
+      "SQS-STD-APN1": {
+        "SQS-STD-APN1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SQS-STD-APN1",
+          "priceDimensions": {
+            "SQS-STD-APN1.JRTCKXETXF.1": {
+              "rateCode": "SQS-STD-APN1.JRTCKXETXF.1",
+              "description": "First 100 billion Amazon SQS Requests per month",
+              "beginRange": "0",
+              "endRange": "100000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004500"}
+            },
+            "SQS-STD-APN1.JRTCKXETXF.2": {
+              "rateCode": "SQS-STD-APN1.JRTCKXETXF.2",
+              "description": "Next 100 billion Amazon SQS Requests per month",
+              "beginRange": "100000000000",
+              "endRange": "200000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004000"}
+            },
+            "SQS-STD-APN1.JRTCKXETXF.3": {
+              "rateCode": "SQS-STD-APN1.JRTCKXETXF.3",
+              "description": "Over 200 billion Amazon SQS Requests per month",
+              "beginRange": "200000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000003700"}
+            }
+          }
+        }
+      },
+      "SQS-FIFO-USE1": {
+        "SQS-FIFO-USE1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SQS-FIFO-USE1",
+          "priceDimensions": {
+            "SQS-FIFO-USE1.JRTCKXETXF.1": {
+              "rateCode": "SQS-FIFO-USE1.JRTCKXETXF.1",
+              "description": "First 100 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "0",
+              "endRange": "100000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000005000"}
+            },
+            "SQS-FIFO-USE1.JRTCKXETXF.2": {
+              "rateCode": "SQS-FIFO-USE1.JRTCKXETXF.2",
+              "description": "Next 100 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "100000000000",
+              "endRange": "200000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004800"}
+            },
+            "SQS-FIFO-USE1.JRTCKXETXF.3": {
+              "rateCode": "SQS-FIFO-USE1.JRTCKXETXF.3",
+              "description": "Over 200 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "200000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004500"}
+            }
+          }
+        }
+      },
+      "SQS-FIFO-EUW1": {
+        "SQS-FIFO-EUW1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SQS-FIFO-EUW1",
+          "priceDimensions": {
+            "SQS-FIFO-EUW1.JRTCKXETXF.1": {
+              "rateCode": "SQS-FIFO-EUW1.JRTCKXETXF.1",
+              "description": "First 100 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "0",
+              "endRange": "100000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000005250"}
+            },
+            "SQS-FIFO-EUW1.JRTCKXETXF.2": {
+              "rateCode": "SQS-FIFO-EUW1.JRTCKXETXF.2",
+              "description": "Next 100 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "100000000000",
+              "endRange": "200000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000005030"}
+            },
+            "SQS-FIFO-EUW1.JRTCKXETXF.3": {
+              "rateCode": "SQS-FIFO-EUW1.JRTCKXETXF.3",
+              "description": "Over 200 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "200000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000004730"}
+            }
+          }
+        }
+      },
+      "SQS-FIFO-APN1": {
+        "SQS-FIFO-APN1.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SQS-FIFO-APN1",
+          "priceDimensions": {
+            "SQS-FIFO-APN1.JRTCKXETXF.1": {
+              "rateCode": "SQS-FIFO-APN1.JRTCKXETXF.1",
+              "description": "First 100 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "0",
+              "endRange": "100000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000005630"}
+            },
+            "SQS-FIFO-APN1.JRTCKXETXF.2": {
+              "rateCode": "SQS-FIFO-APN1.JRTCKXETXF.2",
+              "description": "Next 100 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "100000000000",
+              "endRange": "200000000000",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000005400"}
+            },
+            "SQS-FIFO-APN1.JRTCKXETXF.3": {
+              "rateCode": "SQS-FIFO-APN1.JRTCKXETXF.3",
+              "description": "Over 200 billion Amazon SQS FIFO Requests per month",
+              "beginRange": "200000000000",
+              "endRange": "Inf",
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000005080"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

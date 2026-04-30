@@ -256,6 +256,23 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku estimate --item gcp/bigquery:on-demand:region=bq-us:tb_queried=100 --pretty
 ./bin/sku estimate --item gcp/bigquery:capacity-standard:region=bq-us:slots=500:hours=730 --pretty
 ./bin/sku estimate --item gcp/bigquery:storage-active:region=bq-us:gb_month=5000 --pretty
+
+# M-δ S2 messaging (SQS, SNS)
+./bin/sku aws sqs price --queue-type standard --region us-east-1 --preset agent
+./bin/sku aws sqs price --queue-type fifo     --region us-east-1
+./bin/sku aws sqs list  --queue-type standard
+./bin/sku aws sns price --region us-east-1 --preset agent
+./bin/sku aws sns list
+
+# M-δ S2 dns.zone (Route53)
+./bin/sku aws route53 price --zone-type public  --region global --preset agent
+./bin/sku aws route53 list  --zone-type public
+
+# M-δ S2 api.gateway (AWS API Gateway)
+./bin/sku aws api-gateway price --api-type rest --region us-east-1 --preset agent
+./bin/sku aws api-gateway list  --api-type rest
+./bin/sku aws api-gateway price --api-type http --region us-east-1 --preset agent
+./bin/sku aws api-gateway list  --api-type http
 ```
 
 ### Distribution smoke (M6)

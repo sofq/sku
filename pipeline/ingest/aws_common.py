@@ -98,6 +98,10 @@ _AWS_SERVICE_CODES: dict[str, str] = {
     "aws_elasticache": "AmazonElastiCache",
     "aws_eks": "AmazonEKS",
     "aws_opensearch": "AmazonES",
+    "aws_sns": "AmazonSNS",
+    "aws_sqs": "AWSQueueService",
+    "aws_route53": "AmazonRoute53",
+    "aws_api_gateway": "AmazonApiGateway",
 }
 
 # Multiple shards share an upstream offer — aws_ec2 + aws_ebs both consume

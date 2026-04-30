@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 ALL_SHARDS: tuple[str, ...] = (
+    "aws_api_gateway",
     "aws_aurora",
     "aws_cloudfront",
     "aws_dynamodb",
@@ -13,7 +14,10 @@ ALL_SHARDS: tuple[str, ...] = (
     "aws_lambda",
     "aws_opensearch",
     "aws_rds",
+    "aws_route53",
     "aws_s3",
+    "aws_sns",
+    "aws_sqs",
     "azure_aks",
     "azure_appservice",
     "azure_blob",
@@ -39,6 +43,7 @@ ALL_SHARDS: tuple[str, ...] = (
 )
 
 _PROVIDER_OF: dict[str, str] = {
+    "aws_api_gateway": "aws",
     "aws_aurora": "aws",
     "aws_cloudfront": "aws",
     "aws_dynamodb": "aws",
@@ -49,7 +54,10 @@ _PROVIDER_OF: dict[str, str] = {
     "aws_lambda": "aws",
     "aws_opensearch": "aws",
     "aws_rds": "aws",
+    "aws_route53": "aws",
     "aws_s3": "aws",
+    "aws_sns": "aws",
+    "aws_sqs": "aws",
     "azure_aks": "azure",
     "azure_appservice": "azure",
     "azure_blob": "azure",

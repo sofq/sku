@@ -1,0 +1,64 @@
+{
+  "products": {
+    "R53-ZONE-001": {
+      "sku": "R53-ZONE-001",
+      "productFamily": "DNS Zone",
+      "attributes": {
+        "servicecode": "AmazonRoute53",
+        "group": "HostedZone",
+        "location": "Any",
+        "locationType": "AWS Region"
+      }
+    },
+    "R53-QUERY-001": {
+      "sku": "R53-QUERY-001",
+      "productFamily": "DNS Query",
+      "attributes": {
+        "servicecode": "AmazonRoute53",
+        "usagetype": "DNS-Queries",
+        "location": "Any",
+        "locationType": "AWS Region"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "R53-ZONE-001": {
+        "R53-ZONE-001.JRTCKXETXF": {
+          "priceDimensions": {
+            "R53-ZONE-001.JRTCKXETXF.tier1": {
+              "beginRange": "0",
+              "endRange": "25",
+              "pricePerUnit": {"USD": "0.5000000000"},
+              "unit": "HostedZone"
+            },
+            "R53-ZONE-001.JRTCKXETXF.tier2": {
+              "beginRange": "25",
+              "endRange": "Inf",
+              "pricePerUnit": {"USD": "0.1000000000"},
+              "unit": "HostedZone"
+            }
+          }
+        }
+      },
+      "R53-QUERY-001": {
+        "R53-QUERY-001.JRTCKXETXF": {
+          "priceDimensions": {
+            "R53-QUERY-001.JRTCKXETXF.tier1": {
+              "beginRange": "0",
+              "endRange": "1000000000",
+              "pricePerUnit": {"USD": "0.0000004000"},
+              "unit": "Queries"
+            },
+            "R53-QUERY-001.JRTCKXETXF.tier2": {
+              "beginRange": "1000000000",
+              "endRange": "Inf",
+              "pricePerUnit": {"USD": "0.0000002000"},
+              "unit": "Queries"
+            }
+          }
+        }
+      }
+    }
+  }
+}

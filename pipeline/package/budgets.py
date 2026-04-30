@@ -13,6 +13,7 @@ from __future__ import annotations
 
 
 SHARD_BUDGETS: dict[str, int] = {
+    'aws_api_gateway':          300_000,
     'aws_aurora':            10_000_000,
     'aws_cloudfront':           500_000,
     'aws_dynamodb':             500_000,
@@ -23,7 +24,10 @@ SHARD_BUDGETS: dict[str, int] = {
     'aws_lambda':               500_000,
     'aws_opensearch':         3_145_728,
     'aws_rds':               10_000_000,
+    'aws_route53':              300_000,
     'aws_s3':                   500_000,
+    'aws_sns':                  150_000,
+    'aws_sqs':                  200_000,
     'azure_aks':              3_000_000,
     'azure_appservice':       3_145_728,
     'azure_blob':               500_000,

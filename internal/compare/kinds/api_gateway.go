@@ -94,6 +94,9 @@ ORDER BY COALESCE(mp.min_price, 1e308) ASC, s.provider, s.resource_name, s.sku_i
 	if spec.Mode == "" {
 		hasPerCall := false
 		hasPerHour := false
+		// Match both the canonical compare unit ("1M-req"/"hr") and the
+		// raw ingest unit ("request"/"hour") so the warning fires regardless
+		// of which normalisation stage was applied to the shard.
 		for _, row := range out {
 			for _, p := range row.Prices {
 				switch p.Unit {

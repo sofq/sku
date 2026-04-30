@@ -21,5 +21,9 @@ func newAWSCmd() *cobra.Command {
 	c.AddCommand(newAWSElastiCacheCmd())
 	c.AddCommand(newAWSEKSCmd())
 	c.AddCommand(newAWSOpenSearchCmd())
+	c.AddCommand(newAWSRoute53Cmd())
+	c.AddCommand(newAWSSNSCmd())
+	c.AddCommand(newAWSSQSCmd())
+	c.AddCommand(newAWSAPIGatewayCmd())
 	return c
 }

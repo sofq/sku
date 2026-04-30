@@ -1,0 +1,12 @@
+shard: aws_route53
+provider: aws
+service: route53
+kind: dns.zone
+cli:
+  group: aws
+  command: route53
+  resource_flag: zone-type
+ingest:
+  module: aws_route53
+  discover: aws.publication_date
+budget_bytes: 300000

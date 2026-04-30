@@ -1,0 +1,12 @@
+shard: aws_sns
+provider: aws
+service: sns
+kind: messaging.topic
+cli:
+  group: aws
+  command: sns
+  resource_flag: destination
+ingest:
+  module: aws_sns
+  discover: aws.publication_date
+budget_bytes: 150000

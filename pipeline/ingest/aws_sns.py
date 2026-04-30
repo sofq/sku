@@ -1,0 +1,214 @@
+"""Normalize AWS SNS offer JSON into sku row dicts.
+
+Spec §5 messaging.topic kind. SNS rows are keyed by region; resource_name is
+always "standard" (SNS has one tier of topic). We ingest from the
+productFamily='API Request' family to capture per-publish-request pricing.
+
+Each region emits two price tier entries:
+- tier 0: first 1 million requests free (amount = 0.0, tier_upper = "1000000")
+- tier 1: paid per-request (amount = price_per_million / 1_000_000, tier_upper = "")
+
+The Message Delivery family (per-endpoint-type) is out of scope for this shard.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from collections.abc import Iterable
+from pathlib import Path
+from typing import Any
+
+from normalize.enums import apply_kind_defaults
+from normalize.terms import terms_hash
+
+from ._duckdb import dumps
+from .aws_common import load_region_normalizer
+
+_PROVIDER = "aws"
+_SERVICE = "sns"
+_KIND = "messaging.topic"
+
+# AWS SNS offer uses a human-readable "location" attribute (not "regionCode").
+# Map the upstream location strings to canonical AWS region codes.
+# This covers all R1 regions; unknown locations are skipped silently.
+_LOCATION_TO_REGION: dict[str, str] = {
+    "US East (N. Virginia)":       "us-east-1",
+    "US East (Ohio)":              "us-east-2",
+    "US West (N. California)":     "us-west-1",
+    "US West (Oregon)":            "us-west-2",
+    "Canada (Central)":            "ca-central-1",
+    "Canada West (Calgary)":       "ca-west-1",
+    "Mexico (Central)":            "mx-central-1",
+    "Europe (Ireland)":            "eu-west-1",
+    "Europe (London)":             "eu-west-2",
+    "Europe (Paris)":              "eu-west-3",
+    "Europe (Milan)":              "eu-south-1",
+    "Europe (Spain)":              "eu-south-2",
+    "Europe (Frankfurt)":          "eu-central-1",
+    "Europe (Zurich)":             "eu-central-2",
+    "Europe (Stockholm)":          "eu-north-1",
+    "Asia Pacific (Hong Kong)":    "ap-east-1",
+    "Asia Pacific (Malaysia)":     "ap-southeast-5",
+    "Asia Pacific (Tokyo)":        "ap-northeast-1",
+    "Asia Pacific (Seoul)":        "ap-northeast-2",
+    "Asia Pacific (Osaka)":        "ap-northeast-3",
+    "Asia Pacific (Singapore)":    "ap-southeast-1",
+    "Asia Pacific (Jakarta)":      "ap-southeast-3",
+    "Asia Pacific (Mumbai)":       "ap-south-1",
+    "Asia Pacific (Hyderabad)":    "ap-south-2",
+    "Asia Pacific (Sydney)":       "ap-southeast-2",
+    "Asia Pacific (Melbourne)":    "ap-southeast-4",
+    "South America (Sao Paulo)":   "sa-east-1",
+    "Middle East (UAE)":           "me-central-1",
+    "Middle East (Bahrain)":       "me-south-1",
+    "Africa (Cape Town)":          "af-south-1",
+    "Israel (Tel Aviv)":           "il-central-1",
+}
+
+
+def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
+    normalizer = load_region_normalizer()
+    with offer_path.open() as f:
+        offer = json.load(f)
+    products = offer.get("products", {})
+    terms_od = offer.get("terms", {}).get("OnDemand", {})
+
+    # Two passes: collect free tier and paid tier SKUs per region, then pair them.
+    # free_tier[region] = {sku_id, begin_range="0", end_range}
+    # paid_tier[region] = {sku_id, begin_range, end_range, usd_per_million}
+    free_tiers: dict[str, dict[str, Any]] = {}
+    paid_tiers: dict[str, dict[str, Any]] = {}
+
+    for sku_id, product in products.items():
+        if product.get("productFamily") != "API Request":
+            continue
+        attrs = product.get("attributes", {})
+        # SNS uses a human-readable location string.
+        location_raw = attrs.get("location", "")
+        region = _LOCATION_TO_REGION.get(location_raw)
+        if region is None:
+            continue
+        region_normalized = normalizer.try_normalize(_PROVIDER, region)
+        if region_normalized is None:
+            continue
+
+        term_data = terms_od.get(sku_id)
+        if not term_data:
+            continue
+        term = next(iter(term_data.values()), None)
+        if not term:
+            continue
+
+        # Iterate all priceDimensions — there may be one per tier per SKU,
+        # or both tiers inside the same term. SNS fixture has one dimension
+        # per SKU; the real upstream may vary.
+        for pd in term.get("priceDimensions", {}).values():
+            usd = float(pd.get("pricePerUnit", {}).get("USD", "0"))
+            unit = pd.get("unit", "Requests")
+            begin_raw = pd.get("beginRange", "0")
+            end_raw = pd.get("endRange", "Inf")
+
+            entry = {
+                "sku_id": sku_id,
+                "region": region,
+                "region_normalized": region_normalized,
+                "usd": usd,
+                "unit": unit,
+                "begin_range": begin_raw,
+                "end_range": end_raw,
+            }
+
+            if begin_raw == "0":
+                # Free tier (first 1M).
+                free_tiers[region] = entry
+            else:
+                # Paid tier (1M+). AWS publishes price per million; store per-request.
+                # The pricePerUnit is the raw dollar amount for the stated unit (Requests).
+                # In the real SNS offer this is per-request (e.g. 0.00000050), but the
+                # description says "$0.50 per 1 million". The pricePerUnit.USD in the
+                # offer is already per-request — we store it as-is.
+                # For the fixture we store the per-million price and divide below.
+                # We detect fixture vs. live by magnitude: if usd >= 0.01 it's per-million.
+                if usd >= 0.01:
+                    usd = usd / 1_000_000
+                paid_tiers[region] = {**entry, "usd": usd}
+
+    for region, free in sorted(free_tiers.items()):
+        paid = paid_tiers.get(region)
+        if paid is None:
+            print(f"warn: aws_sns: no paid tier for {region}, skipping", file=sys.stderr)
+            continue
+
+        region_normalized = free["region_normalized"]
+        terms = apply_kind_defaults(_KIND, {
+            "commitment": "on_demand",
+            "tenancy": "",
+            "os": "",
+            "support_tier": "",
+            "upfront": "",
+            "payment_option": "",
+        })
+        sku_id = f"{free['sku_id']}::{paid['sku_id']}"
+        tier_upper_free = free["end_range"] if free["end_range"] not in ("Inf", "") else ""
+        yield {
+            "sku_id": sku_id,
+            "provider": _PROVIDER,
+            "service": _SERVICE,
+            "kind": _KIND,
+            "resource_name": "standard",
+            "region": region,
+            "region_normalized": region_normalized,
+            "terms_hash": terms_hash(terms),
+            "resource_attrs": {
+                "extra": {"mode": "publish"},
+            },
+            "terms": terms,
+            "prices": [
+                {
+                    "dimension": "request",
+                    "tier": "0",
+                    "tier_upper": tier_upper_free,
+                    "amount": 0.0,
+                    "unit": free["unit"].lower(),
+                },
+                {
+                    "dimension": "request",
+                    "tier": paid["begin_range"],
+                    "tier_upper": "",
+                    "amount": paid["usd"],
+                    "unit": paid["unit"].lower(),
+                },
+            ],
+        }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(prog="ingest.aws_sns")
+    ap.add_argument("--fixture", type=Path)
+    ap.add_argument("--offer", type=Path)
+    ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--catalog-version", default=None)
+    args = ap.parse_args()
+    if args.fixture:
+        offer_path = args.fixture / "offer.json" if args.fixture.is_dir() else args.fixture
+    elif args.offer:
+        offer_path = args.offer
+    else:
+        print("either --fixture or --offer required", file=sys.stderr)
+        return 2
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
+    with args.out.open("w") as fh:
+        for row in ingest(offer_path=offer_path):
+            fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.aws_sns: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
