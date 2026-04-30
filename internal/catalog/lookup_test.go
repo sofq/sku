@@ -217,18 +217,12 @@ func TestCDNFilter_ModeAndSkuFieldsAccessible(t *testing.T) {
 	// The compare handler (Task 0.5) will populate these for post-filtering;
 	// LookupCDN itself ignores them. This test confirms the fields are
 	// structurally present and zero-valued by default.
-	f := catalog.CDNFilter{
-		Provider:     "aws",
-		Service:      "cloudfront",
-		ResourceName: "standard",
-		Region:       "eu-west-1",
-		Terms:        catalog.Terms{Commitment: "on_demand"},
-	}
+	f := catalog.CDNFilter{}
 	require.Equal(t, "", f.Mode)
 	require.Equal(t, "", f.Sku)
 
 	f.Mode = "regional"
-	f.Sku  = "PriceClass_All"
+	f.Sku = "PriceClass_All"
 	require.Equal(t, "regional", f.Mode)
 	require.Equal(t, "PriceClass_All", f.Sku)
 }
@@ -247,16 +241,12 @@ func openSeededNoSQLEngine(t *testing.T) *catalog.Catalog {
 
 func TestNoSQLDBFilter_EngineFieldAccessible(t *testing.T) {
 	// Compile-time assertion: Engine and Mode fields exist on NoSQLDBFilter.
-	f := catalog.NoSQLDBFilter{
-		Provider:     "aws",
-		Service:      "dynamodb",
-		ResourceName: "standard",
-	}
+	f := catalog.NoSQLDBFilter{}
 	require.Equal(t, "", f.Engine)
 	require.Equal(t, "", f.Mode)
 
 	f.Engine = "dynamodb"
-	f.Mode   = "provisioned"
+	f.Mode = "provisioned"
 	require.Equal(t, "dynamodb", f.Engine)
 	require.Equal(t, "provisioned", f.Mode)
 }
