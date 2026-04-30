@@ -1,6 +1,6 @@
 # Azure pricing-feed coverage
 
-_Generated 2026-04-27_
+_Generated 2026-04-30_
 
 Raw SKU counts per bucket, and which `sku` shard (if any) ingests them.
 Generated weekly by `make profile` against live feeds.

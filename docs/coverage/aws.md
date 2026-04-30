@@ -1,19 +1,19 @@
 # AWS pricing-feed coverage
 
-_Generated 2026-04-27_
+_Generated 2026-04-30_
 
 Raw SKU counts per bucket, and which `sku` shard (if any) ingests them.
 Generated weekly by `make profile` against live feeds.
 
 | Bucket | SKUs | Covered by | Coverage | Attrs fingerprint | Sample SKU ids |
 | --- | ---: | --- | ---: | --- | --- |
-| Compute Instance | 92,785 | aws_ec2 | 100% | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, dedicatedEbsThroughput, +33 more | `QUMEF4UK3NPT4MN3`, `DBCQPZ6Z853WRE98`, `PSKQUF3DN4PQUY5X` |
+| Compute Instance | 98,981 | aws_ec2 | 100% | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, dedicatedEbsThroughput, +33 more | `QUMEF4UK3NPT4MN3`, `DBCQPZ6Z853WRE98`, `PSKQUF3DN4PQUY5X` |
 | Compute Instance (bare metal) | 11,038 | **UNCOVERED** | — | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, dedicatedEbsThroughput, +32 more | `TNWBCS5ACPZ2KN5K`, `PKKXPZKDGX8TTETG`, `9ZNF8HF7HCD62DUE` |
 | Database Instance | 4,926 | aws_rds | 100% | clockSpeed, currentGeneration, databaseEdition, databaseEngine, dedicatedEbsThroughput, deploymentModel, +24 more | `AS89MVW9EQ98NPCS`, `9QH3PUGXCYKNCYPB`, `9TUPTR977JMXWRWK` |
 | Serverless | 511 | aws_lambda | 100% | group, groupDescription, lambdaManagedInstanceType, lambdaManagedInstances-RequestType, location, locationType, +5 more | `8MV6QCXGTMB3SQSA`, `8VMHUU6HBE25BH4E`, `3DQDA3PNUY939FRS` |
-| (no productFamily) | 273 | **UNCOVERED** | — | feeCode, feeDescription, fromLocation, fromLocationType, fromRegionCode, group, +14 more | `SG7CKZDA3VUU22WX`, `Z8X7XRC6YMB3B8CX`, `UMHS42HQRXCX35Z3` |
+| (no productFamily) | 273 | **UNCOVERED** | — | feeCode, feeDescription, fromLocation, fromLocationType, fromRegionCode, group, +14 more | `Z8X7XRC6YMB3B8CX`, `SG7CKZDA3VUU22WX`, `TH43ZXH75AC5F7PY` |
 | Database Storage | 236 | **UNCOVERED** | — | databaseEdition, databaseEngine, deploymentModel, deploymentOption, engineCode, licenseModel, +12 more | `5CY9R54BDJWYJ22J`, `TYAUEGUCCZJVV7J5`, `657RUPPEV3YQSGDA` |
-| Dedicated Host | 222 | **UNCOVERED** | — | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, ecu, +42 more | `US76PBRY3DCZYN6N`, `GUSF94EQ4ATETPFP`, `YK93RGC4R47ACWRA` |
+| Dedicated Host | 226 | **UNCOVERED** | — | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, ecu, +42 more | `SWYFQY6RNJ6NCDEE`, `US76PBRY3DCZYN6N`, `GUSF94EQ4ATETPFP` |
 | Provisioned IOPS | 151 | **UNCOVERED** | — | databaseEdition, databaseEngine, deploymentModel, deploymentOption, engineCode, group, +11 more | `HZNNAFUGB668T2AB`, `CSJDFDAZPE4BE5BD`, `NW7WAC7H9ZCHD68P` |
 | Request | 67 | **UNCOVERED** | — | group, groupDescription, location, locationType, operation, regionCode, +5 more | `F24VFUTRVY389U5R`, `NPFD6SEH9MXS8M4J`, `8TR9SADHNBYGFMTW` |
 | Performance Insights | 52 | **UNCOVERED** | — | databaseEngine, engineCode, group, groupDescription, instanceTypeFamily, location, +6 more | `NY662M2P6WNTPGY2`, `27HUFMH8U28DFE4X`, `KZ4WTWHJMFEQZJJR` |
