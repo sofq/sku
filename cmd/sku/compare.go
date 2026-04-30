@@ -62,6 +62,13 @@ var (
 	compareSearchEngineShards           = []string{"aws-opensearch"}
 	comparePaasAppShards                = []string{"azure-appservice"}
 	compareWarehouseQueryShards         = []string{"gcp-bigquery"}
+	// M-δ S2 shards
+	compareMessagingQueueShards = []string{"aws-sqs", "azure-service-bus-queues", "azure-event-hubs", "gcp-pubsub-queues"}
+	compareMessagingTopicShards = []string{"aws-sns", "azure-service-bus-topics", "gcp-pubsub-topics"}
+	compareDNSZoneShards        = []string{"aws-route53", "gcp-cloud-dns"}
+	compareAPIGatewayShards     = []string{"aws-api-gateway", "azure-apim"}
+	compareNetworkCDNShards     = []string{"aws-cloudfront", "azure-front-door", "gcp-cloud-cdn"}
+	compareDBNoSQLShards        = []string{"gcp-firestore"}
 )
 
 func shardsForKind(kind string) []string {
@@ -82,6 +89,18 @@ func shardsForKind(kind string) []string {
 		return comparePaasAppShards
 	case "warehouse.query":
 		return compareWarehouseQueryShards
+	case "messaging.queue":
+		return compareMessagingQueueShards
+	case "messaging.topic":
+		return compareMessagingTopicShards
+	case "dns.zone":
+		return compareDNSZoneShards
+	case "api.gateway":
+		return compareAPIGatewayShards
+	case "network.cdn":
+		return compareNetworkCDNShards
+	case "db.nosql":
+		return compareDBNoSQLShards
 	}
 	return nil
 }
@@ -90,10 +109,10 @@ func newCompareCmd() *cobra.Command {
 	var f compareFlags
 	c := &cobra.Command{
 		Use:   "compare",
-		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, cache.kv, search.engine, paas.app, warehouse.query)",
+		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, db.nosql, cache.kv, messaging.queue, messaging.topic, dns.zone, api.gateway, network.cdn, container.orchestration, search.engine, paas.app, warehouse.query)",
 		RunE:  func(cmd *cobra.Command, _ []string) error { return runCompare(cmd, &f) },
 	}
-	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (compute.vm | storage.object | db.relational | cache.kv | container.orchestration | search.engine | paas.app | warehouse.query)")
+	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (api.gateway | cache.kv | compute.vm | container.orchestration | db.nosql | db.relational | dns.zone | messaging.queue | messaging.topic | network.cdn | paas.app | search.engine | storage.object | warehouse.query)")
 	c.Flags().Int64Var(&f.vcpu, "vcpu", 0, "minimum vCPU count")
 	c.Flags().Float64Var(&f.memoryGB, "memory", 0, "minimum memory in GB")
 	c.Flags().Int64Var(&f.gpuCount, "gpu-count", 0, "minimum GPU count (0 excludes GPU SKUs)")
@@ -125,21 +144,27 @@ func newCompareCmd() *cobra.Command {
 func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E) {
 	if f.kind == "" {
 		return nil, skuerrors.Validation("flag_invalid", "kind", "",
-			"pass --kind compute.vm | storage.object | db.relational | cache.kv | container.orchestration | search.engine | paas.app | warehouse.query")
+			"pass --kind api.gateway | cache.kv | compute.vm | container.orchestration | db.nosql | db.relational | dns.zone | messaging.queue | messaging.topic | network.cdn | paas.app | search.engine | storage.object | warehouse.query")
 	}
 	supportedKinds := map[string]bool{
-		"compute.vm":              true,
-		"storage.object":          true,
-		"db.relational":           true,
+		"api.gateway":             true,
 		"cache.kv":                true,
+		"compute.vm":              true,
 		"container.orchestration": true,
-		"search.engine":           true,
+		"db.nosql":                true,
+		"db.relational":           true,
+		"dns.zone":                true,
+		"messaging.queue":         true,
+		"messaging.topic":         true,
+		"network.cdn":             true,
 		"paas.app":                true,
+		"search.engine":           true,
+		"storage.object":          true,
 		"warehouse.query":         true,
 	}
 	if !supportedKinds[f.kind] {
 		return nil, skuerrors.Validation("flag_invalid", "kind", f.kind,
-			"supported kinds: compute.vm, storage.object, db.relational, cache.kv, container.orchestration, search.engine, paas.app, warehouse.query")
+			"supported kinds: api.gateway, cache.kv, compute.vm, container.orchestration, db.nosql, db.relational, dns.zone, messaging.queue, messaging.topic, network.cdn, paas.app, search.engine, storage.object, warehouse.query")
 	}
 	// Volume flags are mutually exclusive; at most one may be non-zero.
 	volumeSet := 0
@@ -210,6 +235,46 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"warehouse.query accepts --mode / --edition / --storage-tier / --regions / --max-price")
+		}
+	case "messaging.queue", "messaging.topic":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.deploymentOption != "" || f.tier != "" || f.planOS != "" || f.edition != "" ||
+			f.storageTier != "" || f.queries != 0 || f.requests != 0 || f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				f.kind+" accepts --ops / --engine / --mode / --regions / --max-price")
+		}
+	case "dns.zone":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.deploymentOption != "" || f.tier != "" || f.planOS != "" || f.edition != "" ||
+			f.storageTier != "" || f.ops != 0 || f.requests != 0 || f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"dns.zone accepts --queries / --engine / --mode / --regions / --max-price")
+		}
+	case "api.gateway":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.ops != 0 || f.queries != 0 || f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"api.gateway accepts --requests / --mode / --regions / --max-price")
+		}
+	case "network.cdn":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.ops != 0 || f.queries != 0 || f.requests != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"network.cdn accepts --gb / --mode / --regions / --max-price")
+		}
+	case "db.nosql":
+		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
+			f.availabilityTier != "" || f.storageGB != 0 || f.deploymentOption != "" ||
+			f.tier != "" || f.planOS != "" || f.edition != "" || f.storageTier != "" ||
+			f.ops != 0 || f.queries != 0 || f.requests != 0 || f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"db.nosql accepts --vcpu / --memory / --engine / --mode / --regions / --max-price")
 		}
 	}
 	switch f.sort {
