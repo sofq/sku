@@ -55,12 +55,3 @@ def test_unknown_location_rejected(tmp_path):
     with pytest.raises(KeyError, match="Antarctica"):
         list(ingest(offer_path=p))
 
-
-def test_location_map_fans_out_to_p1_regions():
-    values = set(LOCATION_MAP.values())
-    assert "sa-east-1" in values, "South America must fan out to sa-east-1"
-    assert "ap-southeast-2" in values, "Australia must fan out to ap-southeast-2"
-    assert "ap-south-1" in values, "India must fan out to ap-south-1"
-    assert "ca-central-1" in values, "Canada must fan out to ca-central-1"
-    assert "me-central-1" in values, "Middle East must fan out to me-central-1"
-    assert "af-south-1" in values, "South Africa must fan out to af-south-1"

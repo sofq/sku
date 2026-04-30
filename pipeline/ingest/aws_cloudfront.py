@@ -19,7 +19,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from normalize.cdn_locations import LOCATION_MAP, lookup  # noqa: F401
+from normalize.cdn_locations import LOCATION_MAP
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
