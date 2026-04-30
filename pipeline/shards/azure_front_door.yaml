@@ -1,0 +1,12 @@
+shard: azure_front_door
+provider: azure
+service: front-door
+kind: network.cdn
+cli:
+  group: azure
+  command: front-door
+  resource_flag: tier
+ingest:
+  module: azure_front_door
+  discover: azure.publication_date
+budget_bytes: 1000000

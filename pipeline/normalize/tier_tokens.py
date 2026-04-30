@@ -7,11 +7,18 @@ based on the dimension being walked.
 from __future__ import annotations
 
 TIER_TOKENS_COUNT: frozenset[str] = frozenset({
-    "0", "25", "100", "300M", "333M", "667M", "1B", "10B", "19B",
+    # Base tokens present since Phase 0
+    "0", "25", "100",
+    # M (millions)
+    "1M", "13M", "100M", "250M", "300M", "333M", "667M", "2500M",
+    # B (billions)
+    "1B", "5B", "10B", "19B", "100B", "200B",
+    # K (thousands)
+    "10K",
 })
 
 TIER_TOKENS_BYTES: frozenset[str] = frozenset({
-    "0", "100GB", "500GB", "1TB", "10TB", "40TB", "100TB", "150TB", "500TB", "1PB", "5PB",
+    "0", "100GB", "500GB", "1TB", "10TB", "40TB", "50TB", "100TB", "150TB", "500TB", "1PB", "5PB",
 })
 
 
@@ -29,6 +36,8 @@ def parse_count_tier(token: str) -> float:
         return float(token_upper[:-1]) * 1e9
     if token_upper.endswith("M"):
         return float(token_upper[:-1]) * 1e6
+    if token_upper.endswith("K"):
+        return float(token_upper[:-1]) * 1e3
     return float(token)
 
 

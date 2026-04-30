@@ -31,6 +31,18 @@ _PROVIDER = "aws"
 _SERVICE = "sqs"
 _KIND = "messaging.queue"
 
+# Map raw SQS tier boundary integers (as strings) to canonical count-domain tokens.
+_SQS_TIER_MAP: dict[str, str] = {
+    "0":             "0",
+    "100000000000":  "100B",
+    "200000000000":  "200B",
+}
+
+
+def _to_count_token(raw: str) -> str:
+    """Convert a raw SQS beginRange/endRange string to a canonical tier token."""
+    return _SQS_TIER_MAP.get(str(int(float(raw))) if raw not in ("", "Inf") else raw, raw)
+
 _QUEUE_TYPE_MAP: dict[str, str] = {
     "Standard": "standard",
     "FIFO (first-in, first-out)": "fifo",
@@ -107,9 +119,9 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         key = (resource_name, region)
         if key not in grouped:
             grouped[key] = {"sku_id": sku_id, "tiers": []}
-        tier_upper = "" if (end_range is None or end_range == "Inf") else str(int(float(end_range)))
+        tier_upper = "" if (end_range is None or end_range == "Inf") else _to_count_token(end_range)
         grouped[key]["tiers"].append({
-            "begin_range": begin_range or "0",
+            "begin_range": _to_count_token(begin_range or "0"),
             "tier_upper": tier_upper,
             "usd": usd,
             "unit": unit or "requests",

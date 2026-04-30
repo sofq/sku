@@ -74,33 +74,14 @@ func TestMDeltaKindMap(t *testing.T) {
 	}
 }
 
-// TestMDeltaStubEstimators verifies that the 4 Phase-4 stub kinds are
-// registered and return the expected placeholder error. Uses the real
-// init()-registered stubs — do NOT call resetRegistry here.
-func TestMDeltaStubEstimators(t *testing.T) {
-	stubKinds := []struct {
-		kind        string
-		wantErrFrag string
-	}{
-		{"messaging.queue", "Phase 4"},
-		{"dns.zone", "Phase 4"},
-		{"api.gateway", "Phase 4"},
-		{"network.cdn", "Phase 4"},
-	}
-	ctx := context.Background()
-	for _, tc := range stubKinds {
-		e, ok := Get(tc.kind)
+// TestMDeltaRealEstimatorsRegistered verifies that the 4 Phase-4 estimator kinds
+// are registered as real estimators (not stubs). Uses init()-registered estimators.
+func TestMDeltaRealEstimatorsRegistered(t *testing.T) {
+	realKinds := []string{"messaging.queue", "dns.zone", "api.gateway", "network.cdn"}
+	for _, kind := range realKinds {
+		_, ok := Get(kind)
 		if !ok {
-			t.Errorf("Get(%q): not registered", tc.kind)
-			continue
-		}
-		_, err := e.Estimate(ctx, Item{Raw: "test", Kind: tc.kind})
-		if err == nil {
-			t.Errorf("kind %q: expected error, got nil", tc.kind)
-			continue
-		}
-		if !strings.Contains(err.Error(), tc.wantErrFrag) {
-			t.Errorf("kind %q: error %q does not contain %q", tc.kind, err.Error(), tc.wantErrFrag)
+			t.Errorf("Get(%q): not registered", kind)
 		}
 	}
 }

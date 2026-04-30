@@ -1,0 +1,12 @@
+shard: gcp_cloud_cdn
+provider: gcp
+service: cloud-cdn
+kind: network.cdn
+cli:
+  group: gcp
+  command: cloud-cdn
+  resource_flag: mode
+ingest:
+  module: gcp_cloud_cdn
+  discover: gcp.publication_date
+budget_bytes: 1000000

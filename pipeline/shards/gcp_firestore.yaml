@@ -1,0 +1,12 @@
+shard: gcp_firestore
+provider: gcp
+service: firestore
+kind: db.nosql
+cli:
+  group: gcp
+  command: firestore
+  resource_flag: mode
+ingest:
+  module: gcp_firestore
+  discover: gcp.publication_date
+budget_bytes: 200000

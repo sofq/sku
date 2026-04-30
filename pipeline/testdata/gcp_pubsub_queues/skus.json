@@ -1,0 +1,36 @@
+{"skus": [
+  {
+    "name": "services/A1E8-BE35-7EBC/skus/PUBSUB-001",
+    "skuId": "PUBSUB-001",
+    "description": "Cloud Pub/Sub Message Delivery Basic",
+    "category": {
+      "serviceDisplayName": "Cloud Pub/Sub",
+      "resourceFamily": "ApplicationServices",
+      "resourceGroup": "Message",
+      "usageType": "OnDemand"
+    },
+    "serviceRegions": ["global"],
+    "pricingInfo": [{
+      "pricingExpression": {
+        "usageUnit": "TiBy",
+        "tieredRates": [
+          {"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 0}},
+          {"startUsageAmount": 0.009765625, "unitPrice": {"currencyCode": "USD", "units": "40", "nanos": 0}}
+        ]
+      }
+    }]
+  },
+  {
+    "name": "services/A1E8-BE35-7EBC/skus/PUBSUB-BACKLOG",
+    "skuId": "PUBSUB-BACKLOG",
+    "description": "Topics message backlog",
+    "category": {
+      "serviceDisplayName": "Cloud Pub/Sub",
+      "resourceFamily": "ApplicationServices",
+      "resourceGroup": "Subscription",
+      "usageType": "OnDemand"
+    },
+    "serviceRegions": ["global"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.mo", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 270000000}}]}}]
+  }
+]}

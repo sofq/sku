@@ -1,0 +1,8 @@
+{"Items": [
+  {"skuId": "EH-STD-TU-E", "serviceName": "Event Hubs", "productName": "Event Hubs", "skuName": "Standard", "meterName": "Standard Throughput Unit", "armRegionName": "eastus", "retailPrice": 0.030, "unitOfMeasure": "1 Hour", "type": "Consumption", "currencyCode": "USD"},
+  {"skuId": "EH-STD-EV-E", "serviceName": "Event Hubs", "productName": "Event Hubs", "skuName": "Standard", "meterName": "Standard Ingress Events", "armRegionName": "eastus", "retailPrice": 0.028, "unitOfMeasure": "1M", "type": "Consumption", "currencyCode": "USD"},
+  {"skuId": "EH-PREM-E", "serviceName": "Event Hubs", "productName": "Event Hubs", "skuName": "Premium", "meterName": "Premium Processing Unit", "armRegionName": "eastus", "retailPrice": 1.063, "unitOfMeasure": "1 Hour", "type": "Consumption", "currencyCode": "USD"},
+  {"skuId": "EH-STD-TU-W", "serviceName": "Event Hubs", "productName": "Event Hubs", "skuName": "Standard", "meterName": "Standard Throughput Unit", "armRegionName": "westeurope", "retailPrice": 0.030, "unitOfMeasure": "1 Hour", "type": "Consumption", "currencyCode": "USD"},
+  {"skuId": "EH-STD-EV-W", "serviceName": "Event Hubs", "productName": "Event Hubs", "skuName": "Standard", "meterName": "Standard Ingress Events", "armRegionName": "westeurope", "retailPrice": 0.028, "unitOfMeasure": "1M", "type": "Consumption", "currencyCode": "USD"},
+  {"skuId": "EH-PREM-W", "serviceName": "Event Hubs", "productName": "Event Hubs", "skuName": "Premium", "meterName": "Premium Processing Unit", "armRegionName": "westeurope", "retailPrice": 1.063, "unitOfMeasure": "1 Hour", "type": "Consumption", "currencyCode": "USD"}
+]}

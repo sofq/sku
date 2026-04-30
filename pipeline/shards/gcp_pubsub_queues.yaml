@@ -1,0 +1,12 @@
+shard: gcp_pubsub_queues
+provider: gcp
+service: pubsub-queues
+kind: messaging.queue
+cli:
+  group: gcp
+  command: pubsub-queues
+  resource_flag: mode
+ingest:
+  module: gcp_pubsub_queues
+  discover: gcp.publication_date
+budget_bytes: 150000

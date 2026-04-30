@@ -21,5 +21,10 @@ func newAzureCmd() *cobra.Command {
 	c.AddCommand(newAzureRedisCmd())
 	c.AddCommand(newAzureAKSCmd())
 	c.AddCommand(newAzureAppServiceCmd())
+	c.AddCommand(newAzureServiceBusQueuesCmd())
+	c.AddCommand(newAzureServiceBusTopicsCmd())
+	c.AddCommand(newAzureEventHubsCmd())
+	c.AddCommand(newAzureFrontDoorCmd())
+	c.AddCommand(newAzureAPIMCmd())
 	return c
 }

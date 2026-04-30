@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from ingest.aws_sqs import ingest
+from normalize.tier_tokens import parse_count_tier
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "aws_sqs" / "offer.json"
 GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "aws_sqs_rows.jsonl"
@@ -62,7 +63,7 @@ def test_tiers_contiguous():
     # Inline contiguity check: for each row's prices[] (all same dimension=request),
     # verify tier[i].tier_upper == tier[i+1].tier and last entry has tier_upper=="".
     for row in rows:
-        prices = sorted(row["prices"], key=lambda p: int(p["tier"]))
+        prices = sorted(row["prices"], key=lambda p: parse_count_tier(p["tier"]))
         assert prices, f"row {row['sku_id']} has no prices"
         for i, p in enumerate(prices):
             if i < len(prices) - 1:

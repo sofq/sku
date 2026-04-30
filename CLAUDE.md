@@ -257,22 +257,58 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku estimate --item gcp/bigquery:capacity-standard:region=bq-us:slots=500:hours=730 --pretty
 ./bin/sku estimate --item gcp/bigquery:storage-active:region=bq-us:gb_month=5000 --pretty
 
-# M-δ S2 messaging (SQS, SNS)
+# M-δ S2 messaging.queue
 ./bin/sku aws sqs price --queue-type standard --region us-east-1 --preset agent
 ./bin/sku aws sqs price --queue-type fifo     --region us-east-1
 ./bin/sku aws sqs list  --queue-type standard
 ./bin/sku aws sns price --region us-east-1 --preset agent
 ./bin/sku aws sns list
+./bin/sku azure service-bus-queues price --tier standard --region eastus --preset agent
+./bin/sku azure service-bus-queues price --tier premium  --region eastus
+./bin/sku azure service-bus-queues list  --tier standard
+./bin/sku azure event-hubs price --tier standard --region eastus --preset agent
+./bin/sku azure event-hubs price --tier premium  --region eastus
+./bin/sku azure event-hubs list  --tier standard
+./bin/sku gcp pubsub-queues price --region global --preset agent
+./bin/sku gcp pubsub-queues list
 
-# M-δ S2 dns.zone (Route53)
-./bin/sku aws route53 price --zone-type public  --region global --preset agent
-./bin/sku aws route53 list  --zone-type public
+# M-δ S2 dns.zone
+./bin/sku aws route53    price --zone-type public  --region global --preset agent
+./bin/sku aws route53    list  --zone-type public
+./bin/sku gcp cloud-dns  price --region global --preset agent
+./bin/sku gcp cloud-dns  list
 
-# M-δ S2 api.gateway (AWS API Gateway)
+# M-δ S2 api.gateway
 ./bin/sku aws api-gateway price --api-type rest --region us-east-1 --preset agent
 ./bin/sku aws api-gateway list  --api-type rest
 ./bin/sku aws api-gateway price --api-type http --region us-east-1 --preset agent
-./bin/sku aws api-gateway list  --api-type http
+./bin/sku azure apim price --tier developer --region eastus --preset agent
+./bin/sku azure apim list  --tier consumption
+
+# M-δ S2 network.cdn
+./bin/sku aws cloudfront    price --region us-east-1 --preset agent
+./bin/sku aws cloudfront    list
+./bin/sku azure front-door  price --tier standard --region global --preset agent
+./bin/sku azure front-door  list  --tier standard
+./bin/sku gcp cloud-cdn     price --region us-east1 --preset agent
+./bin/sku gcp cloud-cdn     list
+
+# M-δ S2 estimator examples
+./bin/sku estimate --item aws/sqs:standard:region=us-east-1:ops=1000000000 --pretty
+./bin/sku estimate --item azure/service-bus-queues:standard:region=eastus:ops=50000000 --pretty
+./bin/sku estimate --item azure/service-bus-queues:premium:region=eastus:mu_hours=730 --pretty
+./bin/sku estimate --item azure/event-hubs:standard:region=eastus:tu_hours=730 --pretty
+./bin/sku estimate --item azure/event-hubs:premium:region=eastus:ppu_hours=500 --pretty
+./bin/sku estimate --item gcp/pubsub-queues:throughput:region=global:tib=5 --pretty
+./bin/sku estimate --item aws/route53:public:region=global:zones=10:queries=1000000000 --pretty
+./bin/sku estimate --item gcp/cloud-dns:public:region=global:zones=5:queries=500000000 --pretty
+./bin/sku estimate --item aws/api-gateway:rest:region=us-east-1:requests=500000000 --pretty
+./bin/sku estimate --item aws/api-gateway:http:region=us-east-1:requests=100000000 --pretty
+./bin/sku estimate --item azure/apim:developer:region=eastus:units=2:hours=730 --pretty
+./bin/sku estimate --item azure/apim:consumption:region=eastus:requests=1000000 --pretty
+./bin/sku estimate --item aws/cloudfront:cloudfront:region=us-east-1:gb=500 --pretty
+./bin/sku estimate --item azure/front-door:standard:region=eastus:gb=200 --pretty
+./bin/sku estimate --item gcp/cloud-cdn:standard:region=us-east1:gb=1000 --pretty
 ```
 
 ### Distribution smoke (M6)
