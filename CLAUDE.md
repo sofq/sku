@@ -43,27 +43,41 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M-α — pipeline architecture for coverage expansion:
-- Monolithic `data-daily.yml` split into three per-provider workflows
-  (`data-aws.yml` 03:00, `data-azure.yml` 03:15, `data-gcp.yml` 03:30 UTC)
-  plus `data-publish.yml` (04:30 UTC fallback); `data-dispatch.yml` (formerly
-  `data-daily.yml`) kept as a thin manual-dispatch dispatcher. See
+**Next up: M-δ — S2 services** (sketched in
+`docs/superpowers/plans/2026-04-24-coverage-expansion-roadmap.md:158`; spec not
+yet written). 12 new shards (messaging, DNS, CDN, API gateway) across AWS /
+Azure / GCP, introducing kinds `api.gateway`, `messaging.queue`,
+`messaging.topic`, `dns.zone`, `cdn.origin`. Open design questions flagged for
+spec time: per-operation compare semantics, DNS tiered pricing, API-gateway
+shard shape, whether to merge CloudFront / Front Door / Cloud CDN.
+
+Parked items to fold into M-δ spec:
+- **Dedup respec** — cut from M-α (Feature D); was tagged "will ride with
+  M-γ's schema bump" but did not ship in M-γ.
+- **`terms.os` overload cleanup** — schema-debt note in
+  `docs/superpowers/specs/2026-04-29-m-gamma-3-s1-paas-search-warehouse-design.md:227`
+  (split `os` into real-OS-only + `mode_token`).
+
+Recently closed:
+- **M-α** — pipeline split into per-provider workflows (`data-aws.yml` 03:00,
+  `data-azure.yml` 03:15, `data-gcp.yml` 03:30 UTC) + `data-publish.yml` (04:30
+  UTC fallback); `data-dispatch.yml` is the manual dispatcher. See
   `docs/superpowers/specs/2026-04-24-m-alpha-pipeline-architecture-design.md`
-  for the full design (note: Feature D dedup and Go-side codegen were cut —
-  see the plan file).
-- `pipeline/shards/*.yaml` is now the single source of truth; `make generate`
-  regenerates `package/budgets.py` and `discover/_shards_gen.py`.
-- ETag fast path wired for AWS non-streaming shards; controlled by
-  `SKU_ETAG_MODE` env var.
-
-Next: M-β (R1 regions), then M-γ (S1 services) (dedup respec pending; will
-ride with M-γ's schema bump).
-
-M-γ.1 S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure Redis, Spanner, Memorystore shards + cache.kv compare kind + estimators.
-
-M-γ.2 S1 containers (managed Kubernetes): EKS, AKS, GKE shards + container.orchestration compare kind. Worker/node prices remain in `aws_ec2` / `azure_vm` / `gcp_gce`.
-
-M-γ.3 S1 PaaS / search / warehouse: aws_opensearch, azure_appservice, gcp_bigquery shards + search.engine, paas.app, warehouse.query compare kinds + estimators (opensearch, appservice, bigquery). BigQuery pseudo-regions bq-us / bq-eu added.
+  (Feature D dedup and Go-side codegen were cut). `pipeline/shards/*.yaml` is
+  the single source of truth; `make generate` regenerates `package/budgets.py`
+  and `discover/_shards_gen.py`. ETag fast path wired for AWS non-streaming
+  shards via `SKU_ETAG_MODE`.
+- **M-β** — R1 commercial regions (34 AWS / 56 Azure / 43 GCP); new
+  `africa` and `middle-east` groups; CloudFront fan-out remapped.
+- **M-γ.1** — S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure
+  Redis, Spanner, Memorystore + `cache.kv` compare kind + estimators.
+- **M-γ.2** — S1 containers: EKS, AKS, GKE + `container.orchestration`
+  compare kind. Worker/node prices remain in `aws_ec2` / `azure_vm` / `gcp_gce`.
+- **M-γ.3** — S1 PaaS / search / warehouse: aws_opensearch,
+  azure_appservice, gcp_bigquery + `search.engine`, `paas.app`,
+  `warehouse.query` compare kinds + estimators (single-provider per kind;
+  cross-provider counterparts queued for M-δ/M-ε). BigQuery pseudo-regions
+  bq-us / bq-eu added.
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
