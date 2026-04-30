@@ -111,10 +111,12 @@ var kindRegistry = map[string]kindQuery{
 	},
 	"paas.app": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
 		return kinds.QueryPaasApp(ctx, c, kinds.PaasAppSpec{
-			PlanOS:   r.PlanOS,
-			Tier:     r.Tier,
-			MaxPrice: r.MaxPrice,
-			Regions:  r.Regions,
+			PlanOS:      r.PlanOS,
+			Tier:        r.Tier,
+			MinVCPU:     r.VCPU,
+			MinMemoryGB: r.MemoryGB,
+			MaxPrice:    r.MaxPrice,
+			Regions:     r.Regions,
 		})
 	},
 	"warehouse.query": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {

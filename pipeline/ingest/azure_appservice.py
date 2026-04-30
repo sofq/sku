@@ -68,7 +68,9 @@ _PLAN_SKU_SPECS: dict[str, tuple[int, float]] = {
 _TIER_KEYWORDS: list[tuple[str, str]] = [
     ("Isolated v2", "isolatedv2"),
     ("Isolated",    "isolated"),
+    ("Premium v3",  "premiumv3"),
     ("PremiumV3",   "premiumv3"),
+    ("Premium v2",  "premium"),
     ("PremiumV2",   "premium"),
     ("Premium",     "premium"),
     ("Standard",    "standard"),
@@ -77,7 +79,7 @@ _TIER_KEYWORDS: list[tuple[str, str]] = [
     ("Free",        "free"),
 ]
 
-_SKU_RE = re.compile(r"\b(F1|D1|B[123]|S[123]|P[0-3]v[23]|I[1-6]v2|I[1-3])\b", re.IGNORECASE)
+_SKU_RE = re.compile(r"\b(F1|D1|B[123]|S[123]|P[0-3]\s*v[23]|I[1-6]\s*v2|I[1-3])\b", re.IGNORECASE)
 _OS_RE  = re.compile(r"\b(Linux|Windows)\b", re.IGNORECASE)
 
 _PI_VERSIONED_RE = re.compile(r"^([PI])(\d)V(\d)$", re.IGNORECASE)
@@ -90,7 +92,7 @@ def _canonicalize_sku(raw: str) -> str:
     are uppercase ("F1", "B2", "S1"). Without this, Isolated-v2 SKUs end up
     mismatched downstream — see `_PLAN_SKU_SPECS` and `_APP_SERVICE_SKUS`.
     """
-    upper = raw.upper()
+    upper = raw.upper().replace(" ", "")
     m = _PI_VERSIONED_RE.match(upper)
     if m:
         return f"{m.group(1)}{m.group(2)}v{m.group(3)}"

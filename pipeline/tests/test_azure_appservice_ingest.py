@@ -64,3 +64,28 @@ def test_ingest_isolated_v2_sku_canonicalizes_to_lowercase_v():
         assert not r["resource_attrs"]["extra"].get("unknown_sku")
         assert r["resource_attrs"]["vcpu"] == 2
         assert r["resource_attrs"]["memory_gb"] == 8.0
+
+
+def test_ingest_accepts_live_spaced_premium_v3_names(tmp_path):
+    prices = tmp_path / "prices.json"
+    prices.write_text(
+        """{"Items": [{
+          "skuId": "DZH318Z0DCR6/01FQ",
+          "productName": "Azure App Service Premium v3 Plan - Linux",
+          "meterName": "P1 v3 App",
+          "skuName": "P1 v3",
+          "armRegionName": "eastus",
+          "retailPrice": 0.169,
+          "unitOfMeasure": "1 Hour",
+          "type": "Consumption",
+          "currencyCode": "USD"
+        }]}"""
+    )
+    rows = list(ingest(prices_path=prices))
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["resource_name"] == "P1v3"
+    assert row["terms"]["support_tier"] == "premiumv3"
+    assert row["terms"]["os"] == "linux"
+    assert row["resource_attrs"]["vcpu"] == 2
+    assert row["resource_attrs"]["memory_gb"] == 8.0

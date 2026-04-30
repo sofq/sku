@@ -236,6 +236,8 @@ def _sku_matches_sample(
 
 
 def _region_matches(region: str, upstream_regions: list[str]) -> bool:
+    if not upstream_regions:
+        return region in {"global", "bq-us", "bq-eu"}
     if region in upstream_regions:
         return True
     bigquery_multiregions = {
