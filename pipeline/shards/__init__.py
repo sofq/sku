@@ -31,6 +31,10 @@ _VALID_KINDS: frozenset[str] = frozenset({
     "search.engine",              # M-γ.3: aws_opensearch
     "paas.app",                   # M-γ.3: azure_appservice
     "warehouse.query",            # M-γ.3: gcp_bigquery
+    "messaging.queue",            # M-δ: SQS/Service Bus/Cloud Tasks
+    "messaging.topic",            # M-δ: SNS/Event Hubs/Pub Sub
+    "dns.zone",                   # M-δ: Route 53/Azure DNS/Cloud DNS
+    "api.gateway",                # M-δ: API GW/APIM/Cloud Endpoints
 })
 
 

@@ -123,3 +123,31 @@ defaults:
     support_tier: ""
     upfront: ""
     payment_option: ""
+  messaging.queue:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  messaging.topic:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  dns.zone:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
+  api.gateway:
+    commitment: on_demand
+    tenancy: ""
+    os: ""
+    support_tier: ""
+    upfront: ""
+    payment_option: ""
