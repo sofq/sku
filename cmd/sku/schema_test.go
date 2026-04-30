@@ -60,6 +60,19 @@ func TestSchema_Base_ListsProvidersAndGlobals(t *testing.T) {
 	require.NotEmpty(t, doc["globals"])
 }
 
+func TestSchema_KindTermOverrides_EmitsCatalog(t *testing.T) {
+	out, _, code := runSchema(t, "--kind-term-overrides")
+	require.Zero(t, code)
+	var doc map[string]any
+	require.NoError(t, json.Unmarshal([]byte(out), &doc))
+	overrides, ok := doc["kind_term_overrides"].(map[string]any)
+	require.True(t, ok)
+	dbRel, ok := overrides["db.relational"].(map[string]any)
+	require.True(t, ok)
+	tenancy := dbRel["tenancy"].(map[string]any)
+	require.Equal(t, "engine", tenancy["semantic_name"])
+}
+
 func TestSchema_listCommands_includesBatchRegistry(t *testing.T) {
 	out, _, code := runSchema(t, "--list-commands")
 	require.Zero(t, code)
