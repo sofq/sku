@@ -148,6 +148,13 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     with skus_path.open() as f:
         skus = json.load(f).get("skus", [])
 
+    # Dedupe by (resource_name, region): GCP publishes distinct skuIds for
+    # variants that share the same logical row (e.g. Standard Edition Slot
+    # Reservation vs. Standard Edition Autoscaler Slot — same per-slot-hour
+    # rate). Keep the first row seen so LookupWarehouseQuery / `bq list` show
+    # one row per (mode, region).
+    seen: set[tuple[str, str]] = set()
+
     for sku in skus:
         description = sku.get("description", "")
         sku_id = sku.get("skuId", "")
@@ -199,6 +206,11 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
                 region_normalized = tracked_regions.get(region)
                 if region_normalized is None:
                     continue
+
+            key = (resource_name, region)
+            if key in seen:
+                continue
+            seen.add(key)
 
             terms = apply_kind_defaults(_KIND, {
                 "commitment": "on_demand",

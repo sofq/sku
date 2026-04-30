@@ -68,4 +68,4 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, extra) VALUES
 INSERT INTO prices VALUES
   ('os-mc-large-use1', 'instance', '', 0.166, 'hour'),
   ('os-mc-xl-use1',    'instance', '', 0.332, 'hour'),
-  ('os-sv-use1',       'ocu',      '', 0.24,  'hour');
+  ('os-sv-use1',       'compute-ocu', '', 0.24,  'hour');

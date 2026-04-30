@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from ingest.gcp_bigquery import ingest
@@ -112,3 +113,37 @@ def test_ingest_skips_physical_storage_rows():
         f"duplicate (resource_name, region) for storage rows: {storage_keys}"
     )
     _ = sku_ids  # silence unused-name guard
+
+
+def test_ingest_dedupes_slot_reservation_and_autoscaler(tmp_path):
+    # GCP publishes distinct skuIds for Standard Edition Slot Reservation and
+    # Standard Edition Autoscaler Slot — same per-slot-hour rate, same logical
+    # (resource_name, region). Only one row should survive.
+    skus = {
+        "skus": [
+            {
+                "skuId": "BQ-STD-RESERVATION-USE",
+                "description": "BigQuery Standard edition slot commitment",
+                "serviceRegions": ["us"],
+                "pricingInfo": [{"pricingExpression": {
+                    "usageUnit": "h",
+                    "tieredRates": [{"unitPrice": {"units": "0", "nanos": 40000000}}],
+                }}],
+            },
+            {
+                "skuId": "BQ-STD-AUTOSCALER-USE",
+                "description": "BigQuery Standard edition autoscaler slot",
+                "serviceRegions": ["us"],
+                "pricingInfo": [{"pricingExpression": {
+                    "usageUnit": "h",
+                    "tieredRates": [{"unitPrice": {"units": "0", "nanos": 40000000}}],
+                }}],
+            },
+        ]
+    }
+    p = tmp_path / "skus.json"
+    p.write_text(json.dumps(skus))
+    rows = list(ingest(skus_path=p))
+    keys = [(r["resource_name"], r["region"]) for r in rows]
+    assert len(keys) == len(set(keys)), f"expected dedupe, got: {keys}"
+    assert keys.count(("capacity-standard", "bq-us")) == 1
