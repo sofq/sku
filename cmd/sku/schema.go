@@ -10,6 +10,7 @@ import (
 	"github.com/sofq/sku/internal/batch"
 	"github.com/sofq/sku/internal/catalog"
 	skuerrors "github.com/sofq/sku/internal/errors"
+	"github.com/sofq/sku/internal/schema"
 )
 
 // newSchemaCmd builds the `sku schema` subcommand tree. The command is a
@@ -20,11 +21,12 @@ import (
 // view lands in a later task.
 func newSchemaCmd() *cobra.Command {
 	var (
-		list         bool
-		errs         bool
-		listServing  bool
-		listCommands bool
-		format       string
+		list              bool
+		errs              bool
+		listServing       bool
+		listCommands      bool
+		kindTermOverrides bool
+		format            string
 	)
 	c := &cobra.Command{
 		Use:   "schema [provider [service [verb]]]",
@@ -38,6 +40,9 @@ func newSchemaCmd() *cobra.Command {
 				return enc.Encode(map[string]any{
 					"commands": batch.RegisteredNames(),
 				})
+
+			case kindTermOverrides:
+				return enc.Encode(schema.KindTermOverridesCatalog())
 
 			case errs:
 				return enc.Encode(skuerrors.ErrorCatalog())
@@ -108,6 +113,8 @@ func newSchemaCmd() *cobra.Command {
 		"list serving providers in the openrouter shard")
 	c.Flags().BoolVar(&listCommands, "list-commands", false,
 		"list batch-registered command names")
+	c.Flags().BoolVar(&kindTermOverrides, "kind-term-overrides", false,
+		"emit which `terms` slots are repurposed for which kinds (e.g. tenancy=engine for db.relational)")
 	c.Flags().StringVar(&format, "format", "json", "json | text")
 	return c
 }
