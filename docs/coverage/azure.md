@@ -1,42 +1,42 @@
 # Azure pricing-feed coverage
 
-_Generated 2026-04-27_
+_Generated 2026-04-30_
 
 Raw SKU counts per bucket, and which `sku` shard (if any) ingests them.
 Generated weekly by `make profile` against live feeds.
 
 | Bucket | SKUs | Covered by | Coverage | Attrs fingerprint | Sample SKU ids |
 | --- | ---: | --- | ---: | --- | --- |
-| Virtual Machines / Virtual Machines | 703 | azure_vm | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Edsv4_Type2`, `Standard_E4-2as_v6`, `Standard_E64-16s_v5` |
-| Storage / Storage | 57 | azure_blob | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Priority Object Replication`, `Hot_LRS_Data_Stored_10 TB`, `` |
-| Foundry Models / Foundry Models | 23 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `54 opt Dz`, `gpt img 1.5 out img DZ`, `Grok 7 Inp DZone` |
-| SQL Database / SQL Database | 22 | azure_sql | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `14 vCore`, `SQLDB_GP_Compute_Gen5_32`, `SQLDB_BC_Compute_Gen5_32` |
+| Virtual Machines / Virtual Machines | 703 | azure_vm | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_D14`, `Standard_D4as_v7`, `Standard_D2a_v4` |
+| Storage / Storage | 57 | azure_blob | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | ``, `Premium_SSD_Managed_Disks_P80`, `Cold` |
+| Foundry Models / Foundry Models | 23 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `54 pro Batch inp Dz`, `Grok 7 Inp glbl`, `K2 Thinking Inp DZ` |
+| SQL Database / SQL Database | 22 | azure_sql | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `36 vCore`, `SQLDB_GP_Compute_Gen4_1`, `` |
 | Azure Monitor / Azure Monitor | 15 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
-| Foundry Tools / Foundry Tools | 15 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | ``, `Voice Live BYO Custom Speech Audio Input`, `Commitment Tier STT AddOn Azure 50K` |
-| Azure Database for PostgreSQL / Azure Database for PostgreSQL | 14 | azure_postgres | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `2m vCore`, `Basic`, `AzureDB_PostgreSQL_Flexible_Server_General_Purpose_Ddsv4Series_Compute` |
-| Azure Database for MySQL / Azure Database for MySQL | 12 | azure_mysql | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `AzureDB_MySQL_General_Purpose_Compute_Gen5`, `AzureDB_MySQL_Flexible_Server_Confidential_Compute_ECadsv6_Series`, `Storage` |
-| Redis Cache / Redis Cache | 10 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Azure_Redis_Cache_Enterprise_E100`, `Azure_Managed_Redis_Compute_Optimized_X1`, `Azure_Redis_Cache_Enterprise_E1_Internal` |
+| Foundry Tools / Foundry Tools | 15 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Commitment Tier CLU Azure 1M`, `Voice Live API Lite - LLM Text Cached`, `Standard` |
+| Azure Database for PostgreSQL / Azure Database for PostgreSQL | 14 | azure_postgres | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_E64ds_v5`, `Standard_D16ads_v5`, `` |
+| Azure Database for MySQL / Azure Database for MySQL | 12 | azure_mysql | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `AzureDB_MySQL_Flexible_Server_General_Purpose_Compute_Ddsv5_Series`, ``, `AzureDB_MySQL_Flexible_Server_Memory_Optimized_Edsv5Series_Compute_4vCore` |
+| Redis Cache / Redis Cache | 10 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Azure_Redis_Cache_Enterprise_Flash_F1500`, `Azure_Redis_Cache_Premium_P5_Cache`, `Azure_Redis_Cache_Standard_C3_Cache` |
 | Azure App Service / Azure App Service | 9 | azure_functions | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | ``, `Azure_App_Service_Premium_v3_Plan_Linux_P3mv3`, `Azure_App_Service_Premium_v4_Plan_Linux_P5mv4` |
-| Cloud Services / Cloud Services | 8 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | ``, `Standard_G1`, `Standard_D13` |
-| Azure Cosmos DB / Azure Cosmos DB | 7 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `2 vCore - burstable`, ``, `Azure Cosmos DB Materialized Views Builder D4s` |
+| Cloud Services / Cloud Services | 8 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_D2_v2`, ``, `Standard_G1` |
+| Azure Cosmos DB / Azure Cosmos DB | 7 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Azure Cosmos DB Materialized Views Builder D4s`, `Azure_Cosmos_DB_for_MongoDB_Worker_Node_32vCore`, `2 vCore - burstable` |
 | Azure Front Door Service / Azure Front Door Service | 7 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
-| SQL Managed Instance / SQL Managed Instance | 7 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `64 vCore`, `1 vCore`, `` |
+| SQL Managed Instance / SQL Managed Instance | 7 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `SQLMI_BC_Compute_Gen5_32`, `80 vCore`, `16 vCore` |
 | Azure Synapse Analytics / Azure Synapse Analytics | 6 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | ``, `SQL_DW100c` |
-| Microsoft Fabric / Microsoft Fabric | 6 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Eventhouse`, `BCDR Storage Cool`, `Graph data science` |
+| Microsoft Fabric / Microsoft Fabric | 6 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Graph data science`, `RTI Event Listener and Alert`, `Fabric Meter 48` |
 | Network Watcher / Network Watcher | 5 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Quantum Computing / Quantum Computing | 5 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Data Lake Store / Data Lake Store | 4 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Phone Numbers / Phone Numbers | 4 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `CN`, `AR`, `DE` |
-| Virtual Machines Licenses / Virtual Machines Licenses | 4 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `7 vCPU VM`, `192-vCPU VM`, `Tracking On Premises` |
+| Virtual Machines Licenses / Virtual Machines Licenses | 4 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `192-vCPU VM`, `Tracking On Premises`, `7 vCPU VM` |
 | Azure NetApp Files / Azure NetApp Files | 3 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Flexible Service Level`, `NetApp_Ultra_1 PiB` |
 | ExpressRoute / ExpressRoute | 3 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
-| HDInsight / HDInsight | 3 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `E96d v5`, `Standard_E96a v4` |
+| HDInsight / HDInsight | 3 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_E96a v4`, `E96d v5` |
 | Notification Hubs / Notification Hubs | 3 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Application Gateway / Application Gateway | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Azure Analysis Services / Azure Analysis Services | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Azure Data Factory v2 / Azure Data Factory v2 | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Azure Kubernetes Service / Azure Kubernetes Service | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Automatic` |
-| Azure Managed Instance for Apache Cassandra / Azure Managed Instance for Apache Cassandra | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Apache_Cassandra_Standard_E4s_v4`, `Apache_Cassandra_Standard_L8as_v3` |
+| Azure Managed Instance for Apache Cassandra / Azure Managed Instance for Apache Cassandra | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Apache_Cassandra_Standard_L8as_v3`, `Apache_Cassandra_Standard_E4s_v4` |
 | Backup / Backup | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `ADLS Gen2 Vaulted` |
 | Microsoft Defender for Cloud / Microsoft Defender for Cloud | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Virtual WAN / Virtual WAN | 2 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
