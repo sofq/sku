@@ -75,10 +75,14 @@ jobs:
             git checkout -b "$branch"
             git add docs/coverage/
             git commit -m "docs(coverage): weekly profiler refresh"
-            git push origin "$branch"
-            gh pr create --title "docs(coverage): weekly profiler refresh" \
-              --body "Automated — see diff for upstream feed changes." \
-              --base main --head "$branch"
+            # Refresh remote-tracking ref so --force-with-lease has a baseline.
+            git fetch origin "$branch" 2>/dev/null || true
+            git push --force-with-lease origin "$branch"
+            if [ -z "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
+              gh pr create --title "docs(coverage): weekly profiler refresh" \
+                --body "Automated — see diff for upstream feed changes." \
+                --base main --head "$branch"
+            fi
           fi
         env:
           GH_TOKEN: ${{ secrets.GH_PAT_SKU }}
