@@ -26,8 +26,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -65,12 +66,12 @@ INSERT INTO terms (sku_id, commitment) VALUES
   ('anthropic/claude-opus-4.6::openrouter::default','on_demand');
 
 INSERT INTO prices VALUES
-  ('anthropic/claude-opus-4.6::anthropic::default','prompt','',1.5e-5,'token'),
-  ('anthropic/claude-opus-4.6::anthropic::default','completion','',7.5e-5,'token'),
-  ('anthropic/claude-opus-4.6::aws-bedrock::default','prompt','',1.5e-5,'token'),
-  ('anthropic/claude-opus-4.6::aws-bedrock::default','completion','',7.5e-5,'token'),
-  ('anthropic/claude-opus-4.6::openrouter::default','prompt','',1.5e-5,'token'),
-  ('anthropic/claude-opus-4.6::openrouter::default','completion','',7.5e-5,'token');
+  ('anthropic/claude-opus-4.6::anthropic::default','prompt','','',1.5e-5,'token'),
+  ('anthropic/claude-opus-4.6::anthropic::default','completion','','',7.5e-5,'token'),
+  ('anthropic/claude-opus-4.6::aws-bedrock::default','prompt','','',1.5e-5,'token'),
+  ('anthropic/claude-opus-4.6::aws-bedrock::default','completion','','',7.5e-5,'token'),
+  ('anthropic/claude-opus-4.6::openrouter::default','prompt','','',1.5e-5,'token'),
+  ('anthropic/claude-opus-4.6::openrouter::default','completion','','',7.5e-5,'token');
 
 INSERT INTO health VALUES
   ('anthropic/claude-opus-4.6::anthropic::default', 0.998, 420, 1100, 62.5, 1745020800),

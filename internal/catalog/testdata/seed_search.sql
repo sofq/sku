@@ -32,8 +32,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -86,11 +87,11 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture) VALUES
 
 -- Prices strictly ordered by sku_id so `--sort price` returns a predictable sequence.
 INSERT INTO prices VALUES
-  ('ec2-t3m-use1',   'compute','',0.0416,'hrs'),
-  ('ec2-m5l-use1',   'compute','',0.0960,'hrs'),
-  ('ec2-m5xl-use1',  'compute','',0.1920,'hrs'),
-  ('ec2-m524xl-use1','compute','',4.6080,'hrs'),
-  ('ec2-c5l-use1',   'compute','',0.0850,'hrs'),
-  ('ec2-m5l-usw2',   'compute','',0.1120,'hrs'),
-  ('ec2-m5xl-usw2',  'compute','',0.2240,'hrs'),
-  ('rds-m5l-use1',   'compute','',0.1500,'hrs');
+  ('ec2-t3m-use1',   'compute','','',0.0416,'hrs'),
+  ('ec2-m5l-use1',   'compute','','',0.0960,'hrs'),
+  ('ec2-m5xl-use1',  'compute','','',0.1920,'hrs'),
+  ('ec2-m524xl-use1','compute','','',4.6080,'hrs'),
+  ('ec2-c5l-use1',   'compute','','',0.0850,'hrs'),
+  ('ec2-m5l-usw2',   'compute','','',0.1120,'hrs'),
+  ('ec2-m5xl-usw2',  'compute','','',0.2240,'hrs'),
+  ('rds-m5l-use1',   'compute','','',0.1500,'hrs');

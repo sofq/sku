@@ -28,8 +28,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -64,6 +65,6 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('r53-private-global', '{"zone_type":"private"}');
 
 INSERT INTO prices VALUES
-  ('r53-public-global',  'hosted_zone','', 0.50, 'mo'),
-  ('r53-public-global',  'query',      '', 0.0000004, 'query'),
-  ('r53-private-global', 'hosted_zone','', 0.50, 'mo');
+  ('r53-public-global',  'hosted_zone','', '',0.50, 'mo'),
+  ('r53-public-global',  'query',      '', '',0.0000004, 'query'),
+  ('r53-private-global', 'hosted_zone','', '',0.50, 'mo');

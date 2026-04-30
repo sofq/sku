@@ -29,8 +29,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -72,6 +73,6 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('SPANNER-EP-USEAST1',   '{"edition":"enterprise-plus","pu_hour_usd":0.00028,"node_hour_usd":0.28}');
 
 INSERT INTO prices VALUES
-  ('SPANNER-STD-USEAST1',  'compute','',0.00009,'pu-hour'),
-  ('SPANNER-ENT-USEAST1',  'compute','',0.00014,'pu-hour'),
-  ('SPANNER-EP-USEAST1',   'compute','',0.00028,'pu-hour');
+  ('SPANNER-STD-USEAST1',  'compute','','',0.00009,'pu-hour'),
+  ('SPANNER-ENT-USEAST1',  'compute','','',0.00014,'pu-hour'),
+  ('SPANNER-EP-USEAST1',   'compute','','',0.00028,'pu-hour');

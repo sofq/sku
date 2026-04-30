@@ -28,8 +28,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -64,5 +65,5 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('apigw-http-use1', '{"api_type":"http"}');
 
 INSERT INTO prices VALUES
-  ('apigw-rest-use1', 'request','', 0.0000035, 'request'),
-  ('apigw-http-use1', 'request','', 0.000001,  'request');
+  ('apigw-rest-use1', 'request','', '',0.0000035, 'request'),
+  ('apigw-http-use1', 'request','', '',0.000001,  'request');

@@ -30,8 +30,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -68,18 +69,18 @@ INSERT INTO resource_attrs(sku_id, durability_nines, availability_tier, extra) V
   ('GCS-CL-EUWEST1',  11, 'cold',       '{}'),
   ('GCS-AR-EUWEST1',  11, 'archive',    '{}');
 INSERT INTO prices VALUES
-  ('GCS-STD-USEAST1','storage','',0.02,'gb-mo'),
-  ('GCS-STD-USEAST1','read-ops','',5e-7,'requests'),
-  ('GCS-STD-USEAST1','write-ops','',4e-6,'requests'),
-  ('GCS-NL-USEAST1','storage','',0.01,'gb-mo'),
-  ('GCS-NL-USEAST1','read-ops','',1e-6,'requests'),
-  ('GCS-NL-USEAST1','write-ops','',1e-5,'requests'),
-  ('GCS-CL-EUWEST1','storage','',0.007,'gb-mo'),
-  ('GCS-CL-EUWEST1','read-ops','',1e-5,'requests'),
-  ('GCS-CL-EUWEST1','write-ops','',5e-5,'requests'),
-  ('GCS-AR-EUWEST1','storage','',0.0012,'gb-mo'),
-  ('GCS-AR-EUWEST1','read-ops','',5e-5,'requests'),
-  ('GCS-AR-EUWEST1','write-ops','',5e-4,'requests');
+  ('GCS-STD-USEAST1','storage','','',0.02,'gb-mo'),
+  ('GCS-STD-USEAST1','read-ops','','',5e-7,'requests'),
+  ('GCS-STD-USEAST1','write-ops','','',4e-6,'requests'),
+  ('GCS-NL-USEAST1','storage','','',0.01,'gb-mo'),
+  ('GCS-NL-USEAST1','read-ops','','',1e-6,'requests'),
+  ('GCS-NL-USEAST1','write-ops','','',1e-5,'requests'),
+  ('GCS-CL-EUWEST1','storage','','',0.007,'gb-mo'),
+  ('GCS-CL-EUWEST1','read-ops','','',1e-5,'requests'),
+  ('GCS-CL-EUWEST1','write-ops','','',5e-5,'requests'),
+  ('GCS-AR-EUWEST1','storage','','',0.0012,'gb-mo'),
+  ('GCS-AR-EUWEST1','read-ops','','',5e-5,'requests'),
+  ('GCS-AR-EUWEST1','write-ops','','',5e-4,'requests');
 
 -- Cloud Run: one row per region. resource_name is the architecture slug so
 -- LookupServerlessFunction (which filters resource_name = Architecture) can
@@ -94,12 +95,12 @@ INSERT INTO resource_attrs(sku_id, architecture, extra) VALUES
   ('RUN-USEAST1','x86_64','{"resource_group":"CloudRunV2"}'),
   ('RUN-EUWEST1','x86_64','{"resource_group":"CloudRunV2"}');
 INSERT INTO prices VALUES
-  ('RUN-USEAST1','cpu-second','',2.4e-5,'s'),
-  ('RUN-USEAST1','memory-gb-second','',2.5e-6,'gb-s'),
-  ('RUN-USEAST1','requests','',4e-7,'requests'),
-  ('RUN-EUWEST1','cpu-second','',2.6e-5,'s'),
-  ('RUN-EUWEST1','memory-gb-second','',2.7e-6,'gb-s'),
-  ('RUN-EUWEST1','requests','',4.4e-7,'requests');
+  ('RUN-USEAST1','cpu-second','','',2.4e-5,'s'),
+  ('RUN-USEAST1','memory-gb-second','','',2.5e-6,'gb-s'),
+  ('RUN-USEAST1','requests','','',4e-7,'requests'),
+  ('RUN-EUWEST1','cpu-second','','',2.6e-5,'s'),
+  ('RUN-EUWEST1','memory-gb-second','','',2.7e-6,'gb-s'),
+  ('RUN-EUWEST1','requests','','',4.4e-7,'requests');
 
 -- Cloud Functions: one row per region.
 INSERT INTO skus VALUES
@@ -112,9 +113,9 @@ INSERT INTO resource_attrs(sku_id, architecture, extra) VALUES
   ('FN-USEAST1','x86_64','{"resource_group":"CloudFunctionsV2"}'),
   ('FN-EUWEST1','x86_64','{"resource_group":"CloudFunctionsV2"}');
 INSERT INTO prices VALUES
-  ('FN-USEAST1','cpu-second','',2.4e-5,'s'),
-  ('FN-USEAST1','memory-gb-second','',2.5e-6,'gb-s'),
-  ('FN-USEAST1','requests','',4e-7,'requests'),
-  ('FN-EUWEST1','cpu-second','',2.6e-5,'s'),
-  ('FN-EUWEST1','memory-gb-second','',2.7e-6,'gb-s'),
-  ('FN-EUWEST1','requests','',4.4e-7,'requests');
+  ('FN-USEAST1','cpu-second','','',2.4e-5,'s'),
+  ('FN-USEAST1','memory-gb-second','','',2.5e-6,'gb-s'),
+  ('FN-USEAST1','requests','','',4e-7,'requests'),
+  ('FN-EUWEST1','cpu-second','','',2.6e-5,'s'),
+  ('FN-EUWEST1','memory-gb-second','','',2.7e-6,'gb-s'),
+  ('FN-EUWEST1','requests','','',4.4e-7,'requests');

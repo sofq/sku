@@ -36,8 +36,12 @@ generate-python: ## Regenerate Python sources from pipeline/shards/*.yaml
 	$(MAKE) -C pipeline setup
 	pipeline/.venv/bin/python -m tools.gen_python
 
+.PHONY: generate-go-tier-tokens
+generate-go-tier-tokens: ## Regenerate internal/estimate/tiertokens.go from tier_tokens.py
+	pipeline/.venv/bin/python tools/gen_go_tier_tokens.py
+
 .PHONY: generate
-generate: generate-python ## Regenerate all codegen outputs
+generate: generate-python generate-go-tier-tokens ## Regenerate all codegen outputs
 
 .PHONY: openrouter-shard
 openrouter-shard: ## Build OpenRouter shard from fixtures into dist/pipeline/openrouter.db

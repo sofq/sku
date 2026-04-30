@@ -69,6 +69,7 @@ type ResourceAttrs struct {
 type Price struct {
 	Dimension string
 	Tier      string
+	TierUpper string
 	Amount    float64
 	Unit      string
 }
@@ -848,7 +849,7 @@ func (c *Catalog) LookupAPIGateway(ctx context.Context, f APIGatewayFilter) ([]R
 // duplicating the query.
 func (c *Catalog) FillPrices(ctx context.Context, r *Row) error {
 	rs, err := c.db.QueryContext(ctx,
-		"SELECT dimension, tier, amount, unit FROM prices WHERE sku_id = ? ORDER BY dimension, tier",
+		"SELECT dimension, tier, tier_upper, amount, unit FROM prices WHERE sku_id = ? ORDER BY dimension, tier",
 		r.SKUID,
 	)
 	if err != nil {
@@ -857,7 +858,7 @@ func (c *Catalog) FillPrices(ctx context.Context, r *Row) error {
 	defer func() { _ = rs.Close() }()
 	for rs.Next() {
 		var p Price
-		if err := rs.Scan(&p.Dimension, &p.Tier, &p.Amount, &p.Unit); err != nil {
+		if err := rs.Scan(&p.Dimension, &p.Tier, &p.TierUpper, &p.Amount, &p.Unit); err != nil {
 			return err
 		}
 		r.Prices = append(r.Prices, p)

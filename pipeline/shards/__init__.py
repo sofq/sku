@@ -6,6 +6,12 @@ parses them into `ShardDef` objects; code generators consume the result.
 Validation is intentionally strict — the generators assume well-formed input
 and will emit corrupt Python/Go if this module lets a malformed YAML slip
 through.
+
+Price-row schema note (M-δ): individual price entries in normalized NDJSON rows
+accept a ``tier_upper: str`` field (default ``""`` meaning +∞). This field is
+not validated here — it lives in ``pipeline/package/build_shard.py`` which
+reads each ``p.get("tier_upper", "")`` when inserting into the prices table.
+See ``pipeline/normalize/tier_tokens.py`` for the closed vocabularies.
 """
 
 from __future__ import annotations

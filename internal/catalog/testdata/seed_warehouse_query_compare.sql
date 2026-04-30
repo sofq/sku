@@ -28,8 +28,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -75,9 +76,9 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('bq-st-lt-bq-us',   '{"mode":"storage","storage_tier":"long-term"}');
 
 INSERT INTO prices VALUES
-  ('bq-od-bq-us',      'query',   '', 5.0,  'tb'),
-  ('bq-cap-std-bq-us', 'slot',    '', 0.02, 'slot-hour'),
-  ('bq-cap-ent-bq-us', 'slot',    '', 0.04, 'slot-hour'),
-  ('bq-cap-ep-bq-us',  'slot',    '', 0.06, 'slot-hour'),
-  ('bq-st-act-bq-us',  'storage', '', 0.02, 'gb-month'),
-  ('bq-st-lt-bq-us',   'storage', '', 0.01, 'gb-month');
+  ('bq-od-bq-us',      'query',   '', '',5.0,  'tb'),
+  ('bq-cap-std-bq-us', 'slot',    '', '',0.02, 'slot-hour'),
+  ('bq-cap-ent-bq-us', 'slot',    '', '',0.04, 'slot-hour'),
+  ('bq-cap-ep-bq-us',  'slot',    '', '',0.06, 'slot-hour'),
+  ('bq-st-act-bq-us',  'storage', '', '',0.02, 'gb-month'),
+  ('bq-st-lt-bq-us',   'storage', '', '',0.01, 'gb-month');

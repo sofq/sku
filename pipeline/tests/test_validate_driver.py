@@ -31,8 +31,9 @@ def _make_minimal_shard(tmp_path: Path) -> Path:
             CREATE TABLE prices (
                 sku_id TEXT NOT NULL REFERENCES skus(sku_id),
                 dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+                tier_upper TEXT NOT NULL DEFAULT '',
                 amount REAL NOT NULL, unit TEXT NOT NULL,
-                PRIMARY KEY (sku_id, dimension, tier)
+                PRIMARY KEY (sku_id, dimension, tier, tier_upper)
             ) WITHOUT ROWID;
             CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT);
             INSERT INTO metadata VALUES ('currency', 'USD');
@@ -40,8 +41,8 @@ def _make_minimal_shard(tmp_path: Path) -> Path:
                 'm5.large', 'us-east-1', 'us-east-1', 'h1');
             INSERT INTO skus VALUES ('sku-2', 'aws', 'ec2', 'compute.vm',
                 'c5.large', 'eu-west-1', 'eu-west-1', 'h2');
-            INSERT INTO prices VALUES ('sku-1', 'on-demand', '', 0.096, 'USD');
-            INSERT INTO prices VALUES ('sku-2', 'on-demand', '', 0.085, 'USD');
+            INSERT INTO prices VALUES ('sku-1', 'on-demand', '', '', 0.096, 'USD');
+            INSERT INTO prices VALUES ('sku-2', 'on-demand', '', '', 0.085, 'USD');
             """
         )
         con.commit()

@@ -28,8 +28,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -65,6 +66,6 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, extra) VALUES
   ('os-serverless-use1',   NULL, NULL, '{"mode":"serverless"}');
 
 INSERT INTO prices VALUES
-  ('os-mc-r6g-large-use1', 'instance', '', 0.166, 'hour'),
-  ('os-serverless-use1',   'compute-ocu', '', 0.24,  'hour'),
-  ('os-serverless-use1',   'storage',  '', 0.024, 'gb-month');
+  ('os-mc-r6g-large-use1', 'instance', '', '',0.166, 'hour'),
+  ('os-serverless-use1',   'compute-ocu', '', '',0.24,  'hour'),
+  ('os-serverless-use1',   'storage',  '', '',0.024, 'gb-month');

@@ -30,8 +30,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -72,11 +73,11 @@ INSERT INTO resource_attrs (sku_id, durability_nines, availability_tier, extra) 
   ('cf-use-dto',      NULL, NULL,       '{"tier":"PriceClass_100"}');
 
 INSERT INTO prices VALUES
-  ('ddb-std-use1',    'storage',             '', 0.25,         'gb-mo'),
-  ('ddb-std-use1',    'read_request_units',  '', 0.000000125,  'readrequestunits'),
-  ('ddb-std-use1',    'write_request_units', '', 0.000000625,  'writerequestunits'),
-  ('ddb-std-ia-use1', 'storage',             '', 0.1125,       'gb-mo'),
-  ('ddb-std-ia-use1', 'read_request_units',  '', 0.00000025,   'readrequestunits'),
-  ('ddb-std-ia-use1', 'write_request_units', '', 0.00000125,   'writerequestunits'),
-  ('cf-eu-dto',       'data_transfer_out',   '', 0.085,        'gb'),
-  ('cf-use-dto',      'data_transfer_out',   '', 0.085,        'gb');
+  ('ddb-std-use1',    'storage',             '', '',0.25,         'gb-mo'),
+  ('ddb-std-use1',    'read_request_units',  '', '',0.000000125,  'readrequestunits'),
+  ('ddb-std-use1',    'write_request_units', '', '',0.000000625,  'writerequestunits'),
+  ('ddb-std-ia-use1', 'storage',             '', '',0.1125,       'gb-mo'),
+  ('ddb-std-ia-use1', 'read_request_units',  '', '',0.00000025,   'readrequestunits'),
+  ('ddb-std-ia-use1', 'write_request_units', '', '',0.00000125,   'writerequestunits'),
+  ('cf-eu-dto',       'data_transfer_out',   '', '',0.085,        'gb'),
+  ('cf-use-dto',      'data_transfer_out',   '', '',0.085,        'gb');

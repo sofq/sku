@@ -28,8 +28,9 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier)
+  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (
@@ -64,5 +65,5 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('sns-standard-euw1',  '{"protocol":"all"}');
 
 INSERT INTO prices VALUES
-  ('sns-standard-use1',  'request','', 0.0000005, 'request'),
-  ('sns-standard-euw1',  'request','', 0.0000006, 'request');
+  ('sns-standard-use1',  'request','', '',0.0000005, 'request'),
+  ('sns-standard-euw1',  'request','', '',0.0000006, 'request');
