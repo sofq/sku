@@ -49,6 +49,12 @@ type Request struct {
 	Edition     string
 	StorageTier string
 
+	// M-δ per-kind volume flags
+	Ops      int64
+	Queries  int64
+	Requests int64
+	GB       float64
+
 	Regions []string
 	Sort    string
 	Limit   int

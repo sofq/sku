@@ -45,6 +45,12 @@ type compareFlags struct {
 	// warehouse.query
 	edition     string
 	storageTier string
+
+	// M-δ per-kind volume flags
+	ops      int64
+	queries  int64
+	requests int64
+	gb       float64
 }
 
 var (
@@ -106,6 +112,11 @@ func newCompareCmd() *cobra.Command {
 	c.Flags().StringVar(&f.planOS, "os", "", "paas.app OS filter (linux|windows — paas.app only)")
 	c.Flags().StringVar(&f.edition, "edition", "", "warehouse.query capacity edition (enterprise|enterprise-plus — warehouse.query only)")
 	c.Flags().StringVar(&f.storageTier, "storage-tier", "", "warehouse.query storage tier (active|long-term — warehouse.query only)")
+	// M-δ per-kind volume flags (mutually exclusive; pass at most one)
+	c.Flags().Int64Var(&f.ops, "ops", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
+	c.Flags().Int64Var(&f.queries, "queries", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
+	c.Flags().Int64Var(&f.requests, "requests", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
+	c.Flags().Float64Var(&f.gb, "gb", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
 	return c
 }
 
@@ -130,6 +141,25 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 		return nil, skuerrors.Validation("flag_invalid", "kind", f.kind,
 			"supported kinds: compute.vm, storage.object, db.relational, cache.kv, container.orchestration, search.engine, paas.app, warehouse.query")
 	}
+	// Volume flags are mutually exclusive; at most one may be non-zero.
+	volumeSet := 0
+	if f.ops != 0 {
+		volumeSet++
+	}
+	if f.queries != 0 {
+		volumeSet++
+	}
+	if f.requests != 0 {
+		volumeSet++
+	}
+	if f.gb != 0 {
+		volumeSet++
+	}
+	if volumeSet > 1 {
+		return nil, skuerrors.Validation("flag_invalid", "volume-flags", "",
+			"pass at most one of --ops / --queries / --requests / --gb")
+	}
+
 	switch f.kind {
 	case "compute.vm":
 		if f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 || f.tier != "" || f.mode != "" {
@@ -278,6 +308,10 @@ func compareLookup(ctx context.Context, f compareFlags, s *batch.Settings) ([]ca
 		PlanOS:           f.planOS,
 		Edition:          f.edition,
 		StorageTier:      f.storageTier,
+		Ops:              f.ops,
+		Queries:          f.queries,
+		Requests:         f.requests,
+		GB:               f.gb,
 		Regions:          regionLiterals,
 		Sort:             f.sort,
 		Limit:            f.limit,
@@ -316,6 +350,10 @@ func compareFlagsFromArgs(args map[string]any) compareFlags {
 	if !ok {
 		limit = 20
 	}
+	opsF, _ := argFloat(args, "ops")
+	queriesF, _ := argFloat(args, "queries")
+	requestsF, _ := argFloat(args, "requests")
+	gbF, _ := argFloat(args, "gb")
 	regions := argString(args, "regions")
 	if regions == "" {
 		if regs := argStringSlice(args, "regions"); len(regs) > 0 {
@@ -354,6 +392,10 @@ func compareFlagsFromArgs(args map[string]any) compareFlags {
 		planOS:           argString(args, "os"),
 		edition:          argString(args, "edition"),
 		storageTier:      argString(args, "storage_tier"),
+		ops:              int64(opsF),
+		queries:          int64(queriesF),
+		requests:         int64(requestsF),
+		gb:               gbF,
 	}
 }
 
@@ -423,6 +465,19 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 			args["mode"] = f.mode
 			args["edition"] = f.edition
 			args["storage_tier"] = f.storageTier
+		}
+		// Include volume flags only when set (mirrors max_price pattern).
+		if f.ops != 0 {
+			args["ops"] = f.ops
+		}
+		if f.queries != 0 {
+			args["queries"] = f.queries
+		}
+		if f.requests != 0 {
+			args["requests"] = f.requests
+		}
+		if f.gb != 0 {
+			args["gb"] = f.gb
 		}
 		return output.EmitDryRun(cmd.OutOrStdout(), output.DryRunPlan{
 			Command:      "compare",

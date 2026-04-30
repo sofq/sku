@@ -221,3 +221,86 @@ func TestCompareRejectsTierOnComputeVM(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, stderr.String(), "kind-flag-mismatch")
 }
+
+// M-δ per-kind volume flag tests
+
+func TestCompareVolumeFlag_ops_setsField(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "compute.vm", "--vcpu", "2", "--ops", "1000", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"ops":1000`)
+}
+
+func TestCompareVolumeFlag_queries_setsField(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "compute.vm", "--vcpu", "2", "--queries", "500", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"queries":500`)
+}
+
+func TestCompareVolumeFlag_requests_setsField(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "compute.vm", "--vcpu", "2", "--requests", "200", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"requests":200`)
+}
+
+func TestCompareVolumeFlag_gb_setsField(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	cmd := newRootCmd()
+	cmd.SetOut(&stdout)
+	cmd.SetErr(&stderr)
+	cmd.SetArgs([]string{"compare", "--kind", "compute.vm", "--vcpu", "2", "--gb", "100.5", "--dry-run"})
+	require.NoError(t, cmd.Execute(), stderr.String())
+	require.Contains(t, stdout.String(), `"gb":100.5`)
+}
+
+func TestCompareVolumeFlag_mutuallyExclusive(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{
+			name: "ops+queries",
+			args: []string{"compare", "--kind", "compute.vm", "--ops", "100", "--queries", "50"},
+		},
+		{
+			name: "ops+requests",
+			args: []string{"compare", "--kind", "compute.vm", "--ops", "100", "--requests", "50"},
+		},
+		{
+			name: "ops+gb",
+			args: []string{"compare", "--kind", "compute.vm", "--ops", "100", "--gb", "50"},
+		},
+		{
+			name: "queries+requests",
+			args: []string{"compare", "--kind", "compute.vm", "--queries", "100", "--requests", "50"},
+		},
+		{
+			name: "all-four",
+			args: []string{"compare", "--kind", "compute.vm", "--ops", "100", "--queries", "50", "--requests", "25", "--gb", "10"},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			cmd := newRootCmd()
+			cmd.SetOut(&stdout)
+			cmd.SetErr(&stderr)
+			cmd.SetArgs(tc.args)
+			err := cmd.Execute()
+			require.Error(t, err, "expected exit code 4 for %s", tc.name)
+			require.Contains(t, stderr.String(), `"reason":"flag_invalid"`)
+			require.Contains(t, stderr.String(), "volume-flags")
+		})
+	}
+}
