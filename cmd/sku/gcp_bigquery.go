@@ -23,7 +23,7 @@ type bigqueryFlags struct {
 }
 
 func (f *bigqueryFlags) bind(c *cobra.Command) {
-	c.Flags().StringVar(&f.mode, "mode", "", "on-demand | capacity-standard | capacity-enterprise | capacity-enterprise-plus | storage-active | storage-long-term")
+	c.Flags().StringVar(&f.mode, "mode", "on-demand", "on-demand | capacity-standard | capacity-enterprise | capacity-enterprise-plus | storage-active | storage-long-term")
 	c.Flags().StringVar(&f.region, "region", "", "BigQuery region, e.g. bq-us, bq-eu, us-central1")
 }
 
@@ -64,12 +64,6 @@ func newGCPBigQueryListCmd() *cobra.Command {
 
 func runGCPBigQuery(cmd *cobra.Command, f *bigqueryFlags, requireRegion bool) error {
 	s := globalSettings(cmd)
-	if f.mode == "" {
-		e := skuerrors.Validation("flag_invalid", "mode", "",
-			"pass --mode on-demand, --mode capacity-standard, --mode capacity-enterprise, --mode capacity-enterprise-plus, --mode storage-active, or --mode storage-long-term")
-		skuerrors.Write(cmd.ErrOrStderr(), e)
-		return e
-	}
 	if !bigqueryModes[f.mode] {
 		e := skuerrors.Validation("flag_invalid", "mode", f.mode,
 			"allowed: on-demand | capacity-standard | capacity-enterprise | capacity-enterprise-plus | storage-active | storage-long-term")

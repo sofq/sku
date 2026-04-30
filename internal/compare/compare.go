@@ -104,9 +104,11 @@ var kindRegistry = map[string]kindQuery{
 	},
 	"search.engine": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {
 		return kinds.QuerySearchEngine(ctx, c, kinds.SearchEngineSpec{
-			Mode:     r.Mode,
-			MaxPrice: r.MaxPrice,
-			Regions:  r.Regions,
+			Mode:        r.Mode,
+			MinVCPU:     r.VCPU,
+			MinMemoryGB: r.MemoryGB,
+			MaxPrice:    r.MaxPrice,
+			Regions:     r.Regions,
 		})
 	},
 	"paas.app": func(ctx context.Context, c *catalog.Catalog, r Request) ([]catalog.Row, error) {

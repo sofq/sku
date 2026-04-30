@@ -230,10 +230,11 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 
 ./bin/sku compare --kind search.engine   --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind search.engine   --mode serverless --regions us-east --limit 5
+./bin/sku compare --kind search.engine   --vcpu 4 --memory 16 --regions us-east --limit 5
 ./bin/sku compare --kind paas.app        --regions us-east --limit 5 --preset compare
 ./bin/sku compare --kind paas.app        --os windows      --regions us-east --limit 5
 ./bin/sku compare --kind warehouse.query --regions us-east --limit 5 --preset compare
-./bin/sku compare --kind warehouse.query --mode capacity-standard --regions us-east
+./bin/sku compare --kind warehouse.query --mode capacity --edition enterprise --regions us-east
 
 ./bin/sku estimate --item aws/opensearch:r6g.large.search:region=us-east-1:count=3:hours=730 --pretty
 ./bin/sku estimate --item aws/opensearch:serverless:region=us-east-1:ocu_hours=720 --pretty

@@ -160,12 +160,12 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 				"container.orchestration accepts --tier / --mode / --regions / --max-price")
 		}
 	case "search.engine":
-		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+		if f.gpuCount != 0 || f.storageClass != "" ||
 			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
 			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
 			f.edition != "" || f.storageTier != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				"search.engine accepts --mode / --regions / --max-price")
+				"search.engine accepts --vcpu / --memory / --mode / --regions / --max-price")
 		}
 	case "paas.app":
 		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
@@ -414,6 +414,8 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 			args["mode"] = f.mode
 		case "search.engine":
 			args["mode"] = f.mode
+			args["vcpu"] = f.vcpu
+			args["memory_gb"] = f.memoryGB
 		case "paas.app":
 			args["os"] = f.planOS
 			args["tier"] = f.tier

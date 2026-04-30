@@ -7,15 +7,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGCPBigQueryPriceCmd_RequiresMode(t *testing.T) {
+func TestGCPBigQueryPriceCmd_DefaultsModeToOnDemand(t *testing.T) {
+	// Mode defaults to on-demand to mirror `compare --kind warehouse.query`.
 	cmd := newRootCmd()
-	cmd.SetArgs([]string{"gcp", "bigquery", "price", "--region", "bq-us"})
+	cmd.SetArgs([]string{"gcp", "bigquery", "price", "--region", "bq-us", "--dry-run"})
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)
-	err := cmd.Execute()
-	require.Error(t, err)
-	require.Contains(t, buf.String(), "mode")
+	require.NoError(t, cmd.Execute(), buf.String())
+	require.Contains(t, buf.String(), `"mode":"on-demand"`)
 }
 
 func TestGCPBigQueryPriceCmd_RequiresRegion(t *testing.T) {
@@ -43,15 +43,14 @@ func TestGCPBigQueryPriceCmd_DryRun(t *testing.T) {
 	require.Contains(t, buf.String(), `"mode":"on-demand"`)
 }
 
-func TestGCPBigQueryListCmd_RequiresMode(t *testing.T) {
+func TestGCPBigQueryListCmd_DefaultsModeToOnDemand(t *testing.T) {
 	cmd := newRootCmd()
-	cmd.SetArgs([]string{"gcp", "bigquery", "list"})
+	cmd.SetArgs([]string{"gcp", "bigquery", "list", "--dry-run"})
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)
-	err := cmd.Execute()
-	require.Error(t, err)
-	require.Contains(t, buf.String(), "mode")
+	require.NoError(t, cmd.Execute(), buf.String())
+	require.Contains(t, buf.String(), `"mode":"on-demand"`)
 }
 
 func TestGCPBigQueryPriceCmd_RejectsUnknownMode(t *testing.T) {

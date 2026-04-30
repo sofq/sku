@@ -89,3 +89,26 @@ def test_ingest_empty_skus_returns_no_rows(tmp_path):
     empty = tmp_path / "skus.json"
     empty.write_text('{"skus": []}')
     assert list(ingest(skus_path=empty)) == []
+
+
+def test_ingest_skips_physical_storage_rows():
+    # Logical and Physical storage share the same (resource_name, region)
+    # shape — ingesting both produces duplicate rows in LookupWarehouseQuery.
+    # We ingest Logical only; verify Physical SKUs are dropped.
+    rows = list(ingest(skus_path=FIX / "skus.json"))
+    sku_ids = {r["sku_id"].split("-")[-1] for r in rows}  # row_sku_id is "<skuId>-<region>"
+    sku_id_full = {r["sku_id"] for r in rows}
+    assert not any("PHYSICAL" in sid for sid in sku_id_full), (
+        f"physical-storage rows must be skipped, got: {sku_id_full}"
+    )
+
+    # And there must be exactly one row per (resource_name, region) for storage.
+    storage_keys = [
+        (r["resource_name"], r["region"])
+        for r in rows
+        if r["resource_attrs"]["extra"]["mode"] == "storage"
+    ]
+    assert len(storage_keys) == len(set(storage_keys)), (
+        f"duplicate (resource_name, region) for storage rows: {storage_keys}"
+    )
+    _ = sku_ids  # silence unused-name guard

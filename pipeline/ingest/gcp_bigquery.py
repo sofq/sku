@@ -6,6 +6,13 @@ Three pricing modes are distinguished by SKU description keywords:
   capacity    — "Edition" rows: Enterprise / Enterprise Plus slots.
   storage     — "Storage" rows: Active / Long-term.
 
+BigQuery exposes both Logical and Physical storage billing models with
+distinct prices but the same `(resource_name, region)` shape. We ingest
+Logical only — it is the default billing model and prevents duplicate rows
+in `LookupWarehouseQuery`. Customers on the Physical model should price
+manually until a separate resource_name (e.g. `storage-active-physical`) is
+introduced.
+
 BigQuery multi-region strings US / EU are mapped to bq-us / bq-eu.
 All rows set terms.os = "on-demand" (placeholder for the mode discriminator);
 the edition / storage tier lives in terms.support_tier.
@@ -91,6 +98,12 @@ def _classify(description: str) -> tuple[str, str, str] | None:
 
     # Skip batch + BI Engine + legacy rows
     if any(kw in desc for kw in ("batch", "bi engine", "legacy", "flat rate", "streaming", "dml")):
+        return None
+
+    # Skip Physical-storage billing rows; Logical is the default model and
+    # the two share the same (resource_name, region) shape, which would
+    # otherwise produce duplicate rows in LookupWarehouseQuery.
+    if "physical" in desc and "storage" in desc:
         return None
 
     if "enterprise plus" in desc or "enterprise_plus" in desc:

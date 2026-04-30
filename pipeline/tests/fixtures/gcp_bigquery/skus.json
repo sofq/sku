@@ -90,6 +90,32 @@
           }]
         }
       }]
+    },
+    {
+      "skuId": "BQ-ACTIVE-PHYSICAL-USE",
+      "description": "Active Physical Storage",
+      "serviceRegions": ["US"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 40000000}
+          }]
+        }
+      }]
+    },
+    {
+      "skuId": "BQ-LONGTERM-PHYSICAL-EU",
+      "description": "Long-term Physical Storage",
+      "serviceRegions": ["EU"],
+      "pricingInfo": [{
+        "pricingExpression": {
+          "usageUnit": "GiBy",
+          "tieredRates": [{
+            "unitPrice": {"units": "0", "nanos": 20000000}
+          }]
+        }
+      }]
     }
   ]
 }

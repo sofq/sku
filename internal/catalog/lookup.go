@@ -647,6 +647,12 @@ func (c *Catalog) LookupWarehouseQuery(ctx context.Context, f WarehouseQueryFilt
 // runResourceColumnQuery executes a `s.kind = ...`-anchored point/list query
 // whose WHERE was built from already-validated literals + placeholders.
 //
+// SAFETY: every entry in `where` MUST be a static literal authored in this
+// package — never a caller-supplied or user-controlled string. Filter values
+// belong in `args` and bind through `?` placeholders. The string-concat is
+// intentional (sql.DB does not template column lists) and safe only under
+// this contract; callers that violate it open SQL injection.
+//
 // Used by lookups that filter on individual term columns rather than
 // terms_hash (LookupPaasApp / LookupWarehouseQuery) — these need to expose
 // partial-tuple queries the CLI can't reproduce as a hash.

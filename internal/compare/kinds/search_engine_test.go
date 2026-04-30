@@ -68,3 +68,15 @@ func TestQuerySearchEngine_NoMatchReturnsEmpty(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, rows)
 }
+
+func TestQuerySearchEngine_MinVCPUAndMemoryFilter(t *testing.T) {
+	cat := seedSearchEngineShard(t, filepath.Join("..", "..", "catalog", "testdata", "seed_search_engine_compare.sql"))
+	rows, err := QuerySearchEngine(context.Background(), cat, SearchEngineSpec{
+		MinVCPU:     4,
+		MinMemoryGB: 32,
+		Regions:     []string{"us-east-1"},
+	})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	require.Equal(t, "r6g.xlarge.search", rows[0].ResourceName)
+}
