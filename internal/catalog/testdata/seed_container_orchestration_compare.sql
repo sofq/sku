@@ -28,6 +28,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -69,7 +70,7 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('gke-auto-use1', '{"mode":"autopilot","tier":"autopilot"}');
 
 INSERT INTO prices VALUES
-  ('eks-std-use1',  'cluster', '', 0.10,  'hour'),
-  ('aks-prem-eus',  'cluster', '', 0.15,  'hour'),
-  ('gke-std-use1',  'cluster', '', 0.10,  'hour'),
-  ('gke-auto-use1', 'vcpu',    '', 0.048, 'hour');
+  ('eks-std-use1',  'cluster', '', '',0.10,  'hour'),
+  ('aks-prem-eus',  'cluster', '', '',0.15,  'hour'),
+  ('gke-std-use1',  'cluster', '', '',0.10,  'hour'),
+  ('gke-auto-use1', 'vcpu',    '', '',0.048, 'hour');

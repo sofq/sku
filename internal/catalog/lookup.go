@@ -69,6 +69,7 @@ type ResourceAttrs struct {
 type Price struct {
 	Dimension string
 	Tier      string
+	TierUpper string
 	Amount    float64
 	Unit      string
 }
@@ -311,22 +312,38 @@ func (c *Catalog) LookupStorageBlock(ctx context.Context, f StorageBlockFilter) 
 
 // NoSQLDBFilter captures the flags `sku aws dynamodb price/list` exposes.
 // resource_name holds the table class slug ("standard" / "standard-ia").
+//
+// Engine is the token in terms.tenancy: "dynamodb" / "cosmos-sql" /
+// "cosmos-mongo" / "firestore-native". It is carried here for compare
+// handlers (Task 0.5) to use as a post-filter; LookupNoSQLDB itself passes
+// engine narrowing via Terms.Tenancy — set Terms.Tenancy when you want the
+// lookup to narrow by engine.
+//
+// Mode is a token in extra.mode: "provisioned" / "serverless" / "native" /
+// etc. Also used as a post-filter by compare handlers.
 type NoSQLDBFilter struct {
 	Provider     string
 	Service      string
 	ResourceName string // table class for DynamoDB; capacity-mode slug for Cosmos
 	Region       string
+	Engine       string // post-filter for compare handlers; pass via Terms.Tenancy to LookupNoSQLDB
+	Mode         string // post-filter for compare handlers
 	Terms        Terms
 }
 
 // CDNFilter captures the flags `sku aws cloudfront price/list` exposes.
 // resource_name is the CloudFront offering slug ("standard"); region carries
 // the canonical edge region (see pipeline/ingest/aws_cloudfront.LOCATION_MAP).
+//
+// Mode and Sku are populated by the network_cdn compare handler (Task 0.5)
+// for post-filtering; LookupCDN itself does not filter on these fields.
 type CDNFilter struct {
 	Provider     string
 	Service      string
 	ResourceName string
 	Region       string
+	Mode         string // post-filter for compare handlers
+	Sku          string // post-filter for compare handlers
 	Terms        Terms
 }
 
@@ -386,8 +403,10 @@ func (c *Catalog) lookupResource(
 	var args []any
 	where = append(where, "s.kind = ?")
 	args = append(args, kind)
-	where = append(where, "s.resource_name = ?")
-	args = append(args, resourceName)
+	if resourceName != "" {
+		where = append(where, "s.resource_name = ?")
+		args = append(args, resourceName)
+	}
 	if provider != "" {
 		where = append(where, "s.provider = ?")
 		args = append(args, provider)
@@ -743,12 +762,94 @@ func scanResourceRow(rs *sql.Rows) (Row, error) {
 	return r, nil
 }
 
+// MessagingQueueFilter captures the flags `sku <provider> <queue-service> price/list` exposes.
+// resource_name holds the provider-specific queue identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type MessagingQueueFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupMessagingQueue runs the messaging.queue point lookup / list query.
+func (c *Catalog) LookupMessagingQueue(ctx context.Context, f MessagingQueueFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupMessagingQueue requires ResourceName")
+	}
+	return c.lookupResource(ctx, "messaging.queue", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// MessagingTopicFilter captures the flags `sku <provider> <topic-service> price/list` exposes.
+// resource_name holds the provider-specific topic identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type MessagingTopicFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupMessagingTopic runs the messaging.topic point lookup / list query.
+func (c *Catalog) LookupMessagingTopic(ctx context.Context, f MessagingTopicFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupMessagingTopic requires ResourceName")
+	}
+	return c.lookupResource(ctx, "messaging.topic", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// DNSZoneFilter captures the flags `sku <provider> <dns-service> price/list` exposes.
+// resource_name holds the provider-specific DNS zone identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type DNSZoneFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupDNSZone runs the dns.zone point lookup / list query.
+func (c *Catalog) LookupDNSZone(ctx context.Context, f DNSZoneFilter) ([]Row, error) {
+	if f.ResourceName == "" {
+		return nil, fmt.Errorf("catalog: LookupDNSZone requires ResourceName")
+	}
+	return c.lookupResource(ctx, "dns.zone", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
+// APIGatewayFilter captures the flags `sku <provider> <api-gateway-service> price/list` exposes.
+// resource_name holds the provider-specific API gateway identifier.
+// Mode is available for compare handlers to use as a post-filter.
+type APIGatewayFilter struct {
+	Provider     string
+	Service      string
+	ResourceName string
+	Region       string
+	Mode         string
+	Terms        Terms
+}
+
+// LookupAPIGateway runs the api.gateway point lookup / list query.
+// ResourceName is optional; omit to list all gateway types.
+func (c *Catalog) LookupAPIGateway(ctx context.Context, f APIGatewayFilter) ([]Row, error) {
+	return c.lookupResource(ctx, "api.gateway", f.Provider, f.Service,
+		f.ResourceName, f.Region, f.Terms)
+}
+
 // FillPrices loads the prices rows for r.SKUID and appends them to r.Prices.
 // Exported so internal/compare/kinds can reuse the same scan path without
 // duplicating the query.
 func (c *Catalog) FillPrices(ctx context.Context, r *Row) error {
 	rs, err := c.db.QueryContext(ctx,
-		"SELECT dimension, tier, amount, unit FROM prices WHERE sku_id = ? ORDER BY dimension, tier",
+		"SELECT dimension, tier, tier_upper, amount, unit FROM prices WHERE sku_id = ? ORDER BY dimension, tier",
 		r.SKUID,
 	)
 	if err != nil {
@@ -757,7 +858,7 @@ func (c *Catalog) FillPrices(ctx context.Context, r *Row) error {
 	defer func() { _ = rs.Close() }()
 	for rs.Next() {
 		var p Price
-		if err := rs.Scan(&p.Dimension, &p.Tier, &p.Amount, &p.Unit); err != nil {
+		if err := rs.Scan(&p.Dimension, &p.Tier, &p.TierUpper, &p.Amount, &p.Unit); err != nil {
 			return err
 		}
 		r.Prices = append(r.Prices, p)

@@ -63,9 +63,9 @@ def _insert_row(con: sqlite3.Connection, row: dict[str, Any]) -> None:
 
     for p in row.get("prices") or []:
         con.execute(
-            "INSERT INTO prices(sku_id, dimension, tier, amount, unit) "
-            "VALUES(?,?,?,?,?)",
-            (sku_id, p["dimension"], p.get("tier", ""), p["amount"], p["unit"]),
+            "INSERT INTO prices(sku_id, dimension, tier, tier_upper, amount, unit) "
+            "VALUES(?,?,?,?,?,?)",
+            (sku_id, p["dimension"], p.get("tier", ""), p.get("tier_upper", ""), p["amount"], p["unit"]),
         )
 
     h = row.get("health")

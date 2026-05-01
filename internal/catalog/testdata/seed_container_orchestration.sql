@@ -28,6 +28,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -68,6 +69,6 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('gke-standard-use1',  '{"mode":"control-plane","tier":"standard"}');
 
 INSERT INTO prices VALUES
-  ('eks-standard-use1',  'cluster', '', 0.10, 'hour'),
-  ('aks-premium-eastus', 'cluster', '', 0.10, 'hour'),
-  ('gke-standard-use1',  'cluster', '', 0.10, 'hour');
+  ('eks-standard-use1',  'cluster', '', '',0.10, 'hour'),
+  ('aks-premium-eastus', 'cluster', '', '',0.10, 'hour'),
+  ('gke-standard-use1',  'cluster', '', '',0.10, 'hour');

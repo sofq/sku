@@ -1,0 +1,12 @@
+shard: azure_service_bus_topics
+provider: azure
+service: service-bus-topics
+kind: messaging.topic
+cli:
+  group: azure
+  command: service-bus-topics
+  resource_flag: tier
+ingest:
+  module: azure_service_bus_topics
+  discover: azure.publication_date
+budget_bytes: 150000

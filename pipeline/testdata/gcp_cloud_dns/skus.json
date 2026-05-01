@@ -1,0 +1,29 @@
+{"skus": [
+  {
+    "name": "services/FA26-5236-B8B5/skus/DNS-QUERY",
+    "skuId": "DNS-QUERY",
+    "description": "DNS Query (port 53)",
+    "category": {"serviceDisplayName": "Cloud DNS", "resourceFamily": "Network", "resourceGroup": "DNS", "usageType": "OnDemand"},
+    "serviceRegions": ["global"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count",
+      "tieredRates": [
+        {"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 400}},
+        {"startUsageAmount": 1000000000, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 200}}
+      ]
+    }}]
+  },
+  {
+    "name": "services/FA26-5236-B8B5/skus/DNS-ZONE",
+    "skuId": "DNS-ZONE",
+    "description": "ManagedZone",
+    "category": {"serviceDisplayName": "Cloud DNS", "resourceFamily": "Network", "resourceGroup": "DNS", "usageType": "OnDemand"},
+    "serviceRegions": ["global"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "mo",
+      "tieredRates": [
+        {"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 200000000}},
+        {"startUsageAmount": 25, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 100000000}},
+        {"startUsageAmount": 10000, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 30000000}}
+      ]
+    }}]
+  }
+]}

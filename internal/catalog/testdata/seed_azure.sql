@@ -29,6 +29,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -70,7 +71,7 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture, extra) VALUES
   ('azure-sql-bc-gen5-2-eastus-mi',     NULL, NULL, NULL, '{"deployment_option":"managed-instance"}');
 
 INSERT INTO prices VALUES
-  ('azure-vm-d2v3-eastus-linux',        'compute','',0.096,'hrs'),
-  ('azure-vm-d2v3-eastus-windows',      'compute','',0.144,'hrs'),
-  ('azure-sql-gp-gen5-2-eastus-single', 'compute','',0.252,'hrs'),
-  ('azure-sql-bc-gen5-2-eastus-mi',     'compute','',1.058,'hrs');
+  ('azure-vm-d2v3-eastus-linux',        'compute','','',0.096,'hrs'),
+  ('azure-vm-d2v3-eastus-windows',      'compute','','',0.144,'hrs'),
+  ('azure-sql-gp-gen5-2-eastus-single', 'compute','','',0.252,'hrs'),
+  ('azure-sql-bc-gen5-2-eastus-mi',     'compute','','',1.058,'hrs');

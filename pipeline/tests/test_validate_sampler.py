@@ -34,9 +34,10 @@ def _make_shard(tmp_path: Path, rows: list[dict]) -> Path:
                 sku_id     TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
                 dimension  TEXT NOT NULL,
                 tier       TEXT NOT NULL DEFAULT '',
+                tier_upper TEXT NOT NULL DEFAULT '',
                 amount     REAL NOT NULL,
                 unit       TEXT NOT NULL,
-                PRIMARY KEY (sku_id, dimension, tier)
+                PRIMARY KEY (sku_id, dimension, tier, tier_upper)
             ) WITHOUT ROWID;
             CREATE TABLE metadata (
                 key   TEXT PRIMARY KEY,
@@ -60,8 +61,8 @@ def _make_shard(tmp_path: Path, rows: list[dict]) -> Path:
                 ),
             )
             con.execute(
-                "INSERT INTO prices VALUES (?,?,?,?,?)",
-                (r["sku_id"], r.get("dimension", "on-demand"), "", r["amount"], "USD"),
+                "INSERT INTO prices VALUES (?,?,?,?,?,?)",
+                (r["sku_id"], r.get("dimension", "on-demand"), "", "", r["amount"], "USD"),
             )
         con.commit()
     finally:

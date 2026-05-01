@@ -1,0 +1,12 @@
+shard: aws_sqs
+provider: aws
+service: sqs
+kind: messaging.queue
+cli:
+  group: aws
+  command: sqs
+  resource_flag: queue-type
+ingest:
+  module: aws_sqs
+  discover: aws.publication_date
+budget_bytes: 200000

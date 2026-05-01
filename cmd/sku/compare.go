@@ -45,6 +45,12 @@ type compareFlags struct {
 	// warehouse.query
 	edition     string
 	storageTier string
+
+	// M-δ per-kind volume flags
+	ops      int64
+	queries  int64
+	requests int64
+	gb       float64
 }
 
 var (
@@ -56,6 +62,13 @@ var (
 	compareSearchEngineShards           = []string{"aws-opensearch"}
 	comparePaasAppShards                = []string{"azure-appservice"}
 	compareWarehouseQueryShards         = []string{"gcp-bigquery"}
+	// M-δ S2 shards
+	compareMessagingQueueShards = []string{"aws-sqs", "azure-service-bus-queues", "azure-event-hubs", "gcp-pubsub-queues"}
+	compareMessagingTopicShards = []string{"aws-sns", "azure-service-bus-topics", "gcp-pubsub-topics"}
+	compareDNSZoneShards        = []string{"aws-route53", "gcp-cloud-dns"}
+	compareAPIGatewayShards     = []string{"aws-api-gateway", "azure-apim"}
+	compareNetworkCDNShards     = []string{"aws-cloudfront", "azure-front-door", "gcp-cloud-cdn"}
+	compareDBNoSQLShards        = []string{"gcp-firestore"}
 )
 
 func shardsForKind(kind string) []string {
@@ -76,6 +89,18 @@ func shardsForKind(kind string) []string {
 		return comparePaasAppShards
 	case "warehouse.query":
 		return compareWarehouseQueryShards
+	case "messaging.queue":
+		return compareMessagingQueueShards
+	case "messaging.topic":
+		return compareMessagingTopicShards
+	case "dns.zone":
+		return compareDNSZoneShards
+	case "api.gateway":
+		return compareAPIGatewayShards
+	case "network.cdn":
+		return compareNetworkCDNShards
+	case "db.nosql":
+		return compareDBNoSQLShards
 	}
 	return nil
 }
@@ -84,10 +109,10 @@ func newCompareCmd() *cobra.Command {
 	var f compareFlags
 	c := &cobra.Command{
 		Use:   "compare",
-		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, cache.kv, search.engine, paas.app, warehouse.query)",
+		Short: "Cross-provider equivalence compare (compute.vm, storage.object, db.relational, db.nosql, cache.kv, messaging.queue, messaging.topic, dns.zone, api.gateway, network.cdn, container.orchestration, search.engine, paas.app, warehouse.query)",
 		RunE:  func(cmd *cobra.Command, _ []string) error { return runCompare(cmd, &f) },
 	}
-	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (compute.vm | storage.object | db.relational | cache.kv | container.orchestration | search.engine | paas.app | warehouse.query)")
+	c.Flags().StringVar(&f.kind, "kind", "", "equivalence kind (api.gateway | cache.kv | compute.vm | container.orchestration | db.nosql | db.relational | dns.zone | messaging.queue | messaging.topic | network.cdn | paas.app | search.engine | storage.object | warehouse.query)")
 	c.Flags().Int64Var(&f.vcpu, "vcpu", 0, "minimum vCPU count")
 	c.Flags().Float64Var(&f.memoryGB, "memory", 0, "minimum memory in GB")
 	c.Flags().Int64Var(&f.gpuCount, "gpu-count", 0, "minimum GPU count (0 excludes GPU SKUs)")
@@ -102,10 +127,19 @@ func newCompareCmd() *cobra.Command {
 	c.Flags().StringVar(&f.deploymentOption, "deployment-option", "", "db.relational deployment option (single-az | multi-az | zonal | regional)")
 	c.Flags().Float64Var(&f.storageGB, "storage-gb", 0, "db.relational minimum storage (GB)")
 	c.Flags().StringVar(&f.tier, "tier", "", "container.orchestration/paas.app tier (free|standard|premium|... — container.orchestration or paas.app only)")
-	c.Flags().StringVar(&f.mode, "mode", "", "mode filter (container.orchestration: control-plane|fargate|...; search.engine: managed-cluster|serverless; warehouse.query: on-demand|capacity|storage)")
+	c.Flags().StringVar(&f.mode, "mode", "", "mode filter (container.orchestration: control-plane|fargate|...; "+
+		"search.engine: managed-cluster|serverless; warehouse.query: on-demand|capacity|storage; "+
+		"messaging.queue: standard|fifo|premium|throughput; messaging.topic: standard|premium|publish-http|publish-sqs|publish-email; "+
+		"dns.zone: public|private; api.gateway: rest|http|consumption|provisioned; "+
+		"network.cdn: edge-egress|origin-shield|request|cache-fill|rules-engine|base-fee; db.nosql: provisioned|serverless|native)")
 	c.Flags().StringVar(&f.planOS, "os", "", "paas.app OS filter (linux|windows — paas.app only)")
 	c.Flags().StringVar(&f.edition, "edition", "", "warehouse.query capacity edition (enterprise|enterprise-plus — warehouse.query only)")
 	c.Flags().StringVar(&f.storageTier, "storage-tier", "", "warehouse.query storage tier (active|long-term — warehouse.query only)")
+	// M-δ per-kind volume flags (mutually exclusive; pass at most one)
+	c.Flags().Int64Var(&f.ops, "ops", 0, "messaging.queue / messaging.topic operation count")
+	c.Flags().Int64Var(&f.queries, "queries", 0, "dns.zone query count")
+	c.Flags().Int64Var(&f.requests, "requests", 0, "api.gateway request count")
+	c.Flags().Float64Var(&f.gb, "gb", 0, "network.cdn egress GB")
 	return c
 }
 
@@ -114,22 +148,47 @@ func newCompareCmd() *cobra.Command {
 func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E) {
 	if f.kind == "" {
 		return nil, skuerrors.Validation("flag_invalid", "kind", "",
-			"pass --kind compute.vm | storage.object | db.relational | cache.kv | container.orchestration | search.engine | paas.app | warehouse.query")
+			"pass --kind api.gateway | cache.kv | compute.vm | container.orchestration | db.nosql | db.relational | dns.zone | messaging.queue | messaging.topic | network.cdn | paas.app | search.engine | storage.object | warehouse.query")
 	}
 	supportedKinds := map[string]bool{
-		"compute.vm":              true,
-		"storage.object":          true,
-		"db.relational":           true,
+		"api.gateway":             true,
 		"cache.kv":                true,
+		"compute.vm":              true,
 		"container.orchestration": true,
-		"search.engine":           true,
+		"db.nosql":                true,
+		"db.relational":           true,
+		"dns.zone":                true,
+		"messaging.queue":         true,
+		"messaging.topic":         true,
+		"network.cdn":             true,
 		"paas.app":                true,
+		"search.engine":           true,
+		"storage.object":          true,
 		"warehouse.query":         true,
 	}
 	if !supportedKinds[f.kind] {
 		return nil, skuerrors.Validation("flag_invalid", "kind", f.kind,
-			"supported kinds: compute.vm, storage.object, db.relational, cache.kv, container.orchestration, search.engine, paas.app, warehouse.query")
+			"supported kinds: api.gateway, cache.kv, compute.vm, container.orchestration, db.nosql, db.relational, dns.zone, messaging.queue, messaging.topic, network.cdn, paas.app, search.engine, storage.object, warehouse.query")
 	}
+	// Volume flags are mutually exclusive; at most one may be non-zero.
+	volumeSet := 0
+	if f.ops != 0 {
+		volumeSet++
+	}
+	if f.queries != 0 {
+		volumeSet++
+	}
+	if f.requests != 0 {
+		volumeSet++
+	}
+	if f.gb != 0 {
+		volumeSet++
+	}
+	if volumeSet > 1 {
+		return nil, skuerrors.Validation("flag_invalid", "volume-flags", "",
+			"pass at most one of --ops / --queries / --requests / --gb")
+	}
+
 	switch f.kind {
 	case "compute.vm":
 		if f.storageClass != "" || f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 || f.tier != "" || f.mode != "" {
@@ -180,6 +239,48 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
 				"warehouse.query accepts --mode / --edition / --storage-tier / --regions / --max-price")
+		}
+	case "messaging.queue", "messaging.topic":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.queries != 0 || f.requests != 0 ||
+			f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				f.kind+" accepts --ops / --mode / --regions / --max-price")
+		}
+	case "dns.zone":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.ops != 0 || f.requests != 0 ||
+			f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"dns.zone accepts --queries / --mode / --regions / --max-price")
+		}
+	case "api.gateway":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.ops != 0 || f.queries != 0 || f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"api.gateway accepts --requests / --mode / --regions / --max-price")
+		}
+	case "network.cdn":
+		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
+			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.ops != 0 || f.queries != 0 || f.requests != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"network.cdn accepts --gb / --mode / --regions / --max-price")
+		}
+	case "db.nosql":
+		if f.gpuCount != 0 || f.storageClass != "" || f.durabilityNines != 0 ||
+			f.availabilityTier != "" || f.storageGB != 0 || f.deploymentOption != "" ||
+			f.tier != "" || f.planOS != "" || f.edition != "" || f.storageTier != "" ||
+			f.ops != 0 || f.queries != 0 || f.requests != 0 || f.gb != 0 {
+			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
+				"db.nosql accepts --vcpu / --memory / --engine / --mode / --regions / --max-price")
 		}
 	}
 	switch f.sort {
@@ -278,6 +379,10 @@ func compareLookup(ctx context.Context, f compareFlags, s *batch.Settings) ([]ca
 		PlanOS:           f.planOS,
 		Edition:          f.edition,
 		StorageTier:      f.storageTier,
+		Ops:              f.ops,
+		Queries:          f.queries,
+		Requests:         f.requests,
+		GB:               f.gb,
 		Regions:          regionLiterals,
 		Sort:             f.sort,
 		Limit:            f.limit,
@@ -316,6 +421,10 @@ func compareFlagsFromArgs(args map[string]any) compareFlags {
 	if !ok {
 		limit = 20
 	}
+	opsF, _ := argFloat(args, "ops")
+	queriesF, _ := argFloat(args, "queries")
+	requestsF, _ := argFloat(args, "requests")
+	gbF, _ := argFloat(args, "gb")
 	regions := argString(args, "regions")
 	if regions == "" {
 		if regs := argStringSlice(args, "regions"); len(regs) > 0 {
@@ -354,6 +463,10 @@ func compareFlagsFromArgs(args map[string]any) compareFlags {
 		planOS:           argString(args, "os"),
 		edition:          argString(args, "edition"),
 		storageTier:      argString(args, "storage_tier"),
+		ops:              int64(opsF),
+		queries:          int64(queriesF),
+		requests:         int64(requestsF),
+		gb:               gbF,
 	}
 }
 
@@ -423,6 +536,19 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 			args["mode"] = f.mode
 			args["edition"] = f.edition
 			args["storage_tier"] = f.storageTier
+		}
+		// Include volume flags only when set (mirrors max_price pattern).
+		if f.ops != 0 {
+			args["ops"] = f.ops
+		}
+		if f.queries != 0 {
+			args["queries"] = f.queries
+		}
+		if f.requests != 0 {
+			args["requests"] = f.requests
+		}
+		if f.gb != 0 {
+			args["gb"] = f.gb
 		}
 		return output.EmitDryRun(cmd.OutOrStdout(), output.DryRunPlan{
 			Command:      "compare",

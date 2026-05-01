@@ -1,0 +1,12 @@
+shard: azure_event_hubs
+provider: azure
+service: event-hubs
+kind: messaging.queue
+cli:
+  group: azure
+  command: event-hubs
+  resource_flag: tier
+ingest:
+  module: azure_event_hubs
+  discover: azure.publication_date
+budget_bytes: 200000

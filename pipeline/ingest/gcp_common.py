@@ -42,6 +42,12 @@ _GCP_SERVICE_IDS: dict[str, str | tuple[str, ...]] = {
     ),
     "gcp_gke": "CCD8-9BF1-090E",  # Kubernetes Engine
     "gcp_bigquery": "24E6-581D-38E5",  # BigQuery
+    # M-δ additions
+    "gcp_pubsub_queues": "A1E8-BE35-7EBC",   # Cloud Pub/Sub
+    "gcp_pubsub_topics": "A1E8-BE35-7EBC",   # Cloud Pub/Sub (shared service)
+    "gcp_firestore": "EE2C-7FAC-5E08",        # Cloud Firestore
+    "gcp_cloud_cdn": "E505-1604-58F8",         # Networking (Cloud CDN lives here)
+    "gcp_cloud_dns": "FA26-5236-B8B5",         # Cloud DNS
 }
 
 _USAGE_UNITS: dict[str, tuple[float, str]] = {

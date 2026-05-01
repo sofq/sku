@@ -21,6 +21,10 @@ kind:
   - search.engine
   - paas.app
   - warehouse.query
+  - messaging.queue
+  - messaging.topic
+  - dns.zone
+  - api.gateway
 
 commitment:
   - on_demand
@@ -59,6 +63,12 @@ tenancy:
   - spanner-storage
   # container.orchestration — repurpose tenancy slot for the product family
   - kubernetes
+  # M-δ: messaging / dns / api-gateway / cdn repurpose tenancy slot for product family
+  - messaging
+  - dns
+  - api-gateway
+  - cdn
+  - firestore-native
 
 os:
   - ""
@@ -91,6 +101,30 @@ os:
   - autopilot              # GKE Autopilot
   - managed-cluster        # search.engine (OpenSearch managed)
   - on-demand              # warehouse.query (BigQuery on-demand)
+  # M-δ: messaging os/mode tokens
+  - fifo
+  - topic
+  - pubsub-throughput
+  - event-hubs-standard
+  - event-hubs-premium
+  # M-δ: api.gateway os/mode tokens
+  - apim-consumption
+  - apim-developer
+  - apim-basic
+  - apim-standard
+  - apim-premium
+  - apim-premium-v2
+  - apim-isolated
+  - rest-api
+  - http-api
+  # M-δ: dns.zone os/mode tokens
+  - dns-public
+  - dns-private
+  # M-δ: cdn os/mode tokens
+  - cdn-egress
+  - cdn-request
+  - cdn-origin-shield
+  - cdn-cache-fill
 
 support_tier:
   - ""

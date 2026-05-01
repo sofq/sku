@@ -97,7 +97,7 @@ INSERT INTO terms VALUES
 INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture, extra) VALUES
   ('azure-pg-gen5-2-eastus-flex', 2, 8.0, NULL, '{"deployment_option":"flexible-server"}');
 INSERT INTO prices VALUES
-  ('azure-pg-gen5-2-eastus-flex', 'compute','',0.12,'hrs');
+  ('azure-pg-gen5-2-eastus-flex', 'compute','','',0.12,'hrs');
 `
 	require.NoError(t, catalog.BuildFromSQL(path, base+azurePostgresRow))
 	cat, err := catalog.Open(path)

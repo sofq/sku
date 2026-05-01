@@ -28,6 +28,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -69,6 +70,6 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb) VALUES
   ('as-f1-linux-eastus',   1, 1.0);
 
 INSERT INTO prices VALUES
-  ('as-p1v3-linux-eastus', 'instance', '', 0.072, 'hour'),
-  ('as-p1v3-win-eastus',   'instance', '', 0.095, 'hour'),
-  ('as-f1-linux-eastus',   'instance', '', 0.0,   'hour');
+  ('as-p1v3-linux-eastus', 'instance', '', '',0.072, 'hour'),
+  ('as-p1v3-win-eastus',   'instance', '', '',0.095, 'hour'),
+  ('as-f1-linux-eastus',   'instance', '', '',0.0,   'hour');

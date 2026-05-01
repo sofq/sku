@@ -29,6 +29,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -80,8 +81,8 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture, extra) VALUES
   ('gcp-sql-my-c2-use1-zonal',         NULL, NULL, NULL,'{"engine":"cloud-sql-mysql","deployment_option":"zonal"}');
 
 INSERT INTO prices VALUES
-  ('gcp-gce-n1std2-use1-linux',        'compute','',0.095,'hrs'),
-  ('gcp-gce-e2std2-use1-linux',        'compute','',0.067,'hrs'),
-  ('gcp-sql-pg-c2-use1-zonal',         'compute','',0.115,'hrs'),
-  ('gcp-sql-pg-c2-use1-regional',      'compute','',0.230,'hrs'),
-  ('gcp-sql-my-c2-use1-zonal',         'compute','',0.103,'hrs');
+  ('gcp-gce-n1std2-use1-linux',        'compute','','',0.095,'hrs'),
+  ('gcp-gce-e2std2-use1-linux',        'compute','','',0.067,'hrs'),
+  ('gcp-sql-pg-c2-use1-zonal',         'compute','','',0.115,'hrs'),
+  ('gcp-sql-pg-c2-use1-regional',      'compute','','',0.230,'hrs'),
+  ('gcp-sql-my-c2-use1-zonal',         'compute','','',0.103,'hrs');

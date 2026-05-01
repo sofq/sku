@@ -41,11 +41,12 @@ CREATE TABLE terms (
 ) WITHOUT ROWID;
 
 CREATE TABLE prices (
-  sku_id    TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
-  dimension TEXT NOT NULL,
-  tier      TEXT NOT NULL DEFAULT '',
-  amount    REAL NOT NULL,
-  unit      TEXT NOT NULL,
+  sku_id     TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
+  dimension  TEXT NOT NULL,
+  tier       TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
+  amount     REAL NOT NULL,
+  unit       TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
 
@@ -77,12 +78,12 @@ INSERT INTO terms(sku_id, commitment, tenancy, os) VALUES
   ('azure-blob-hot-eastus',     'on_demand','',''),
   ('azure-blob-archive-eastus', 'on_demand','','');
 INSERT INTO prices VALUES
-  ('azure-blob-hot-eastus',     'storage',   '', 0.0184, 'gb-mo'),
-  ('azure-blob-hot-eastus',     'read-ops',  '', 0.0004, 'requests'),
-  ('azure-blob-hot-eastus',     'write-ops', '', 0.0050, 'requests'),
-  ('azure-blob-archive-eastus', 'storage',   '', 0.0020, 'gb-mo'),
-  ('azure-blob-archive-eastus', 'read-ops',  '', 0.0005, 'requests'),
-  ('azure-blob-archive-eastus', 'write-ops', '', 0.00001,'requests');
+  ('azure-blob-hot-eastus',     'storage',   '', '',0.0184, 'gb-mo'),
+  ('azure-blob-hot-eastus',     'read-ops',  '', '',0.0004, 'requests'),
+  ('azure-blob-hot-eastus',     'write-ops', '', '',0.0050, 'requests'),
+  ('azure-blob-archive-eastus', 'storage',   '', '',0.0020, 'gb-mo'),
+  ('azure-blob-archive-eastus', 'read-ops',  '', '',0.0005, 'requests'),
+  ('azure-blob-archive-eastus', 'write-ops', '', '',0.00001,'requests');
 
 -- azure-functions: x86_64 in eastus + westeurope.
 INSERT INTO skus VALUES
@@ -95,10 +96,10 @@ INSERT INTO terms(sku_id, commitment, tenancy, os) VALUES
   ('azure-fn-x86_64-eastus','on_demand','',''),
   ('azure-fn-x86_64-weu',   'on_demand','','');
 INSERT INTO prices VALUES
-  ('azure-fn-x86_64-eastus','executions','', 0.00000020, 'requests'),
-  ('azure-fn-x86_64-eastus','duration',  '', 0.000016,   'gb-seconds'),
-  ('azure-fn-x86_64-weu',   'executions','', 0.00000022, 'requests'),
-  ('azure-fn-x86_64-weu',   'duration',  '', 0.000018,   'gb-seconds');
+  ('azure-fn-x86_64-eastus','executions','', '',0.00000020, 'requests'),
+  ('azure-fn-x86_64-eastus','duration',  '', '',0.000016,   'gb-seconds'),
+  ('azure-fn-x86_64-weu',   'executions','', '',0.00000022, 'requests'),
+  ('azure-fn-x86_64-weu',   'duration',  '', '',0.000018,   'gb-seconds');
 
 -- azure-disks: standard-ssd + premium-ssd in eastus.
 INSERT INTO skus VALUES
@@ -111,5 +112,5 @@ INSERT INTO terms(sku_id, commitment, tenancy, os) VALUES
   ('azure-disk-std-ssd-eastus', 'on_demand','',''),
   ('azure-disk-prem-ssd-eastus','on_demand','','');
 INSERT INTO prices VALUES
-  ('azure-disk-std-ssd-eastus', 'storage','', 4.80,  'month'),
-  ('azure-disk-prem-ssd-eastus','storage','', 19.71, 'month');
+  ('azure-disk-std-ssd-eastus', 'storage','', '',4.80,  'month'),
+  ('azure-disk-prem-ssd-eastus','storage','', '',19.71, 'month');

@@ -29,6 +29,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -72,7 +73,7 @@ INSERT INTO resource_attrs (sku_id, vcpu, memory_gb, architecture, extra) VALUES
   ('rds-dbm5l-use1-pg-multi',  2,8.0,NULL,'{"engine":"postgres","deployment_option":"multi-az"}');
 
 INSERT INTO prices VALUES
-  ('ec2-m5l-use1-linux-shared','compute','',0.096,'hrs'),
-  ('ec2-m5l-usw2-linux-shared','compute','',0.112,'hrs'),
-  ('rds-dbm5l-use1-pg-single', 'compute','',0.150,'hrs'),
-  ('rds-dbm5l-use1-pg-multi',  'compute','',0.300,'hrs');
+  ('ec2-m5l-use1-linux-shared','compute','','',0.096,'hrs'),
+  ('ec2-m5l-usw2-linux-shared','compute','','',0.112,'hrs'),
+  ('rds-dbm5l-use1-pg-single', 'compute','','',0.150,'hrs'),
+  ('rds-dbm5l-use1-pg-multi',  'compute','','',0.300,'hrs');

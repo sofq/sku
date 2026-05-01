@@ -25,4 +25,6 @@ python/*.egg-info/
 python/sku_cli/bin/
 python/sku_cli.egg-info/
 pipeline/*.egg-info/
+__pycache__/
+*.pyc
 .worktrees/

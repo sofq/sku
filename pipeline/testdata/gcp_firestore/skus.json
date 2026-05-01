@@ -1,0 +1,82 @@
+{"skus": [
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-WRITES-NA",
+    "skuId": "FIRE-WRITES-NA",
+    "description": "Cloud Firestore Entity Writes North America",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreEntityPutOps", "usageType": "OnDemand"},
+    "serviceRegions": ["us-east1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 1800}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-READS-NA",
+    "skuId": "FIRE-READS-NA",
+    "description": "Cloud Firestore Read Ops North America",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreReadOps", "usageType": "OnDemand"},
+    "serviceRegions": ["us-east1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 330}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-DELETES-NA",
+    "skuId": "FIRE-DELETES-NA",
+    "description": "Cloud Firestore Entity Deletes North America",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreEntityDeleteOps", "usageType": "OnDemand"},
+    "serviceRegions": ["us-east1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 100}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-STORAGE-NA",
+    "skuId": "FIRE-STORAGE-NA",
+    "description": "Cloud Firestore Storage North America",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreStorage", "usageType": "OnDemand"},
+    "serviceRegions": ["us-east1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.mo", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 135000000}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-WRITES-EU",
+    "skuId": "FIRE-WRITES-EU",
+    "description": "Cloud Firestore Entity Writes Europe",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreEntityPutOps", "usageType": "OnDemand"},
+    "serviceRegions": ["europe-west1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 1800}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-READS-EU",
+    "skuId": "FIRE-READS-EU",
+    "description": "Cloud Firestore Read Ops Europe",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreReadOps", "usageType": "OnDemand"},
+    "serviceRegions": ["europe-west1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 330}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-DELETES-EU",
+    "skuId": "FIRE-DELETES-EU",
+    "description": "Cloud Firestore Entity Deletes Europe",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreEntityDeleteOps", "usageType": "OnDemand"},
+    "serviceRegions": ["europe-west1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 100}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-STORAGE-EU",
+    "skuId": "FIRE-STORAGE-EU",
+    "description": "Cloud Firestore Storage Europe",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreStorage", "usageType": "OnDemand"},
+    "serviceRegions": ["europe-west1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy.mo", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 135000000}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/FIRE-SMALLOPS-NA",
+    "skuId": "FIRE-SMALLOPS-NA",
+    "description": "Cloud Firestore Small Ops North America",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "FirestoreSmallOps", "usageType": "OnDemand"},
+    "serviceRegions": ["us-east1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 0}}]}}]
+  },
+  {
+    "name": "services/EE2C-7FAC-5E08/skus/DATASTORE-WRITES-NA",
+    "skuId": "DATASTORE-WRITES-NA",
+    "description": "Cloud Datastore Entity Writes North America",
+    "category": {"serviceDisplayName": "Cloud Firestore", "resourceFamily": "Databases", "resourceGroup": "DatastoreEntityPutOps", "usageType": "OnDemand"},
+    "serviceRegions": ["us-east1"],
+    "pricingInfo": [{"pricingExpression": {"usageUnit": "count", "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 1800}}]}}]
+  }
+]}

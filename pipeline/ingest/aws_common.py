@@ -85,6 +85,69 @@ def load_region_normalizer() -> RegionNormalizer:
     return RegionNormalizer(table)
 
 
+# Shared AWS pricing-API "location" → region-code map.
+#
+# AWS uses BOTH "EU (Frankfurt)" (legacy) and "Europe (Frankfurt)" (newer)
+# location strings inconsistently across services and even across products
+# inside the same offer file. Per-shard maps therefore must accept both
+# spellings or they silently drop rows for major regions.
+#
+# This single map is the source of truth. Add new regions here once and
+# every consumer ingestor picks them up. Government / opt-in regions
+# (us-gov-east-1, us-gov-west-1, cn-north-1, cn-northwest-1) are
+# intentionally absent — they live outside the catalog's regions.yaml
+# and callers should treat them as unknown locations.
+AWS_LOCATION_TO_REGION: dict[str, str] = {
+    # US
+    "US East (N. Virginia)":       "us-east-1",
+    "US East (Ohio)":              "us-east-2",
+    "US West (N. California)":     "us-west-1",
+    "US West (Oregon)":            "us-west-2",
+    # Canada / Mexico
+    "Canada (Central)":            "ca-central-1",
+    "Canada West (Calgary)":       "ca-west-1",
+    "Mexico (Central)":            "mx-central-1",
+    # Europe — both "EU (...)" and "Europe (...)" naming
+    "EU (Ireland)":                "eu-west-1",
+    "Europe (Ireland)":            "eu-west-1",
+    "EU (London)":                 "eu-west-2",
+    "Europe (London)":             "eu-west-2",
+    "EU (Paris)":                  "eu-west-3",
+    "Europe (Paris)":              "eu-west-3",
+    "EU (Frankfurt)":              "eu-central-1",
+    "Europe (Frankfurt)":          "eu-central-1",
+    "EU (Milan)":                  "eu-south-1",
+    "Europe (Milan)":              "eu-south-1",
+    "EU (Stockholm)":              "eu-north-1",
+    "Europe (Stockholm)":          "eu-north-1",
+    "Europe (Spain)":              "eu-south-2",
+    "Europe (Zurich)":             "eu-central-2",
+    # Asia Pacific
+    "Asia Pacific (Tokyo)":        "ap-northeast-1",
+    "Asia Pacific (Seoul)":        "ap-northeast-2",
+    "Asia Pacific (Osaka)":        "ap-northeast-3",
+    "Asia Pacific (Singapore)":    "ap-southeast-1",
+    "Asia Pacific (Sydney)":       "ap-southeast-2",
+    "Asia Pacific (Jakarta)":      "ap-southeast-3",
+    "Asia Pacific (Melbourne)":    "ap-southeast-4",
+    "Asia Pacific (Malaysia)":     "ap-southeast-5",
+    "Asia Pacific (New Zealand)":  "ap-southeast-6",
+    "Asia Pacific (Thailand)":     "ap-southeast-7",
+    "Asia Pacific (Hong Kong)":    "ap-east-1",
+    "Asia Pacific (Taipei)":       "ap-east-2",
+    "Asia Pacific (Mumbai)":       "ap-south-1",
+    "Asia Pacific (Hyderabad)":    "ap-south-2",
+    # South America
+    "South America (Sao Paulo)":   "sa-east-1",
+    # Middle East
+    "Middle East (Bahrain)":       "me-south-1",
+    "Middle East (UAE)":           "me-central-1",
+    "Israel (Tel Aviv)":           "il-central-1",
+    # Africa
+    "Africa (Cape Town)":          "af-south-1",
+}
+
+
 _AWS_OFFER_BASE = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws"
 _AWS_SERVICE_CODES: dict[str, str] = {
     "aws_ec2": "AmazonEC2",
@@ -98,6 +161,10 @@ _AWS_SERVICE_CODES: dict[str, str] = {
     "aws_elasticache": "AmazonElastiCache",
     "aws_eks": "AmazonEKS",
     "aws_opensearch": "AmazonES",
+    "aws_sns": "AmazonSNS",
+    "aws_sqs": "AWSQueueService",
+    "aws_route53": "AmazonRoute53",
+    "aws_api_gateway": "AmazonApiGateway",
 }
 
 # Multiple shards share an upstream offer — aws_ec2 + aws_ebs both consume

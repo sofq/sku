@@ -1,0 +1,12 @@
+shard: aws_api_gateway
+provider: aws
+service: api-gateway
+kind: api.gateway
+cli:
+  group: aws
+  command: api-gateway
+  resource_flag: api-type
+ingest:
+  module: aws_api_gateway
+  discover: aws.publication_date
+budget_bytes: 300000

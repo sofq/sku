@@ -52,13 +52,14 @@ INSERT INTO resource_attrs (sku_id, context_length) VALUES ('m/pricey', 200000);
 
 CREATE TABLE prices (
   sku_id TEXT NOT NULL, dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL DEFAULT 'token',
   PRIMARY KEY (sku_id, dimension, tier)
 );
-INSERT INTO prices VALUES ('m/cheap','prompt','',5e-7,'token');
-INSERT INTO prices VALUES ('m/cheap','completion','',1.5e-6,'token');
-INSERT INTO prices VALUES ('m/pricey','prompt','',1.5e-6,'token');
-INSERT INTO prices VALUES ('m/pricey','completion','',4.5e-6,'token');
+INSERT INTO prices VALUES ('m/cheap','prompt','','',5e-7,'token');
+INSERT INTO prices VALUES ('m/cheap','completion','','',1.5e-6,'token');
+INSERT INTO prices VALUES ('m/pricey','prompt','','',1.5e-6,'token');
+INSERT INTO prices VALUES ('m/pricey','completion','','',4.5e-6,'token');
 
 CREATE TABLE health (
   sku_id TEXT PRIMARY KEY, uptime_30d REAL, latency_p50_ms INTEGER,

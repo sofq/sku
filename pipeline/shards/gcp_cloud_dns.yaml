@@ -1,0 +1,12 @@
+shard: gcp_cloud_dns
+provider: gcp
+service: cloud-dns
+kind: dns.zone
+cli:
+  group: gcp
+  command: cloud-dns
+  resource_flag: zone-type
+ingest:
+  module: gcp_cloud_dns
+  discover: gcp.publication_date
+budget_bytes: 100000

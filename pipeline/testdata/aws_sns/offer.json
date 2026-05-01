@@ -1,0 +1,187 @@
+{
+  "formatVersion": "v1.0",
+  "publicationDate": "2026-04-15T00:00:00Z",
+  "offerCode": "AmazonSNS",
+  "version": "20260415000000",
+  "products": {
+    "SKU-SNS-USE1-FREE": {
+      "sku": "SKU-SNS-USE1-FREE",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "US East (N. Virginia)",
+        "usagetype": "USE1-Requests-Tier1",
+        "operation": "PublishMessage"
+      }
+    },
+    "SKU-SNS-USE1-PAID": {
+      "sku": "SKU-SNS-USE1-PAID",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "US East (N. Virginia)",
+        "usagetype": "USE1-Requests-Tier2",
+        "operation": "PublishMessage"
+      }
+    },
+    "SKU-SNS-EUW1-FREE": {
+      "sku": "SKU-SNS-EUW1-FREE",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "Europe (Ireland)",
+        "usagetype": "EU-Requests-Tier1",
+        "operation": "PublishMessage"
+      }
+    },
+    "SKU-SNS-EUW1-PAID": {
+      "sku": "SKU-SNS-EUW1-PAID",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "Europe (Ireland)",
+        "usagetype": "EU-Requests-Tier2",
+        "operation": "PublishMessage"
+      }
+    },
+    "SKU-SNS-APS2-FREE": {
+      "sku": "SKU-SNS-APS2-FREE",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "Asia Pacific (Sydney)",
+        "usagetype": "APS2-Requests-Tier1",
+        "operation": "PublishMessage"
+      }
+    },
+    "SKU-SNS-APS2-PAID": {
+      "sku": "SKU-SNS-APS2-PAID",
+      "productFamily": "API Request",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "Asia Pacific (Sydney)",
+        "usagetype": "APS2-Requests-Tier2",
+        "operation": "PublishMessage"
+      }
+    },
+    "SKU-SNS-DELIVERY-IGNORE": {
+      "sku": "SKU-SNS-DELIVERY-IGNORE",
+      "productFamily": "Message Delivery",
+      "attributes": {
+        "servicecode": "AmazonSNS",
+        "location": "US East (N. Virginia)",
+        "endpointType": "HTTP",
+        "usagetype": "USE1-Deliveries-HTTP"
+      }
+    }
+  },
+  "terms": {
+    "OnDemand": {
+      "SKU-SNS-USE1-FREE": {
+        "SKU-SNS-USE1-FREE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-USE1-FREE",
+          "priceDimensions": {
+            "SKU-SNS-USE1-FREE.JRTCKXETXF.F1": {
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000000000"},
+              "description": "First 1,000,000 SNS Requests per month for free",
+              "beginRange": "0",
+              "endRange": "1000000"
+            }
+          }
+        }
+      },
+      "SKU-SNS-USE1-PAID": {
+        "SKU-SNS-USE1-PAID.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-USE1-PAID",
+          "priceDimensions": {
+            "SKU-SNS-USE1-PAID.JRTCKXETXF.F1": {
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.5000000000"},
+              "description": "$0.50 per 1 million SNS Requests after first 1 million",
+              "beginRange": "1000000",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-SNS-EUW1-FREE": {
+        "SKU-SNS-EUW1-FREE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-EUW1-FREE",
+          "priceDimensions": {
+            "SKU-SNS-EUW1-FREE.JRTCKXETXF.F1": {
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000000000"},
+              "description": "First 1,000,000 SNS Requests per month for free",
+              "beginRange": "0",
+              "endRange": "1000000"
+            }
+          }
+        }
+      },
+      "SKU-SNS-EUW1-PAID": {
+        "SKU-SNS-EUW1-PAID.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-EUW1-PAID",
+          "priceDimensions": {
+            "SKU-SNS-EUW1-PAID.JRTCKXETXF.F1": {
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.5550000000"},
+              "description": "$0.555 per 1 million SNS Requests after first 1 million",
+              "beginRange": "1000000",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-SNS-APS2-FREE": {
+        "SKU-SNS-APS2-FREE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-APS2-FREE",
+          "priceDimensions": {
+            "SKU-SNS-APS2-FREE.JRTCKXETXF.F1": {
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.0000000000"},
+              "description": "First 1,000,000 SNS Requests per month for free",
+              "beginRange": "0",
+              "endRange": "1000000"
+            }
+          }
+        }
+      },
+      "SKU-SNS-APS2-PAID": {
+        "SKU-SNS-APS2-PAID.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-APS2-PAID",
+          "priceDimensions": {
+            "SKU-SNS-APS2-PAID.JRTCKXETXF.F1": {
+              "unit": "Requests",
+              "pricePerUnit": {"USD": "0.5750000000"},
+              "description": "$0.575 per 1 million SNS Requests after first 1 million",
+              "beginRange": "1000000",
+              "endRange": "Inf"
+            }
+          }
+        }
+      },
+      "SKU-SNS-DELIVERY-IGNORE": {
+        "SKU-SNS-DELIVERY-IGNORE.JRTCKXETXF": {
+          "offerTermCode": "JRTCKXETXF",
+          "sku": "SKU-SNS-DELIVERY-IGNORE",
+          "priceDimensions": {
+            "SKU-SNS-DELIVERY-IGNORE.JRTCKXETXF.F1": {
+              "unit": "Deliveries",
+              "pricePerUnit": {"USD": "0.0000000000"},
+              "description": "First 100,000 deliveries for free",
+              "beginRange": "0",
+              "endRange": "Inf"
+            }
+          }
+        }
+      }
+    }
+  }
+}

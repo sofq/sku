@@ -43,27 +43,41 @@ Agent quick-start for the `sku` repo.
 
 ## Current milestone
 
-M-α — pipeline architecture for coverage expansion:
-- Monolithic `data-daily.yml` split into three per-provider workflows
-  (`data-aws.yml` 03:00, `data-azure.yml` 03:15, `data-gcp.yml` 03:30 UTC)
-  plus `data-publish.yml` (04:30 UTC fallback); `data-dispatch.yml` (formerly
-  `data-daily.yml`) kept as a thin manual-dispatch dispatcher. See
+**Next up: M-δ — S2 services** (sketched in
+`docs/superpowers/plans/2026-04-24-coverage-expansion-roadmap.md:158`; spec not
+yet written). 12 new shards (messaging, DNS, CDN, API gateway) across AWS /
+Azure / GCP, introducing kinds `api.gateway`, `messaging.queue`,
+`messaging.topic`, `dns.zone`, `cdn.origin`. Open design questions flagged for
+spec time: per-operation compare semantics, DNS tiered pricing, API-gateway
+shard shape, whether to merge CloudFront / Front Door / Cloud CDN.
+
+Parked items to fold into M-δ spec:
+- **Dedup respec** — cut from M-α (Feature D); was tagged "will ride with
+  M-γ's schema bump" but did not ship in M-γ.
+- **`terms.os` overload cleanup** — schema-debt note in
+  `docs/superpowers/specs/2026-04-29-m-gamma-3-s1-paas-search-warehouse-design.md:227`
+  (split `os` into real-OS-only + `mode_token`).
+
+Recently closed:
+- **M-α** — pipeline split into per-provider workflows (`data-aws.yml` 03:00,
+  `data-azure.yml` 03:15, `data-gcp.yml` 03:30 UTC) + `data-publish.yml` (04:30
+  UTC fallback); `data-dispatch.yml` is the manual dispatcher. See
   `docs/superpowers/specs/2026-04-24-m-alpha-pipeline-architecture-design.md`
-  for the full design (note: Feature D dedup and Go-side codegen were cut —
-  see the plan file).
-- `pipeline/shards/*.yaml` is now the single source of truth; `make generate`
-  regenerates `package/budgets.py` and `discover/_shards_gen.py`.
-- ETag fast path wired for AWS non-streaming shards; controlled by
-  `SKU_ETAG_MODE` env var.
-
-Next: M-β (R1 regions), then M-γ (S1 services) (dedup respec pending; will
-ride with M-γ's schema bump).
-
-M-γ.1 S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure Redis, Spanner, Memorystore shards + cache.kv compare kind + estimators.
-
-M-γ.2 S1 containers (managed Kubernetes): EKS, AKS, GKE shards + container.orchestration compare kind. Worker/node prices remain in `aws_ec2` / `azure_vm` / `gcp_gce`.
-
-M-γ.3 S1 PaaS / search / warehouse: aws_opensearch, azure_appservice, gcp_bigquery shards + search.engine, paas.app, warehouse.query compare kinds + estimators (opensearch, appservice, bigquery). BigQuery pseudo-regions bq-us / bq-eu added.
+  (Feature D dedup and Go-side codegen were cut). `pipeline/shards/*.yaml` is
+  the single source of truth; `make generate` regenerates `package/budgets.py`
+  and `discover/_shards_gen.py`. ETag fast path wired for AWS non-streaming
+  shards via `SKU_ETAG_MODE`.
+- **M-β** — R1 commercial regions (34 AWS / 56 Azure / 43 GCP); new
+  `africa` and `middle-east` groups; CloudFront fan-out remapped.
+- **M-γ.1** — S1 databases & caches: Aurora, ElastiCache, Cosmos DB, Azure
+  Redis, Spanner, Memorystore + `cache.kv` compare kind + estimators.
+- **M-γ.2** — S1 containers: EKS, AKS, GKE + `container.orchestration`
+  compare kind. Worker/node prices remain in `aws_ec2` / `azure_vm` / `gcp_gce`.
+- **M-γ.3** — S1 PaaS / search / warehouse: aws_opensearch,
+  azure_appservice, gcp_bigquery + `search.engine`, `paas.app`,
+  `warehouse.query` compare kinds + estimators (single-provider per kind;
+  cross-provider counterparts queued for M-δ/M-ε). BigQuery pseudo-regions
+  bq-us / bq-eu added.
 
 ### Quick path (agent, repeatable, M3b.4 surface)
 
@@ -242,6 +256,59 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku estimate --item gcp/bigquery:on-demand:region=bq-us:tb_queried=100 --pretty
 ./bin/sku estimate --item gcp/bigquery:capacity-standard:region=bq-us:slots=500:hours=730 --pretty
 ./bin/sku estimate --item gcp/bigquery:storage-active:region=bq-us:gb_month=5000 --pretty
+
+# M-δ S2 messaging.queue
+./bin/sku aws sqs price --queue-type standard --region us-east-1 --preset agent
+./bin/sku aws sqs price --queue-type fifo     --region us-east-1
+./bin/sku aws sqs list  --queue-type standard
+./bin/sku aws sns price --region us-east-1 --preset agent
+./bin/sku aws sns list
+./bin/sku azure service-bus-queues price --tier standard --region eastus --preset agent
+./bin/sku azure service-bus-queues price --tier premium  --region eastus
+./bin/sku azure service-bus-queues list  --tier standard
+./bin/sku azure event-hubs price --tier standard --region eastus --preset agent
+./bin/sku azure event-hubs price --tier premium  --region eastus
+./bin/sku azure event-hubs list  --tier standard
+./bin/sku gcp pubsub-queues price --region global --preset agent
+./bin/sku gcp pubsub-queues list
+
+# M-δ S2 dns.zone
+./bin/sku aws route53    price --zone-type public  --region global --preset agent
+./bin/sku aws route53    list  --zone-type public
+./bin/sku gcp cloud-dns  price --region global --preset agent
+./bin/sku gcp cloud-dns  list
+
+# M-δ S2 api.gateway
+./bin/sku aws api-gateway price --api-type rest --region us-east-1 --preset agent
+./bin/sku aws api-gateway list  --api-type rest
+./bin/sku aws api-gateway price --api-type http --region us-east-1 --preset agent
+./bin/sku azure apim price --tier developer --region eastus --preset agent
+./bin/sku azure apim list  --tier consumption
+
+# M-δ S2 network.cdn
+./bin/sku aws cloudfront    price --region us-east-1 --preset agent
+./bin/sku aws cloudfront    list
+./bin/sku azure front-door  price --tier standard --region global --preset agent
+./bin/sku azure front-door  list  --tier standard
+./bin/sku gcp cloud-cdn     price --region us-east1 --preset agent
+./bin/sku gcp cloud-cdn     list
+
+# M-δ S2 estimator examples
+./bin/sku estimate --item aws/sqs:standard:region=us-east-1:ops=1000000000 --pretty
+./bin/sku estimate --item azure/service-bus-queues:standard:region=eastus:ops=50000000 --pretty
+./bin/sku estimate --item azure/service-bus-queues:premium:region=eastus:mu_hours=730 --pretty
+./bin/sku estimate --item azure/event-hubs:standard:region=eastus:tu_hours=730 --pretty
+./bin/sku estimate --item azure/event-hubs:premium:region=eastus:ppu_hours=500 --pretty
+./bin/sku estimate --item gcp/pubsub-queues:throughput:region=global:tib=5 --pretty
+./bin/sku estimate --item aws/route53:public:region=global:zones=10:queries=1000000000 --pretty
+./bin/sku estimate --item gcp/cloud-dns:public:region=global:zones=5:queries=500000000 --pretty
+./bin/sku estimate --item aws/api-gateway:rest:region=us-east-1:requests=500000000 --pretty
+./bin/sku estimate --item aws/api-gateway:http:region=us-east-1:requests=100000000 --pretty
+./bin/sku estimate --item azure/apim:developer:region=eastus:units=2:hours=730 --pretty
+./bin/sku estimate --item azure/apim:consumption:region=eastus:requests=1000000 --pretty
+./bin/sku estimate --item aws/cloudfront:standard:region=us-east-1:gb=500 --pretty
+./bin/sku estimate --item azure/front-door:standard:region=us-east:gb=200 --pretty
+./bin/sku estimate --item gcp/cloud-cdn:standard:region=us-east1:gb=1000 --pretty
 ```
 
 ### Distribution smoke (M6)

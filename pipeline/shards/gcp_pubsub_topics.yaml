@@ -1,0 +1,12 @@
+shard: gcp_pubsub_topics
+provider: gcp
+service: pubsub-topics
+kind: messaging.topic
+cli:
+  group: gcp
+  command: pubsub-topics
+  resource_flag: mode
+ingest:
+  module: gcp_pubsub_topics
+  discover: gcp.publication_date
+budget_bytes: 150000

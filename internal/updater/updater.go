@@ -67,6 +67,21 @@ var DefaultSources = map[string]string{
 	"gcp-memorystore":  "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-memorystore",
 	"gcp-gke":          "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-gke",
 	"gcp-bigquery":     "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-bigquery",
+	// M-δ S2 shards
+	"aws-sqs":                  "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-sqs",
+	"aws-sns":                  "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-sns",
+	"aws-route53":              "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-route53",
+	"aws-api-gateway":          "https://github.com/sofq/sku/releases/download/data-bootstrap-aws-api-gateway",
+	"azure-service-bus-queues": "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-service-bus-queues",
+	"azure-service-bus-topics": "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-service-bus-topics",
+	"azure-event-hubs":         "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-event-hubs",
+	"azure-front-door":         "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-front-door",
+	"azure-apim":               "https://github.com/sofq/sku/releases/download/data-bootstrap-azure-apim",
+	"gcp-pubsub-queues":        "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-pubsub-queues",
+	"gcp-pubsub-topics":        "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-pubsub-topics",
+	"gcp-cloud-dns":            "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-cloud-dns",
+	"gcp-cloud-cdn":            "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-cloud-cdn",
+	"gcp-firestore":            "https://github.com/sofq/sku/releases/download/data-bootstrap-gcp-firestore",
 }
 
 // ShardNames returns the keys of DefaultSources. Used by the Cobra

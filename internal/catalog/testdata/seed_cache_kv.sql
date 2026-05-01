@@ -28,6 +28,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -65,5 +66,5 @@ INSERT INTO resource_attrs (sku_id, memory_gb, extra) VALUES
   ('ec-r6g-large-memcd-use1',    13.07, '{"engine":"memcached"}');
 
 INSERT INTO prices VALUES
-  ('ec-r6g-large-redis-use1',    'compute','',0.156,'hour'),
-  ('ec-r6g-large-memcd-use1',    'compute','',0.133,'hour');
+  ('ec-r6g-large-redis-use1',    'compute','','',0.156,'hour'),
+  ('ec-r6g-large-memcd-use1',    'compute','','',0.133,'hour');

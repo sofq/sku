@@ -18,5 +18,10 @@ func newGCPCmd() *cobra.Command {
 	c.AddCommand(newGCPMemorystoreCmd())
 	c.AddCommand(newGCPGKECmd())
 	c.AddCommand(newGCPBigQueryCmd())
+	c.AddCommand(newGCPPubSubQueuesCmd())
+	c.AddCommand(newGCPPubSubTopicsCmd())
+	c.AddCommand(newGCPCloudDNSCmd())
+	c.AddCommand(newGCPCloudCDNCmd())
+	c.AddCommand(newGCPFirestoreCmd())
 	return c
 }

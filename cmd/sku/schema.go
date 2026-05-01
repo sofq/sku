@@ -92,8 +92,25 @@ func newSchemaCmd() *cobra.Command {
 			case len(args) == 0:
 				return enc.Encode(map[string]any{
 					"providers": []string{"openrouter"},
-					"kinds":     []string{"llm.text", "llm.multimodal"},
-					"globals":   listGlobalFlags(cmd.Root()),
+					"kinds": []string{
+						"api.gateway",
+						"cache.kv",
+						"compute.function",
+						"compute.vm",
+						"container.orchestration",
+						"db.nosql",
+						"db.relational",
+						"dns.zone",
+						"messaging.queue",
+						"messaging.topic",
+						"network.cdn",
+						"paas.app",
+						"search.engine",
+						"storage.block",
+						"storage.object",
+						"warehouse.query",
+					},
+					"globals": listGlobalFlags(cmd.Root()),
 				})
 
 			default:

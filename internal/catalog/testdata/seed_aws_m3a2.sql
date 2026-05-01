@@ -30,6 +30,7 @@ CREATE TABLE terms (
 CREATE TABLE prices (
   sku_id TEXT NOT NULL REFERENCES skus(sku_id) ON DELETE CASCADE,
   dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
+  tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL,
   PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
@@ -78,15 +79,15 @@ INSERT INTO resource_attrs (sku_id, durability_nines, availability_tier, archite
   ('ebs-io2-use1',        NULL, NULL,      NULL,    '{"volume_type":"io2"}');
 
 INSERT INTO prices VALUES
-  ('s3-standard-use1',    'storage',      '', 0.023,        'gb-mo'),
-  ('s3-standard-use1',    'requests-put', '', 0.000005,     'requests'),
-  ('s3-standard-use1',    'requests-get', '', 0.0000004,    'requests'),
-  ('s3-standard-ia-use1', 'storage',      '', 0.0125,       'gb-mo'),
-  ('s3-standard-ia-use1', 'requests-put', '', 0.00001,      'requests'),
-  ('s3-standard-ia-use1', 'requests-get', '', 0.000001,     'requests'),
-  ('lambda-x86_64-use1',  'requests',     '', 0.0000002,    'requests'),
-  ('lambda-x86_64-use1',  'duration',     '', 0.0000166667, 'second'),
-  ('lambda-arm64-use1',   'requests',     '', 0.0000002,    'requests'),
-  ('lambda-arm64-use1',   'duration',     '', 0.0000133334, 'second'),
-  ('ebs-gp3-use1',        'storage',      '', 0.08,         'gb-mo'),
-  ('ebs-io2-use1',        'storage',      '', 0.125,        'gb-mo');
+  ('s3-standard-use1',    'storage',      '', '',0.023,        'gb-mo'),
+  ('s3-standard-use1',    'requests-put', '', '',0.000005,     'requests'),
+  ('s3-standard-use1',    'requests-get', '', '',0.0000004,    'requests'),
+  ('s3-standard-ia-use1', 'storage',      '', '',0.0125,       'gb-mo'),
+  ('s3-standard-ia-use1', 'requests-put', '', '',0.00001,      'requests'),
+  ('s3-standard-ia-use1', 'requests-get', '', '',0.000001,     'requests'),
+  ('lambda-x86_64-use1',  'requests',     '', '',0.0000002,    'requests'),
+  ('lambda-x86_64-use1',  'duration',     '', '',0.0000166667, 'second'),
+  ('lambda-arm64-use1',   'requests',     '', '',0.0000002,    'requests'),
+  ('lambda-arm64-use1',   'duration',     '', '',0.0000133334, 'second'),
+  ('ebs-gp3-use1',        'storage',      '', '',0.08,         'gb-mo'),
+  ('ebs-io2-use1',        'storage',      '', '',0.125,        'gb-mo');

@@ -18,4 +18,25 @@ var providerServiceKind = map[string]string{
 	"aws/opensearch":   "search.engine.opensearch",
 	"azure/appservice": "paas.app.appservice",
 	"gcp/bigquery":     "warehouse.query.bigquery",
+	// M-δ messaging.queue shards
+	"aws/sqs":                  "messaging.queue",
+	"azure/service-bus-queues": "messaging.queue",
+	"azure/event-hubs":         "messaging.queue",
+	"gcp/pubsub-queues":        "messaging.queue",
+	// M-δ messaging.topic shards
+	"aws/sns":                  "messaging.topic",
+	"azure/service-bus-topics": "messaging.topic",
+	"gcp/pubsub-topics":        "messaging.topic",
+	// M-δ dns.zone shards
+	"aws/route53":   "dns.zone",
+	"gcp/cloud-dns": "dns.zone",
+	// M-δ api.gateway shards
+	"aws/api-gateway": "api.gateway",
+	"azure/apim":      "api.gateway",
+	// M-δ network.cdn shards
+	"aws/cloudfront":   "network.cdn",
+	"azure/front-door": "network.cdn",
+	"gcp/cloud-cdn":    "network.cdn",
+	// M-δ db.nosql (Firestore joins existing Cosmos)
+	"gcp/firestore": "db.nosql",
 }

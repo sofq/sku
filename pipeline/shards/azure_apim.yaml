@@ -1,0 +1,12 @@
+shard: azure_apim
+provider: azure
+service: apim
+kind: api.gateway
+cli:
+  group: azure
+  command: apim
+  resource_flag: tier
+ingest:
+  module: azure_apim
+  discover: azure.retail_prices
+budget_bytes: 300000

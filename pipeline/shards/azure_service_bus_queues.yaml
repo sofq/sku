@@ -1,0 +1,12 @@
+shard: azure_service_bus_queues
+provider: azure
+service: service-bus-queues
+kind: messaging.queue
+cli:
+  group: azure
+  command: service-bus-queues
+  resource_flag: tier
+ingest:
+  module: azure_service_bus_queues
+  discover: azure.publication_date
+budget_bytes: 200000

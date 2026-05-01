@@ -36,8 +36,12 @@ generate-python: ## Regenerate Python sources from pipeline/shards/*.yaml
 	$(MAKE) -C pipeline setup
 	pipeline/.venv/bin/python -m tools.gen_python
 
+.PHONY: generate-go-tier-tokens
+generate-go-tier-tokens: ## Regenerate internal/estimate/tiertokens.go from tier_tokens.py
+	pipeline/.venv/bin/python tools/gen_go_tier_tokens.py
+
 .PHONY: generate
-generate: generate-python ## Regenerate all codegen outputs
+generate: generate-python generate-go-tier-tokens ## Regenerate all codegen outputs
 
 .PHONY: openrouter-shard
 openrouter-shard: ## Build OpenRouter shard from fixtures into dist/pipeline/openrouter.db
@@ -93,6 +97,34 @@ aws-cloudfront-shard: ## Build aws-cloudfront shard from fixtures
 	  INGEST_EXTRA='--catalog-version 2026.04.18'
 	@mv dist/pipeline/aws_cloudfront.db dist/pipeline/aws-cloudfront.db
 	@mv dist/pipeline/aws_cloudfront.rows.jsonl dist/pipeline/aws-cloudfront.rows.jsonl
+
+.PHONY: aws-route53-shard
+aws-route53-shard: ## Build aws-route53 shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_route53 FIXTURE=testdata/aws_route53 \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_route53.db dist/pipeline/aws-route53.db
+	@mv dist/pipeline/aws_route53.rows.jsonl dist/pipeline/aws-route53.rows.jsonl
+
+.PHONY: aws-sns-shard
+aws-sns-shard: ## Build aws-sns shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_sns FIXTURE=testdata/aws_sns \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_sns.db dist/pipeline/aws-sns.db
+	@mv dist/pipeline/aws_sns.rows.jsonl dist/pipeline/aws-sns.rows.jsonl
+
+.PHONY: aws-sqs-shard
+aws-sqs-shard: ## Build aws-sqs shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_sqs FIXTURE=testdata/aws_sqs \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_sqs.db dist/pipeline/aws-sqs.db
+	@mv dist/pipeline/aws_sqs.rows.jsonl dist/pipeline/aws-sqs.rows.jsonl
+
+.PHONY: aws-api-gateway-shard
+aws-api-gateway-shard: ## Build aws-api-gateway shard from fixtures
+	$(MAKE) -C pipeline shard SHARD=aws_api_gateway FIXTURE=testdata/aws_api_gateway \
+	  INGEST_EXTRA='--catalog-version 2026.04.18'
+	@mv dist/pipeline/aws_api_gateway.db dist/pipeline/aws-api-gateway.db
+	@mv dist/pipeline/aws_api_gateway.rows.jsonl dist/pipeline/aws-api-gateway.rows.jsonl
 
 .PHONY: aws-shards
 aws-shards: aws-ec2-shard aws-rds-shard aws-s3-shard aws-lambda-shard aws-ebs-shard aws-dynamodb-shard aws-cloudfront-shard ## Build all aws shards (m3a.1+m3a.2+m3a.3)
