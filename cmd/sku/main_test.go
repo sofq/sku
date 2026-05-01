@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 		}
 		_ = os.Setenv("SKU_CONFIG_DIR", dir)
 		code := m.Run()
-		os.RemoveAll(dir)
+		_ = os.RemoveAll(dir)
 		os.Exit(code)
 	}
 	os.Exit(m.Run())
