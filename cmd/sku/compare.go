@@ -243,18 +243,20 @@ func compareValidate(f compareFlags) (regionLiterals []string, err *skuerrors.E)
 	case "messaging.queue", "messaging.topic":
 		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
 			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
-			f.deploymentOption != "" || f.tier != "" || f.planOS != "" || f.edition != "" ||
-			f.storageTier != "" || f.queries != 0 || f.requests != 0 || f.gb != 0 {
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.queries != 0 || f.requests != 0 ||
+			f.gb != 0 {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				f.kind+" accepts --ops / --engine / --mode / --regions / --max-price")
+				f.kind+" accepts --ops / --mode / --regions / --max-price")
 		}
 	case "dns.zone":
 		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||
 			f.durabilityNines != 0 || f.availabilityTier != "" || f.storageGB != 0 ||
-			f.deploymentOption != "" || f.tier != "" || f.planOS != "" || f.edition != "" ||
-			f.storageTier != "" || f.ops != 0 || f.requests != 0 || f.gb != 0 {
+			f.engine != "" || f.deploymentOption != "" || f.tier != "" || f.planOS != "" ||
+			f.edition != "" || f.storageTier != "" || f.ops != 0 || f.requests != 0 ||
+			f.gb != 0 {
 			return nil, skuerrors.Validation("flag_invalid", "kind-flag-mismatch", f.kind,
-				"dns.zone accepts --queries / --engine / --mode / --regions / --max-price")
+				"dns.zone accepts --queries / --mode / --regions / --max-price")
 		}
 	case "api.gateway":
 		if f.vcpu != 0 || f.memoryGB != 0 || f.gpuCount != 0 || f.storageClass != "" ||

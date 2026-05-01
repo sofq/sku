@@ -23,6 +23,10 @@ type MessagingTopicSpec struct {
 // single shard and returns rows with prices populated.
 // Term pin: commitment='on_demand'. Mode is optionally filtered via
 // json_extract(extra, '$.mode').
+//
+// When Mode is empty and the result mixes price units across the count-,
+// hour-, and byte-families (e.g. SNS per-million-publishes vs Service Bus
+// Topic mu/hour vs Pub/Sub per-GiB-month), a warning is logged to stderr.
 func QueryMessagingTopic(ctx context.Context, c *catalog.Catalog, spec MessagingTopicSpec) ([]catalog.Row, error) {
 	where := []string{
 		"s.kind = 'messaging.topic'",
@@ -79,5 +83,12 @@ ORDER BY COALESCE(mp.min_price, 1e308) ASC, s.provider, s.resource_name, s.sku_i
 		}
 		out = append(out, r)
 	}
-	return out, rs.Err()
+	if err := rs.Err(); err != nil {
+		return nil, err
+	}
+
+	if spec.Mode == "" {
+		warnIfMixedMessagingUnits(out, "messaging.topic")
+	}
+	return out, nil
 }

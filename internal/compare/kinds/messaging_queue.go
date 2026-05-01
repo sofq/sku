@@ -22,6 +22,11 @@ type MessagingQueueSpec struct {
 // single shard and returns rows with prices populated.
 // Term pin: commitment='on_demand'. Mode is optionally filtered via
 // json_extract(extra, '$.mode').
+//
+// When Mode is empty and the result mixes price units across the count-,
+// hour-, and byte-families (e.g. SQS per-million-requests vs Azure Service
+// Bus mu/hour vs Pub/Sub per-GiB-month), a warning is logged to stderr
+// because aggregating across these axes is not meaningful.
 func QueryMessagingQueue(ctx context.Context, c *catalog.Catalog, spec MessagingQueueSpec) ([]catalog.Row, error) {
 	where := []string{
 		"s.kind = 'messaging.queue'",
@@ -78,5 +83,12 @@ ORDER BY COALESCE(mp.min_price, 1e308) ASC, s.provider, s.resource_name, s.sku_i
 		}
 		out = append(out, r)
 	}
-	return out, rs.Err()
+	if err := rs.Err(); err != nil {
+		return nil, err
+	}
+
+	if spec.Mode == "" {
+		warnIfMixedMessagingUnits(out, "messaging.queue")
+	}
+	return out, nil
 }

@@ -264,6 +264,23 @@ func TestCompareVolumeFlag_gb_setsField(t *testing.T) {
 	require.Contains(t, stdout.String(), `"gb":100.5`)
 }
 
+func TestCompareCmd_messagingRejectsEngine(t *testing.T) {
+	for _, kind := range []string{"messaging.queue", "messaging.topic", "dns.zone"} {
+		t.Run(kind, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			cmd := newRootCmd()
+			cmd.SetOut(&stdout)
+			cmd.SetErr(&stderr)
+			cmd.SetArgs([]string{"compare", "--kind", kind, "--engine", "redis", "--dry-run"})
+			err := cmd.Execute()
+			require.Error(t, err, "expected --engine to be rejected for %s", kind)
+			require.Contains(t, stderr.String(), `"reason":"flag_invalid"`)
+			require.NotContains(t, stderr.String(), "--engine",
+				"help text must not advertise --engine for %s now that it is rejected", kind)
+		})
+	}
+}
+
 func TestCompareVolumeFlag_mutuallyExclusive(t *testing.T) {
 	tests := []struct {
 		name string

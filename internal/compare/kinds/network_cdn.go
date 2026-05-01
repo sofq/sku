@@ -24,6 +24,10 @@ type NetworkCDNSpec struct {
 // shard and returns rows with prices populated.
 // Term pin: commitment='on_demand'. Mode is optionally filtered via
 // json_extract(extra, '$.mode').
+//
+// When Mode is empty and the result mixes per-byte egress, per-call request,
+// and per-month base-fee rows, a warning is logged to stderr because
+// MIN(amount) across these units is not meaningful.
 func QueryNetworkCDN(ctx context.Context, c *catalog.Catalog, spec NetworkCDNSpec) ([]catalog.Row, error) {
 	where := []string{
 		"s.kind = 'network.cdn'",
@@ -80,5 +84,12 @@ ORDER BY COALESCE(mp.min_price, 1e308) ASC, s.provider, s.resource_name, s.sku_i
 		}
 		out = append(out, r)
 	}
-	return out, rs.Err()
+	if err := rs.Err(); err != nil {
+		return nil, err
+	}
+
+	if spec.Mode == "" {
+		warnIfMixedCDNUnits(out)
+	}
+	return out, nil
 }
