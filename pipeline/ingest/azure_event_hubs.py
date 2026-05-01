@@ -208,16 +208,16 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
 def main() -> int:
     ap = argparse.ArgumentParser(prog="ingest.azure_event_hubs")
     ap.add_argument("--fixture", type=Path)
-    ap.add_argument("--offer", type=Path)
+    ap.add_argument("--prices", type=Path)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--catalog-version", default=None)
     args = ap.parse_args()
     if args.fixture:
         prices_path = args.fixture / "prices.json" if args.fixture.is_dir() else args.fixture
-    elif args.offer:
-        prices_path = args.offer
+    elif args.prices:
+        prices_path = args.prices
     else:
-        print("either --fixture or --offer required", file=sys.stderr)
+        print("either --fixture or --prices required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
     n = 0

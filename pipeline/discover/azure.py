@@ -35,7 +35,7 @@ _SHARD_FILTERS: dict[str, str] = {
     "azure_service_bus_queues": "serviceName eq 'Service Bus'",
     "azure_service_bus_topics": "serviceName eq 'Service Bus'",
     "azure_event_hubs": "serviceName eq 'Event Hubs'",
-    "azure_front_door": "serviceName eq 'Azure Front Door'",
+    "azure_front_door": "serviceName eq 'Azure Front Door Service'",
 }
 
 # Tuple order is part of the discover-hash contract: reordering invalidates

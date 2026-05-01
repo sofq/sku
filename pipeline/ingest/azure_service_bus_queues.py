@@ -4,17 +4,17 @@ Azure Service Bus exposes two queue-relevant tiers:
   - Standard: tiered per-million-operations pricing (4 tiers, first is free).
   - Premium:  hourly per-Messaging-Unit pricing.
 
-The upstream Azure Retail Prices API returns one item per tier break for
-Standard (3 paid items; the free tier is implicit and hardcoded here).
+The upstream Azure Retail Prices API returns all 3 paid tier prices under a
+single meterName "Standard Messaging Operations" (one item per price point per
+region). We sort by price descending and zip with the hardcoded tier bounds.
+The free first tier (0-13M) is hardcoded as _STD_FREE_TIER.
 Premium returns a single hourly item.
 
 Relevant meterNames:
   Standard:
-    "Standard Messaging Operations"         -> tier 13M-100M ($0.80/M)
-    "Standard Messaging Operations Tier 2"  -> tier 100M-2500M ($0.50/M)
-    "Standard Messaging Operations Tier 3"  -> tier 2500M+ ($0.20/M)
+    "Standard Messaging Operations"  -> all paid tiers ($0.80, $0.50, $0.20/M)
   Premium:
-    "Premium Messaging Unit"                -> hourly per MU
+    "Premium Messaging Unit"         -> hourly per MU
 """
 
 from __future__ import annotations
@@ -29,7 +29,6 @@ from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
-from normalize.tier_tokens import parse_count_tier  # noqa: F401 — imported for validation
 
 from ._duckdb import dumps
 from .azure_common import (
@@ -52,15 +51,18 @@ _STD_FREE_TIER = {
     "unit": "request",
 }
 
-# Map meterName -> (tier, tier_upper) for Standard paid tiers.
-_STD_METER_TIERS: dict[str, tuple[str, str]] = {
-    "Standard Messaging Operations":        ("13M",   "100M"),
-    "Standard Messaging Operations Tier 2": ("100M",  "2500M"),
-    "Standard Messaging Operations Tier 3": ("2500M", ""),
-}
+# Ordered paid tier boundaries for Standard operations.
+# The API returns all paid prices under a single meterName "Standard Messaging Operations".
+# We sort by price descending and zip with these bounds.
+_STD_TIER_BOUNDS: list[tuple[str, str]] = [
+    ("13M",   "100M"),
+    ("100M",  "2500M"),
+    ("2500M", ""),
+]
 
+_STD_METER_NAME = "Standard Messaging Operations"
 _VALID_SKU_NAMES = {"Standard", "Premium"}
-_VALID_METER_NAMES = frozenset(_STD_METER_TIERS) | {"Premium Messaging Unit"}
+_VALID_METER_NAMES = frozenset({_STD_METER_NAME, "Premium Messaging Unit"})
 
 
 def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
@@ -68,9 +70,8 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
     with prices_path.open() as f:
         items = json.load(f).get("Items", [])
 
-    # Collect Standard tier items grouped by region.
-    # region -> list of (tier, tier_upper, amount)
-    std_tiers: dict[str, list[tuple[str, str, float]]] = defaultdict(list)
+    # Collect Standard paid prices grouped by region (per-request USD amounts).
+    std_raw: dict[str, list[float]] = defaultdict(list)
     # Collect Premium tier items grouped by region.
     # region -> (sku_id, hourly_price, region_normalized)
     prem_items: dict[str, tuple[str, float, str]] = {}
@@ -102,16 +103,16 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         sku_id = item.get("skuId") or f"SB-{sku_name.upper()[:4]}-{region}"
 
         if sku_name == "Standard":
-            tier_bounds = _STD_METER_TIERS.get(meter_name)
-            if tier_bounds is None:
+            if meter_name != _STD_METER_NAME:
                 continue
+            if usd <= 0:
+                continue  # skip free-tier entry
             uom = item.get("unitOfMeasure", "")
             try:
                 divisor, _unit = parse_request_uom(uom)
             except ValueError:
                 continue
-            tier, tier_upper = tier_bounds
-            std_tiers[region].append((tier, tier_upper, usd / divisor))
+            std_raw[region].append(usd / divisor)
 
         elif sku_name == "Premium":
             if meter_name != "Premium Messaging Unit":
@@ -126,14 +127,20 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                 prem_items[region] = (sku_id, hourly, region_normalized)
 
     # Emit Standard rows.
-    for region, tier_list in sorted(std_tiers.items()):
+    for region, raw_prices in sorted(std_raw.items()):
         region_normalized = normalizer.try_normalize(_PROVIDER, region)
         if region_normalized is None:
             continue
-        # Sort by tier lower bound.
-        tier_list_sorted = sorted(tier_list, key=lambda t: parse_count_tier(t[0]))
+        sorted_prices = sorted(raw_prices, reverse=True)
+        if len(sorted_prices) != len(_STD_TIER_BOUNDS):
+            print(
+                f"warn: azure_service_bus_queues region {region!r} expected "
+                f"{len(_STD_TIER_BOUNDS)} paid tiers, got {len(sorted_prices)}, skipping",
+                file=sys.stderr,
+            )
+            continue
         prices: list[dict[str, Any]] = [_STD_FREE_TIER.copy()]
-        for tier, tier_upper, amount in tier_list_sorted:
+        for (tier, tier_upper), amount in zip(_STD_TIER_BOUNDS, sorted_prices, strict=True):
             prices.append({
                 "dimension": "request",
                 "tier": tier,
@@ -166,7 +173,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         }
 
     # Emit Premium rows.
-    for region, (sku_id, hourly, region_normalized) in sorted(prem_items.items()):
+    for region, (_sku_id, hourly, region_normalized) in sorted(prem_items.items()):
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "",
