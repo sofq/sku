@@ -9,10 +9,13 @@ Each SKU emits three row types:
 We filter to productName == "Azure Front Door" (not "Azure Front Door Service"
 which is the deprecated classic tier).
 
-Egress tiers are not identified in the API response — only price values differ
-across items with the same meterName. We sort by price descending (highest price
-= lowest volume = tier "0") and zip with the hardcoded canonical tier sequence.
-The last emitted tier always has tier_upper="" regardless of sequence length.
+The API returns zone names ("Zone 1" .. "Zone 8") as armRegionName, not ARM
+region codes.  _ZONE_REGION_MAP translates each zone to a representative ARM
+region for normalization.  Government zones ("US Gov Zone 1", "DE Gov Zone 2")
+are absent from the map and are silently skipped.
+
+Egress tiers are identified by the `tierMinimumUnits` field in the API response,
+which maps directly to the canonical byte-domain tier tokens in _EGRESS_TIERS.
 """
 
 from __future__ import annotations
@@ -47,6 +50,20 @@ _EGRESS_TIERS = [
     ("1PB", "5PB"),
     ("5PB", ""),
 ]
+
+# Zone 1=North America, Zone 2=Asia Pacific (incl. Japan), Zone 3=South America,
+# Zone 4=Australia, Zone 5=India, Zone 6=Europe, Zone 7=Middle East & Africa,
+# Zone 8=Korea.  Government zones are omitted — skip them during ingest.
+_ZONE_REGION_MAP: dict[str, str] = {
+    "Zone 1": "eastus",
+    "Zone 2": "japaneast",
+    "Zone 3": "brazilsouth",
+    "Zone 4": "australiaeast",
+    "Zone 5": "centralindia",
+    "Zone 6": "westeurope",
+    "Zone 7": "southafricanorth",
+    "Zone 8": "koreacentral",
+}
 
 _SKU_SLUG = {
     "Standard": "front-door-standard",
@@ -169,22 +186,26 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             }
 
         elif mode == "edge-egress":
-            # Multiple items per region — one per tier.
-            # Skip regions not in our normalizer.
-            region_normalized = normalizer.try_normalize(_PROVIDER, region_key)
+            arm_region = _ZONE_REGION_MAP.get(region_key)
+            if arm_region is None:
+                continue  # government or unknown zone
+            region_normalized = normalizer.try_normalize(_PROVIDER, arm_region)
             if region_normalized is None:
                 continue
 
-            # Sort by retailPrice descending: highest price = lowest volume = tier "0"
-            sorted_items = sorted(bucket_items, key=lambda x: float(x.get("retailPrice", 0)), reverse=True)
+            # Sort by tierMinimumUnits ascending: tier 0 first.
+            # Using tierMinimumUnits (not price) handles zones where high-volume
+            # tiers share the same unit price (e.g., Zone 8).
+            sorted_items = sorted(
+                bucket_items, key=lambda x: float(x.get("tierMinimumUnits", 0))
+            )
 
             prices = []
-            for idx, (tier_lower, tier_upper) in enumerate(zip(sorted_items, _EGRESS_TIERS)):
+            for idx in range(min(len(sorted_items), len(_EGRESS_TIERS))):
                 item = sorted_items[idx]
                 tier_tok, tier_upper_tok = _EGRESS_TIERS[idx]
                 usd = float(item.get("retailPrice", 0))
-                # Force tier_upper="" on last emitted tier (fixture may have fewer than 7 tiers)
-                is_last = idx == len(sorted_items) - 1
+                is_last = idx == min(len(sorted_items), len(_EGRESS_TIERS)) - 1
                 actual_tier_upper = "" if is_last else tier_upper_tok
                 prices.append({
                     "dimension": "egress",
@@ -194,7 +215,6 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                     "unit": "gb",
                 })
 
-            # Use skuId from the first (most expensive) item as the row sku_id
             sku_id = (
                 sorted_items[0].get("skuId")
                 or f"afd-{sku_name.lower()}-egress-{region_key}"
@@ -219,12 +239,15 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             }
 
         elif mode == "request":
-            # Single item per region.
-            region_normalized = normalizer.try_normalize(_PROVIDER, region_key)
+            arm_region = _ZONE_REGION_MAP.get(region_key)
+            if arm_region is None:
+                continue  # government or unknown zone
+            region_normalized = normalizer.try_normalize(_PROVIDER, arm_region)
             if region_normalized is None:
                 continue
 
-            item = bucket_items[0]
+            # Take the tier-0 (lowest tierMinimumUnits) item as the base per-request price.
+            item = min(bucket_items, key=lambda x: float(x.get("tierMinimumUnits", 0)))
             uom = item.get("unitOfMeasure", "")
             try:
                 divisor, unit = parse_request_uom(uom)
