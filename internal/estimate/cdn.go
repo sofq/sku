@@ -23,6 +23,15 @@ var providerServiceShardCDN = map[string]string{
 	"gcp/cloud-cdn":    "gcp-cloud-cdn",
 }
 
+// Fallback tier-0 boundaries (in bytes) for CDN providers whose ingestor
+// emits only the tier-0 row (single-tier, with tier_upper=""). The
+// contiguity convention treats tier_upper="" as "unbounded last tier",
+// which would silently bypass the M-ε multi-tier deferral guard. M-ε will
+// add real multi-tier ingestion and remove this map.
+var providerServiceCDNTier0FallbackBytes = map[string]float64{
+	"aws/cloudfront": 10e12, // CloudFront tier-0 covers 0–10TB.
+}
+
 // extraMode returns the "mode" value from a row's ResourceAttrs.Extra map.
 func extraMode(r catalog.Row) string {
 	if m, ok := r.ResourceAttrs.Extra["mode"]; ok {
@@ -116,6 +125,14 @@ func (networkCDNTier0Estimator) Estimate(ctx context.Context, it Item) (LineItem
 	tier0Upper, err := parseTierBoundBytes(tier0Price.TierUpper)
 	if err != nil {
 		return LineItem{}, fmt.Errorf("estimate/network.cdn: tier_upper parse: %w", err)
+	}
+	// Single-tier ingestors emit tier_upper="" (per the tier-contiguity
+	// convention, the last tier is unbounded). Substitute the per-provider
+	// fallback so the M-ε guard fires above the real tier-0 ceiling.
+	if tier0Upper == math.MaxFloat64 {
+		if fb, ok := providerServiceCDNTier0FallbackBytes[psKey]; ok {
+			tier0Upper = fb
+		}
 	}
 	// Convert GB input to bytes for comparison.
 	gbInBytes := gb * 1e9

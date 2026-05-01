@@ -187,9 +187,13 @@ func TestCDN_Tier0_BoundaryExceeded(t *testing.T) {
 	require.Contains(t, err.Error(), "M-ε")
 }
 
-// --- Tier-0 upper bound infinite (no cap) ---
+// --- CloudFront single-tier ingest: fallback boundary fires above 10TB ---
+// CloudFront's ingestor emits only the tier-0 row with tier_upper=""
+// (per the tier-contiguity convention). Without the per-provider fallback
+// in providerServiceCDNTier0FallbackBytes, the M-ε guard would never fire
+// and large volumes would silently use tier-0 pricing.
 
-func TestCDN_Tier0_Infinite(t *testing.T) {
+func TestCDN_CloudFront_SingleTier_FallbackFiresAbove10TB(t *testing.T) {
 	resetRegistry(t)
 	Register(networkCDNTier0Estimator{})
 	e, _ := Get("network.cdn")
@@ -198,7 +202,6 @@ func TestCDN_Tier0_Infinite(t *testing.T) {
 		if f.Region == "global" {
 			return nil, nil
 		}
-		// tier_upper="" → MaxFloat64, so no boundary exceeded
 		return []catalog.Row{
 			rowWithMode("cf-use1", "aws", "cloudfront", "cloudfront", "us-east-1", "edge-egress", []catalog.Price{
 				{Dimension: "egress", Tier: "0", TierUpper: "", Amount: 0.085, Unit: "gb"},
@@ -206,11 +209,20 @@ func TestCDN_Tier0_Infinite(t *testing.T) {
 		}, nil
 	})
 
-	item, err := ParseItem("aws/cloudfront:cloudfront:region=us-east-1:gb=99999")
+	// 15000 GB > 10TB fallback → error.
+	item, err := ParseItem("aws/cloudfront:cloudfront:region=us-east-1:gb=15000")
+	require.NoError(t, err)
+	_, err = e.Estimate(context.Background(), item)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "tier-0 boundary")
+	require.Contains(t, err.Error(), "M-ε")
+
+	// 5000 GB < 10TB fallback → tier-0 rate, no error.
+	item, err = ParseItem("aws/cloudfront:cloudfront:region=us-east-1:gb=5000")
 	require.NoError(t, err)
 	li, err := e.Estimate(context.Background(), item)
 	require.NoError(t, err)
-	require.InDelta(t, 99999*0.085, li.MonthlyUSD, 1e-2)
+	require.InDelta(t, 5000*0.085, li.MonthlyUSD, 1e-6)
 }
 
 // --- parseTierBoundBytes unit tests ---
