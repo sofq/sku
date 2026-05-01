@@ -156,7 +156,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             except ValueError:
                 divisor, unit = 1.0, "month"
             usd = float(item.get("retailPrice", 0)) / divisor
-            sku_id = item.get("skuId") or f"afd-{sku_name.lower()}-base-fee"
+            sku_id = f"{item.get('skuId') or f'afd-{sku_name.lower()}'}:base-fee:global"
             prices = [
                 {
                     "dimension": "fee",
@@ -215,23 +215,28 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                     "unit": "gb",
                 })
 
-            sku_id = (
-                sorted_items[0].get("skuId")
-                or f"afd-{sku_name.lower()}-egress-{region_key}"
-            )
+            base_sku = sorted_items[0].get("skuId") or f"afd-{sku_name.lower()}"
+            sku_id = f"{base_sku}:edge-egress:{region_key}"
+            # Front Door bills per Microsoft "billing zone" (Zone 1 .. Zone 8).
+            # Each zone covers many ARM regions, so we store the canonical
+            # region group (region_normalized, e.g. "us-east") as the row's
+            # `region` field. This aligns with the M-δ spec DSL surface
+            # (`azure/front-door:edge-egress:region=us-east:gb=5000`) and
+            # lets the estimator/CLI find the row via its --regions group.
             yield {
                 "sku_id": sku_id,
                 "provider": _PROVIDER,
                 "service": _SERVICE,
                 "kind": _KIND,
                 "resource_name": resource_name,
-                "region": region_key,
+                "region": region_normalized,
                 "region_normalized": region_normalized,
                 "terms_hash": terms_hash(terms),
                 "resource_attrs": {
                     "extra": {
                         "sku": sku_slug,
                         "mode": mode,
+                        "billing_zone": region_key,
                     },
                 },
                 "terms": terms,
@@ -254,7 +259,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             except ValueError:
                 divisor, unit = 10_000.0, "requests"
             usd = float(item.get("retailPrice", 0)) / divisor
-            sku_id = item.get("skuId") or f"afd-{sku_name.lower()}-request-{region_key}"
+            sku_id = f"{item.get('skuId') or f'afd-{sku_name.lower()}'}:request:{region_key}"
             prices = [
                 {
                     "dimension": "request",
@@ -264,19 +269,22 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                     "unit": unit,
                 },
             ]
+            # See edge-egress note above — store row's `region` as the
+            # canonical group so estimator lookups by `region=<group>` match.
             yield {
                 "sku_id": sku_id,
                 "provider": _PROVIDER,
                 "service": _SERVICE,
                 "kind": _KIND,
                 "resource_name": resource_name,
-                "region": region_key,
+                "region": region_normalized,
                 "region_normalized": region_normalized,
                 "terms_hash": terms_hash(terms),
                 "resource_attrs": {
                     "extra": {
                         "sku": sku_slug,
                         "mode": mode,
+                        "billing_zone": region_key,
                     },
                 },
                 "terms": terms,

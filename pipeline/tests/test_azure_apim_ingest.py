@@ -27,6 +27,19 @@ def test_all_rows_are_api_gateway_kind():
     assert all(r["kind"] == "api.gateway" for r in rows)
 
 
+def test_consumption_picks_paid_meter_when_free_meter_listed_first():
+    """Regression: Azure publishes both a $0 free-tier meter and a paid
+    per-10K meter for Consumption Calls in the same region. Earlier code
+    took bucket_items[0]; if Azure listed the free meter first, the entire
+    region was dropped (retailPrice<=0 short-circuit). Live east-us showed
+    this bug — fixed by selecting the highest non-zero priced item."""
+    rows = list(ingest(prices_path=FIXTURE / "prices.json"))
+    eastus = [r for r in rows if r["resource_name"] == "consumption" and r["region"] == "eastus"]
+    assert eastus, "expected a consumption row for eastus"
+    paid = next((p for p in eastus[0]["prices"] if p["tier"] == "1M"), None)
+    assert paid is not None and paid["amount"] > 0.0
+
+
 def test_consumption_rows_have_call_dimension():
     rows = list(ingest(prices_path=FIXTURE / "prices.json"))
     consumption = [r for r in rows if r["resource_name"] == "consumption"]

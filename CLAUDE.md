@@ -307,7 +307,7 @@ cat docs/examples/batch-queries.ndjson | ./bin/sku batch
 ./bin/sku estimate --item azure/apim:developer:region=eastus:units=2:hours=730 --pretty
 ./bin/sku estimate --item azure/apim:consumption:region=eastus:requests=1000000 --pretty
 ./bin/sku estimate --item aws/cloudfront:standard:region=us-east-1:gb=500 --pretty
-./bin/sku estimate --item azure/front-door:standard:region=eastus:gb=200 --pretty
+./bin/sku estimate --item azure/front-door:standard:region=us-east:gb=200 --pretty
 ./bin/sku estimate --item gcp/cloud-cdn:standard:region=us-east1:gb=1000 --pretty
 ```
 

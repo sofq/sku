@@ -43,6 +43,9 @@ def _to_count_token(raw: str) -> str:
     """Convert a raw SQS beginRange/endRange string to a canonical tier token."""
     return _SQS_TIER_MAP.get(str(int(float(raw))) if raw not in ("", "Inf") else raw, raw)
 
+# TODO(M-ε): AWS introduced Fair queues (queueType="Fair") in late 2024.
+# Live ingest currently logs "warn: unknown queueType 'Fair', skipping" for
+# every Fair-priced SKU. Treat as a follow-up coverage gap, not a bug.
 _QUEUE_TYPE_MAP: dict[str, str] = {
     "Standard": "standard",
     "FIFO (first-in, first-out)": "fifo",

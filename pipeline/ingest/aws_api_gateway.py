@@ -33,7 +33,7 @@ from normalize.terms import terms_hash
 from normalize.tier_tokens import TIER_TOKENS_COUNT
 
 from ._duckdb import dumps
-from .aws_common import load_region_normalizer
+from .aws_common import AWS_LOCATION_TO_REGION, load_region_normalizer
 
 
 def _canonicalize_count_tier(numeric: str) -> str:
@@ -65,45 +65,18 @@ _PROVIDER = "aws"
 _SERVICE = "api-gateway"
 _KIND = "api.gateway"
 
-# Map AWS display location names → canonical AWS region codes.
-# We map every R1 region the shard publishes today. Unknown locations
-# (e.g. a brand-new AWS region not yet added here) are skipped with a
-# stderr warning so the daily ingest doesn't hard-fail when AWS adds a region.
-_LOCATION_MAP: dict[str, str] = {
-    "US East (N. Virginia)": "us-east-1",
-    "US East (Ohio)": "us-east-2",
-    "US West (N. California)": "us-west-1",
-    "US West (Oregon)": "us-west-2",
-    "Canada (Central)": "ca-central-1",
-    "EU (Ireland)": "eu-west-1",
-    "EU (Frankfurt)": "eu-central-1",
-    "EU (London)": "eu-west-2",
-    "EU (Paris)": "eu-west-3",
-    "EU (Stockholm)": "eu-north-1",
-    "EU (Milan)": "eu-south-1",
-    "Europe (Spain)": "eu-south-2",
-    "Europe (Zurich)": "eu-central-2",
-    "Asia Pacific (Singapore)": "ap-southeast-1",
-    "Asia Pacific (Sydney)": "ap-southeast-2",
-    "Asia Pacific (Tokyo)": "ap-northeast-1",
-    "Asia Pacific (Seoul)": "ap-northeast-2",
-    "Asia Pacific (Mumbai)": "ap-south-1",
-    "Asia Pacific (Hong Kong)": "ap-east-1",
-    "Asia Pacific (Osaka)": "ap-northeast-3",
-    "Asia Pacific (Jakarta)": "ap-southeast-3",
-    "Asia Pacific (Melbourne)": "ap-southeast-4",
-    "Asia Pacific (Hyderabad)": "ap-south-2",
-    "Asia Pacific (Malaysia)": "ap-southeast-5",
-    "South America (Sao Paulo)": "sa-east-1",
-    "Middle East (Bahrain)": "me-south-1",
-    "Middle East (UAE)": "me-central-1",
-    "Africa (Cape Town)": "af-south-1",
-}
+# AWS API Gateway uses the same display-location convention as other AWS
+# services. The shared map in aws_common handles both "EU (...)" and
+# "Europe (...)" spellings; unknown locations are skipped with a stderr
+# warning so the daily ingest doesn't hard-fail when AWS adds a region.
+_LOCATION_MAP = AWS_LOCATION_TO_REGION
 
 # Map operation attribute → (resource_name, os token, mode)
+# os token is "" — resource_name alone distinguishes rest vs http within
+# the shard, and the Go CLI's lookup uses Terms{Commitment:"on_demand"}.
 _OPERATION_MAP: dict[str, tuple[str, str, str]] = {
-    "ApiGatewayRequest": ("rest", "rest-api", "rest"),
-    "ApiGatewayHttpApi": ("http", "http-api", "http"),
+    "ApiGatewayRequest": ("rest", "", "rest"),
+    "ApiGatewayHttpApi": ("http", "", "http"),
 }
 
 

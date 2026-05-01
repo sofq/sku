@@ -32,14 +32,16 @@ _SERVICE = "apim"
 _KIND = "api.gateway"
 
 # Map from skuName (lower) to (resource_name, os_token, mode)
+# os_token is "" — resource_name already discriminates tiers within the shard,
+# and the Go CLI's lookup uses Terms{Commitment:"on_demand"} (no os filter).
 _SKU_MAP: dict[str, tuple[str, str, str]] = {
-    "consumption":   ("consumption",  "apim-consumption",  "consumption"),
-    "developer":     ("developer",    "apim-developer",    "provisioned"),
-    "basic":         ("basic",        "apim-basic",        "provisioned"),
-    "standard":      ("standard",     "apim-standard",     "provisioned"),
-    "premium":       ("premium",      "apim-premium",      "provisioned"),
-    "isolated":      ("isolated",     "apim-isolated",     "provisioned"),
-    "premium v2":    ("premium-v2",   "apim-premium-v2",   "provisioned"),
+    "consumption":   ("consumption",  "", "consumption"),
+    "developer":     ("developer",    "", "provisioned"),
+    "basic":         ("basic",        "", "provisioned"),
+    "standard":      ("standard",     "", "provisioned"),
+    "premium":       ("premium",      "", "provisioned"),
+    "isolated":      ("isolated",     "", "provisioned"),
+    "premium v2":    ("premium-v2",   "", "provisioned"),
 }
 
 # Excluded skuName patterns (case-insensitive substring match)
@@ -125,10 +127,19 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                     "azure_apim: no 10K consumption item for region %r", region
                 )
                 continue
-            item = per_call_items[0]
-            usd_per_10k = float(item.get("retailPrice", 0))
-            if usd_per_10k <= 0:
+            # Azure publishes two "Consumption Calls" meters per region: one
+            # priced at $0 (the free-tier allowance, first 1M calls) and one
+            # priced at the paid per-10K rate. Pick the highest non-zero
+            # price; falling back to the first item silently dropped paid
+            # rates whenever Azure listed the free meter ahead of the paid one.
+            paid_items = [
+                c for c in per_call_items
+                if float(c.get("retailPrice", 0)) > 0
+            ]
+            if not paid_items:
                 continue
+            item = max(paid_items, key=lambda c: float(c.get("retailPrice", 0)))
+            usd_per_10k = float(item.get("retailPrice", 0))
             per_call_price = usd_per_10k / 10_000.0
             sku_id = item.get("skuId") or f"APIM-{resource_name.upper()}-{region}"
             prices = [

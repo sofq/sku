@@ -118,15 +118,11 @@ def test_websocket_skipped():
         assert mode != "websocket", f"Row {r['sku_id']} has unexpected mode=websocket"
 
 
-def test_terms_os_tokens():
-    """REST rows should have os=rest-api, HTTP rows should have os=http-api."""
+def test_terms_os_blank():
+    """resource_name (rest|http) discriminates rows, so terms.os stays blank."""
     rows = list(ingest(offer_path=FIXTURE))
+    assert rows, "fixture produced zero rows"
     for r in rows:
-        if r["resource_name"] == "rest":
-            assert r["terms"]["os"] == "rest-api", (
-                f"REST row {r['sku_id']} has os={r['terms']['os']!r}, expected 'rest-api'"
-            )
-        elif r["resource_name"] == "http":
-            assert r["terms"]["os"] == "http-api", (
-                f"HTTP row {r['sku_id']} has os={r['terms']['os']!r}, expected 'http-api'"
-            )
+        assert r["terms"]["os"] == "", (
+            f"row {r['sku_id']} has os={r['terms']['os']!r}, expected ''"
+        )

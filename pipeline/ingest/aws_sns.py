@@ -26,7 +26,7 @@ from normalize.terms import terms_hash
 from normalize.tier_tokens import TIER_TOKENS_COUNT
 
 from ._duckdb import dumps
-from .aws_common import load_region_normalizer
+from .aws_common import AWS_LOCATION_TO_REGION, load_region_normalizer
 
 
 def _canonicalize_count_tier(numeric: str) -> str:
@@ -83,41 +83,9 @@ _SERVICE = "sns"
 _KIND = "messaging.topic"
 
 # AWS SNS offer uses a human-readable "location" attribute (not "regionCode").
-# Map the upstream location strings to canonical AWS region codes.
-# This covers all R1 regions; unknown locations are skipped silently.
-_LOCATION_TO_REGION: dict[str, str] = {
-    "US East (N. Virginia)":       "us-east-1",
-    "US East (Ohio)":              "us-east-2",
-    "US West (N. California)":     "us-west-1",
-    "US West (Oregon)":            "us-west-2",
-    "Canada (Central)":            "ca-central-1",
-    "Canada West (Calgary)":       "ca-west-1",
-    "Mexico (Central)":            "mx-central-1",
-    "Europe (Ireland)":            "eu-west-1",
-    "Europe (London)":             "eu-west-2",
-    "Europe (Paris)":              "eu-west-3",
-    "Europe (Milan)":              "eu-south-1",
-    "Europe (Spain)":              "eu-south-2",
-    "Europe (Frankfurt)":          "eu-central-1",
-    "Europe (Zurich)":             "eu-central-2",
-    "Europe (Stockholm)":          "eu-north-1",
-    "Asia Pacific (Hong Kong)":    "ap-east-1",
-    "Asia Pacific (Malaysia)":     "ap-southeast-5",
-    "Asia Pacific (Tokyo)":        "ap-northeast-1",
-    "Asia Pacific (Seoul)":        "ap-northeast-2",
-    "Asia Pacific (Osaka)":        "ap-northeast-3",
-    "Asia Pacific (Singapore)":    "ap-southeast-1",
-    "Asia Pacific (Jakarta)":      "ap-southeast-3",
-    "Asia Pacific (Mumbai)":       "ap-south-1",
-    "Asia Pacific (Hyderabad)":    "ap-south-2",
-    "Asia Pacific (Sydney)":       "ap-southeast-2",
-    "Asia Pacific (Melbourne)":    "ap-southeast-4",
-    "South America (Sao Paulo)":   "sa-east-1",
-    "Middle East (UAE)":           "me-central-1",
-    "Middle East (Bahrain)":       "me-south-1",
-    "Africa (Cape Town)":          "af-south-1",
-    "Israel (Tel Aviv)":           "il-central-1",
-}
+# The shared map in aws_common handles both "EU (...)" and "Europe (...)"
+# spellings; unknown locations are skipped silently.
+_LOCATION_TO_REGION = AWS_LOCATION_TO_REGION
 
 
 def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
