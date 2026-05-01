@@ -32,15 +32,14 @@ _SERVICE = "apim"
 _KIND = "api.gateway"
 
 # Map from skuName (lower) to (resource_name, os_token, mode)
-# os_token is "" — resource_name alone distinguishes tiers within the shard.
 _SKU_MAP: dict[str, tuple[str, str, str]] = {
-    "consumption":   ("consumption",  "", "consumption"),
-    "developer":     ("developer",    "", "provisioned"),
-    "basic":         ("basic",        "", "provisioned"),
-    "standard":      ("standard",     "", "provisioned"),
-    "premium":       ("premium",      "", "provisioned"),
-    "isolated":      ("isolated",     "", "provisioned"),
-    "premium v2":    ("premium-v2",   "", "provisioned"),
+    "consumption":   ("consumption",  "apim-consumption",  "consumption"),
+    "developer":     ("developer",    "apim-developer",    "provisioned"),
+    "basic":         ("basic",        "apim-basic",        "provisioned"),
+    "standard":      ("standard",     "apim-standard",     "provisioned"),
+    "premium":       ("premium",      "apim-premium",      "provisioned"),
+    "isolated":      ("isolated",     "apim-isolated",     "provisioned"),
+    "premium v2":    ("premium-v2",   "apim-premium-v2",   "provisioned"),
 }
 
 # Excluded skuName patterns (case-insensitive substring match)

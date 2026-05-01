@@ -101,10 +101,9 @@ _LOCATION_MAP: dict[str, str] = {
 }
 
 # Map operation attribute → (resource_name, os token, mode)
-# os token is "" — resource_name alone distinguishes rest vs http within the shard.
 _OPERATION_MAP: dict[str, tuple[str, str, str]] = {
-    "ApiGatewayRequest": ("rest", "", "rest"),
-    "ApiGatewayHttpApi": ("http", "", "http"),
+    "ApiGatewayRequest": ("rest", "rest-api", "rest"),
+    "ApiGatewayHttpApi": ("http", "http-api", "http"),
 }
 
 
