@@ -41,8 +41,8 @@ def test_consumption_rows_have_call_dimension():
         free_tier = next((p for p in r["prices"] if p["tier"] == "0"), None)
         assert free_tier is not None, f"consumption row {r['sku_id']} missing free tier"
         assert free_tier["amount"] == 0.0, "first 1M calls should be free"
-        assert free_tier["tier_upper"] == "1000000", "free tier upper bound should be 1000000"
-        paid_tier = next((p for p in r["prices"] if p["tier"] == "1000000"), None)
+        assert free_tier["tier_upper"] == "1M", "free tier upper bound should be canonical '1M'"
+        paid_tier = next((p for p in r["prices"] if p["tier"] == "1M"), None)
         assert paid_tier is not None, f"consumption row {r['sku_id']} missing paid tier"
         assert paid_tier["amount"] > 0.0, "paid tier should have positive price"
         assert paid_tier["tier_upper"] == "", "paid tier should be unbounded"

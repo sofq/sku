@@ -135,13 +135,13 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                 {
                     "dimension": "call",
                     "tier": "0",
-                    "tier_upper": "1000000",
+                    "tier_upper": "1M",
                     "amount": 0.0,
                     "unit": "request",
                 },
                 {
                     "dimension": "call",
-                    "tier": "1000000",
+                    "tier": "1M",
                     "tier_upper": "",
                     "amount": per_call_price,
                     "unit": "request",

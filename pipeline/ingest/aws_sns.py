@@ -5,8 +5,8 @@ always "standard" (SNS has one tier of topic). We ingest from the
 productFamily='API Request' family to capture per-publish-request pricing.
 
 Each region emits two price tier entries:
-- tier 0: first 1 million requests free (amount = 0.0, tier_upper = "1000000")
-- tier 1: paid per-request (amount = price_per_million / 1_000_000, tier_upper = "")
+- tier "0": first 1 million requests free (amount = 0.0, tier_upper = "1M")
+- tier "1M": paid per-request (amount = price_per_million / 1_000_000, tier_upper = "")
 
 The Message Delivery family (per-endpoint-type) is out of scope for this shard.
 """
@@ -23,9 +23,33 @@ from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
+from normalize.tier_tokens import TIER_TOKENS_COUNT
 
 from ._duckdb import dumps
 from .aws_common import load_region_normalizer
+
+
+def _canonicalize_count_tier(numeric: str) -> str:
+    """Convert a raw numeric AWS tier boundary (e.g. "1000000") to a canonical
+    tier token from TIER_TOKENS_COUNT (e.g. "1M"). Returns "" for empty/"Inf".
+    Raises ValueError if the resulting token is not in the vocabulary."""
+    if numeric in ("0", "", "Inf"):
+        return numeric if numeric != "Inf" else ""
+    n = int(numeric)
+    if n >= 1_000_000_000 and n % 1_000_000_000 == 0:
+        token = f"{n // 1_000_000_000}B"
+    elif n >= 1_000_000 and n % 1_000_000 == 0:
+        token = f"{n // 1_000_000}M"
+    elif n >= 1_000 and n % 1_000 == 0:
+        token = f"{n // 1_000}K"
+    else:
+        token = numeric
+    if token not in TIER_TOKENS_COUNT:
+        raise ValueError(
+            f"aws_sns: tier {numeric!r} -> {token!r} not in TIER_TOKENS_COUNT; "
+            f"add it to pipeline/normalize/tier_tokens.py"
+        )
+    return token
 
 # AWS SNS pricing-API descriptions consistently include the per-N-million rate,
 # e.g. "$0.50 per 1 million SNS Requests after first 1 million". Match a
@@ -178,7 +202,8 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
             "payment_option": "",
         })
         sku_id = f"{free['sku_id']}::{paid['sku_id']}"
-        tier_upper_free = free["end_range"] if free["end_range"] not in ("Inf", "") else ""
+        tier_upper_free = _canonicalize_count_tier(free["end_range"])
+        paid_tier_lower = _canonicalize_count_tier(paid["begin_range"])
         yield {
             "sku_id": sku_id,
             "provider": _PROVIDER,
@@ -202,7 +227,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
                 },
                 {
                     "dimension": "request",
-                    "tier": paid["begin_range"],
+                    "tier": paid_tier_lower,
                     "tier_upper": "",
                     "amount": paid["usd"],
                     "unit": paid["unit"].lower(),

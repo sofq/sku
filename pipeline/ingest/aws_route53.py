@@ -211,9 +211,14 @@ def main() -> int:
         print("either --fixture or --offer required", file=sys.stderr)
         return 2
     args.out.parent.mkdir(parents=True, exist_ok=True)
+    n = 0
     with args.out.open("w") as fh:
         for row in ingest(offer_path=offer_path):
             fh.write(dumps(row) + "\n")
+            n += 1
+    print(f"ingest.aws_route53: wrote {n} rows", file=sys.stderr)
+    if n == 0:
+        return 2
     return 0
 
 

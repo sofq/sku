@@ -66,9 +66,9 @@ _SERVICE = "api-gateway"
 _KIND = "api.gateway"
 
 # Map AWS display location names → canonical AWS region codes.
-# We only map the regions used in our fixture and real AWS offers we support.
-# Unknown locations are rejected with a KeyError so test_unknown_location_rejected
-# is exercised.
+# We map every R1 region the shard publishes today. Unknown locations
+# (e.g. a brand-new AWS region not yet added here) are skipped with a
+# stderr warning so the daily ingest doesn't hard-fail when AWS adds a region.
 _LOCATION_MAP: dict[str, str] = {
     "US East (N. Virginia)": "us-east-1",
     "US East (Ohio)": "us-east-2",
@@ -129,9 +129,13 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
 
         resource_name, os_token, mode = op_info
         location = attrs.get("location", "")
-        if location not in _LOCATION_MAP:
-            raise KeyError(f"Unknown API Gateway location: {location!r}")
-        region = _LOCATION_MAP[location]
+        region = _LOCATION_MAP.get(location)
+        if region is None:
+            print(
+                f"warn: ingest.aws_api_gateway: unknown location {location!r}, skipping",
+                file=sys.stderr,
+            )
+            continue
         if normalizer.try_normalize(_PROVIDER, region) is None:
             continue
 

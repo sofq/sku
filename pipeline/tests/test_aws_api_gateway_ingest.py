@@ -71,14 +71,21 @@ def test_http_has_2_tiers():
         )
 
 
-def test_unknown_location_rejected(tmp_path):
+def test_unknown_location_skipped(tmp_path, capsys):
+    """Unknown locations (e.g. a brand-new AWS region not yet in _LOCATION_MAP) are
+    skipped with a stderr warning rather than crashing the daily ingest."""
     bad = json.loads(FIXTURE.read_text())
-    # Set an unknown location on one of the REST products
-    bad["products"]["APIGW-REST-USE1"]["attributes"]["location"] = "Unknown Location (Nowhere)"
+    # Mark every REST product with an unknown location so no REST rows survive.
+    for sku_id, product in bad["products"].items():
+        if product.get("attributes", {}).get("operation") == "ApiGatewayRequest":
+            product["attributes"]["location"] = "Unknown Location (Nowhere)"
     p = tmp_path / "bad.json"
     p.write_text(json.dumps(bad))
-    with pytest.raises(KeyError, match="Unknown API Gateway location"):
-        list(ingest(offer_path=p))
+    rows = list(ingest(offer_path=p))
+    captured = capsys.readouterr()
+    assert "unknown location" in captured.err.lower()
+    rest_rows = [r for r in rows if r["resource_name"] == "rest"]
+    assert rest_rows == [], "REST rows with unknown location should be skipped"
 
 
 def test_tiers_contiguous():
