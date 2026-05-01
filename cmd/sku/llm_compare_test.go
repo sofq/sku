@@ -54,7 +54,7 @@ CREATE TABLE prices (
   sku_id TEXT NOT NULL, dimension TEXT NOT NULL, tier TEXT NOT NULL DEFAULT '',
   tier_upper TEXT NOT NULL DEFAULT '',
   amount REAL NOT NULL, unit TEXT NOT NULL DEFAULT 'token',
-  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
+  PRIMARY KEY (sku_id, dimension, tier)
 );
 INSERT INTO prices VALUES ('m/cheap','prompt','','',5e-7,'token');
 INSERT INTO prices VALUES ('m/cheap','completion','','',1.5e-6,'token');

@@ -47,7 +47,7 @@ CREATE TABLE prices (
   tier_upper TEXT NOT NULL DEFAULT '',
   amount     REAL NOT NULL,
   unit       TEXT NOT NULL,
-  PRIMARY KEY (sku_id, dimension, tier, tier_upper)
+  PRIMARY KEY (sku_id, dimension, tier)
 ) WITHOUT ROWID;
 
 CREATE TABLE health (

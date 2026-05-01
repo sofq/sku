@@ -132,10 +132,10 @@ func newCompareCmd() *cobra.Command {
 	c.Flags().StringVar(&f.edition, "edition", "", "warehouse.query capacity edition (enterprise|enterprise-plus — warehouse.query only)")
 	c.Flags().StringVar(&f.storageTier, "storage-tier", "", "warehouse.query storage tier (active|long-term — warehouse.query only)")
 	// M-δ per-kind volume flags (mutually exclusive; pass at most one)
-	c.Flags().Int64Var(&f.ops, "ops", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
-	c.Flags().Int64Var(&f.queries, "queries", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
-	c.Flags().Int64Var(&f.requests, "requests", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
-	c.Flags().Float64Var(&f.gb, "gb", 0, "kind-specific volume flags — --ops (messaging), --queries (dns), --requests (api-gateway), --gb (network.cdn)")
+	c.Flags().Int64Var(&f.ops, "ops", 0, "messaging.queue / messaging.topic operation count")
+	c.Flags().Int64Var(&f.queries, "queries", 0, "dns.zone query count")
+	c.Flags().Int64Var(&f.requests, "requests", 0, "api.gateway request count")
+	c.Flags().Float64Var(&f.gb, "gb", 0, "network.cdn egress GB")
 	return c
 }
 
