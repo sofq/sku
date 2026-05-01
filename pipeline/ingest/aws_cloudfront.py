@@ -82,6 +82,13 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
     for sku_id, location_raw, unit, usd, begin_range in con.execute(_SQL).fetchall():
         if location_raw is None:
             continue
+        # Upstream emits a fromLocation="Any" SKU carrying the CloudFront
+        # free-tier (first 1 TB/mo @ $0). It applies on top of every regional
+        # SKU, so ingesting it here would overwrite real regional pricing
+        # (e.g. us-east-1 → $0.0). Drop it; the free tier is a billing-time
+        # adjustment, not regional data-transfer pricing.
+        if location_raw == "Any":
+            continue
         if location_raw not in LOCATION_MAP:
             raise KeyError(location_raw)
         region = LOCATION_MAP[location_raw]

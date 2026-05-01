@@ -40,6 +40,9 @@ var literalSet = func() map[string]struct{} {
 	// BigQuery multi-region pseudo-regions (not in any provider group).
 	m["bq-us"] = struct{}{}
 	m["bq-eu"] = struct{}{}
+	// Globally-priced services (DNS, GCP Pub/Sub, Front Door base fees)
+	// emit `region="global"`; allow `--regions global` to surface them.
+	m["global"] = struct{}{}
 	return m
 }()
 
@@ -47,6 +50,14 @@ var literalSet = func() map[string]struct{} {
 // Input entries may be either a group key (e.g. "us-east") or a literal
 // provider region (e.g. "us-east-1"). Duplicates are removed; the literal
 // slice is sorted for deterministic SQL binding.
+//
+// When a group is expanded, the output literals also include:
+//   - the group key itself (e.g. "us-east"), since some shards store the
+//     normalized group name as their `region` field (Azure Front Door bills
+//     per zone covering many ARM regions, so it pins one row per group)
+//   - "global", since globally-priced services (DNS, GCP Pub/Sub) emit
+//     `region="global"` and would otherwise be invisible to a regional
+//     compare query
 func Expand(inputs []string) ([]string, []string, error) {
 	litSet := map[string]struct{}{}
 	var groups []string
@@ -59,13 +70,15 @@ func Expand(inputs []string) ([]string, []string, error) {
 			for _, r := range expanded {
 				litSet[r] = struct{}{}
 			}
+			litSet[in] = struct{}{}
+			litSet["global"] = struct{}{}
 			continue
 		}
 		if _, ok := literalSet[in]; ok {
 			litSet[in] = struct{}{}
 			continue
 		}
-		return nil, nil, fmt.Errorf("compare: unknown region or group %q; pass a known group (us-east, us-central, us-west, eu-west, eu-central, eu-north, asia-ne, asia-se, asia-south, oceania, sa, africa, middle-east) or a provider region literal (BigQuery: bq-us, bq-eu)", in)
+		return nil, nil, fmt.Errorf("compare: unknown region or group %q; pass a known group (us-east, us-central, us-west, eu-west, eu-central, eu-north, asia-ne, asia-se, asia-south, oceania, sa, africa, middle-east), \"global\", or a provider region literal (BigQuery: bq-us, bq-eu)", in)
 	}
 	lits := make([]string, 0, len(litSet))
 	for r := range litSet {

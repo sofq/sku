@@ -49,3 +49,24 @@ func TestExpand_unknownInput(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "mars-crater-1")
 }
+
+func TestExpand_globalLiteralAccepted(t *testing.T) {
+	// Globally-priced services (DNS, GCP Pub/Sub) emit region="global".
+	// `--regions global` must be accepted so users can compare them.
+	lits, groups, err := Expand([]string{"global"})
+	require.NoError(t, err)
+	require.Equal(t, []string{"global"}, lits)
+	require.Empty(t, groups)
+}
+
+func TestExpand_groupIncludesGroupKeyAndGlobal(t *testing.T) {
+	// Some shards pin `region` to the normalized group key (e.g. Azure
+	// Front Door bills per multi-region zone and stores `region="us-east"`).
+	// And globally-priced services emit region="global". Expanding a group
+	// must include both so a regional compare query catches them.
+	lits, _, err := Expand([]string{"us-east"})
+	require.NoError(t, err)
+	require.Contains(t, lits, "us-east", "group key itself must appear in literals")
+	require.Contains(t, lits, "global", "global must appear so DNS/Pub/Sub rows match")
+	require.Contains(t, lits, "us-east-1", "expanded provider regions must still appear")
+}

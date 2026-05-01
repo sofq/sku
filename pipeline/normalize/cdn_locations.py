@@ -26,7 +26,10 @@ LOCATION_MAP: dict[str, str] = {
     "South America":  "sa-east-1",
     "Middle East":    "me-central-1",
     "South Africa":   "af-south-1",
-    "Any":            "us-east-1",
+    # Note: upstream also ships a fromLocation="Any" SKU carrying the
+    # CloudFront free-tier (1 TB/mo @ $0). It is intentionally NOT mapped
+    # — the ingestor drops "Any" rows because they would overwrite real
+    # regional pricing.
 }
 
 
