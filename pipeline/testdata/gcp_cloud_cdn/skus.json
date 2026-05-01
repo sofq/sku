@@ -1,54 +1,200 @@
-{"skus": [
-  {
-    "name": "services/E505-1604-58F8/skus/CDN-NA",
-    "skuId": "CDN-NA",
-    "description": "Networking Cloud CDN Traffic Cache Data Transfer to North America",
-    "category": {"serviceDisplayName": "Networking", "resourceFamily": "Network", "resourceGroup": "CDNCacheEgress", "usageType": "OnDemand"},
-    "serviceRegions": ["global"],
-    "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy",
-      "tieredRates": [
-        {"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 80000000}},
-        {"startUsageAmount": 9313.2, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 55000000}},
-        {"startUsageAmount": 139698.0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 30000000}}
+{
+  "skus": [
+    {
+      "name": "services/E505-1604-58F8/skus/CDN-NA",
+      "skuId": "CDN-NA",
+      "description": "Networking Cloud CDN Traffic Cache Data Transfer to North America",
+      "category": {
+        "serviceDisplayName": "Networking",
+        "resourceFamily": "Network",
+        "resourceGroup": "CDNCacheEgress",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "global"
+      ],
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "GiBy",
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 80000000
+                }
+              },
+              {
+                "startUsageAmount": 9313.2,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 55000000
+                }
+              },
+              {
+                "startUsageAmount": 139698.0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 30000000
+                }
+              },
+              {
+                "startUsageAmount": 1024000,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "nanos": 20000000,
+                  "units": "0"
+                }
+              }
+            ]
+          }
+        }
       ]
-    }}]
-  },
-  {
-    "name": "services/E505-1604-58F8/skus/CDN-EU",
-    "skuId": "CDN-EU",
-    "description": "Networking Cloud CDN Traffic Cache Data Transfer to Europe",
-    "category": {"serviceDisplayName": "Networking", "resourceFamily": "Network", "resourceGroup": "CDNCacheEgress", "usageType": "OnDemand"},
-    "serviceRegions": ["global"],
-    "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy",
-      "tieredRates": [
-        {"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 80000000}},
-        {"startUsageAmount": 9313.2, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 55000000}},
-        {"startUsageAmount": 139698.0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 30000000}}
+    },
+    {
+      "name": "services/E505-1604-58F8/skus/CDN-EU",
+      "skuId": "CDN-EU",
+      "description": "Networking Cloud CDN Traffic Cache Data Transfer to Europe",
+      "category": {
+        "serviceDisplayName": "Networking",
+        "resourceFamily": "Network",
+        "resourceGroup": "CDNCacheEgress",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "global"
+      ],
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "GiBy",
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 80000000
+                }
+              },
+              {
+                "startUsageAmount": 9313.2,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 55000000
+                }
+              },
+              {
+                "startUsageAmount": 139698.0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 30000000
+                }
+              },
+              {
+                "startUsageAmount": 1024000,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "nanos": 20000000,
+                  "units": "0"
+                }
+              }
+            ]
+          }
+        }
       ]
-    }}]
-  },
-  {
-    "name": "services/E505-1604-58F8/skus/CDN-ASIA",
-    "skuId": "CDN-ASIA",
-    "description": "Networking Cloud CDN Traffic Cache Data Transfer to Asia",
-    "category": {"serviceDisplayName": "Networking", "resourceFamily": "Network", "resourceGroup": "CDNCacheEgress", "usageType": "OnDemand"},
-    "serviceRegions": ["global"],
-    "pricingInfo": [{"pricingExpression": {"usageUnit": "GiBy",
-      "tieredRates": [
-        {"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 90000000}},
-        {"startUsageAmount": 9313.2, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 60000000}},
-        {"startUsageAmount": 139698.0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 50000000}}
+    },
+    {
+      "name": "services/E505-1604-58F8/skus/CDN-ASIA",
+      "skuId": "CDN-ASIA",
+      "description": "Networking Cloud CDN Traffic Cache Data Transfer to Asia",
+      "category": {
+        "serviceDisplayName": "Networking",
+        "resourceFamily": "Network",
+        "resourceGroup": "CDNCacheEgress",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "global"
+      ],
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "GiBy",
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 90000000
+                }
+              },
+              {
+                "startUsageAmount": 9313.2,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 60000000
+                }
+              },
+              {
+                "startUsageAmount": 139698.0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 50000000
+                }
+              },
+              {
+                "startUsageAmount": 1024000,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "nanos": 40000000,
+                  "units": "0"
+                }
+              }
+            ]
+          }
+        }
       ]
-    }}]
-  },
-  {
-    "name": "services/E505-1604-58F8/skus/CDN-REQ",
-    "skuId": "CDN-REQ",
-    "description": "Networking Cloud Cdn Cache Lookups",
-    "category": {"serviceDisplayName": "Networking", "resourceFamily": "Network", "resourceGroup": "Cdn", "usageType": "OnDemand"},
-    "serviceRegions": ["global"],
-    "pricingInfo": [{"pricingExpression": {"usageUnit": "count",
-      "tieredRates": [{"startUsageAmount": 0, "unitPrice": {"currencyCode": "USD", "units": "0", "nanos": 750}}]
-    }}]
-  }
-]}
+    },
+    {
+      "name": "services/E505-1604-58F8/skus/CDN-REQ",
+      "skuId": "CDN-REQ",
+      "description": "Networking Cloud Cdn Cache Lookups",
+      "category": {
+        "serviceDisplayName": "Networking",
+        "resourceFamily": "Network",
+        "resourceGroup": "Cdn",
+        "usageType": "OnDemand"
+      },
+      "serviceRegions": [
+        "global"
+      ],
+      "pricingInfo": [
+        {
+          "pricingExpression": {
+            "usageUnit": "count",
+            "tieredRates": [
+              {
+                "startUsageAmount": 0,
+                "unitPrice": {
+                  "currencyCode": "USD",
+                  "units": "0",
+                  "nanos": 750
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

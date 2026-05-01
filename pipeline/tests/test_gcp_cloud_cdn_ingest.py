@@ -9,7 +9,7 @@ _DATA = Path(__file__).resolve().parent.parent / "testdata"
 FIXTURE = _DATA / "gcp_cloud_cdn" / "skus.json"
 GOLDEN = _DATA / "golden" / "gcp_cloud_cdn_rows.jsonl"
 
-_EGRESS_TIER_TOKENS = ["0", "10TB", "150TB"]
+_EGRESS_TIER_TOKENS = ["0", "10TB", "150TB", "1PB"]
 
 
 def _canonical(rows: list[dict]) -> list[dict]:
@@ -34,7 +34,7 @@ def test_egress_rows_have_three_tiers():
     assert egress_rows, "expected at least one egress row"
     for row in egress_rows:
         prices = row["prices"]
-        assert len(prices) == 3, f"expected 3 tiers, got {len(prices)} for {row['sku_id']}"
+        assert len(prices) == 4, f"expected 4 tiers, got {len(prices)} for {row['sku_id']}"
         tiers = [p["tier"] for p in prices]
         assert tiers == _EGRESS_TIER_TOKENS, f"tier tokens mismatch: {tiers}"
         units = {p["unit"] for p in prices}

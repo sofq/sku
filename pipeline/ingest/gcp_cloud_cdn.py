@@ -8,8 +8,8 @@ Spec §5 network.cdn kind. Cloud CDN is billed under the Networking service
 
 EdgeCacheEgress (Media CDN) is explicitly excluded.
 
-Each CDNCacheEgress SKU has 3 tieredRates. We sort them by startUsageAmount
-ascending and zip with canonical tokens ["0", "10TB", "150TB"]. The exact
+Each CDNCacheEgress SKU has 4 tieredRates. We sort them by startUsageAmount
+ascending and zip with canonical tokens ["0", "10TB", "150TB", "1PB"]. The exact
 GiB boundaries differ from round powers of 1000 because Google bills in GiB
 but defines tiers in TB (base-10). Sorting and zipping is more robust than
 comparing float boundaries.
@@ -55,8 +55,9 @@ _CDN_GEO_MAP: dict[str, str] = {
 # Description prefix shared by all CDNCacheEgress SKUs
 _EGRESS_PREFIX = "Networking Cloud CDN Traffic Cache Data Transfer to "
 
-# Tier tokens zipped with sorted tieredRates (ascending startUsageAmount)
-_EGRESS_TIER_TOKENS = ["0", "10TB", "150TB"]
+# Tier tokens zipped with sorted tieredRates (ascending startUsageAmount).
+# Real GCP CDN billing has 4 tiers: 0, ~10TB, ~150TB, ~1PB.
+_EGRESS_TIER_TOKENS = ["0", "10TB", "150TB", "1PB"]
 
 
 def _parse_egress_geo(description: str) -> str | None:

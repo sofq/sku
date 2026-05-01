@@ -119,7 +119,8 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         if product.get("productFamily") != "DNS Zone":
             continue
         attrs = product.get("attributes", {})
-        if attrs.get("group") != "HostedZone":
+        # Real offer uses usagetype=HostedZone; fixture uses group=HostedZone
+        if attrs.get("group") != "HostedZone" and attrs.get("usagetype") != "HostedZone":
             continue
         # Get price dimensions for this SKU
         sku_terms = terms_od.get(sku_id, {})

@@ -21,6 +21,7 @@ __all__ = [
 _HOUR_DIVISORS: dict[str, tuple[float, str]] = {
     "1 Hour": (1.0, "hrs"),
     "1 Hours": (1.0, "hrs"),
+    "1/Hour": (1.0, "hrs"),
     "100 Hours": (100.0, "hrs"),
 }
 
