@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from ingest.aws_api_gateway import ingest
+from normalize.tier_tokens import parse_count_tier
 
 FIXTURE = Path(__file__).resolve().parent.parent / "testdata" / "aws_api_gateway" / "offer.json"
 GOLDEN = Path(__file__).resolve().parent.parent / "testdata" / "golden" / "aws_api_gateway_rows.jsonl"
@@ -85,7 +86,7 @@ def test_tiers_contiguous():
     and the last tier has tier_upper == ''."""
     rows = list(ingest(offer_path=FIXTURE))
     for r in rows:
-        prices = sorted(r["prices"], key=lambda p: int(p["tier"]))
+        prices = sorted(r["prices"], key=lambda p: parse_count_tier(p["tier"]))
         for i, price in enumerate(prices):
             if i < len(prices) - 1:
                 assert price["tier_upper"] == prices[i + 1]["tier"], (

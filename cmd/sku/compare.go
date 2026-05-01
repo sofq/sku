@@ -127,7 +127,11 @@ func newCompareCmd() *cobra.Command {
 	c.Flags().StringVar(&f.deploymentOption, "deployment-option", "", "db.relational deployment option (single-az | multi-az | zonal | regional)")
 	c.Flags().Float64Var(&f.storageGB, "storage-gb", 0, "db.relational minimum storage (GB)")
 	c.Flags().StringVar(&f.tier, "tier", "", "container.orchestration/paas.app tier (free|standard|premium|... — container.orchestration or paas.app only)")
-	c.Flags().StringVar(&f.mode, "mode", "", "mode filter (container.orchestration: control-plane|fargate|...; search.engine: managed-cluster|serverless; warehouse.query: on-demand|capacity|storage)")
+	c.Flags().StringVar(&f.mode, "mode", "", "mode filter (container.orchestration: control-plane|fargate|...; "+
+		"search.engine: managed-cluster|serverless; warehouse.query: on-demand|capacity|storage; "+
+		"messaging.queue: standard|fifo|premium|throughput; messaging.topic: standard|premium|publish-http|publish-sqs|publish-email; "+
+		"dns.zone: public|private; api.gateway: rest|http|consumption|provisioned; "+
+		"network.cdn: edge-egress|origin-shield|request|cache-fill|rules-engine|base-fee; db.nosql: provisioned|serverless|native)")
 	c.Flags().StringVar(&f.planOS, "os", "", "paas.app OS filter (linux|windows — paas.app only)")
 	c.Flags().StringVar(&f.edition, "edition", "", "warehouse.query capacity edition (enterprise|enterprise-plus — warehouse.query only)")
 	c.Flags().StringVar(&f.storageTier, "storage-tier", "", "warehouse.query storage tier (active|long-term — warehouse.query only)")

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -25,6 +26,33 @@ from normalize.terms import terms_hash
 
 from ._duckdb import dumps
 from .aws_common import load_region_normalizer
+
+# AWS SNS pricing-API descriptions consistently include the per-N-million rate,
+# e.g. "$0.50 per 1 million SNS Requests after first 1 million". Match a
+# leading "$<n> per <m> million" pattern so we can decide whether pricePerUnit
+# is already per-request (matches the stated rate at scale) or per-million
+# (fixture-style, where pricePerUnit.USD == "0.50").
+_PER_MILLION_RE = re.compile(
+    r"\$([0-9]*\.?[0-9]+)\s+per\s+([0-9]+)\s+million",
+    re.IGNORECASE,
+)
+
+
+def _detect_per_million_divisor(description: str, price_per_unit_usd: float) -> float:
+    """Return 1_000_000 if description says "$X per N million" AND
+    price_per_unit_usd matches X (i.e. the pricePerUnit was stored at the
+    advertised per-N-million rate, not already converted to per-request).
+    Returns 1.0 otherwise."""
+    if not description:
+        return 1.0
+    m = _PER_MILLION_RE.search(description)
+    if not m:
+        return 1.0
+    advertised_rate = float(m.group(1)) / float(m.group(2))
+    # Tolerance to account for floating-point representation.
+    if abs(price_per_unit_usd - advertised_rate) <= advertised_rate * 1e-6:
+        return 1_000_000.0
+    return 1.0
 
 _PROVIDER = "aws"
 _SERVICE = "sns"
@@ -124,15 +152,14 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
                 # Free tier (first 1M).
                 free_tiers[region] = entry
             else:
-                # Paid tier (1M+). AWS publishes price per million; store per-request.
-                # The pricePerUnit is the raw dollar amount for the stated unit (Requests).
-                # In the real SNS offer this is per-request (e.g. 0.00000050), but the
-                # description says "$0.50 per 1 million". The pricePerUnit.USD in the
-                # offer is already per-request — we store it as-is.
-                # For the fixture we store the per-million price and divide below.
-                # We detect fixture vs. live by magnitude: if usd >= 0.01 it's per-million.
-                if usd >= 0.01:
-                    usd = usd / 1_000_000
+                # Paid tier (1M+). Use the priceDimension `description` to detect
+                # whether pricePerUnit is per-request (live AWS offer files) or
+                # per-million (some test fixtures). AWS descriptions consistently
+                # spell out the rate, e.g. "$0.50 per 1 million SNS Requests".
+                description = pd.get("description", "")
+                divisor = _detect_per_million_divisor(description, usd)
+                if divisor != 1.0:
+                    usd = usd / divisor
                 paid_tiers[region] = {**entry, "usd": usd}
 
     for region, free in sorted(free_tiers.items()):

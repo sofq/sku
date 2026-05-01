@@ -135,10 +135,10 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             item = bucket_items[0]
             uom = item.get("unitOfMeasure", "")
             try:
-                _divisor, unit = parse_storage_uom(uom)
+                divisor, unit = parse_storage_uom(uom)
             except ValueError:
-                unit = "month"
-            usd = float(item.get("retailPrice", 0))
+                divisor, unit = 1.0, "month"
+            usd = float(item.get("retailPrice", 0)) / divisor
             sku_id = item.get("skuId") or f"afd-{sku_name.lower()}-base-fee"
             prices = [
                 {

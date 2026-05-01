@@ -32,10 +32,10 @@ func TestAPIGateway_REST_TierCrossing(t *testing.T) {
 			SKUID: "apigw-rest-use1", Provider: "aws", Service: "api-gateway",
 			ResourceName: "rest", Region: "us-east-1",
 			Prices: []catalog.Price{
-				{Dimension: "request", Tier: "0", TierUpper: "333000000", Amount: 0.0000035, Unit: "request"},
-				{Dimension: "request", Tier: "333000000", TierUpper: "1000000000", Amount: 0.00000319, Unit: "request"},
-				{Dimension: "request", Tier: "1000000000", TierUpper: "20000000000", Amount: 0.00000271, Unit: "request"},
-				{Dimension: "request", Tier: "20000000000", TierUpper: "", Amount: 0.00000172, Unit: "request"},
+				{Dimension: "request", Tier: "0", TierUpper: "333M", Amount: 0.0000035, Unit: "request"},
+				{Dimension: "request", Tier: "333M", TierUpper: "1B", Amount: 0.00000319, Unit: "request"},
+				{Dimension: "request", Tier: "1B", TierUpper: "20B", Amount: 0.00000271, Unit: "request"},
+				{Dimension: "request", Tier: "20B", TierUpper: "", Amount: 0.00000172, Unit: "request"},
 			},
 		}}, nil
 	})
@@ -62,8 +62,8 @@ func TestAPIGateway_HTTP_SingleTier(t *testing.T) {
 			SKUID: "apigw-http-use1", Provider: "aws", Service: "api-gateway",
 			ResourceName: "http", Region: "us-east-1",
 			Prices: []catalog.Price{
-				{Dimension: "request", Tier: "0", TierUpper: "300000000", Amount: 0.000001, Unit: "request"},
-				{Dimension: "request", Tier: "300000000", TierUpper: "", Amount: 0.0000009, Unit: "request"},
+				{Dimension: "request", Tier: "0", TierUpper: "300M", Amount: 0.000001, Unit: "request"},
+				{Dimension: "request", Tier: "300M", TierUpper: "", Amount: 0.0000009, Unit: "request"},
 			},
 		}}, nil
 	})

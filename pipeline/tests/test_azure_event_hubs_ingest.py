@@ -42,6 +42,22 @@ def test_standard_rows_have_both_dimensions():
         assert "event" in dims, f"row {row['sku_id']} missing event dimension"
 
 
+def test_event_amount_is_per_event():
+    """Azure publishes Standard Ingress Events at $/M (UoM '1M'); the ingestor
+    must divide so the catalog amount is per-event. Anything in the 0.001+
+    range means the divisor was skipped."""
+    rows = list(ingest(prices_path=FIXTURE))
+    standard_rows = [r for r in rows if r["resource_name"] == "standard"]
+    for row in standard_rows:
+        for p in row["prices"]:
+            if p["dimension"] != "event":
+                continue
+            assert p["amount"] < 1e-3, (
+                f"row {row['sku_id']} event amount={p['amount']} looks like a "
+                f"$/M rate; ingestor must divide by unitOfMeasure"
+            )
+
+
 def test_premium_rows_have_ppu_hour_dimension():
     rows = list(ingest(prices_path=FIXTURE))
     premium_rows = [r for r in rows if r["resource_name"] == "premium"]

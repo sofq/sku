@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ingest.azure_front_door import ingest
-from normalize.tier_tokens import parse_bytes_tier
+from ingest.azure_front_door import _EGRESS_TIERS, ingest
+from normalize.tier_tokens import TIER_TOKENS_BYTES, parse_bytes_tier
 from ._tier_contiguity import assert_tiers_contiguous
 
 _DATA = Path(__file__).resolve().parent.parent / "testdata"
@@ -69,6 +69,24 @@ def test_request_rows_have_single_tier():
         assert p["tier"] == "0"
         assert p["tier_upper"] == ""
         assert p["unit"] == "requests"
+
+
+def test_egress_tier_tokens_in_canonical_vocabulary():
+    """The hardcoded `_EGRESS_TIERS` sequence must use tokens that exist in the
+    shared `TIER_TOKENS_BYTES` vocabulary; otherwise the Go side
+    (`internal/estimate/tiertokens.go`, generated from this set) won't be able
+    to parse the emitted tier boundaries and `parseTierBoundBytes` will fall
+    back to numeric parsing."""
+    for tier_lower, tier_upper in _EGRESS_TIERS:
+        assert tier_lower in TIER_TOKENS_BYTES, (
+            f"_EGRESS_TIERS lower bound {tier_lower!r} not in TIER_TOKENS_BYTES; "
+            f"add it to pipeline/normalize/tier_tokens.py and rerun "
+            f"`make generate-go-tier-tokens`"
+        )
+        if tier_upper:
+            assert tier_upper in TIER_TOKENS_BYTES, (
+                f"_EGRESS_TIERS upper bound {tier_upper!r} not in TIER_TOKENS_BYTES"
+            )
 
 
 def test_egress_tiers_contiguous():

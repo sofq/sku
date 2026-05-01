@@ -108,7 +108,11 @@ func TestCDN_FrontDoor_BaseFeeJoin(t *testing.T) {
 			// Base-fee row
 			return []catalog.Row{
 				rowWithModeSku("fd-base", "azure", "front-door", "standard", "global", "base-fee", skuToken, []catalog.Price{
-					{Dimension: "base_fee", Tier: "0", TierUpper: "", Amount: 35.0, Unit: "mo"},
+					// Dimension matches azure_front_door.py output ("fee"); the
+					// tier-0 estimator sums all amounts so the literal value
+					// here doesn't affect the result, but the string must match
+					// what the ingestor emits to keep this stub honest.
+					{Dimension: "fee", Tier: "0", TierUpper: "", Amount: 35.0, Unit: "month"},
 				}),
 			}, nil
 		}

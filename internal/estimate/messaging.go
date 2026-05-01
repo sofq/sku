@@ -227,8 +227,12 @@ type messagingTopicEstimator struct{}
 
 func (messagingTopicEstimator) Kind() string { return "messaging.topic" }
 
-func (messagingTopicEstimator) Estimate(_ context.Context, _ Item) (LineItem, error) {
-	return LineItem{}, fmt.Errorf("estimator for messaging.topic deferred to M-ε")
+func (messagingTopicEstimator) Estimate(_ context.Context, it Item) (LineItem, error) {
+	return LineItem{}, fmt.Errorf(
+		"estimate/messaging.topic: %q — estimator for messaging.topic deferred to M-ε; "+
+			"use 'sku compare --kind messaging.topic' to view per-tier prices in the meantime",
+		it.Raw,
+	)
 }
 
 func init() {

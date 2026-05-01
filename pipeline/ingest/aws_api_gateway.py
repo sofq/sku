@@ -30,9 +30,36 @@ from typing import Any
 
 from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
+from normalize.tier_tokens import TIER_TOKENS_COUNT
 
 from ._duckdb import dumps
 from .aws_common import load_region_normalizer
+
+
+def _canonicalize_count_tier(numeric: str) -> str:
+    """Convert a raw numeric AWS tier boundary (e.g. "333000000") to a
+    canonical tier token (e.g. "333M"). Returns the input unchanged for
+    "0" or "Inf". Raises ValueError if the resulting token is not in the
+    shared TIER_TOKENS_COUNT vocabulary — this surfaces unknown breakpoints
+    instead of letting them silently bypass the canonical set."""
+    if numeric in ("0", "", "Inf"):
+        return numeric if numeric != "Inf" else ""
+    n = int(numeric)
+    if n >= 1_000_000_000 and n % 1_000_000_000 == 0:
+        token = f"{n // 1_000_000_000}B"
+    elif n >= 1_000_000 and n % 1_000_000 == 0:
+        token = f"{n // 1_000_000}M"
+    elif n >= 1_000 and n % 1_000 == 0:
+        token = f"{n // 1_000}K"
+    else:
+        token = numeric  # fall back; will fail vocabulary check below
+    if token not in TIER_TOKENS_COUNT:
+        raise ValueError(
+            f"aws_api_gateway: tier {numeric!r} -> {token!r} not in TIER_TOKENS_COUNT; "
+            f"add it to pipeline/normalize/tier_tokens.py and rerun "
+            f"`make generate-go-tier-tokens`"
+        )
+    return token
 
 _PROVIDER = "aws"
 _SERVICE = "api-gateway"
@@ -147,17 +174,15 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         # Sort tiers by beginRange numerically
         tiers = sorted(entry["tiers"], key=lambda t: int(t["begin_range"]))
 
-        # Build price list with contiguous tier tokens
+        # Build price list with canonical tier tokens.
         prices = []
         for i, tier in enumerate(tiers):
-            begin = tier["begin_range"]
-            end = tier["end_range"]
-            # tier_upper: "" if last tier (Inf), otherwise end_range string
-            tier_upper = "" if end == "Inf" else end
+            begin_tok = _canonicalize_count_tier(tier["begin_range"])
+            end_tok = _canonicalize_count_tier(tier["end_range"])
             prices.append({
                 "dimension": "request",
-                "tier": begin,
-                "tier_upper": tier_upper,
+                "tier": begin_tok,
+                "tier_upper": end_tok,
                 "amount": tier["usd"],
                 "unit": "request",
             })

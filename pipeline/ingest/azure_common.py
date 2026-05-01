@@ -32,6 +32,7 @@ _STORAGE_DIVISORS: dict[str, tuple[float, str]] = {
 
 _REQUEST_DIVISORS: dict[str, tuple[float, str]] = {
     "1000000": (1_000_000.0, "requests"),
+    "1M": (1_000_000.0, "requests"),
     "10K": (10_000.0, "requests"),
     "1K": (1_000.0, "requests"),
     "1": (1.0, "requests"),

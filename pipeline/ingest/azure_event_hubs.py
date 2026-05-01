@@ -25,7 +25,11 @@ from normalize.enums import apply_kind_defaults
 from normalize.terms import terms_hash
 
 from ._duckdb import dumps
-from .azure_common import load_region_normalizer, parse_unit_of_measure
+from .azure_common import (
+    load_region_normalizer,
+    parse_request_uom,
+    parse_unit_of_measure,
+)
 
 _PROVIDER = "azure"
 _SERVICE = "event-hubs"
@@ -90,8 +94,15 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
                     continue
                 standard_groups[region]["tu"] = usd / divisor
             elif meter_name == _STANDARD_EVENT_METER:
-                # Price is returned as per-1M events; use directly.
-                standard_groups[region]["event"] = usd
+                # Azure publishes ingress events with UoM "1M" — divide so
+                # downstream consumers see a per-event rate consistent with
+                # how the messaging.queue estimator multiplies by ops.
+                uom = item.get("unitOfMeasure", "")
+                try:
+                    divisor, _ = parse_request_uom(uom)
+                except ValueError:
+                    continue
+                standard_groups[region]["event"] = usd / divisor
         elif _is_premium(item):
             if meter_name == _PREMIUM_PPU_METER:
                 uom = item.get("unitOfMeasure", "")

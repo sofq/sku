@@ -69,9 +69,11 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('SB-STD-eastus',  '{"mode":"standard"}'),
   ('SB-PREM-eastus', '{"mode":"premium"}');
 
+-- Standard tier amounts are per-request (Azure publishes $/M; ingestor divides
+-- by the unitOfMeasure divisor so downstream WalkTiers can multiply by ops directly).
 INSERT INTO prices VALUES
-  ('SB-STD-eastus',  'request','0',    '13M',   0.0,   'request'),
-  ('SB-STD-eastus',  'request','13M',  '100M',  0.8,   'request'),
-  ('SB-STD-eastus',  'request','100M', '2500M', 0.5,   'request'),
-  ('SB-STD-eastus',  'request','2500M','',      0.2,   'request'),
-  ('SB-PREM-eastus', 'mu_hour','0',    '',      0.928, 'hr');
+  ('SB-STD-eastus',  'request','0',    '13M',   0.0,    'request'),
+  ('SB-STD-eastus',  'request','13M',  '100M',  8e-7,   'request'),
+  ('SB-STD-eastus',  'request','100M', '2500M', 5e-7,   'request'),
+  ('SB-STD-eastus',  'request','2500M','',      2e-7,   'request'),
+  ('SB-PREM-eastus', 'mu_hour','0',    '',      0.928,  'hr');

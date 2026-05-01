@@ -32,7 +32,11 @@ from normalize.terms import terms_hash
 from normalize.tier_tokens import parse_count_tier  # noqa: F401 — imported for validation
 
 from ._duckdb import dumps
-from .azure_common import load_region_normalizer, parse_unit_of_measure
+from .azure_common import (
+    load_region_normalizer,
+    parse_request_uom,
+    parse_unit_of_measure,
+)
 
 _PROVIDER = "azure"
 _SERVICE = "service-bus-queues"
@@ -101,8 +105,13 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
             tier_bounds = _STD_METER_TIERS.get(meter_name)
             if tier_bounds is None:
                 continue
+            uom = item.get("unitOfMeasure", "")
+            try:
+                divisor, _unit = parse_request_uom(uom)
+            except ValueError:
+                continue
             tier, tier_upper = tier_bounds
-            std_tiers[region].append((tier, tier_upper, usd))
+            std_tiers[region].append((tier, tier_upper, usd / divisor))
 
         elif sku_name == "Premium":
             if meter_name != "Premium Messaging Unit":

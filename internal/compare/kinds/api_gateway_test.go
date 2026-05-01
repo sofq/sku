@@ -3,7 +3,6 @@ package kinds
 import (
 	"bytes"
 	"context"
-	"log"
 	"path/filepath"
 	"testing"
 
@@ -54,11 +53,9 @@ func TestQueryAPIGateway_NoMatchReturnsEmpty(t *testing.T) {
 func TestQueryAPIGateway_MixedUnitWarnsWhenNoMode(t *testing.T) {
 	cat := seedAPIGatewayShard(t, filepath.Join("..", "..", "catalog", "testdata", "seed_api_gateway_compare.sql"))
 
-	// Capture log output.
 	var buf bytes.Buffer
-	orig := log.Writer()
-	log.SetOutput(&buf)
-	defer log.SetOutput(orig)
+	prev := SetWarningWriter(&buf)
+	t.Cleanup(func() { SetWarningWriter(prev) })
 
 	// No mode filter: result mixes "1M-req" (rest/http) and "hr" (provisioned).
 	rows, err := QueryAPIGateway(context.Background(), cat, APIGatewaySpec{})
@@ -70,11 +67,9 @@ func TestQueryAPIGateway_MixedUnitWarnsWhenNoMode(t *testing.T) {
 func TestQueryAPIGateway_MixedUnitNoWarnWithMode(t *testing.T) {
 	cat := seedAPIGatewayShard(t, filepath.Join("..", "..", "catalog", "testdata", "seed_api_gateway_compare.sql"))
 
-	// Capture log output.
 	var buf bytes.Buffer
-	orig := log.Writer()
-	log.SetOutput(&buf)
-	defer log.SetOutput(orig)
+	prev := SetWarningWriter(&buf)
+	t.Cleanup(func() { SetWarningWriter(prev) })
 
 	// Mode filter set: no mixed-unit warning should be emitted.
 	rows, err := QueryAPIGateway(context.Background(), cat, APIGatewaySpec{Mode: "rest"})

@@ -12,7 +12,7 @@ TIER_TOKENS_COUNT: frozenset[str] = frozenset({
     # M (millions)
     "1M", "13M", "100M", "250M", "300M", "333M", "667M", "2500M",
     # B (billions)
-    "1B", "5B", "10B", "19B", "100B", "200B",
+    "1B", "5B", "10B", "19B", "20B", "100B", "200B",
     # K (thousands)
     "10K",
 })

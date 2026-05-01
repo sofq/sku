@@ -82,21 +82,18 @@ func TestMessagingQueue_ServiceBusQueues_Ops(t *testing.T) {
 			ResourceName: "standard", Region: "eastus",
 			Prices: []catalog.Price{
 				{Dimension: "request", Tier: "0", TierUpper: "13M", Amount: 0.0, Unit: "request"},
-				{Dimension: "request", Tier: "13M", TierUpper: "100M", Amount: 0.8, Unit: "request"},
-				{Dimension: "request", Tier: "100M", TierUpper: "", Amount: 0.5, Unit: "request"},
+				{Dimension: "request", Tier: "13M", TierUpper: "100M", Amount: 8e-7, Unit: "request"},
+				{Dimension: "request", Tier: "100M", TierUpper: "", Amount: 5e-7, Unit: "request"},
 			},
 		}}, nil
 	})
 
-	// 50M ops: first 13M free, next 37M at 0.8 per million
+	// 50M ops: first 13M free, next 37M at $0.80/M = 37e6 * 8e-7 = $29.60
 	item, err := ParseItem("azure/service-bus-queues:standard:region=eastus:ops=50000000")
 	require.NoError(t, err)
 	li, err := e.Estimate(context.Background(), item)
 	require.NoError(t, err)
-	// WalkTiers: tier 0..13M → $0, tier 13M..50M → 37M * 0.8/1M = $29.6
-	// Note: prices in catalog are per-million-requests stored as rate per unit
-	// The SB seed stores 0.8 as the per-request amount for that tier
-	require.True(t, li.MonthlyUSD >= 0)
+	require.InDelta(t, 37e6*8e-7, li.MonthlyUSD, 1e-6)
 	require.Equal(t, "sb-std-eastus", li.SKUID)
 }
 

@@ -100,6 +100,24 @@ def test_standard_has_free_tier():
         assert free_tiers, f"row {row['sku_id']} missing free tier (tier=0, amount=0.0)"
 
 
+def test_standard_amount_is_per_request():
+    """Azure publishes Standard ops at $/M (unitOfMeasure '1M'); the ingestor
+    must divide so amounts are stored as per-request rates. The largest tier
+    fixture price is $0.80/M = 8e-7/request. Anything in the 0.1–10 range
+    means the divisor was skipped (the B-1 bug)."""
+    rows = _load_rows()
+    std_rows = [r for r in rows if r["resource_name"] == "standard"]
+    assert std_rows, "no standard rows found"
+    for row in std_rows:
+        for p in row["prices"]:
+            if p["amount"] == 0.0:
+                continue
+            assert p["amount"] < 1e-3, (
+                f"row {row['sku_id']} tier {p['tier']} amount={p['amount']} "
+                f"looks like a $/M rate; ingestor must divide by unitOfMeasure"
+            )
+
+
 def test_premium_amount_is_hourly():
     rows = _load_rows()
     prem_rows = [r for r in rows if r["resource_name"] == "premium"]

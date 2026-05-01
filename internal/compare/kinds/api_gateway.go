@@ -3,11 +3,25 @@ package kinds
 import (
 	"context"
 	"fmt"
-	"log"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/sofq/sku/internal/catalog"
 )
+
+// WarningWriter is the destination for compare-kind warnings (e.g. the
+// api.gateway mixed-unit notice). Defaults to os.Stderr; tests swap it via
+// SetWarningWriter so messages don't bleed into stdout JSON output.
+var warningWriter io.Writer = os.Stderr
+
+// SetWarningWriter overrides the default stderr destination. Returns the
+// previous writer so callers can restore it (typical use: t.Cleanup).
+func SetWarningWriter(w io.Writer) io.Writer {
+	prev := warningWriter
+	warningWriter = w
+	return prev
+}
 
 // APIGatewaySpec captures the api.gateway equivalence shape.
 //
@@ -108,7 +122,8 @@ ORDER BY COALESCE(mp.min_price, 1e308) ASC, s.provider, s.resource_name, s.sku_i
 			}
 		}
 		if hasPerCall && hasPerHour {
-			log.Print("api.gateway result mixes per-call and per-unit-hour pricing; pass --mode to narrow")
+			_, _ = fmt.Fprintln(warningWriter,
+				"warning: api.gateway result mixes per-call and per-unit-hour pricing; pass --mode to narrow")
 		}
 	}
 

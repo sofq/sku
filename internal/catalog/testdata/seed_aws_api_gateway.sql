@@ -67,10 +67,13 @@ INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('apigw-rest-use1', '{"mode":"rest"}'),
   ('apigw-http-use1', '{"mode":"http"}');
 
+-- Tier boundaries use canonical TIER_TOKENS_COUNT vocabulary; the ingestor
+-- converts AWS's raw numerics ("333000000", "1000000000", ...) to "333M",
+-- "1B", "20B", "300M".
 INSERT INTO prices VALUES
-  ('apigw-rest-use1', 'request','0',          '333000000',   0.0000035, 'request'),
-  ('apigw-rest-use1', 'request','333000000',  '1000000000',  0.00000319,'request'),
-  ('apigw-rest-use1', 'request','1000000000', '20000000000', 0.00000271,'request'),
-  ('apigw-rest-use1', 'request','20000000000','',            0.00000172,'request'),
-  ('apigw-http-use1', 'request','0',          '300000000',   0.000001,  'request'),
-  ('apigw-http-use1', 'request','300000000',  '',            0.0000009, 'request');
+  ('apigw-rest-use1', 'request','0',    '333M', 0.0000035, 'request'),
+  ('apigw-rest-use1', 'request','333M', '1B',   0.00000319,'request'),
+  ('apigw-rest-use1', 'request','1B',   '20B',  0.00000271,'request'),
+  ('apigw-rest-use1', 'request','20B',  '',     0.00000172,'request'),
+  ('apigw-http-use1', 'request','0',    '300M', 0.000001,  'request'),
+  ('apigw-http-use1', 'request','300M', '',     0.0000009, 'request');
