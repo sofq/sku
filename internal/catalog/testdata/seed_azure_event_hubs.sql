@@ -51,15 +51,15 @@ INSERT INTO metadata VALUES
   ('allowed_kinds','["messaging.queue"]'),
   ('serving_providers','["azure"]');
 
--- terms_hash for (on_demand,'','event-hubs-standard','','','') = b99455fedf1fb330c96d18aa30c73f41
--- terms_hash for (on_demand,'','event-hubs-premium', '','','') = 1eabb24b9539d7007d680f3a710013cb
+-- terms_hash for (on_demand,'','','','','') = 4b0dbf5efbd01c9e5f0a3f2e39227bc3
+-- resource_name alone distinguishes standard vs premium within the shard.
 INSERT INTO skus VALUES
-  ('EH-STD-eastus',  'azure','event-hubs','messaging.queue','standard','eastus','us-east','b99455fedf1fb330c96d18aa30c73f41'),
-  ('EH-PREM-eastus', 'azure','event-hubs','messaging.queue','premium', 'eastus','us-east','1eabb24b9539d7007d680f3a710013cb');
+  ('EH-STD-eastus',  'azure','event-hubs','messaging.queue','standard','eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3'),
+  ('EH-PREM-eastus', 'azure','event-hubs','messaging.queue','premium', 'eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3');
 
 INSERT INTO terms (sku_id, commitment, tenancy, os) VALUES
-  ('EH-STD-eastus',  'on_demand','','event-hubs-standard'),
-  ('EH-PREM-eastus', 'on_demand','','event-hubs-premium');
+  ('EH-STD-eastus',  'on_demand','',''),
+  ('EH-PREM-eastus', 'on_demand','','');
 
 INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('EH-STD-eastus',  '{"mode":"standard"}'),

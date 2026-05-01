@@ -199,13 +199,14 @@ func TestLookupAPIGateway_ResourceNameNarrows(t *testing.T) {
 	require.Equal(t, "http", rows[0].ResourceName)
 }
 
-func TestLookupAPIGateway_MissingResourceNameErrors(t *testing.T) {
+func TestLookupAPIGateway_EmptyResourceNameListsAll(t *testing.T) {
 	cat := openSeededAPIGateway(t)
-	_, err := cat.LookupAPIGateway(context.Background(), catalog.APIGatewayFilter{
+	rows, err := cat.LookupAPIGateway(context.Background(), catalog.APIGatewayFilter{
 		Provider: "aws",
 		Service:  "apigateway",
 	})
-	require.Error(t, err)
+	require.NoError(t, err)
+	require.Len(t, rows, 2)
 }
 
 // ---------------------------------------------------------------------------

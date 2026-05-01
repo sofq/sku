@@ -51,19 +51,15 @@ INSERT INTO metadata VALUES
   ('allowed_kinds','["messaging.queue"]'),
   ('serving_providers','["azure"]');
 
--- terms_hash for standard (on_demand,'','standard','','',''):
--- computed from apply_kind_defaults("messaging.queue", {..., "os":"standard"})
--- terms_hash for premium (on_demand,'','premium','','',''):
--- actual hashes from ingest output:
---   standard: a4b7ae059c59d6a9d0917ba8f655f681
---   premium:  4cd9a63daf2a46bc1d23c67cb722580d
+-- terms_hash for (on_demand,'','','','','') = 4b0dbf5efbd01c9e5f0a3f2e39227bc3
+-- resource_name alone distinguishes standard vs premium within the shard.
 INSERT INTO skus VALUES
-  ('SB-STD-eastus',  'azure','service-bus-queues','messaging.queue','standard','eastus','us-east','a4b7ae059c59d6a9d0917ba8f655f681'),
-  ('SB-PREM-eastus', 'azure','service-bus-queues','messaging.queue','premium', 'eastus','us-east','4cd9a63daf2a46bc1d23c67cb722580d');
+  ('SB-STD-eastus',  'azure','service-bus-queues','messaging.queue','standard','eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3'),
+  ('SB-PREM-eastus', 'azure','service-bus-queues','messaging.queue','premium', 'eastus','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3');
 
 INSERT INTO terms (sku_id, commitment, tenancy, os) VALUES
-  ('SB-STD-eastus',  'on_demand','','standard'),
-  ('SB-PREM-eastus', 'on_demand','','premium');
+  ('SB-STD-eastus',  'on_demand','',''),
+  ('SB-PREM-eastus', 'on_demand','','');
 
 INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('SB-STD-eastus',  '{"mode":"standard"}'),

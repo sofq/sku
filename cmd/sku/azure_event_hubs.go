@@ -32,7 +32,7 @@ func (f *eventHubsFlags) bind(c *cobra.Command) {
 }
 
 func (f *eventHubsFlags) terms() catalog.Terms {
-	return catalog.Terms{Commitment: f.commitment, OS: "event-hubs-" + f.tier}
+	return catalog.Terms{Commitment: f.commitment}
 }
 
 func newAzureEventHubsPriceCmd() *cobra.Command {

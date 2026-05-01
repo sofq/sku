@@ -144,7 +144,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "",
-            "os": "standard",
+            "os": "",
             "support_tier": "",
             "upfront": "",
             "payment_option": "",
@@ -170,7 +170,7 @@ def ingest(*, prices_path: Path) -> Iterable[dict[str, Any]]:
         terms = apply_kind_defaults(_KIND, {
             "commitment": "on_demand",
             "tenancy": "",
-            "os": "premium",
+            "os": "",
             "support_tier": "",
             "upfront": "",
             "payment_option": "",

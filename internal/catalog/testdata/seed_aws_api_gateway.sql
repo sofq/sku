@@ -53,15 +53,15 @@ INSERT INTO metadata VALUES
   ('allowed_kinds','["api.gateway"]'),
   ('serving_providers','["aws"]');
 
--- terms_hash for (on_demand,'','rest-api','','','') — REST rows
--- terms_hash for (on_demand,'','http-api','','','') — HTTP rows
+-- terms_hash for (on_demand,'','','','','') = 4b0dbf5efbd01c9e5f0a3f2e39227bc3
+-- resource_name alone distinguishes rest vs http within the shard.
 INSERT INTO skus VALUES
-  ('apigw-rest-use1', 'aws','api-gateway','api.gateway','rest', 'us-east-1','us-east','5d97d50d69b04fe9d71c1c383684cfbb'),
-  ('apigw-http-use1', 'aws','api-gateway','api.gateway','http', 'us-east-1','us-east','4fb318278b6781f29ac57ad6336b7361');
+  ('apigw-rest-use1', 'aws','api-gateway','api.gateway','rest', 'us-east-1','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3'),
+  ('apigw-http-use1', 'aws','api-gateway','api.gateway','http', 'us-east-1','us-east','4b0dbf5efbd01c9e5f0a3f2e39227bc3');
 
 INSERT INTO terms (sku_id, commitment, tenancy, os) VALUES
-  ('apigw-rest-use1', 'on_demand','','rest-api'),
-  ('apigw-http-use1', 'on_demand','','http-api');
+  ('apigw-rest-use1', 'on_demand','',''),
+  ('apigw-http-use1', 'on_demand','','');
 
 INSERT INTO resource_attrs (sku_id, extra) VALUES
   ('apigw-rest-use1', '{"mode":"rest"}'),

@@ -40,24 +40,7 @@ func (f *azureAPIMFlags) bind(c *cobra.Command) {
 }
 
 func (f *azureAPIMFlags) terms() catalog.Terms {
-	os := ""
-	switch f.tier {
-	case "consumption":
-		os = "apim-consumption"
-	case "developer":
-		os = "apim-developer"
-	case "basic":
-		os = "apim-basic"
-	case "standard":
-		os = "apim-standard"
-	case "premium":
-		os = "apim-premium"
-	case "isolated":
-		os = "apim-isolated"
-	case "premium-v2":
-		os = "apim-premium-v2"
-	}
-	return catalog.Terms{Commitment: "on_demand", OS: os}
+	return catalog.Terms{Commitment: "on_demand"}
 }
 
 func newAzureAPIMPriceCmd() *cobra.Command {

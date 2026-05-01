@@ -32,7 +32,7 @@ func (f *serviceBusQueuesFlags) bind(c *cobra.Command) {
 }
 
 func (f *serviceBusQueuesFlags) terms() catalog.Terms {
-	return catalog.Terms{Commitment: f.commitment, OS: f.tier}
+	return catalog.Terms{Commitment: f.commitment}
 }
 
 func newAzureServiceBusQueuesPriceCmd() *cobra.Command {

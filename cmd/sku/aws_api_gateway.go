@@ -30,11 +30,7 @@ func (f *apiGatewayFlags) bind(c *cobra.Command) {
 }
 
 func (f *apiGatewayFlags) terms() catalog.Terms {
-	os := "rest-api"
-	if f.apiType == "http" {
-		os = "http-api"
-	}
-	return catalog.Terms{Commitment: "on_demand", OS: os}
+	return catalog.Terms{Commitment: "on_demand"}
 }
 
 func newAWSAPIGatewayPriceCmd() *cobra.Command {

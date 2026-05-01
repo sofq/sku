@@ -35,7 +35,7 @@ func (f *gcpCloudDNSFlags) bind(c *cobra.Command) {
 }
 
 func (f *gcpCloudDNSFlags) terms() catalog.Terms {
-	return catalog.Terms{Commitment: f.commitment, OS: "dns-public"}
+	return catalog.Terms{Commitment: f.commitment}
 }
 
 func newGCPCloudDNSPriceCmd() *cobra.Command {

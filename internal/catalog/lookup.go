@@ -403,8 +403,10 @@ func (c *Catalog) lookupResource(
 	var args []any
 	where = append(where, "s.kind = ?")
 	args = append(args, kind)
-	where = append(where, "s.resource_name = ?")
-	args = append(args, resourceName)
+	if resourceName != "" {
+		where = append(where, "s.resource_name = ?")
+		args = append(args, resourceName)
+	}
 	if provider != "" {
 		where = append(where, "s.provider = ?")
 		args = append(args, provider)
@@ -836,10 +838,8 @@ type APIGatewayFilter struct {
 }
 
 // LookupAPIGateway runs the api.gateway point lookup / list query.
+// ResourceName is optional; omit to list all gateway types.
 func (c *Catalog) LookupAPIGateway(ctx context.Context, f APIGatewayFilter) ([]Row, error) {
-	if f.ResourceName == "" {
-		return nil, fmt.Errorf("catalog: LookupAPIGateway requires ResourceName")
-	}
 	return c.lookupResource(ctx, "api.gateway", f.Provider, f.Service,
 		f.ResourceName, f.Region, f.Terms)
 }

@@ -113,7 +113,7 @@ def ingest(*, skus_path: Path) -> Iterable[dict[str, Any]]:
     base_terms = apply_kind_defaults(_KIND, {
         "commitment": "on_demand",
         "tenancy": "",
-        "os": "dns-public",
+        "os": "",
         "support_tier": "",
         "upfront": "",
         "payment_option": "",
