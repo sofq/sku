@@ -1,6 +1,6 @@
 # AWS pricing-feed coverage
 
-_Generated 2026-04-30_
+_Generated 2026-05-04_
 
 Raw SKU counts per bucket, and which `sku` shard (if any) ingests them.
 Generated weekly by `make profile` against live feeds.
@@ -9,7 +9,7 @@ Generated weekly by `make profile` against live feeds.
 | --- | ---: | --- | ---: | --- | --- |
 | Compute Instance | 98,981 | aws_ec2 | 100% | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, dedicatedEbsThroughput, +33 more | `QUMEF4UK3NPT4MN3`, `DBCQPZ6Z853WRE98`, `PSKQUF3DN4PQUY5X` |
 | Compute Instance (bare metal) | 11,038 | **UNCOVERED** | — | availabilityzone, capacitystatus, classicnetworkingsupport, clockSpeed, currentGeneration, dedicatedEbsThroughput, +32 more | `TNWBCS5ACPZ2KN5K`, `PKKXPZKDGX8TTETG`, `9ZNF8HF7HCD62DUE` |
-| Database Instance | 4,926 | aws_rds | 100% | clockSpeed, currentGeneration, databaseEdition, databaseEngine, dedicatedEbsThroughput, deploymentModel, +24 more | `AS89MVW9EQ98NPCS`, `9QH3PUGXCYKNCYPB`, `9TUPTR977JMXWRWK` |
+| Database Instance | 5,010 | aws_rds | 100% | clockSpeed, currentGeneration, databaseEdition, databaseEngine, dedicatedEbsThroughput, deploymentModel, +24 more | `AS89MVW9EQ98NPCS`, `9QH3PUGXCYKNCYPB`, `9TUPTR977JMXWRWK` |
 | Serverless | 511 | aws_lambda | 100% | group, groupDescription, lambdaManagedInstanceType, lambdaManagedInstances-RequestType, location, locationType, +5 more | `8MV6QCXGTMB3SQSA`, `8VMHUU6HBE25BH4E`, `3DQDA3PNUY939FRS` |
 | (no productFamily) | 273 | **UNCOVERED** | — | feeCode, feeDescription, fromLocation, fromLocationType, fromRegionCode, group, +14 more | `Z8X7XRC6YMB3B8CX`, `SG7CKZDA3VUU22WX`, `TH43ZXH75AC5F7PY` |
 | Database Storage | 236 | **UNCOVERED** | — | databaseEdition, databaseEngine, deploymentModel, deploymentOption, engineCode, licenseModel, +12 more | `5CY9R54BDJWYJ22J`, `TYAUEGUCCZJVV7J5`, `657RUPPEV3YQSGDA` |
