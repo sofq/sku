@@ -1,7 +1,7 @@
 """Normalize AWS OpenSearch Service offer JSON into search.engine rows.
 
 Two modes:
-  managed-cluster  — Instance-based rows (productFamily = "Amazon OpenSearch Service").
+  managed-cluster  — Instance-based rows (productFamily = "Amazon OpenSearch Service Instance").
   serverless       — OCU + storage rows (productFamily = "Amazon OpenSearch Service Serverless").
 """
 
@@ -77,16 +77,16 @@ def _classify_serverless(attrs: dict) -> tuple[str, str] | None:
     """Return (dimension, billed_unit) or None to skip.
 
     Three serverless dimensions co-exist on one logical SKU per region:
-      compute-ocu  — OpenSearchComputeOCU operation, billed per hour
-      indexing-ocu — OpenSearchIndexingOCU operation, billed per hour
-      storage      — OpenSearchStorageOCU operation, billed per gb-month
+      compute-ocu  — SearchOCU operation, billed per hour
+      indexing-ocu — IndexingOCU operation, billed per hour
+      storage      — StorageUsedInS3ByteHour operation, billed per gb-month
     """
     operation = attrs.get("operation", "")
-    if "OpenSearchComputeOCU" in operation:
+    if operation == "SearchOCU":
         return "compute-ocu", "hour"
-    if "OpenSearchIndexingOCU" in operation:
+    if operation == "IndexingOCU":
         return "indexing-ocu", "hour"
-    if "OpenSearchStorageOCU" in operation:
+    if operation == "StorageUsedInS3ByteHour":
         return "storage", "gb-month"
     return None
 
@@ -122,7 +122,7 @@ def ingest(*, offer_path: Path) -> Iterable[dict[str, Any]]:
         unit_raw = pd.get("unit", "Hrs").lower()
         unit = "hour" if "hr" in unit_raw else unit_raw
 
-        if family == "Amazon OpenSearch Service":
+        if family == "Amazon OpenSearch Service Instance":
             result = _classify_managed_cluster(attrs)
             if result is None:
                 continue

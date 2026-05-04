@@ -53,13 +53,20 @@ _MULTIREGION: dict[str, str] = {
 
 
 def _hourly_usd(sku: dict) -> tuple[float, str]:
-    """Return (amount, unit) from the first pricing tier of a SKU."""
+    """Return (amount, unit) from the first non-zero pricing tier of a SKU.
+
+    GCP Cloud Billing uses tiered rates where tier 0 is typically a free quota
+    at $0. The real price lives in tier 1+.
+    """
     try:
-        tiers = sku["pricingInfo"][0]["pricingExpression"]["tieredRates"]
-        units = float(tiers[0]["unitPrice"]["units"])
-        nanos = float(tiers[0]["unitPrice"]["nanos"]) / 1e9
-        usage_unit = sku["pricingInfo"][0]["pricingExpression"]["usageUnit"]
-        return units + nanos, usage_unit
+        pricing_expr = sku["pricingInfo"][0]["pricingExpression"]
+        tiers = pricing_expr["tieredRates"]
+        usage_unit = pricing_expr["usageUnit"]
+        for tier in tiers:
+            amount = float(tier["unitPrice"]["units"]) + float(tier["unitPrice"]["nanos"]) / 1e9
+            if amount > 0:
+                return amount, usage_unit
+        return 0.0, usage_unit
     except (KeyError, IndexError):
         return 0.0, ""
 

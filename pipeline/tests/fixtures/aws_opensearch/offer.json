@@ -2,7 +2,7 @@
   "products": {
     "OPENSEARCH_R6G_LARGE_USE1": {
       "sku": "OPENSEARCH_R6G_LARGE_USE1",
-      "productFamily": "Amazon OpenSearch Service",
+      "productFamily": "Amazon OpenSearch Service Instance",
       "attributes": {
         "regionCode": "us-east-1",
         "instanceType": "r6g.large.search",
@@ -11,31 +11,31 @@
     },
     "OPENSEARCH_SERVERLESS_OCU_USE1": {
       "sku": "OPENSEARCH_SERVERLESS_OCU_USE1",
-      "productFamily": "Amazon OpenSearch Serverless",
+      "productFamily": "Amazon OpenSearch Service Serverless",
       "attributes": {
         "regionCode": "us-east-1",
-        "operation": "OpenSearchComputeOCU"
+        "operation": "SearchOCU"
       }
     },
     "OPENSEARCH_SERVERLESS_STORAGE_USE1": {
       "sku": "OPENSEARCH_SERVERLESS_STORAGE_USE1",
-      "productFamily": "Amazon OpenSearch Serverless",
+      "productFamily": "Amazon OpenSearch Service Serverless",
       "attributes": {
         "regionCode": "us-east-1",
-        "operation": "OpenSearchStorageOCU"
+        "operation": "StorageUsedInS3ByteHour"
       }
     },
     "OPENSEARCH_SERVERLESS_INDEXING_USE1": {
       "sku": "OPENSEARCH_SERVERLESS_INDEXING_USE1",
-      "productFamily": "Amazon OpenSearch Serverless",
+      "productFamily": "Amazon OpenSearch Service Serverless",
       "attributes": {
         "regionCode": "us-east-1",
-        "operation": "OpenSearchIndexingOCU"
+        "operation": "IndexingOCU"
       }
     },
     "OPENSEARCH_UNKNOWN_REGION": {
       "sku": "OPENSEARCH_UNKNOWN_REGION",
-      "productFamily": "Amazon OpenSearch Service",
+      "productFamily": "Amazon OpenSearch Service Instance",
       "attributes": {
         "regionCode": "xx-fake-1",
         "instanceType": "r6g.large.search"
