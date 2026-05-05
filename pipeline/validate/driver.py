@@ -26,6 +26,22 @@ from validate.sampler import Sample, sample
 logger = logging.getLogger(__name__)
 
 
+# Shards where the upstream API can't be compared one-to-one against catalog
+# rows: catalog stores synthesized values (e.g. gcp-gce machine totals built
+# from per-vCPU + per-GiB component prices) while the upstream API exposes the
+# components. Listing here makes the validator skip revalidation and emit a
+# pass with the reason recorded in the report.
+SKIP_REVALIDATION: dict[str, str] = {
+    "gcp-gce": (
+        "ingest synthesizes machine totals from per-vCPU and per-GiB "
+        "component SKUs (see pipeline/ingest/gcp_gce.py); validator "
+        "compares against the raw component unitPrice, producing "
+        "false-positive drift. Re-enable once a sidecar or component-aware "
+        "comparison lands."
+    ),
+}
+
+
 # ---------------------------------------------------------------------------
 # Types
 # ---------------------------------------------------------------------------
@@ -52,7 +68,8 @@ class ValidationReport:
     drift_records: list[dict]
     missing_upstream: list[str]
     vantage_drift: list[dict]
-    exit: str  # "pass" | "fail"
+    exit: str  # "pass" | "fail" | "skipped"
+    skip_reason: str | None = None
 
     def as_dict(self) -> dict:
         return dataclasses.asdict(self)
@@ -123,6 +140,23 @@ def run_validation(
     int
         0 on pass, 1 on fail.
     """
+    if shard in SKIP_REVALIDATION:
+        reason = SKIP_REVALIDATION[shard]
+        logger.info("Skipping revalidation for %s: %s", shard, reason)
+        report_data = ValidationReport(
+            shard=shard,
+            generated_at=datetime.now(UTC).isoformat(),
+            sample_size=0,
+            drift_records=[],
+            missing_upstream=[],
+            vantage_drift=[],
+            exit="skipped",
+            skip_reason=reason,
+        )
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps(report_data.as_dict(), indent=2))
+        return 0
+
     if revalidator is None:
         revalidator = _default_revalidator(shard)
 

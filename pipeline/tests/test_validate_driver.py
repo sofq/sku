@@ -223,3 +223,36 @@ def test_driver_aggregates_multiple_drift_records(tmp_path: Path) -> None:
     data = json.loads(report_path.read_text())
     assert result == 1
     assert len(data["drift_records"]) == data["sample_size"]
+
+
+
+def test_driver_skips_listed_shard(tmp_path: Path) -> None:
+    """Shards in SKIP_REVALIDATION are skipped — revalidator is not called."""
+    from validate.driver import SKIP_REVALIDATION
+
+    db = _make_minimal_shard(tmp_path)
+    report_path = tmp_path / "report.json"
+
+    called = False
+
+    def must_not_be_called(samples, **kwargs):
+        nonlocal called
+        called = True
+        return [], []
+
+    skipped_shard = next(iter(SKIP_REVALIDATION))
+    result = run_validation(
+        shard=skipped_shard,
+        shard_db=db,
+        budget=5,
+        report=report_path,
+        revalidator=must_not_be_called,
+        seed=42,
+    )
+    assert result == 0
+    assert not called
+    data = json.loads(report_path.read_text())
+    assert data["exit"] == "skipped"
+    assert data["skip_reason"]
+    assert data["sample_size"] == 0
+    assert data["drift_records"] == []
