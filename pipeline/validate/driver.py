@@ -62,6 +62,19 @@ SKIP_REVALIDATION: dict[str, str] = {
 }
 
 
+# Shards whose ingest fans-in additional price dimensions onto a primary SKU's
+# row (e.g. gcp-gcs storage SKU also carries fanned-in global ops prices). The
+# upstream API only knows about the primary dimension, so the validator can
+# only meaningfully compare that one. Other dimensions are sampled out before
+# revalidation. Fan-in dimensions remain unvalidated until the validator can
+# look them up against their actual source SKUs (tracked separately).
+PRIMARY_DIMENSIONS: dict[str, frozenset[str]] = {
+    "gcp-gcs": frozenset({"storage"}),       # ops fanned-in from global SKUs
+    "gcp-run": frozenset({"cpu-second"}),    # memory + requests fanned-in
+    "gcp-functions": frozenset({"cpu-second"}),  # memory + requests fanned-in
+}
+
+
 # ---------------------------------------------------------------------------
 # Types
 # ---------------------------------------------------------------------------
@@ -183,6 +196,16 @@ def run_validation(
     # --- Sample ---
     samples = sample(shard_db, budget=budget, seed=seed)
     logger.info("Sampled %d rows from %s", len(samples), shard)
+
+    # --- Filter to primary dimensions for fan-in shards ---
+    if shard in PRIMARY_DIMENSIONS:
+        allowed = PRIMARY_DIMENSIONS[shard]
+        before = len(samples)
+        samples = [s for s in samples if s.dimension in allowed]
+        logger.info(
+            "Filtered %s samples to primary dimensions %s: %d → %d",
+            shard, sorted(allowed), before, len(samples),
+        )
 
     # --- Revalidate ---
     drift_objs, missing = revalidator(samples)

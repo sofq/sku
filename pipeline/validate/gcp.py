@@ -22,6 +22,19 @@ logger = logging.getLogger(__name__)
 _BILLING_BASE = "https://cloudbilling.googleapis.com/v1/services"
 _DRIFT_THRESHOLD = 0.01  # 1%
 
+# Must mirror ingest/gcp_common.py:_USAGE_UNITS divisors. Validator divides the
+# raw upstream unitPrice by this factor to match what ingest stored.
+_USAGE_UNIT_DIVISORS: dict[str, float] = {
+    "h": 1.0,
+    "GiBy.h": 1.0,
+    "GiBy.mo": 1.0,
+    "GiBy.d": 1.0 / 30.4375,
+    "By.mo": 1.0 / (1024**3),
+    "count": 1.0,
+    "s": 1.0,
+    "GiBy.s": 1.0,
+}
+
 # Default service ID used when callers don't specify (matches the legacy
 # behaviour of single-service GCE shards). The driver should always pass an
 # explicit service_id for known shards.
@@ -176,8 +189,14 @@ def _fetch_sku_price(
             nanos = int(up.get("nanos", 0))
             units = up.get("units", "0")
             price = _nanos_to_float(units, nanos)
-            if price > 0:
-                return price
+            if price <= 0:
+                continue
+            # Mirror ingest's unit normalization (pipeline/ingest/gcp_common.py).
+            # E.g. usageUnit="GiBy.d" → ingest emits per-month price (×30.4375),
+            # so validator must do the same to compare on the same axis.
+            usage_unit = expr.get("usageUnit", "")
+            divisor = _USAGE_UNIT_DIVISORS.get(usage_unit, 1.0)
+            return price / divisor
 
         page_token = data.get("nextPageToken", "")
         if not page_token:

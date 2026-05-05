@@ -256,3 +256,35 @@ def test_driver_skips_listed_shard(tmp_path: Path) -> None:
     assert data["skip_reason"]
     assert data["sample_size"] == 0
     assert data["drift_records"] == []
+
+
+def test_driver_filters_to_primary_dimensions(tmp_path: Path) -> None:
+    """Samples whose dimension isn't in PRIMARY_DIMENSIONS[shard] are filtered out."""
+    from validate.driver import PRIMARY_DIMENSIONS
+
+    db = _make_minimal_shard(tmp_path)
+    report_path = tmp_path / "report.json"
+
+    seen_dims: list[str] = []
+
+    def capture(samples, **kwargs):
+        seen_dims.extend(s.dimension for s in samples)
+        return [], []
+
+    # Inject a temporary primary-dim filter for the test shard so the existing
+    # minimal fixture (whose dimension is "on-demand") survives.
+    PRIMARY_DIMENSIONS["aws-ec2"] = frozenset({"on-demand"})
+    try:
+        run_validation(
+            shard="aws-ec2",
+            shard_db=db,
+            budget=10,
+            report=report_path,
+            revalidator=capture,
+            seed=42,
+        )
+    finally:
+        del PRIMARY_DIMENSIONS["aws-ec2"]
+
+    assert seen_dims, "revalidator received no samples"
+    assert all(d == "on-demand" for d in seen_dims)
