@@ -39,6 +39,26 @@ SKIP_REVALIDATION: dict[str, str] = {
         "false-positive drift. Re-enable once a sidecar or component-aware "
         "comparison lands."
     ),
+    # Azure DB shards: validator filters upstream by `meterName eq '{resource_name}'`
+    # (pipeline/validate/azure.py:_filter_for_sample), but the Retail API exposes
+    # `meterName="vCore"` and disambiguates via `productName` + `skuName`. Our
+    # resource_name (e.g. "Gen5 2 vCore", "GP_Gen5_2") never matches the upstream
+    # meterName, so 14-19 of 20 sampled SKUs are reported `missing_upstream` and the
+    # 1-5 that incidentally match return unrelated line items. Re-enable once the
+    # azure validator gains per-shard product/sku-name matching.
+    "azure-mariadb": (
+        "validator's meterName-based filter doesn't match this shard's "
+        "resource_name format (Retail API uses meterName='vCore' with "
+        "productName disambiguation). See pipeline/validate/azure.py."
+    ),
+    "azure-sql": (
+        "validator's meterName-based filter doesn't match this shard's "
+        "resource_name format. See pipeline/validate/azure.py."
+    ),
+    "azure-postgres": (
+        "validator's meterName-based filter doesn't match this shard's "
+        "resource_name format. See pipeline/validate/azure.py."
+    ),
 }
 
 
