@@ -1,4 +1,4 @@
-# sku — agent-friendly cloud & LLM pricing CLI
+# (Alpha - unstable) sku — agent-friendly cloud & LLM pricing CLI
 
 [![CI](https://github.com/sofq/sku/actions/workflows/ci.yml/badge.svg)](https://github.com/sofq/sku/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/sofq/sku?include_prereleases&sort=semver)](https://github.com/sofq/sku/releases)
