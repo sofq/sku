@@ -346,3 +346,61 @@ def test_gcp_gke_autopilot_matches_requested_dimension(
         drift, missing = revalidate([sample], service_id=service_id)
     assert drift == []
     assert missing == []
+
+
+def test_gcp_validator_applies_usage_unit_divisor(
+    requests_mock: requests_mock_module.Mocker,
+) -> None:
+    """Validator must mirror ingest's per-day → per-month conversion (GiBy.d).
+
+    Ingest divides by 1/30.4375 (= multiplies by 30.4375) so a per-day price
+    of 0.0005333 becomes 0.01623 per-month in the catalog. Validator must
+    apply the same divisor to compare on the same axis instead of reporting
+    spurious 30.4375× drift.
+    """
+    sku_id = "6088-27E4-7DD4"
+    region = "asia-east2"
+    catalog_per_month = 0.016233231875  # what ingest stored
+
+    sample = Sample(
+        sku_id=sku_id,
+        region=region,
+        resource_name="nearline",
+        price_amount=catalog_per_month,
+        price_currency="USD",
+        dimension="storage",
+    )
+    response = {
+        "skus": [
+            {
+                "skuId": sku_id,
+                "description": "Nearline Storage Hong Kong (Early Delete)",
+                "serviceRegions": [region],
+                "pricingInfo": [
+                    {
+                        "pricingExpression": {
+                            "usageUnit": "GiBy.d",
+                            "tieredRates": [
+                                {
+                                    "startUsageAmount": 0,
+                                    "unitPrice": {
+                                        "currencyCode": "USD",
+                                        "units": "0",
+                                        "nanos": 533330,  # 0.0005333 per-day
+                                    },
+                                }
+                            ],
+                        }
+                    }
+                ],
+            }
+        ],
+        "nextPageToken": "",
+    }
+    requests_mock.get(f"{_BASE_URL}/95FF-2EF5-5EA1/skus", json=response)
+
+    with patch("validate.gcp._get_bearer_token", return_value="token"):
+        drift, missing = revalidate([sample], service_id="95FF-2EF5-5EA1")
+
+    assert drift == [], f"unexpected drift after unit normalization: {drift}"
+    assert missing == []
