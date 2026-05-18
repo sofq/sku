@@ -1,18 +1,18 @@
 # Azure pricing-feed coverage
 
-_Generated 2026-05-04_
+_Generated 2026-05-18_
 
 Raw SKU counts per bucket, and which `sku` shard (if any) ingests them.
 Generated weekly by `make profile` against live feeds.
 
 | Bucket | SKUs | Covered by | Coverage | Attrs fingerprint | Sample SKU ids |
 | --- | ---: | --- | ---: | --- | --- |
-| Virtual Machines / Virtual Machines | 702 | azure_vm | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_D14`, `Standard_D4as_v7`, `Standard_D2a_v4` |
+| Virtual Machines / Virtual Machines | 699 | azure_vm | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_D14`, `Standard_D4as_v7`, `Standard_D2a_v4` |
 | Storage / Storage | 57 | azure_blob | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | ``, `Premium_SSD_Managed_Disks_P80`, `Cold` |
-| Foundry Models / Foundry Models | 24 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `54 pro Batch inp Dz`, `Grok 7 Inp glbl`, `K2 Thinking Inp DZ` |
+| Foundry Models / Foundry Models | 28 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `54 pro Batch inp Dz`, `Grok 7 Inp glbl`, `gpt-realtime-2 Image cd inp Gl` |
 | SQL Database / SQL Database | 23 | azure_sql | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `36 vCore`, `SQLDB_GP_Compute_Gen4_1`, `` |
-| Foundry Tools / Foundry Tools | 15 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Commitment Tier CLU Azure 1M`, `Voice Live API Lite - LLM Text Cached`, `Standard` |
 | Azure Database for PostgreSQL / Azure Database for PostgreSQL | 14 | azure_postgres | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_E64ds_v5`, `Standard_D16ads_v5`, `` |
+| Foundry Tools / Foundry Tools | 14 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Commitment Tier CLU Azure 1M`, `Voice Live API Lite - LLM Text Cached`, `Standard` |
 | Azure Monitor / Azure Monitor | 13 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `` |
 | Azure Database for MySQL / Azure Database for MySQL | 12 | azure_mysql | 100% | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `AzureDB_MySQL_Flexible_Server_General_Purpose_Compute_Ddsv5_Series`, ``, `AzureDB_MySQL_Flexible_Server_Memory_Optimized_Edsv5Series_Compute_4vCore` |
 | Cloud Services / Cloud Services | 10 | **UNCOVERED** | — | armRegionName, armSkuName, currencyCode, effectiveStartDate, isPrimaryMeterRegion, location, +16 more | `Standard_D2_v2`, `Standard_E64i_v3`, `` |
