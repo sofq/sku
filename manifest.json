@@ -1,0 +1,652 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-03T09:57:40Z",
+  "catalog_version": "2026.10.03",
+  "min_binary_version": "1.0.0",
+  "shards": {
+    "aws-api-gateway": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-api-gateway.db.zst",
+      "baseline_sha256": "78f08510e66dda36cca69a042a24e3bc625b3cf7e5d881f46d0655a242015bc1",
+      "baseline_size": 8898,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 68,
+      "last_updated": "2026.10.03"
+    },
+    "aws-aurora": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-aurora.db.zst",
+      "baseline_sha256": "59d381d588a965d57da415828a8346995ec421add4d8eb609bb7a40bb20b973b",
+      "baseline_size": 451967,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 7769,
+      "last_updated": "2026.10.03"
+    },
+    "aws-cloudfront": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-cloudfront.db.zst",
+      "baseline_sha256": "4450f8c6e87cfb257b43ed57b557e444ab1718a50531960b4f28a4489bc99fa0",
+      "baseline_size": 2621,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 9,
+      "last_updated": "2026.10.03"
+    },
+    "aws-dynamodb": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-dynamodb.db.zst",
+      "baseline_sha256": "f0248195c426e9bdf66bb25a8121269bbaa76c23b32589467b2d8e259869025e",
+      "baseline_size": 11113,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 68,
+      "last_updated": "2026.10.03"
+    },
+    "aws-ebs": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-ebs.db.zst",
+      "baseline_sha256": "74e98c64c487415cab56357ad0a87fcf3b82a018a3a871cfc68e3d9879479dfe",
+      "baseline_size": 12657,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 170,
+      "last_updated": "2026.10.03"
+    },
+    "aws-ec2": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-ec2.db.zst",
+      "baseline_sha256": "7f99e0984241d8e20e30ce437d1af4500fecfff786daad8d86ed8c33914dc7a2",
+      "baseline_size": 9534605,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 140526,
+      "last_updated": "2026.10.03"
+    },
+    "aws-eks": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-eks.db.zst",
+      "baseline_sha256": "41922c451d888553cf8c09e0848b834339b8e16e44b069e0fb3c0c73a5b23c11",
+      "baseline_size": 9800,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 102,
+      "last_updated": "2026.10.03"
+    },
+    "aws-elasticache": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-elasticache.db.zst",
+      "baseline_sha256": "1843a20db8ea26368a8c48fdda85cdc76d8afe32b4dd718fc7e929e443f7191c",
+      "baseline_size": 450816,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 8056,
+      "last_updated": "2026.10.03"
+    },
+    "aws-lambda": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-lambda.db.zst",
+      "baseline_sha256": "9d408dbb17c11d9123c430d1b339278a8764864d23749f3ee6bc2aa007148dd4",
+      "baseline_size": 8309,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 68,
+      "last_updated": "2026.10.03"
+    },
+    "aws-opensearch": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-opensearch.db.zst",
+      "baseline_sha256": "ff12ecc209dee7dbc7bda81947a07e0d3d1dc6ac4ab1638c4168aaf7342d6470",
+      "baseline_size": 325980,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 5792,
+      "last_updated": "2026.10.03"
+    },
+    "aws-rds": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-rds.db.zst",
+      "baseline_sha256": "0581eac7fedbc2268e4b195ed2ca0144170f628f61b9c08798b92ac6155159f0",
+      "baseline_size": 5085286,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 82158,
+      "last_updated": "2026.10.03"
+    },
+    "aws-route53": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-route53.db.zst",
+      "baseline_sha256": "54b8d34f99a70874ff1ad4da5be51654a477a0e664ea3cf06e36ecf94fc5568a",
+      "baseline_size": 2017,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 2,
+      "last_updated": "2026.10.03"
+    },
+    "aws-s3": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-s3.db.zst",
+      "baseline_sha256": "5d07fe3244fee8fb7ff3eb7d698a14fc460ae3e01bcebd3627b681e202185407",
+      "baseline_size": 19922,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 170,
+      "last_updated": "2026.10.03"
+    },
+    "aws-sns": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-sns.db.zst",
+      "baseline_sha256": "3d1135db0f216f2f1f59b3bc660f7501dfd8b624d3e689ae612265943f37c97c",
+      "baseline_size": 4708,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 34,
+      "last_updated": "2026.10.03"
+    },
+    "aws-sqs": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/aws-sqs.db.zst",
+      "baseline_sha256": "40a2a428947aabb8c0e04e898327a79cb5df504b697da7f73498eb3456af1fc2",
+      "baseline_size": 8360,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 68,
+      "last_updated": "2026.10.03"
+    },
+    "azure-aks": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-aks.db.zst",
+      "baseline_sha256": "c105f6dcdd712599351821d1c735702f7bcaf1a66ed3b8707b1e4069cd449923",
+      "baseline_size": 18247,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 205,
+      "last_updated": "2026.09.15"
+    },
+    "azure-apim": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-apim.db.zst",
+      "baseline_sha256": "ca1e07eafbf5e31bbce9aadfc2f6a5e95a841ed9f83e0c4358bcc3fd383032b7",
+      "baseline_size": 18650,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-apim-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "f4019075efce018832cbb42978332bda6af1c757cc4a74ad0eab95508c25d23a",
+          "size": 367
+        }
+      ],
+      "row_count": 388,
+      "last_updated": "2026.09.30"
+    },
+    "azure-appservice": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-appservice.db.zst",
+      "baseline_sha256": "e6602a725c9b67f2315d6e9806a046e1f0ee41ba9fd35b2953d0ffa74afd905e",
+      "baseline_size": 90444,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-appservice-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "c8ed4b369933669435b5fc03d0c92202164050b5e620ccfb6152d2577b066917",
+          "size": 384
+        }
+      ],
+      "row_count": 2414,
+      "last_updated": "2026.09.30"
+    },
+    "azure-blob": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-blob.db.zst",
+      "baseline_sha256": "831fb5529d9eeb562935b9048aef6a12760c467daf89105b6a3cfb46e255a4fa",
+      "baseline_size": 26432,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-blob-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "c8301c6a45e98104c4ad3ae52ca19cc07468a080e2771c85b79a3453095f160f",
+          "size": 371
+        }
+      ],
+      "row_count": 157,
+      "last_updated": "2026.09.30"
+    },
+    "azure-cosmosdb": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-cosmosdb.db.zst",
+      "baseline_sha256": "819e286110e7c7f21a52e6c0ef39fcffeeb690eb56e454eab504e41a471fea0f",
+      "baseline_size": 14406,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-cosmosdb-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "c2141e3895292d274374c6cfb2ba0204871db99a6ff2350820fcad0233ec6294",
+          "size": 387
+        }
+      ],
+      "row_count": 214,
+      "last_updated": "2026.09.30"
+    },
+    "azure-disks": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-disks.db.zst",
+      "baseline_sha256": "64cff6fa3c9b4d2ccc20ca6f5a307d1e5647c2a6f0f247788afaff0ed1d41525",
+      "baseline_size": 343607,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-disks-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "81e27385d804ff17a6e2c5045b3111915b0cf803d6334b5bc99606ba62f72485",
+          "size": 370
+        }
+      ],
+      "row_count": 6003,
+      "last_updated": "2026.09.30"
+    },
+    "azure-event-hubs": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-event-hubs.db.zst",
+      "baseline_sha256": "eb691e3c009ff88fd179fe471c8b7c4a6f930475c399494e280bb9ed98b48674",
+      "baseline_size": 10693,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 112,
+      "last_updated": "2026.09.15"
+    },
+    "azure-front-door": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-front-door.db.zst",
+      "baseline_sha256": "2287d67d009845c32a0c73c147dcac3fdf4d6b8e7f047c691ffe766bb5065334",
+      "baseline_size": 5833,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 34,
+      "last_updated": "2026.09.15"
+    },
+    "azure-functions": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-functions.db.zst",
+      "baseline_sha256": "5e6659413c47cf0c99035e3397659ee6d36d250d9f93a6fed1dd4cc7e9d4c11b",
+      "baseline_size": 7078,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-functions-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "236b4794f0d42ce1b021e50e76ee7d92cb3ff26b530dd9e78d1097a19f26ea0f",
+          "size": 376
+        }
+      ],
+      "row_count": 48,
+      "last_updated": "2026.09.30"
+    },
+    "azure-mariadb": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-mariadb.db.zst",
+      "baseline_sha256": "2f6023df61825d2d607bd84e23ab63b873916c65b77d151a76a954c51afbd77f",
+      "baseline_size": 22557,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 272,
+      "last_updated": "2026.09.15"
+    },
+    "azure-mysql": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-mysql.db.zst",
+      "baseline_sha256": "003b1759164ff129fd46e630cde99c939d3d6d889606e9aa15227580eb4da685",
+      "baseline_size": 139851,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-mysql-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "a5e6a651a3f7eb5bb1ee2361ce02520c637c0c89edcc3ef042eb0d8695768a32",
+          "size": 395
+        }
+      ],
+      "row_count": 2011,
+      "last_updated": "2026.09.30"
+    },
+    "azure-postgres": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-postgres.db.zst",
+      "baseline_sha256": "4b263ba4c835e87856e11093c27b0787f8a8b8759de0d4db96f841d0774d8c36",
+      "baseline_size": 272892,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-postgres-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "89c7450206142ddb0eee00afeb9ca7ae9b745546e99600515c2440c8b06646d5",
+          "size": 401
+        }
+      ],
+      "row_count": 4044,
+      "last_updated": "2026.09.30"
+    },
+    "azure-redis": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-redis.db.zst",
+      "baseline_sha256": "afbf26a88bd29510423d5243a51fca9177ef6442a1130db12fdaa70d5196492f",
+      "baseline_size": 75287,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 1702,
+      "last_updated": "2026.09.15"
+    },
+    "azure-service-bus-queues": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-service-bus-queues.db.zst",
+      "baseline_sha256": "fc0b30aa363182470ee0d932e16898189c7bcc90a776b945426fd6359962424d",
+      "baseline_size": 11877,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 111,
+      "last_updated": "2026.09.15"
+    },
+    "azure-service-bus-topics": {
+      "baseline_version": "2026.09.15",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.15/azure-service-bus-topics.db.zst",
+      "baseline_sha256": "9facb61037895483938eae63247645eb778285c4d63fcb51d36e7eec97aa5768",
+      "baseline_size": 11997,
+      "head_version": "2026.09.15",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 111,
+      "last_updated": "2026.09.15"
+    },
+    "azure-sql": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-sql.db.zst",
+      "baseline_sha256": "6e69c23c6ae3d78c830c5610ff9db3a563c2c06576534f459ee288b66681c745",
+      "baseline_size": 116647,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-sql-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "f28d064c87ee9ebdd5b98d5ae3caa2c1d10ca0f75a08fbed72b414b38241aee6",
+          "size": 378
+        }
+      ],
+      "row_count": 1782,
+      "last_updated": "2026.09.30"
+    },
+    "azure-vm": {
+      "baseline_version": "2026.09.29",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.09.29/azure-vm.db.zst",
+      "baseline_sha256": "c1a3139d5f402cfe236e6baa4124a7e70bf583ef1a6d8b8c7a9b95aee6a7ae69",
+      "baseline_size": 39545941,
+      "head_version": "2026.09.30",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [
+        {
+          "from": "2026.09.29",
+          "to": "2026.09.30",
+          "url": "https://github.com/sofq/sku/releases/download/data-2026.09.30/azure-vm-2026.09.29-to-2026.09.30.sql.gz",
+          "sha256": "ca8f5b31c34df32a83e4b9a99e30dbc67fa4d8cba6337d155684289360e3de31",
+          "size": 384
+        }
+      ],
+      "row_count": 303442,
+      "last_updated": "2026.09.30"
+    },
+    "gcp-bigquery": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-bigquery.db.zst",
+      "baseline_sha256": "5b5475e54dff48a480e5a0d8bd2a60448b507ba05af70424faf8f895b51883f5",
+      "baseline_size": 13525,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 132,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-cloud-cdn": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-cloud-cdn.db.zst",
+      "baseline_sha256": "71cca24d071f687e89ed37c181b9c88f84497c78f079d24f4e15246409bbfb39",
+      "baseline_size": 3072,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 8,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-cloud-dns": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-cloud-dns.db.zst",
+      "baseline_sha256": "c9b13e02464db3c24fc6ac78018339e0d38c12729c49b4fadd30cc144c39d1ef",
+      "baseline_size": 1953,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 1,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-cloud-sql": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-cloud-sql.db.zst",
+      "baseline_sha256": "4c65d2cb5f87fb148f0806d3489a7bb4d95011b7028b3a50cd53de1edc827458",
+      "baseline_size": 217522,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 3810,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-firestore": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-firestore.db.zst",
+      "baseline_sha256": "ff397e7a7ab53630fea63562b88e7532d24d850f6543cdad7c40c749778cf1f8",
+      "baseline_size": 2128,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 2,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-functions": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-functions.db.zst",
+      "baseline_sha256": "073f3af52d3a97d5d5f8ffddf6cbe7de7e97d8543e08d79aa785fb89aadf98a1",
+      "baseline_size": 5284,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 40,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-gce": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-gce.db.zst",
+      "baseline_sha256": "589d5abbeb72224f6770dd040a23074259247b97c166c39547acc56859be80b2",
+      "baseline_size": 38893,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 575,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-gcs": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-gcs.db.zst",
+      "baseline_sha256": "e2fe1c26c8f7a96e525d7038493c1ef2346a8f6027af163a19c25e7acb73754b",
+      "baseline_size": 17393,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 170,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-gke": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-gke.db.zst",
+      "baseline_sha256": "f6508d0a87dc6833895f1c26fb199539b45109606c724a52bfaf5224eda7118f",
+      "baseline_size": 9432,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 88,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-memorystore": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-memorystore.db.zst",
+      "baseline_sha256": "dbf36124955acc4c4e90fef3cb18af2524abfd751879fd2b5ca8b489d68418d1",
+      "baseline_size": 42911,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 688,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-pubsub-queues": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-pubsub-queues.db.zst",
+      "baseline_sha256": "1459f534db312a782bf212e815e12e15b5652ca13f6ffdae80f1b864310bd9bc",
+      "baseline_size": 1806,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 1,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-pubsub-topics": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-pubsub-topics.db.zst",
+      "baseline_sha256": "a79dc86d5461329c1c2ea6431e6c50b8f80d3691b33b12e732d8690828a8c3d1",
+      "baseline_size": 1803,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 1,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-run": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-run.db.zst",
+      "baseline_sha256": "bf58f27a04d305c9ca3ed9ca1d78f02cd0a63823bed0c2b3798c0f18739bb384",
+      "baseline_size": 5607,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 43,
+      "last_updated": "2026.10.03"
+    },
+    "gcp-spanner": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/gcp-spanner.db.zst",
+      "baseline_sha256": "d8d948295deb994b1a9add7f4d2d5214832affeff6043d9706f114fd05505193",
+      "baseline_size": 24507,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 301,
+      "last_updated": "2026.10.03"
+    },
+    "openrouter": {
+      "baseline_version": "2026.10.03",
+      "baseline_url": "https://github.com/sofq/sku/releases/download/data-2026.10.03/openrouter.db.zst",
+      "baseline_sha256": "af507197c0449ee35ff1c9fe00f1725e871e3a3d36fcfa2e0c841bbd3693a9bb",
+      "baseline_size": 190087,
+      "head_version": "2026.10.03",
+      "min_binary_version": "1.0.0",
+      "shard_schema_version": 1,
+      "deltas": [],
+      "row_count": 1824,
+      "last_updated": "2026.10.03"
+    }
+  }
+}
